@@ -1,0 +1,13 @@
+Deux composants sont nécessaires : le désassembleur et l'analyse de graphes
+
+Désassembleur:
+cf PandaPE (soon)
+
+Graphes:
+cd graphes/
+cmake .
+make
+
+Pour les tests (sur la partie graphes):
+cd graphes/
+./tests
