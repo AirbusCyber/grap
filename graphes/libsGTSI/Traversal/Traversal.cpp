@@ -837,13 +837,14 @@ ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph
               }
 
               numeros[max_numeros - 1].second = s;
-            }
+            
 
-            if (r < m->minRepeat) {
-              // pas trouvé, TODO: attention au branchement
-              return std::make_tuple(false, last_s, numeros, last_max_numeros, numerotes);
+              if (r < m->minRepeat) {
+                // pas trouvé, TODO: attention au branchement
+                return std::make_tuple(false, last_s, numeros, last_max_numeros, numerotes);
+              }
             }
-
+            
             numerotes.insert(f);
             return std::make_tuple(true, f, numeros, max_numeros, numerotes);
           }

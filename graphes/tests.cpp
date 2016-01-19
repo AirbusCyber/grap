@@ -27,11 +27,10 @@ void printDescription() {
   std::cout << "Test 6: bigger test graph with 4 pattern graphs.\n";
 }
 
-char *color;
-char *Red = "\e[1;31m";
-char *Green = "\e[1;32m";
-char *Blue = "\e[1;33m";
-char *Color_Off = "\e[0m";
+string Red = "\e[1;31m";
+string Green = "\e[1;32m";
+string Blue = "\e[1;33m";
+string Color_Off = "\e[0m";
 
 int main(int argc, char *argv[]) {
   if (argc >= 2) {
@@ -39,6 +38,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+  string color;
   graph_t **grPattern;
   graph_t *grTest;
 
@@ -70,9 +70,9 @@ int main(int argc, char *argv[]) {
 //       fprintf(stderr, "Can't open pattern or test graph\n");
       break;
     }
-    printf("%s", Blue);
+    cout << Blue;
     std::cout << "Running test " + std::to_string(i) + "\n";
-    printf("%s", Color_Off);
+    cout << Color_Off;
 
     int j = 0;
     int nPattern = 0;
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
 }
 
 void test_GTSI(graph_t ** grPattern, int nPattern, graph_t * grTest, int expected, bool checkLabels, std::string desc, bool exportTree, string treePath) {
-  char *color;
+  string color;
   std::cout << "GTSI" + desc + ":\n";
 
   int i;
@@ -129,7 +129,7 @@ void test_GTSI(graph_t ** grPattern, int nPattern, graph_t * grTest, int expecte
       printf("WARNING: pattern graph %d was not added to traversal tree because it already exists there.\n", i);
   }
 
-  //tree->saveParcoursNodeToDot(treePath);
+  tree->saveParcoursNodeToDot(treePath);
 
   printf("%d traversals reconstructed from pattern graph.\n", tree->countLeaves());
 
@@ -140,7 +140,7 @@ void test_GTSI(graph_t ** grPattern, int nPattern, graph_t * grTest, int expecte
   else {
     color = Green;
   }
-  printf("%s%d traversals possible in test graph (expected: %d) with tree.%s\n", color, count, expected, Color_Off);
+  printf("%s%d traversals possible in test graph (expected: %d) with tree.%s\n", color.c_str(), count, expected, Color_Off.c_str());
 
   if (nPattern == 1) {
     Parcours *p = parcoursLargeur(grPattern[0], grPattern[0]->root->list_id, siteSize);
@@ -153,7 +153,7 @@ void test_GTSI(graph_t ** grPattern, int nPattern, graph_t * grTest, int expecte
     else {
       color = Green;
     }
-    printf("%s%d traversals possible in test graph (expected: %d) with a single traversal.%s\n", color, count2, expected, Color_Off);
+    printf("%s%d traversals possible in test graph (expected: %d) with a single traversal.%s\n", color.c_str(), count2, expected, Color_Off.c_str());
   }
 
 }
