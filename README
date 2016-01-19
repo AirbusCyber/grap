@@ -11,3 +11,6 @@ make
 Pour les tests (sur la partie graphes):
 cd graphes/
 ./tests
+
+Utilisation du script grap:
+./grap motif.dot prg.exe
