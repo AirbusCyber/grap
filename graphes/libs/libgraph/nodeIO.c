@@ -7,6 +7,13 @@ int printVK(FILE * fp, char *key, char *value, char virg) {
     return fprintf(fp, "%s = \"%s\"", key, value);
 }
 
+int printVKint(FILE * fp, char *key, int value, char virg) {
+  if (virg)
+    return fprintf(fp, ", %s = \"%d\"", key, value);
+  else
+    return fprintf(fp, "%s = \"%d\"", key, value);
+}
+
 char *csymbtypeToString(enum label_t cst) {
   char *rs;
   switch (cst) {
@@ -155,9 +162,9 @@ size_t node_to_dot(const node_t * node, const node_t * root, size_t node_number,
     ret += printVK(fp, "csymbtype", ss, 1);
     ret += printVK(fp, "csymb", node->csymb, 1);
     if (node->minRepeat != 1)
-      ret += printVK(fp, "minrepeat", node->minRepeat, 1);
+      ret += printVKint(fp, "minrepeat", node->minRepeat, 1);
     if (node->hasMaxRepeat == 1)
-      ret += printVK(fp, "maxnrepeat", node->maxRepeat, 1);
+      ret += printVKint(fp, "maxnrepeat", node->maxRepeat, 1);
     free(ss);
     char *str = malloc(4 * sizeof(char));
     snprintf(str, 4, "%d", node->minChildrenNumber);

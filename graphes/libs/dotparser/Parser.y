@@ -69,7 +69,7 @@ typedef void* yyscan_t;
 %type <SedgeList> edge_list
 %type <Soption> option
 %type <SoptionList> option_list
-%type <value> graph_options
+//%type <value> graph_options
 
 %%
 
@@ -126,10 +126,10 @@ edge
     | TOKEN_ID[F] TOKEN_ARROW TOKEN_ID[C] { $$ = createEdge($F, $C); }
     ;
 
-graph_options
-    :
-    { $$ = 0; printf("nl\n"); }
-    | TOKEN_ID TOKEN_EQ TOKEN_ID { $$ = 0; printf("kl\n"); }
-    ;
+//graph_options
+//    :
+//    { $$ = 0; printf("nl\n"); }
+//    | TOKEN_ID TOKEN_EQ TOKEN_ID { $$ = 0; }
+//    ;
  
 %%

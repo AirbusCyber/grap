@@ -18,13 +18,18 @@ void printDescription() {
 //   std::cout << "  1 - GTSI and SIDT use trees and won't process twice the same pattern graph ; Ullmann will. Hence one should be careful not to submit identical pattern graphs to Ullmann and expect to compare results with GTSI or SIDT.\n";
 //   std::cout << "  2 - On these tests the libraries are used in a way that allow easy comparison of results and the expected SIDT <= GTSI <= Ullmann. This is because the pattern graphs always have the same size which is the site size. Be careful that this is not always the case. \n";
 //   std::cout << "\n";
-  std::cout << "Test 0: small identical graphs.\n";
-  std::cout << "Test 1: small test graph with one child more (to a leaf) than pattern.\n";
-  std::cout << "Test 2: small test graph with one edge more (leaf -> leaf) than pattern.\n";
-  std::cout << "Test 3: small test graph with one child more (to a leaf) and an edge more (leaf -> root) than pattern.\n";
-  std::cout << "Test 4: same as test 3 but with different labels.\n";
-  std::cout << "Test 5: small test graph with two JCC (that have two children).\n";
-  std::cout << "Test 6: bigger test graph with 4 pattern graphs.\n";
+  std::cout << "Test 0:  [manual] small identical graphs.\n";
+  std::cout << "Test 1:  [manual] small test graph with one child more (to a leaf) than pattern.\n";
+  std::cout << "Test 2:  [manual] small test graph with one edge more (leaf -> leaf) than pattern.\n";
+  std::cout << "Test 3:  [manual] small test graph with one child more (to a leaf) and an edge more (leaf -> root) than pattern.\n";
+  std::cout << "Test 4:  [manual] same as test 3 but with different labels.\n";
+  std::cout << "Test 5:  [manual] small test graph with two JCC (that have two children).\n";
+  std::cout << "Test 6:  [manual] bigger test graph with 4 pattern graphs.\n";
+  std::cout << "Test 7:  [manual] small graph with node repetition (INST*).\n";
+  std::cout << "Test 8:  [manual] small graph with node repetition (INST*) with extraction.\n";
+  std::cout << "Test 9:  [reference] generic pattern on Mirage sample.\n";
+  std::cout << "Test 10: [reference] generic pattern on Mirage sample with extraction.\n";
+  std::cout << "Test 11: [reference] simple loop pattern on Mirage sample.\n";
 }
 
 string Red = "\e[1;31m";

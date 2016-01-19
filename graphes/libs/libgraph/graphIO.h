@@ -16,6 +16,8 @@
 #include "graph.h"
 #include "return_status.h"
 
+graph_t *getGraphFromFile (FILE * f); // implemented in graphParser.c
+
 /*!
  @brief Serialize a graph.
  @param graph The graph to serialize.

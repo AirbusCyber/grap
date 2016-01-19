@@ -24,7 +24,7 @@ void node_list_add(node_list_t * list, node_t* node) {
   }
   else {
     // node already exists 
-    printf("Warning: node %x already exists in graph (it was NOT duplicated).\n", node->node_id);
+    printf("Warning: node %x already exists in graph (it was NOT duplicated).\n", (int) node->node_id);
   }
 }
 
