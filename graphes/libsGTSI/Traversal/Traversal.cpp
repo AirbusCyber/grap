@@ -119,7 +119,7 @@ string MotParcours::toString() {
 }
 
 void MotParcours::addV2Info(node_t * n) {
-  if (n->version == 2) {
+  if (n != NULL and n->version == 2) {
 //     this->repeat = n->repeat;
     this->version = 2;
     this->csymbtype = n->csymbType;
@@ -127,8 +127,6 @@ void MotParcours::addV2Info(node_t * n) {
     this->minChildrenNumber = n->minChildrenNumber;
     this->minFathersNumber = n->minFathersNumber;
     this->minRepeat = n->minRepeat;
-    
-//     printf("mr: %d %d\n", this->minRepeat, n->minRepeat);
 
     if (n->hasMaxChildrenNumber) {
       this->hasMaxChildrenNumber = true;
@@ -164,6 +162,7 @@ void MotParcours::addV2Info(node_t * n) {
   }
   else {
     this->version = 1;
+    this->get = false;
   }
 }
 
@@ -272,7 +271,7 @@ void Parcours::addMot(MotParcours * m) {
 }
 
 Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
-  //WARNING : after calling this function, the ->list_id fields for nodes in inputGraph are broken
+  //WARNING : after calling this function, the ->list_id fields for nodes in inputGraph are changed
   Parcours *p = new Parcours();
 
   //all inputgraph nodes to unexplored(0):
@@ -311,8 +310,6 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
     k = std::get < 1 > (tq);
     ss = std::get < 2 > (tq);
 
-
-
     unordered_set < node_t * >::iterator it = explored.find(ss);
     if ((it != explored.end()or i < W + 1) and sc != pere and not p_is_epsilon) {
       m = new MotParcours();
@@ -320,6 +317,7 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
       m->alpha_is_R = true;
       m->has_symbol = false;
       m->i = pere->list_id;
+      m->addV2Info(ss);
       p->addMot(m);
 
       sc = pere;
@@ -366,6 +364,7 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
       m->i = ss->list_id;
       m->k = k;
       m->has_symbol = false;
+      m->addV2Info(ss);
       p->addMot(m);
       sc = ss;
     }

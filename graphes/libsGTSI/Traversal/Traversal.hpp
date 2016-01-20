@@ -38,7 +38,7 @@ public:
   int i;
   bool alpha_is_R;
   int k;
-    MotParcours();
+  MotParcours();
   string toString();
   bool matchesSymbol(node_t * n, bool);
   bool matchesCF(node_t * n);
@@ -72,7 +72,7 @@ public:
   int version;                  // 1: original; 2: enhanced
   int size;
   MotParcours **mots;
-    Parcours();
+  Parcours();
   string toString();
   void addMot(MotParcours * m);
   typedef std::pair < bool, std::map < string, std::list < node_t * >*>*>RetourParcoursDepuisSommet;
@@ -85,7 +85,6 @@ public:
 typedef std::tuple < node_t *, uint8_t, node_t * >TupleQueue;
 Parcours *parcoursLargeur(graph_t * graph, vsize_t root, vsize_t W);
 Parcours *newParcours();
-MotParcours *newMotParcours();
 std::unordered_set < Parcours * >parcoursFromGraph(graph_t *, vsize_t, bool);
 
 class ParcoursNode {
@@ -93,9 +92,9 @@ public:
   uint64_t id;
   bool feuille;
   MotParcours *mot;
-    std::list < ParcoursNode * >fils;
-    ParcoursNode();
-    ParcoursNode(std::list < ParcoursNode * >fils, MotParcours * mot, uint64_t id);
+  std::list < ParcoursNode * >fils;
+  ParcoursNode();
+  ParcoursNode(std::list < ParcoursNode * >fils, MotParcours * mot, uint64_t id);
   bool addGraphFromNode(graph_t *, node_t *, vsize_t W, bool checkLabels);
   vsize_t addGraph(graph_t *, vsize_t W, vsize_t maxLearn, bool checkLabels);
   bool addParcours(Parcours * p, int index, bool checkLabels);
@@ -105,8 +104,8 @@ public:
   string toString();
   vsize_t parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool countAllMatches);
   typedef std::tuple < bool, vsize_t > RetourParcourir;
-    list < vsize_t > parcourirDepuisSommetRec(bool racine, graph_t * gr, node_t * r, vsize_t W, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, std::unordered_set < node_t * >numerotes, bool checkLabels);
-    list < vsize_t > parcourirDepuisSommet(graph_t *, vsize_t r, vsize_t W, bool checkLabels);
+  list < vsize_t > parcourirDepuisSommetRec(bool racine, graph_t * gr, node_t * r, vsize_t W, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, std::unordered_set < node_t * >numerotes, bool checkLabels);
+  list < vsize_t > parcourirDepuisSommet(graph_t *, vsize_t r, vsize_t W, bool checkLabels);
   typedef std::tuple < bool, node_t *, std::pair < node_t *, node_t * >*, vsize_t, unordered_set < node_t * >>RetourEtape;
   RetourEtape etape(MotParcours * m, node_t *, graph_t *, std::pair < node_t *, node_t * >*, vsize_t, unordered_set < node_t * >, bool);
   vsize_t countLeaves();

@@ -3,6 +3,16 @@ project(grap)
 CMAKE_POLICY(SET CMP0015 NEW)
 set(CMAKE_CXX_FLAGS " -std=c++11")
 
+set(CMAKE_CXX_FLAGS_VALGRIND "-g")
+set(CMAKE_C_FLAGS_VALGRIND "-g")
+
+set(CMAKE_CXX_FLAGS_DEBUG " -fsanitize=address")
+set(CMAKE_C_FLAGS_DEBUG " -fsanitize=address")
+
+# No optimization on "Release" (it induces bugs in the parser)
+set(CMAKE_CXX_FLAGS_RELEASE "")
+set(CMAKE_C_FLAGS_RELEASE "")
+
 include_directories(
 	./
 	src/

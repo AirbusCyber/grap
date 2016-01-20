@@ -37,7 +37,7 @@ string Green = "\e[1;32m";
 string Blue = "\e[1;33m";
 string Color_Off = "\e[0m";
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {  
   if (argc >= 2) {
     printDescription();
     return 1;
@@ -71,6 +71,7 @@ int main(int argc, char *argv[]) {
 
     f_res_gtsi.close();
 
+    fpTest = fopen(pathTest.c_str(), "r");
     if (fpTest == NULL) {
 //       fprintf(stderr, "Can't open pattern or test graph\n");
       break;
