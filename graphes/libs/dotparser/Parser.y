@@ -80,7 +80,7 @@ input
 graph
     : 
     TOKEN_DIGRAPH_HEADER TOKEN_LENS node_list[G] edge_list[E] TOKEN_RENS { $$ = addEdgesToGraph($E, fixDict($G)); }
-    | TOKEN_DIGRAPH_HEADER TOKEN_ID TOKEN_LENS node_list[G] edge_list[E] TOKEN_RENS { $$ = addEdgesToGraph($E, fixDict($G)); }
+    | TOKEN_DIGRAPH_HEADER TOKEN_ID[id] TOKEN_LENS node_list[G] edge_list[E] TOKEN_RENS { free($id); $$ = addEdgesToGraph($E, fixDict($G)); }
     ;
 
 node_list
@@ -122,8 +122,8 @@ edge_list
     
 edge
     :
-    TOKEN_ID[F] TOKEN_ARROW TOKEN_ID[C] TOKEN_LCRO option_list TOKEN_RCRO { $$ = createEdge($F, $C); }
-    | TOKEN_ID[F] TOKEN_ARROW TOKEN_ID[C] { $$ = createEdge($F, $C); }
+    TOKEN_ID[F] TOKEN_ARROW TOKEN_ID[C] TOKEN_LCRO option_list[L] TOKEN_RCRO { $$ = createEdge($F, $C, $L); }
+    | TOKEN_ID[F] TOKEN_ARROW TOKEN_ID[C] { $$ = createEdge($F, $C, NULL); }
     ;
 
 //graph_options

@@ -50,14 +50,14 @@ int main(int argc, char *argv[]) {
   FILE *fpPattern;
   FILE *fpTest;
 
-  int i = 0;
-  while (i < std::numeric_limits < int >::max()) {
+  vsize_t i = 0;
+  while (i < std::numeric_limits < vsize_t >::max()) {
     std::string dirPath = "tests_graphs/test" + std::to_string(i) + "/";
     std::string pathTest = dirPath + "test.dot";
 
     // read expected results
-    int expected_gtsi_with_labels = -1;
-    int expected_gtsi_no_labels = -1;
+    vsize_t expected_gtsi_with_labels = -1;
+    vsize_t expected_gtsi_no_labels = -1;
     std::ifstream f_res_gtsi(dirPath + "expected_gtsi");
 
     if (f_res_gtsi.good()) {
@@ -80,11 +80,11 @@ int main(int argc, char *argv[]) {
     std::cout << "Running test " + std::to_string(i) + "\n";
     cout << Color_Off;
 
-    int j = 0;
-    int nPattern = 0;
+    vsize_t j = 0;
+    vsize_t nPattern = 0;
     grPattern = (graph_t **) std::malloc(sizeof(graph_t *));
 
-    while (j < std::numeric_limits < int >::max()) {
+    while (j < std::numeric_limits < vsize_t >::max()) {
       std::string pathPattern = dirPath + "pattern_" + to_string(j) + ".dot";
       grPattern = (graph_t **) std::realloc(grPattern, (j + 1) * sizeof(graph_t *));
       fpPattern = fopen(pathPattern.c_str(), "r");
@@ -110,6 +110,12 @@ int main(int argc, char *argv[]) {
     test_GTSI(grPattern, nPattern, grTest, expected_gtsi_with_labels, true, " (Check labels)", true, "gtsi-l-" + std::to_string(i) + ".dot");
     test_GTSI(grPattern, nPattern, grTest, expected_gtsi_no_labels, false, " (Don't check labels)", true, "gtsi-nl-" + std::to_string(i) + ".dot");
 
+    for (j=0; j<nPattern; j++){
+      graph_free(grPattern[j]);
+    }
+    
+    graph_free(grTest);
+    
     std::cout << "\n";
     i++;
   }
@@ -119,8 +125,8 @@ void test_GTSI(graph_t ** grPattern, int nPattern, graph_t * grTest, int expecte
   string color;
   std::cout << "GTSI" + desc + ":\n";
 
-  int i;
-  int siteSize = grPattern[0]->nodes.count;
+  vsize_t i;
+  vsize_t siteSize = grPattern[0]->nodes.count;
   for (i = 1; i < nPattern; i++) {
     if (grPattern[i]->nodes.count < siteSize)
       siteSize = grPattern[i]->nodes.count;

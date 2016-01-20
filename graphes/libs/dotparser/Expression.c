@@ -32,22 +32,22 @@ CoupleList *createEdgeList() {
 }
 
 CoupleList *addEdgeToList(Couple * c, CoupleList * cl) {
-//   if (cl->couples == NULL) {
-//     cl->couples = (Couple **) malloc(sizeof(Couple *));
-//   }
-//   else {
   cl->couples = (Couple **) realloc(cl->couples, (cl->size + 1) * sizeof(Couple *));
-//   }
   cl->couples[cl->size] = c;
   cl->size++;
 
   return cl;
 }
 
-Couple *createEdge(char *f, char *c) {
+Couple *createEdge(char *f, char *c, OptionList* ol) {
   Couple *e = (Couple *) malloc(sizeof(Couple));
   e->x = hash(f);
   e->y = hash(c);
+  
+  free(f);
+  free(c);
+  
+  if (ol != NULL) freeOptionList(ol);
   return e;
 }
 
@@ -94,6 +94,7 @@ uint hash(char *s) {
 
 node_t *createNode(char *value) {
   uint id = hash(value);
+  free(value);
 
   node_t *node = (node_t *) malloc(sizeof(node_t));
   node->children = NULL;
@@ -105,7 +106,6 @@ node_t *createNode(char *value) {
   node->node_id = id;
   node->symb = INST_SEQ;
   node->version = 1;
-//   node->repeat = REPEAT_SINGLE;
   node->csymbType = LABEL_EXACT_STRING;
   node->csymb = "";
   node->hasMaxChildrenNumber = 0;
@@ -123,22 +123,9 @@ node_t *createNode(char *value) {
 }
 
 graph_t *createGraph() {
-//   node_t* node;
   graph_t *graph = NULL;
-
   graph = graph_alloc(0);
-
-//   node = node_list_append(&graph->nodes, 0);
-//   node->children_nb = 0;
-//   node->fathers_nb = 0;
-//   node->explored = UNEXPLORED;
-//   node->list_id = 0;
-//   node->node_id = 0;
-//   node->symb = INST_SEQ;
-//   graph->root = node;
-
-//   graph_fprint(stdout, graph);
-
+  
   return graph;
 }
 
@@ -175,7 +162,7 @@ char *removeQuotes(char *s) {
 }
 
 int strToSymb(char *st) {
-  char *s = st;                 // removeQuotes(st);
+  char *s = st;
   int r;
 
   if (strcmp(s, "INIT") == 0) {
@@ -228,10 +215,10 @@ node_t *updateNode(OptionList * ol, node_t * n) {
   char hasMaxRepeat = 0;
 
   for (i = 0; i < ol->size; i++) {
+    char free_v = 1;
     char *v = removeQuotes(ol->options[i]->value);
     char *id = ol->options[i]->id;
-//     char *v = ol->options[i]->value;
-//     printf("%d orig: %s, out: %s\n", i, ol->options[i]->value, v);
+
     if (hasSymb == 0 && strcmp(id, "label") == 0) {
       n->symb = strToSymb(v);
     }    
@@ -245,6 +232,7 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     else if (strcmp(id, "csymb") == 0) {
       n->version = 2;
       n->csymb = v;
+      free_v = 0;
       hasCSymb = 1;
     }
     else if (strcmp(id, "symbtype") == 0 || strcmp(id, "csymbtype") == 0) {
@@ -318,13 +306,14 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     else if (strcmp(id, "getid") == 0) {
       n->get = 1;
       n->getid = v;
+      free_v = 0;
     }
     else if (strcmp(id, "address") == 0) {
       n->hasAddress = 1;
       n->address = (vsize_t) strtol(v, NULL, 16);
     }
-
-//     free(v);
+    
+    if (free_v) free(v);
   }
 
   if (hasMinRepeat && !hasMaxRepeat) {
@@ -335,7 +324,7 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     n->csymb = symbToString(n->symb);
   }
 
-//   freeOptionList(ol);
+  freeOptionList(ol);
   return n;
 }
 
@@ -348,14 +337,7 @@ OptionList *createOptionList() {
 }
 
 OptionList *addOptionToList(Option * o, OptionList * ol) {
-//   printf("s: %d %p %p\n", ol->size, ol->options, ol);
-
-//   if (ol->options == NULL) {
-//     ol->options = (Option **) malloc(sizeof(Option *));
-//   }
-//   else {
   ol->options = (Option **) realloc(ol->options, (ol->size + 1) * sizeof(Option *));
-//   }
   ol->options[ol->size] = o;
   ol->size++;
 
@@ -373,6 +355,11 @@ Option *createOption(char *I, char *V) {
 
   o->id = key;
   o->value = value;
+  
+  free(I);
+  free(V);
+  
+  return o;
 }
 
 void freeOption(Option * o) {
@@ -387,5 +374,7 @@ void freeOptionList(OptionList * ol) {
   for (i = 0; i < ol->size; i++) {
     freeOption(ol->options[i]);
   }
+  
+  free(ol->options);
   free(ol);
 }

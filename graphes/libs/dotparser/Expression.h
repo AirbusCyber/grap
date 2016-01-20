@@ -31,14 +31,6 @@ typedef struct CoupleList
 
 uint hash(char* s);
 
-CoupleList* createEdgeList();
-
-CoupleList* addEdgeToList(Couple* c, CoupleList* cl);
-
-Couple* createEdge(char* f, char* c);
-
-graph_t* addEdgesToGraph(CoupleList* cl, graph_t* g);
-
 void debug_print(char* s);
 
 typedef struct Option
@@ -52,6 +44,14 @@ typedef struct OptionList
   vsize_t size;
   Option** options;
 } OptionList;
+
+CoupleList* createEdgeList();
+
+CoupleList* addEdgeToList(Couple* c, CoupleList* cl);
+
+Couple* createEdge(char* f, char* c, OptionList* ol);
+
+graph_t* addEdgesToGraph(CoupleList* cl, graph_t* g);
 
 node_t* updateNode(OptionList* ol, node_t* n);
 
