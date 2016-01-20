@@ -19,18 +19,18 @@
 %option bison-bridge
  
 DIGRAPH_HEADER  [dD]igraph
-IGNORE "labeljust=r"
-IDS        [a-zA-Z0-9*+.]+
-IDC        \"[a-zA-Z0-9*+-.: \\(),\[\]]+\"
+IGNORE    "labeljust=r"
+IDS       [a-zA-Z0-9*+.]+
+IDC       \"[a-zA-Z0-9*+-._: \\(),\[\]]*\"
 LENS      "{"
 RENS      "}"
 LCRO      "["
 RCRO      "]"
 EQ        "="
-VIRG        ","
-ARROW      "->"
+VIRG      ","
+ARROW     "->"
  
-WS          [ \r\n\t]*
+WS        [ \r\n\t]*
  
 %%
  

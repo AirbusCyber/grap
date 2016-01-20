@@ -30,6 +30,9 @@ void printDescription() {
   std::cout << "Test 9:  [reference] generic pattern on Mirage sample.\n";
   std::cout << "Test 10: [reference] generic pattern on Mirage sample with extraction.\n";
   std::cout << "Test 11: [reference] simple loop pattern on Mirage sample.\n";
+  std::cout << "Test 12: [reference] same as test 9  but with PandaPE's disassembler.\n";
+  std::cout << "Test 13: [reference] same as test 10 but with PandaPE's disassembler.\n";
+  std::cout << "Test 14: [reference] same as test 11 but with PandaPE's disassembler.\n";
 }
 
 string Red = "\e[1;31m";
@@ -158,6 +161,8 @@ void test_GTSI(graph_t ** grPattern, int nPattern, graph_t * grTest, int expecte
     Parcours *p = parcoursLargeur(grPattern[0], grPattern[0]->root->list_id, siteSize);
     Parcours::RetourParcours rt = p->parcourir(grTest, siteSize, checkLabels, true, true);
     vsize_t count2 = rt.first;
+    
+//     freeRetourParcoursDepuisSommet(rt);
 
     if (rt.first != expected) {
       color = Red;

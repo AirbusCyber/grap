@@ -442,9 +442,9 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
     numerotes.insert(sc);
 
     if (printFound and this->mots[0]->get) {
-      std::list < node_t * >*list_nodes = new std::list < node_t * >();
-      list_nodes->push_back(sc);
-      found_nodes->insert(std::pair < string, std::list < node_t * >*>(this->mots[0]->getid, list_nodes));
+      std::list < node_t * >*list_nodes_1 = new std::list < node_t * >();
+      list_nodes_1->push_back(sc);
+      found_nodes->insert(std::pair < string, std::list < node_t * >*>(this->mots[0]->getid, list_nodes_1));
     }
   }
   else {
@@ -503,7 +503,7 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
                   break;
                 }
               }
-
+              
               numeros[max_numeros - 1].second = sc;
             }
 
@@ -557,6 +557,19 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
   return RetourParcoursDepuisSommet(true, found_nodes);
 }
 
+void freeRetourParcoursDepuisSommet(Parcours::RetourParcoursDepuisSommet rt){
+    // freeing found nodes
+    std::map < string, std::list < node_t * >*>* found_nodes = rt.second;
+    if (not found_nodes->empty()) {
+      std::map < string, std::list < node_t * >*>::iterator it;
+
+      for (it = found_nodes->begin(); it != found_nodes->end(); it++) {
+        std::list < node_t * >* p_found_nodes = (*it).second;
+        delete p_found_nodes;
+      }
+    }
+}
+
 Parcours::RetourParcours Parcours::parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool countAllMatches, bool printFound) {
   vsize_t n;
   vsize_t count = 0;
@@ -571,6 +584,9 @@ Parcours::RetourParcours Parcours::parcourir(graph_t * gr, vsize_t W, bool check
       else
         count++;
     }
+    else{
+      freeRetourParcoursDepuisSommet(rt);
+    }    
   }
   return RetourParcours(count, set_gotten);
 }
@@ -744,7 +760,9 @@ list < vsize_t > ParcoursNode::parcourirDepuisSommet(graph_t * gr, vsize_t v, vs
 //   node_t **numeros = (node_t **) calloc(W, sizeof(node_t *));
   std::pair < node_t *, node_t * >*numeros = (std::pair < node_t *, node_t * >*)calloc(W, sizeof(std::pair < node_t *, node_t * >));
   vsize_t max_numeros = 0;
-  return this->parcourirDepuisSommetRec(true, gr, r, W, numeros, max_numeros, numerotes, checkLabels);
+  list < vsize_t > l = this->parcourirDepuisSommetRec(true, gr, r, W, numeros, max_numeros, numerotes, checkLabels);
+  free(numeros);
+  return l;
 }
 
 

@@ -65,7 +65,6 @@ public:
   string getid;
 };
 
-
 class Parcours {
 public:
   bool complete;
@@ -81,6 +80,8 @@ public:
   RetourParcours parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool countAllMatches, bool printFound);
   bool equals(Parcours *, bool checkLabels);
 };
+
+void freeRetourParcoursDepuisSommet(Parcours::RetourParcoursDepuisSommet rt);
 
 typedef std::tuple < node_t *, uint8_t, node_t * >TupleQueue;
 Parcours *parcoursLargeur(graph_t * graph, vsize_t root, vsize_t W);

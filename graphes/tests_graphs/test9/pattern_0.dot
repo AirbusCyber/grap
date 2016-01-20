@@ -1,0 +1,15 @@
+digraph G{
+A [label="xor eax, eax", shape="box", csymbtype="string", csymb="xor eax, eax"]
+B [label="add [eax + ebx], al", shape="box", csymbtype="string", csymb="add byte [eax + ebx], al"]
+C [label="inc eax", shape="box", csymbtype="string", csymb="inc eax"]
+D [label="cmp eax, esi", shape="box", csymbtype="string", csymb="cmp eax, esi"]
+E [label="jb", shape="box", csymbtype="substring", csymb="jb"]
+F [label="*", shape="box", csymbtype="*"]
+
+A -> B
+B -> C
+C -> D
+D -> E
+E -> B
+E -> F
+}
