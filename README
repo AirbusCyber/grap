@@ -1,16 +1,29 @@
 Deux composants sont nécessaires : le désassembleur et l'analyse de graphes
 
 Désassembleur:
-cf PandaPE (soon)
+cf PandaPE
 
 Graphes:
 cd graphes/
-cmake .
+cmake -DCMAKE_BUILD_TYPE=Release .
 make
+
+
 
 Pour les tests (sur la partie graphes):
 cd graphes/
 ./tests
+
+Tests avec -fsanitize=address:
+cmake -DCMAKE_BUILD_TYPE=Debug .
+./tests
+
+Tests avec Valgrind:
+cmake -DCMAKE_BUILD_TYPE=Valgrind .
+make
+valgrind --leak-check=full --track-origins=yes --show-reachable=yes ./tests
+
+
 
 Utilisation du script grap:
 ./grap motif.dot prg.exe
