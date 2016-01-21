@@ -513,10 +513,9 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
               numeros[max_numeros - 1].second = sc;
             }
 
-            if (printFound and m->get)
-              found_nodes->insert(std::pair < string, std::list < node_t * >*>(m->getid, list_nodes));
+            if (printFound and m->get) found_nodes->insert(std::pair < string, std::list < node_t * >*>(m->getid, list_nodes));
+            else delete list_nodes;
             
-            if (list_nodes->empty()) delete list_nodes;
             // TODO: attention, on peut renvoyer false alors qu'on a "simplement" tenté de boucler dans la mauvaise branche
             // FIX: il faut nécessairement tenter les autres branches
             if (m->version == 2 and r < m->minRepeat) {
