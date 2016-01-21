@@ -14,3 +14,12 @@ cd graphes/
 
 Utilisation du script grap:
 ./grap motif.dot prg.exe
+./grap motif.dot prg.exe -v
+./grap motif.dot prg.exe -q
+
+Utilisation de graphes/GTSI-grap directement:
+./GTSI-grap --help
+./GTSI-grap motif.dot prg.dot
+./GTSI-grap motif.dot prg.dot -ncl
+./GTSI-grap motif.dot prg.dot -q
+
