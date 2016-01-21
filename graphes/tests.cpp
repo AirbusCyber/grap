@@ -41,17 +41,22 @@ string Blue = "\e[1;33m";
 string Color_Off = "\e[0m";
 
 int main(int argc, char *argv[]) {  
+
+  
+  
   if (argc >= 2) {
     printDescription();
     return 1;
   }
 
   string color;
-  graph_t **grPattern;
-  graph_t *grTest;
+  graph_t **grPattern = nullptr;
+  graph_t *grPattern2 = nullptr;
+  graph_t *grTest = nullptr;
 
   FILE *fpPattern;
   FILE *fpTest;
+  
 
   vsize_t i = 0;
   while (i < std::numeric_limits < vsize_t >::max()) {
@@ -85,17 +90,23 @@ int main(int argc, char *argv[]) {
 
     vsize_t j = 0;
     vsize_t nPattern = 0;
-    grPattern = (graph_t **) std::malloc(sizeof(graph_t *));
+//     grPattern = (graph_t **) std::malloc(0*sizeof(graph_t *));
 
     while (j < std::numeric_limits < vsize_t >::max()) {
       std::string pathPattern = dirPath + "pattern_" + to_string(j) + ".dot";
-      grPattern = (graph_t **) std::realloc(grPattern, (j + 1) * sizeof(graph_t *));
-      fpPattern = fopen(pathPattern.c_str(), "r");
+//       fpPattern = fopen(pathPattern.c_str(), "r");
 
-      if (fpPattern == NULL)
-        break;
-      fclose(fpPattern);
+//       if (fpPattern == NULL)
+//         break;
+//       fclose(fpPattern);
+      
+      grPattern = (graph_t **) std::realloc(grPattern, (j + 1) * sizeof(graph_t *));
       grPattern[j] = getGraphFromPath(pathPattern.c_str());
+      
+      if (grPattern[j] == NULL){
+       break; 
+      }
+      
 //       graph_fprint(stdout, grPattern[j]);
 //       graph_from_file(&grPattern[j], fpPattern);
       j++;
@@ -157,20 +168,20 @@ void test_GTSI(graph_t ** grPattern, int nPattern, graph_t * grTest, int expecte
   }
   printf("%s%d traversals possible in test graph (expected: %d) with tree.%s\n", color.c_str(), count, expected, Color_Off.c_str());
 
-  if (nPattern == 1) {
+  if (nPattern == 1) {    
     Parcours *p = parcoursLargeur(grPattern[0], grPattern[0]->root->list_id, siteSize);
     Parcours::RetourParcours rt = p->parcourir(grTest, siteSize, checkLabels, true, true);
     vsize_t count2 = rt.first;
-    
-//     freeRetourParcoursDepuisSommet(rt);
 
-    if (rt.first != expected) {
+    if (count2 != expected) {
       color = Red;
     }
     else {
       color = Green;
     }
     printf("%s%d traversals possible in test graph (expected: %d) with a single traversal.%s\n", color.c_str(), count2, expected, Color_Off.c_str());
+  
+    //     freeRetourParcoursDepuisSommet(rt); 
   }
 
 }

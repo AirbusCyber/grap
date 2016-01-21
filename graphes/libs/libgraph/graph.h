@@ -50,6 +50,6 @@ void graph_free(graph_t* graph);
  @brief Reset a graph.
  @param graph The graph to reset.
  */
-void graph_reset(graph_t* graph);
+// void graph_reset(graph_t* graph);
 
 #endif

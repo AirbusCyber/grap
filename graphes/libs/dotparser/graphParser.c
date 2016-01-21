@@ -75,5 +75,6 @@ graph_t *getGraphFromFile (FILE * f) {
 
 graph_t *getGraphFromPath (const char *path) {
   FILE *f = fopen (path, "rb");
-  return getGraphFromFile (f);
+  if (f != NULL) return getGraphFromFile (f);
+  else return NULL; 
 }

@@ -10,7 +10,7 @@
 
  Now node pointers list has it own type, different from dv_t.
  Help to make a clear distinction between arrays of node_t (in graph_t) and
- arrays of node_t* (used in mdec.c for example).
+ arrays of node_t*.
 
  @see node_ptr_list.h
  */
@@ -29,7 +29,7 @@ typedef struct node_list_t {
    or remove any node after creating edges. This is too dangerous, so we use a
    static array.
    */
-  node_t *storage;
+  node_t **storage;
 
   /*!
    @brief Size of the node array.
@@ -42,7 +42,7 @@ typedef struct node_list_t {
   vsize_t count;
   
   /*!
-  @brief Dictionary (or map) used when loading graph from edg file
+  @brief Dictionary (or map) used when loading graph from dot file
   */
   struct dict *nodes_dict;
 } node_list_t;
@@ -65,7 +65,7 @@ void node_list_free(node_list_t * list);
  @brief Reset the list.
  @param list The list to reset.
  */
-void node_list_reset(node_list_t * list);
+// void node_list_reset(node_list_t * list);
 
 /*!
  @brief Get the i-th node of the node_list.

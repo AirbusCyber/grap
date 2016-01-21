@@ -17,7 +17,7 @@ void graph_free(graph_t* graph) {
   }
 }
 
-void graph_reset(graph_t* graph) {
-  graph->root = NULL;
-  node_list_reset(&(graph->nodes));
-}
+// void graph_reset(graph_t* graph) {
+//   graph->root = NULL;
+//   node_list_reset(&(graph->nodes));
+// }

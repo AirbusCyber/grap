@@ -16,7 +16,7 @@ size_t graph_to_file(graph_t* graph, FILE* fp) {
   /* write the number of nodes */
   /* only taking non orphans nodes */
   for (i=0; i<graph->nodes.count; i++){
-    node_t* node = &(graph->nodes.storage[i]);
+    node_t* node = graph->nodes.storage[i];
     if (node->children_nb!=0 || node->fathers_nb!=0){
       nNonOrphanNode++;
     }
@@ -27,7 +27,7 @@ size_t graph_to_file(graph_t* graph, FILE* fp) {
 
   /* for easier parsing all node are dumped first */
   for (i=0; i<graph->nodes.count; i++){
-    node_t* node = &(graph->nodes.storage[i]);
+    node_t* node = graph->nodes.storage[i];
     if (node->children_nb != 0 || node ->fathers_nb != 0){
 	    fputc('n', fp);
 	    ret++;
@@ -39,7 +39,7 @@ size_t graph_to_file(graph_t* graph, FILE* fp) {
 
   /* then edges */
   for (i=0; i<graph->nodes.count; i++){
-    node_t* node = &(graph->nodes.storage[i]);
+    node_t* node = graph->nodes.storage[i];
     ret += node_edges_to_file(node, fp);
   }
 
@@ -220,9 +220,9 @@ void graph_fprint(FILE* fp, graph_t* graph) {
   size_t i;
   
   for (i=0; i<graph->nodes.count; i++){
-      node_t node = graph->nodes.storage[i];
-	  node_to_dot(&node,(node_t*)&graph->root->node_id, i, fp);
-	  node_edges_to_dot(&node, fp);
+      node_t* node = graph->nodes.storage[i];
+	  node_to_dot(node,(node_t*)&graph->root->node_id, i, fp);
+	  node_edges_to_dot(node, fp);
   }
 
 

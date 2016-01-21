@@ -272,6 +272,7 @@ void Parcours::addMot(MotParcours * m) {
 
 Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
   //WARNING : after calling this function, the ->list_id fields for nodes in inputGraph are changed
+  //TODO: change that !!!
   Parcours *p = new Parcours();
 
   //all inputgraph nodes to unexplored(0):
@@ -282,6 +283,7 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
   bool p_is_epsilon = true;
   vsize_t s = 0;
   nI = node_list_item(listI, vroot);
+  node_t* original_root = nI;
 
   assert(nI != NULL);
 
@@ -377,6 +379,8 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
   else {
     p->complete = false;
   }
+  
+  original_root->list_id = vroot;
   return p;
 }
 

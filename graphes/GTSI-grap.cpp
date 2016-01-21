@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
   int n = 0;
 
   graph_t *gr;
-  graph_from_file(&gr, fpPattern);
+  gr = getGraphFromFile(fpPattern);
   vsize_t n_pattern = gr->nodes.size;
   fclose(fpPattern);
 
@@ -90,10 +90,9 @@ int main(int argc, char *argv[]) {
   if (not parcours->complete) {
     printf("Warning: Pattern graph is not connected.\n");
   }
-
   graph_free(gr);
 
-  graph_from_file(&gr, fpTest);
+  gr = getGraphFromFile(fpTest);
   vsize_t n_test = gr->nodes.size;
   fclose(fpTest);
 

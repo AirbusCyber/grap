@@ -16,8 +16,8 @@ void debug_print(char *s) {
 graph_t *fixDict(graph_t * g) {
   vsize_t i;
   for (i = 0; i < g->nodes.size; i++) {
-    dict_delete(g->nodes.nodes_dict, g->nodes.storage[i].node_id);
-    node_t *n = dict_insert(g->nodes.nodes_dict, g->nodes.storage[i].node_id, &g->nodes.storage[i]);
+    dict_delete(g->nodes.nodes_dict, g->nodes.storage[i]->node_id);
+    node_t *n = dict_insert(g->nodes.nodes_dict, g->nodes.storage[i]->node_id, g->nodes.storage[i]);
   }
 
   return g;
