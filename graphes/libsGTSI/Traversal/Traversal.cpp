@@ -452,6 +452,7 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
     }
   }
   else {
+    free(numeros);
     return RetourParcoursDepuisSommet(false, found_nodes);
   }
 
@@ -469,6 +470,7 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
 //         printf("R: %x\n", sc->node_id);
       }
       else {
+        free(numeros);
         return RetourParcoursDepuisSommet(false, found_nodes);
       }
     }
@@ -513,16 +515,19 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
 
             if (printFound and m->get)
               found_nodes->insert(std::pair < string, std::list < node_t * >*>(m->getid, list_nodes));
-
+            
+            if (list_nodes->empty()) delete list_nodes;
             // TODO: attention, on peut renvoyer false alors qu'on a "simplement" tenté de boucler dans la mauvaise branche
             // FIX: il faut nécessairement tenter les autres branches
             if (m->version == 2 and r < m->minRepeat) {
 //               printf("%d < %d -> ret\n", r, m->minRepeat);
+              free(numeros);
               return RetourParcoursDepuisSommet(false, found_nodes);
             }
           }
           else {
 //             printf("%x: not numbered, not found\n", f->address);
+            free(numeros);
             return RetourParcoursDepuisSommet(false, found_nodes);
           }
         }
@@ -548,16 +553,19 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
         }
         else {
 //           printf("has symbol ; sc: %x\n", sc->address);
+          free(numeros);
           return RetourParcoursDepuisSommet(false, found_nodes);
         }
       }
       else {
 //         printf("no child with this number\n");
+        free(numeros);
         return RetourParcoursDepuisSommet(false, found_nodes);
       }
     }
   }
 
+  free(numeros);
   return RetourParcoursDepuisSommet(true, found_nodes);
 }
 
@@ -572,6 +580,8 @@ void freeRetourParcoursDepuisSommet(Parcours::RetourParcoursDepuisSommet rt){
         delete p_found_nodes;
       }
     }
+    
+    delete rt.second;
 }
 
 Parcours::RetourParcours Parcours::parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool countAllMatches, bool printFound) {
