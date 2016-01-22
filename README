@@ -10,21 +10,6 @@ make
 
 
 
-Pour les tests (sur la partie graphes):
-cd graphes/
-./tests
-
-Tests avec -fsanitize=address:
-cmake -DCMAKE_BUILD_TYPE=Debug .
-./tests
-
-Tests avec Valgrind:
-cmake -DCMAKE_BUILD_TYPE=Valgrind .
-make
-valgrind --leak-check=full --track-origins=yes --show-reachable=yes ./tests
-
-
-
 Utilisation du script grap:
 ./grap motif.dot prg.exe
 ./grap motif.dot prg.exe -v
