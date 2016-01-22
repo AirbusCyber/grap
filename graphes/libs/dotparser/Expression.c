@@ -96,7 +96,7 @@ node_t *createNode(char *value) {
   uint id = hash(value);
   free(value);
 
-  node_t *node = (node_t *) malloc(sizeof(node_t));
+  node_t *node = (node_t *) calloc(1, sizeof(node_t));
   node->children = NULL;
   node->fathers = NULL;
   node->children_nb = 0;
@@ -107,12 +107,13 @@ node_t *createNode(char *value) {
   node->symb = INST_SEQ;
   node->version = 1;
   node->csymbType = LABEL_EXACT_STRING;
-  node->csymb = "";
+  node->csymb = NULL;
   node->hasMaxChildrenNumber = 0;
   node->hasMaxFathersNumber = 0;
   node->minChildrenNumber = 0;
   node->minFathersNumber = 0;
   node->get = 0;
+  node->getid = NULL;
   node->minRepeat = 1;
   node->hasMaxRepeat = 1;
   node->maxRepeat = 1;

@@ -1,19 +1,7 @@
 #include "node.h"
 
 node_t *node_alloc () {
-  node_t *node = MY_ZALLOC (1, node_t);
-
-  /*
-     use zalloc() !
-     node->symb = SYMB_INIT;
-     node->code_add = 0;
-     node->code_length = 0;
-     node->explored = UNEXPLORED;
-     node->children_nb = 0;
-     node->fathers_nb = 0;
-     node->children = NULL;
-     node->fathers = NULL;
-   */
+  node_t *node = (node_t*) calloc (1, sizeof(node_t));
 
   return node;
 }
@@ -66,9 +54,11 @@ node_t *node_copy (node_t * node1, const node_t * node2) {
 }
 
 void node_free (node_t * node) {
-  MY_FREE (node->children);
-  MY_FREE (node->fathers);
-  MY_FREE (node);
+  free(node->children);
+  free(node->fathers);
+  if (node->csymb) free(node->csymb);
+  if (node->getid) free(node->getid);
+  free(node);
 }
 
 void node_link (node_t * node, node_t * child) {

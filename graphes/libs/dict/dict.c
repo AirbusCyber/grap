@@ -36,6 +36,7 @@ node_t *dict_find(struct dict * d, uint64_t k) {
   p->key = k;
 
   dictPair *r = (dictPair *) tfind(p, &d->root, compar);
+  free(p);
 
   if (r == NULL)
     return NULL;
@@ -49,6 +50,7 @@ void dict_delete(struct dict *d, uint64_t k) {
   p->key = k;
 
   tdelete(p, &d->root, compar);
+  free(p);
 }
 
 

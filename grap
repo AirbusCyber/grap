@@ -1,7 +1,6 @@
 #!/bin/bash
 
 GTSIPATH="graphes/GTSI-grap"
-disasPATH=$HOME"/disasm/disasm.py"
 pattern=$1
 test=$2
 verbose=$3
@@ -17,7 +16,7 @@ fi
 if [ ! "$verbose" = "-q" ]; then
 	echo "Disassembling "$test" (to "$testdot"):"
 fi
-python2 $disasPATH $verbose -f $testdot $test
+disassembler.py -d $testdot $test
 
 if [ ! "$verbose" = "-q" ]; then
 	echo ""
