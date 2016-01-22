@@ -68,8 +68,6 @@ Option* createOption(char* I, char* V);
  */
 node_t *createNode(char* value);
 
-graph_t* fixDict(graph_t* g);
-
 graph_t *createGraph();
 
 graph_t* addNodeToGraph(node_t* n, graph_t* g);

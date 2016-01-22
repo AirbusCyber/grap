@@ -13,7 +13,7 @@ graph_t* graph_alloc(vsize_t max_size) {
 void graph_free(graph_t* graph) {
   if(graph) {
     node_list_free(&(graph->nodes));
-    MY_FREE(graph);
+    free(graph);
   }
 }
 

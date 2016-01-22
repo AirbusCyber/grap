@@ -13,16 +13,6 @@ void debug_print(char *s) {
     printf("%s", s);
 }
 
-graph_t *fixDict(graph_t * g) {
-  vsize_t i;
-  for (i = 0; i < g->nodes.size; i++) {
-    dict_delete(g->nodes.nodes_dict, g->nodes.storage[i]->node_id);
-    node_t *n = dict_insert(g->nodes.nodes_dict, g->nodes.storage[i]->node_id, g->nodes.storage[i]);
-  }
-
-  return g;
-}
-
 CoupleList *createEdgeList() {
   CoupleList *cl = (CoupleList *) malloc(sizeof(CoupleList));
   cl->size = 0;
@@ -37,6 +27,15 @@ CoupleList *addEdgeToList(Couple * c, CoupleList * cl) {
   cl->size++;
 
   return cl;
+}
+
+void freeEdgeList(CoupleList* cl){
+  vsize_t i;
+  for (i = 0; i < cl->size; i++){
+    free(cl->couples[i]);
+  }
+  
+  free(cl);
 }
 
 Couple *createEdge(char *f, char *c, OptionList* ol) {
@@ -77,6 +76,7 @@ graph_t *addEdgesToGraph(CoupleList * cl, graph_t * g) {
   }
 
 //   graph_fprint(stdout, g);
+  freeEdgeList(cl);
   return g;
 }
 

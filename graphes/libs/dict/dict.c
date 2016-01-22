@@ -26,6 +26,11 @@ node_t *dict_insert(struct dict * d, uint64_t k, node_t * v) {
   p->value = v;
 
   const void *r = tsearch(p, &d->root, compar);
+  
+  if (*(dictPair **) r != p){
+//     nothing was added
+    free(p);
+  }
 
   return (*(dictPair **) r)->value;
 }
@@ -52,7 +57,6 @@ void dict_delete(struct dict *d, uint64_t k) {
   tdelete(p, &d->root, compar);
   free(p);
 }
-
 
 void dict_free(struct dict *d) {
   tdestroy(d->root, free);

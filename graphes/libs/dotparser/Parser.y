@@ -79,8 +79,8 @@ input
  
 graph
     : 
-    TOKEN_DIGRAPH_HEADER TOKEN_LENS node_list[G] edge_list[E] TOKEN_RENS { $$ = addEdgesToGraph($E, fixDict($G)); }
-    | TOKEN_DIGRAPH_HEADER TOKEN_ID[id] TOKEN_LENS node_list[G] edge_list[E] TOKEN_RENS { free($id); $$ = addEdgesToGraph($E, fixDict($G)); }
+    TOKEN_DIGRAPH_HEADER TOKEN_LENS node_list[G] edge_list[E] TOKEN_RENS { $$ = addEdgesToGraph($E, $G); }
+    | TOKEN_DIGRAPH_HEADER TOKEN_ID[id] TOKEN_LENS node_list[G] edge_list[E] TOKEN_RENS { free($id); $$ = addEdgesToGraph($E, $G); }
     ;
 
 node_list
