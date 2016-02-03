@@ -262,12 +262,16 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     }
     else if (strcmp(id, "repeat") == 0) {
       n->version = 2;
-      if (strcmp(v, "+") == 0) {
+      if (strcmp(v, "*") == 0) {
+        n->minRepeat = 0;
+        n->hasMaxRepeat = 0;
+      }
+      else if (strcmp(v, "+") == 0) {
         n->minRepeat = 1;
         n->hasMaxRepeat = 0;
       }
-      else if (strcmp(v, "*") == 0) {
-        n->minRepeat = 0;
+      else if (strcmp(v, "++") == 0) {
+        n->minRepeat = 2;
         n->hasMaxRepeat = 0;
       }
       else {

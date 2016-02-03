@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
   vsize_t siteSize = gr->nodes.size;
 
   Parcours *parcours = parcoursLargeur(gr, gr->root->list_id, siteSize);
-  cout << parcours->toString() << "\n";
+//   cout << parcours->toString() << "\n";
 
   if (not parcours->complete) {
     printf("Warning: Pattern graph is not connected.\n");
@@ -131,11 +131,9 @@ int main(int argc, char *argv[]) {
           for (std::list < node_t * >::iterator itn = node_list->begin(); itn != node_list->end(); ++itn) {
             node_t *n = *itn;
             cout << (*it2).first;
-            if (node_list->size() > 1)
-              cout << k;
+            if (node_list->size() > 1) cout << k;
             cout << ": ";
-            if (n->hasAddress)
-              cout << "0x" << std::hex << n->address << ", ";
+            if (n->hasAddress) cout << "0x" << std::hex << n->address << ", ";
             cout << n->csymb;
             cout << endl;
             k++;

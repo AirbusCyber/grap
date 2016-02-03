@@ -506,7 +506,7 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
                   if (it != numerotes.end()) break;
                   
                   // le fils trouvé n'est pas numéroté
-                  // s'il l'est déjà, on n'itère pas dessus
+                  // s'il l'était déjà, on n'aurait pas itéré pas dessus
                   sc = sc->children[0];
                   r++;
 
