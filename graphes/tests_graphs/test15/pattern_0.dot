@@ -1,0 +1,15 @@
+digraph G{
+A [label="A: *", shape="box", csymbtype="*", getid=A]
+B [label="B: *", shape="box", csymbtype="*", getid="B"]
+C [label="C: *", shape="box", csymbtype="*", getid=C]
+D [label="D: *", shape="box", csymbtype="*", getid=D]
+E [label="E: *", shape="box", csymbtype="*", getid=E]
+F [label="F: *", shape="box", csymbtype="*", getid=F]
+
+A -> B
+B -> C
+C -> D
+D -> E
+E -> B
+E -> F
+}

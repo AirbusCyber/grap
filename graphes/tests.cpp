@@ -27,12 +27,13 @@ void printDescription() {
   std::cout << "Test 6:  [manual] bigger test graph with 4 pattern graphs.\n";
   std::cout << "Test 7:  [manual] small graph with node repetition (INST*).\n";
   std::cout << "Test 8:  [manual] small graph with node repetition (INST*) with extraction.\n";
-  std::cout << "Test 9:  [reference] generic pattern on Mirage sample.\n";
-  std::cout << "Test 10: [reference] generic pattern on Mirage sample with extraction.\n";
-  std::cout << "Test 11: [reference] simple loop pattern on Mirage sample.\n";
-  std::cout << "Test 12: [reference] same as test 9  but with PandaPE's disassembler.\n";
-  std::cout << "Test 13: [reference] same as test 10 but with PandaPE's disassembler.\n";
-  std::cout << "Test 14: [reference] same as test 11 but with PandaPE's disassembler.\n";
+  std::cout << "Test 9:  [manual] generic pattern on Mirage sample.\n";
+  std::cout << "Test 10: [manual] generic pattern on Mirage sample with extraction.\n";
+  std::cout << "Test 11: [manual] simple loop pattern on Mirage sample.\n";
+  std::cout << "Test 12: [reference to disas.py] same as test 9  but with PandaPE's disassembler.\n";
+  std::cout << "Test 13: [reference to disas.py] same as test 10 but with PandaPE's disassembler.\n";
+  std::cout << "Test 14: [reference to disas.py] same as test 11 but with PandaPE's disassembler. PandaPE does not loop rep instructions (hence 12 -> 2).\n";
+  std::cout << "Test 15: [manual] Non-regression test for bug in graph traversal (child number i in -k>i terms was not checked).\n";
 }
 
 string Red = "\e[1;31m";

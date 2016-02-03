@@ -6,8 +6,8 @@ set(CMAKE_CXX_FLAGS " -std=c++11")
 set(CMAKE_CXX_FLAGS_VALGRIND "-g")
 set(CMAKE_C_FLAGS_VALGRIND "-g")
 
-set(CMAKE_CXX_FLAGS_DEBUG " -fsanitize=address")
-set(CMAKE_C_FLAGS_DEBUG " -fsanitize=address")
+set(CMAKE_CXX_FLAGS_DEBUG " -g -fsanitize=address")
+set(CMAKE_C_FLAGS_DEBUG " -g -fsanitize=address")
 
 # No optimization on "Release" (it induces bugs in the parser)
 set(CMAKE_CXX_FLAGS_RELEASE "")

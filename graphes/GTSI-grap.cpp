@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
   vsize_t siteSize = gr->nodes.size;
 
   Parcours *parcours = parcoursLargeur(gr, gr->root->list_id, siteSize);
-//   cout << parcours->toString() << "\n";
+  cout << parcours->toString() << "\n";
 
   if (not parcours->complete) {
     printf("Warning: Pattern graph is not connected.\n");

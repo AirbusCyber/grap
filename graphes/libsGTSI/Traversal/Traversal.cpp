@@ -501,11 +501,16 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
               while (true) {
                 if ((not m->hasMaxRepeat or r < m->maxRepeat) and sc->children_nb == 1 and sc->children[0]->fathers_nb == 1 and m->matchesSymbol(sc->children[0], checkLabels) and m->matchesCF(sc->children[0])) {
 //                   printf("%x !r\n", sc->address);
+                  
+                  unordered_set < node_t * >::iterator it = numerotes.find(sc->children[0]);
+                  if (it != numerotes.end()) break;
+                  
+                  // le fils trouvé n'est pas numéroté
+                  // s'il l'est déjà, on n'itère pas dessus
                   sc = sc->children[0];
                   r++;
 
                   if (printFound and m->get) list_nodes->push_back((node_t *) sc);
-                  
                 }
                 else {
 //                   printf("%x not repeat\n", sc->address);
@@ -538,13 +543,13 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
           if (max_numeros >= m->i) {
             std::pair < node_t *, node_t * >p = numeros[m->i - 1];
             
-            if (p.second == NULL) sc = p.first;
-            else sc = p.second;
-            
-            if (sc != f){
+            if (p.first != f){
               free(numeros);
               return RetourParcoursDepuisSommet(false, found_nodes);
             }
+            
+            if (p.second == NULL) sc = p.first;
+            else sc = p.second;
           }
           else{
               free(numeros);
@@ -596,7 +601,6 @@ Parcours::RetourParcours Parcours::parcourir(graph_t * gr, vsize_t W, bool check
   for (n = 0; n < gr->nodes.size; n++) {
     RetourParcoursDepuisSommet rt = this->parcourirDepuisSommet(gr, n, W, checkLabels, printFound);
     if (rt.first) {
-      cout << "found match\n";
       if (printFound and not rt.second->empty())
         set_gotten.insert(rt.second);
       if (not countAllMatches)
