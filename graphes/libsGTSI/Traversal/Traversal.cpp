@@ -455,9 +455,12 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
     free(numeros);
     return RetourParcoursDepuisSommet(false, found_nodes);
   }
+//   cout << "sc_begin: " << sc->csymb << "\n";
 
   size_t i;
   for (i = 1; i < this->size; i++) {
+//     cout << "sc_in: " << sc->csymb << "\n";
+    
     MotParcours *m = this->mots[i];
     if (m->alpha_is_R) {
       if (max_numeros >= m->i) {
@@ -501,8 +504,8 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
                   sc = sc->children[0];
                   r++;
 
-                  if (printFound and m->get)
-                    list_nodes->push_back((node_t *) sc);
+                  if (printFound and m->get) list_nodes->push_back((node_t *) sc);
+                  
                 }
                 else {
 //                   printf("%x not repeat\n", sc->address);
@@ -531,24 +534,25 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
           }
         }
         else if (not m->has_symbol) {
-//           printf("no symbol\n");
-          
-          // Search a pair (n_in, n_out) in numeros (repeated node) so the matched node should be n_out
-          // TODO: change data structure, this is inefficient
-          vsize_t k;
-          bool found = false;
-          for (k = 0; k < max_numeros; k++) {
-            std::pair < node_t *, node_t * >p = numeros[k];
-            if (p.second != NULL and p.first == f) {
-              found = true;
-              sc = p.second;
-              break;
+          // Verify that f is numbered m->i:
+          if (max_numeros >= m->i) {
+            std::pair < node_t *, node_t * >p = numeros[m->i - 1];
+            
+            if (p.second == NULL) sc = p.first;
+            else sc = p.second;
+            
+            if (sc != f){
+              free(numeros);
+              return RetourParcoursDepuisSommet(false, found_nodes);
             }
-
           }
-
-          if (not found)
-            sc = f;
+          else{
+              free(numeros);
+              return RetourParcoursDepuisSommet(false, found_nodes);
+          }
+     
+          
+//           cout << "sc: " << sc->csymb << "\n" ;
         }
         else {
 //           printf("has symbol ; sc: %x\n", sc->address);
@@ -562,6 +566,8 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
         return RetourParcoursDepuisSommet(false, found_nodes);
       }
     }
+    
+//     cout << "sc_out: " << sc->csymb << "\n";
   }
 
   free(numeros);
@@ -590,6 +596,7 @@ Parcours::RetourParcours Parcours::parcourir(graph_t * gr, vsize_t W, bool check
   for (n = 0; n < gr->nodes.size; n++) {
     RetourParcoursDepuisSommet rt = this->parcourirDepuisSommet(gr, n, W, checkLabels, printFound);
     if (rt.first) {
+      cout << "found match\n";
       if (printFound and not rt.second->empty())
         set_gotten.insert(rt.second);
       if (not countAllMatches)
@@ -671,6 +678,8 @@ vsize_t ParcoursNode::addGraph(graph_t * gr, vsize_t W, vsize_t maxLearn, bool c
       break;
     }
   }
+  
+  delete p;
   return added;
 }
 

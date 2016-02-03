@@ -1,7 +1,6 @@
 #ifndef TRAVERSAL_HPP
 #define TRAVERSAL_HPP
 
-
 #include <tuple>
 #include <unordered_set>
 #include <set>

@@ -35,6 +35,7 @@ void freeEdgeList(CoupleList* cl){
     free(cl->couples[i]);
   }
   
+  free(cl->couples);
   free(cl);
 }
 

@@ -146,20 +146,20 @@ void test_GTSI(graph_t ** grPattern, int nPattern, graph_t * grTest, int expecte
       siteSize = grPattern[i]->nodes.count;
   }
 
-  ParcoursNode *tree = new ParcoursNode();
+  ParcoursNode tree = ParcoursNode();
 
   for (i = 0; i < nPattern; i++) {
-    bool added = tree->addGraphFromNode(grPattern[i], grPattern[i]->root, siteSize, checkLabels);
+    bool added = tree.addGraphFromNode(grPattern[i], grPattern[i]->root, siteSize, checkLabels);
 
     if (not added)
       printf("WARNING: pattern graph %d was not added to traversal tree because it already exists there.\n", i);
   }
 
-  tree->saveParcoursNodeToDot(treePath);
+  tree.saveParcoursNodeToDot(treePath);
 
-  printf("%d traversals reconstructed from pattern graph.\n", tree->countLeaves());
+  printf("%d traversals reconstructed from pattern graph.\n", tree.countLeaves());
 
-  vsize_t count = tree->parcourir(grTest, siteSize, checkLabels, true);
+  vsize_t count = tree.parcourir(grTest, siteSize, checkLabels, true);
   if (count != expected) {
     color = Red;
   }
@@ -167,10 +167,12 @@ void test_GTSI(graph_t ** grPattern, int nPattern, graph_t * grTest, int expecte
     color = Green;
   }
   printf("%s%d traversals possible in test graph (expected: %d) with tree.%s\n", color.c_str(), count, expected, Color_Off.c_str());
+  
 
   if (nPattern == 1) {    
     Parcours *p = parcoursLargeur(grPattern[0], grPattern[0]->root->list_id, siteSize);
     Parcours::RetourParcours rt = p->parcourir(grTest, siteSize, checkLabels, true, true);
+    delete p;
     vsize_t count2 = rt.first;
 
     if (count2 != expected) {
