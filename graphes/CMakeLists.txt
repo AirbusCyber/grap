@@ -22,6 +22,7 @@ include_directories(
 	libsGTSI/Traversal/
 	libs/dict/
 	libs/dotparser/
+        libs/node_info/
 )
 
 #shared libs
@@ -85,6 +86,9 @@ add_library(graph
 #target_link_libraries(graph libsimpledotparser)
 #target_link_libraries(sdp graph)
 
+# Node Info
+add_library(nodeinfo libs/node_info/node_info.cpp)
+
 # GTSI
 add_library(libGTSI libGTSI.cpp
       libsGTSI/utils-gtsi.cpp
@@ -97,7 +101,7 @@ target_link_libraries(GTSI-grap libGTSI graph)
 
 # tests
 add_executable(tests tests.cpp)
-target_link_libraries(tests libGTSI graph pthread)
+target_link_libraries(tests libGTSI graph pthread nodeinfo)
 
 # todot
 add_executable(todot todot.cpp)

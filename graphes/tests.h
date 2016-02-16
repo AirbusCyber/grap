@@ -8,6 +8,7 @@
 #include <limits>
 #include <fstream>
 #include <cstdlib>
+#include "node_info.hpp"
 
 extern "C" {
 #include "graphIO.h"
@@ -17,6 +18,8 @@ extern "C" {
 #include "libGTSI.h"
 char optionFuncs;
 
+void print_leaf_result(bool r, string, bool);
+void test_NodeInfo();
 void printDescription ();
 void test_GTSI (graph_t ** grPattern, int nPattern, graph_t * grTest, int expected, bool checkLabels, std::string desc, bool exportTree, string treePath);
 

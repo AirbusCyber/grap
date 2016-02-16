@@ -120,7 +120,6 @@ string MotParcours::toString() {
 
 void MotParcours::addV2Info(node_t * n) {
   if (n != NULL and n->version == 2) {
-//     this->repeat = n->repeat;
     this->version = 2;
     this->csymbtype = n->csymbType;
     this->csymb = n->csymb;
@@ -239,13 +238,11 @@ Parcours::Parcours() {
 }
 
 bool Parcours::equals(Parcours * p, bool checkLabels) {
-  if (this->size != p->size)
-    return false;
+  if (this->size != p->size) return false;
 
   vsize_t n;
   for (n = 0; n < this->size; n++) {
-    if (not this->mots[n]->equals(p->mots[n], checkLabels))
-      return false;
+    if (not this->mots[n]->equals(p->mots[n], checkLabels)) return false;
   }
 
   return true;

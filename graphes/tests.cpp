@@ -41,14 +41,13 @@ string Green = "\e[1;32m";
 string Blue = "\e[1;33m";
 string Color_Off = "\e[0m";
 
-int main(int argc, char *argv[]) {  
-
-  
-  
+int main(int argc, char *argv[]) {    
   if (argc >= 2) {
     printDescription();
     return 1;
   }
+  
+  test_NodeInfo();
 
   string color;
   graph_t **grPattern = nullptr;
@@ -136,6 +135,175 @@ int main(int argc, char *argv[]) {
   }
 }
 
+void test_NodeInfo(){
+  std::cout << "Testing comparisons (NodeList)." << endl;
+  NodeInfo* np = new NodeInfo();
+  NodeInfo* nt = new NodeInfo();
+
+  
+  std::cout << "Testing bool_equals: ";
+  CondNode* cn = new CondNode();
+  cn->pattern_field = (void* NodeInfo::*) &NodeInfo::has_address;
+  cn->test_field = (void* NodeInfo::*) &NodeInfo::has_address;
+  cn->comparison = ComparisonFunctions::bool_equals;
+  cn->children = new std::list<CondNode*>();
+    
+  np->has_address = false;
+  nt->has_address = false;
+  bool r = cn->evaluate(np, nt);
+  print_leaf_result(r, "= ", false);
+  
+  np->has_address = false;
+  nt->has_address = true;
+  r = cn->evaluate(np, nt);
+  print_leaf_result(not r, "!= ", true);
+  
+  delete cn;
+  
+  
+  std::cout << "Testing bool_test_true: ";
+  cn = new CondNode();
+  cn->test_field = (void* NodeInfo::*) &NodeInfo::has_address;
+  cn->comparison = ComparisonFunctions::bool_test_true;
+  cn->children = new std::list<CondNode*>();
+    
+  nt->has_address = true;
+  r = cn->evaluate(np, nt);
+  print_leaf_result(r, "= ", false);
+  
+  nt->has_address = false;
+  r = cn->evaluate(np, nt);
+  print_leaf_result(not r, "!= ", true);
+  
+  delete cn;
+  
+  
+  std::cout << "Testing str_equals: ";
+  cn = new CondNode();
+  cn->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
+  cn->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
+  cn->comparison = ComparisonFunctions::str_equals;
+  cn->children = new std::list<CondNode*>();
+    
+  np->inst_str = "xor";
+  nt->inst_str = "xor";
+  r = cn->evaluate(np, nt);
+  print_leaf_result(r, "= ", false);
+  
+  nt->inst_str = "mov";
+  r = cn->evaluate(np, nt);
+  print_leaf_result(not r, "!= ", true);
+  
+  delete cn;
+  
+  
+  std::cout << "Testing uint8_equals: ";
+  cn = new CondNode();
+  cn->pattern_field = (void* NodeInfo::*) &NodeInfo::maxChildrenNumber;
+  cn->test_field = (void* NodeInfo::*) &NodeInfo::childrenNumber;
+  cn->comparison = ComparisonFunctions::uint8t_equals;
+  cn->children = new std::list<CondNode*>();
+    
+  np->maxChildrenNumber = 2;
+  nt->childrenNumber = 2;
+  r = cn->evaluate(np, nt);
+  print_leaf_result(r, "= ", false);
+  
+  np->maxChildrenNumber = 1;
+  r = cn->evaluate(np, nt);
+  print_leaf_result(not r, "!= ", true);
+
+  delete cn;
+  
+  
+  // Shoud return true iff pattern >= test
+  std::cout << "Testing uint8_gt: ";
+  cn = new CondNode();
+  cn->pattern_field = (void* NodeInfo::*) &NodeInfo::maxChildrenNumber;
+  cn->test_field = (void* NodeInfo::*) &NodeInfo::childrenNumber;
+  cn->comparison = ComparisonFunctions::uint8t_gt;
+  cn->children = new std::list<CondNode*>();
+    
+  np->maxChildrenNumber = 2;
+  nt->childrenNumber = 2;
+  r = cn->evaluate(np, nt);
+  print_leaf_result(r, "= ", false);
+  
+  np->maxChildrenNumber = 1;
+  r = cn->evaluate(np, nt);
+  print_leaf_result(not r, "< ", false);
+  
+  np->maxChildrenNumber = 3;
+  r = cn->evaluate(np, nt);
+  print_leaf_result(r, "> ", true);
+
+  delete cn;
+  
+  
+  std::cout << "Testing vsizet_equals: ";
+  cn = new CondNode();
+  cn->pattern_field = (void* NodeInfo::*) &NodeInfo::address;
+  cn->test_field = (void* NodeInfo::*) &NodeInfo::address;
+  cn->comparison = ComparisonFunctions::vsizet_equals;
+  cn->children = new std::list<CondNode*>();
+    
+  np->address = 2;
+  nt->address = 2;
+  r = cn->evaluate(np, nt);
+  print_leaf_result(r, "= ", false);
+  
+  np->address = 1;
+  r = cn->evaluate(np, nt);
+  print_leaf_result(not r, "!= ", true);
+  
+  
+  // cn evaluates to false
+  std::cout << "Testing not and not not: ";
+  CondNode* cn_not = new CondNode();
+  cn_not->children = new std::list<CondNode*>();
+  cn_not->children->push_front(cn);
+  cn_not->unary_operator = std::logical_not<bool>();
+  r = cn_not->evaluate(np, nt);
+  print_leaf_result(r, "! ", false);
+  
+  CondNode* cn_not2 = new CondNode();
+  cn_not2->children = new std::list<CondNode*>();
+  cn_not2->children->push_front(cn_not);
+  cn_not2->unary_operator = std::logical_not<bool>();
+  r = cn_not2->evaluate(np, nt);
+  print_leaf_result(not r, "!! ", true);
+  
+  
+  std::cout << "Testing or on multiple operands: ";
+  CondNode* cn_or = new CondNode();
+  cn_or->children = new std::list<CondNode*>();
+  cn_or->children->push_front(cn);
+  cn_or->children->push_front(cn_not);
+  cn_or->binary_operator = std::logical_or<bool>();
+  r = cn_or->evaluate(np, nt);
+  print_leaf_result(r, "2 ", false);
+  
+  cn_or->children->push_front(cn_not2);
+  r = cn_or->evaluate(np, nt);
+  print_leaf_result(r, "3 ", true);
+  
+  
+  std::cout << "Testing and on multiple operands: ";
+  CondNode* cn_and = new CondNode();
+  cn_and->children = new std::list<CondNode*>();
+  cn_and->children->push_front(cn);
+  cn_and->children->push_front(cn_not);
+  cn_and->binary_operator = std::logical_and<bool>();
+  r = cn_and->evaluate(np, nt);
+  print_leaf_result(not r, "2 ", false);
+  
+  cn_and->children->push_front(cn_not2);
+  r = cn_and->evaluate(np, nt);
+  print_leaf_result(not r, "3 ", true);
+  
+  cout << endl;
+}
+
 void test_GTSI(graph_t ** grPattern, int nPattern, graph_t * grTest, int expected, bool checkLabels, std::string desc, bool exportTree, string treePath) {
   string color;
   std::cout << "GTSI" + desc + ":\n";
@@ -186,5 +354,18 @@ void test_GTSI(graph_t ** grPattern, int nPattern, graph_t * grTest, int expecte
   
     //     freeRetourParcoursDepuisSommet(rt); 
   }
+  
+}
 
+
+void print_leaf_result(bool r, string desc, bool end_bool){
+  string end_str = "";
+  if (end_bool) end_str = "\n";
+  
+  if (r){
+    cout << Green << desc << Color_Off << end_str;
+  }
+  else{
+    cout << Red << desc << Color_Off << end_str;
+  }
 }
