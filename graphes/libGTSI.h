@@ -6,9 +6,9 @@
 #include "utils-gtsi.h"
 #include <unordered_set>
 
-extern "C" {
+// extern "C" {
 #include "graphIO.h"
-}
+// }
 
 // char optionFuncs;
 // char optionLabels;

@@ -18,25 +18,25 @@ char *csymbtypeToString(enum label_t cst) {
   char *rs;
   switch (cst) {
   case LABEL_STAR:
-    rs = "*";
+    rs = (char*) "*";
     break;
   case LABEL_GENERIC_OPCODE:
-    rs = "gopcode";
+    rs = (char*) "gopcode";
     break;
   case LABEL_EXACT_OPCODE:
-    rs = "opcode";
+    rs = (char*) "opcode";
     break;
   case LABEL_SUBSTRING:
-    rs = "substring";
+    rs = (char*) "substring";
     break;
   case LABEL_EXACT_STRING:
-    rs = "string";
+    rs = (char*) "string";
     break;
   case LABEL_REGEX:
-    rs = "regex";
+    rs = (char*) "regex";
     break;
   default:
-    rs = "string";
+    rs = (char*) "string";
   }
 
   char *s = (char *) malloc((strlen(rs) + 1) * sizeof(char));
@@ -49,35 +49,35 @@ char *symbToString(vsize_t symb) {
   char *rs;
   switch (symb) {
   case INST_SEQ:
-    rs = "INST";
+    rs = (char*) "INST";
     break;
   case INST_RET:
-    rs = "RET";
+    rs = (char*) "RET";
     break;
   case INST_CALL:
-    rs = "CALL";
+    rs = (char*) "CALL";
     break;
   case INST_JCC:
-    rs = "JCC";
+    rs = (char*) "JCC";
     break;
   case INST_JMP:
-    rs = "JUMP";
+    rs = (char*) "JUMP";
     break;
   case INST_END:
-    rs = "HLT";
+    rs = (char*) "HLT";
     break;
   case INST_UREACH:
-    rs = "UNREACHEABLE";
+    rs = (char*) "UNREACHEABLE";
     break;
   case INST_UNDEF:
-    rs = "UNDEFINED";
+    rs = (char*) "UNDEFINED";
     break;
   case INST_SCALL:
-    rs = "INT";
+    rs = (char*) "INT";
     break;
   default:
   case SYMB_END:
-    rs = "ERROR";
+    rs = (char*) "ERROR";
     break;
   }
 
@@ -159,25 +159,25 @@ size_t node_to_dot(const node_t * node, const node_t * root, size_t node_number,
 
     //printing other props
     ss = csymbtypeToString(node->csymbType);
-    ret += printVK(fp, "csymbtype", ss, 1);
-    ret += printVK(fp, "csymb", node->csymb, 1);
+    ret += printVK(fp, (char*) "csymbtype", ss, 1);
+    ret += printVK(fp, (char*) "csymb", node->csymb, 1);
     if (node->minRepeat != 1)
-      ret += printVKint(fp, "minrepeat", node->minRepeat, 1);
+      ret += printVKint(fp, (char*) "minrepeat", node->minRepeat, 1);
     if (node->hasMaxRepeat == 1)
-      ret += printVKint(fp, "maxnrepeat", node->maxRepeat, 1);
+      ret += printVKint(fp, (char*) "maxnrepeat", node->maxRepeat, 1);
     free(ss);
-    char *str = malloc(4 * sizeof(char));
+    char *str = (char*) malloc(4 * sizeof(char));
     snprintf(str, 4, "%d", node->minChildrenNumber);
-    ret += printVK(fp, "minchildren", str, 1);
+    ret += printVK(fp, (char*) "minchildren", str, 1);
     if (node->hasMaxChildrenNumber) {
       snprintf(str, 4, "%d", node->maxChildrenNumber);
-      ret += printVK(fp, "maxchildren", str, 1);
+      ret += printVK(fp, (char*) "maxchildren", str, 1);
     }
     snprintf(str, 4, "%d", node->minFathersNumber);
-    ret += printVK(fp, "minfathers", str, 1);
+    ret += printVK(fp, (char*) "minfathers", str, 1);
     if (node->hasMaxFathersNumber) {
       snprintf(str, 4, "%d", node->maxFathersNumber);
-      ret += printVK(fp, "maxfathers", str, 1);
+      ret += printVK(fp, (char*) "maxfathers", str, 1);
     }
     free(str);
   }

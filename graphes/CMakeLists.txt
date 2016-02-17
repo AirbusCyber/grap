@@ -64,21 +64,21 @@ ADD_CUSTOM_COMMAND(
 #)
 add_library(graph
       libs/libgraph/graph.h
-      libs/libgraph/graph.c
+      libs/libgraph/graph.cpp
       libs/libgraph/graphIO.h
-      libs/libgraph/graphIO.c
+      libs/libgraph/graphIO.cpp
       libs/libgraph/node.h
-      libs/libgraph/node.c
+      libs/libgraph/node.cpp
       libs/libgraph/node_list.h
-      libs/libgraph/node_list.c
+      libs/libgraph/node_list.cpp
       libs/libgraph/nodeIO.h
-      libs/libgraph/nodeIO.c
-      libs/dict/dict.c
+      libs/libgraph/nodeIO.cpp
+      libs/dict/dict.cpp
       libs/dict/dict.h
-      libs/dotparser/graphParser.c 
-	  Lexer.c 
-	  Parser.c 
-	  libs/dotparser/Expression.c
+      libs/dotparser/graphParser.cpp
+      libs/dotparser/Expression.cpp
+      Lexer.c 
+      Parser.c 
 )
 #add_executable(sdp libs/dotparser/main.c)
 

@@ -4,8 +4,8 @@
 #include "dict.h"
 
 int compar(const void *l, const void *r) {
-  const dictPair *dl = l;
-  const dictPair *dr = r;
+  const dictPair *dl = (const dictPair *) l;
+  const dictPair *dr = (const dictPair *) r;
 
   if (dl->key < dr->key)
     return -1;
@@ -21,7 +21,7 @@ struct dict *dict_alloc() {
 }
 
 node_t *dict_insert(struct dict * d, uint64_t k, node_t * v) {
-  dictPair *p = malloc(sizeof(dictPair));
+  dictPair *p = (dictPair*) malloc(sizeof(dictPair));
   p->key = k;
   p->value = v;
 
@@ -37,7 +37,7 @@ node_t *dict_insert(struct dict * d, uint64_t k, node_t * v) {
 
 
 node_t *dict_find(struct dict * d, uint64_t k) {
-  dictPair *p = malloc(sizeof(dictPair));
+  dictPair *p = (dictPair*) malloc(sizeof(dictPair));
   p->key = k;
 
   dictPair *r = (dictPair *) tfind(p, &d->root, compar);
@@ -51,7 +51,7 @@ node_t *dict_find(struct dict * d, uint64_t k) {
 
 
 void dict_delete(struct dict *d, uint64_t k) {
-  dictPair *p = malloc(sizeof(dictPair));
+  dictPair *p = (dictPair*) malloc(sizeof(dictPair));
   p->key = k;
 
   tdelete(p, &d->root, compar);

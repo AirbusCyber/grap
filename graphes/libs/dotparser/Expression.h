@@ -16,7 +16,6 @@
 // graph_t* graph_alloc(vsize_t max_size);
 // void graph_free(graph_t* graph);
 
-
 typedef struct Couple
 {
   uint x;
@@ -29,10 +28,6 @@ typedef struct CoupleList
   Couple** couples;
 } CoupleList;
 
-uint hash(char* s);
-
-void debug_print(char* s);
-
 typedef struct Option
 {
   char* id;
@@ -44,6 +39,28 @@ typedef struct OptionList
   vsize_t size;
   Option** options;
 } OptionList;
+
+#ifdef __cplusplus
+extern "C" { 
+void debug_print(char*);
+CoupleList* createEdgeList();
+CoupleList* addEdgeToList(Couple* c, CoupleList* cl);
+Couple* createEdge(char* f, char* c, OptionList* ol);
+graph_t* addEdgesToGraph(CoupleList* cl, graph_t* g);
+node_t* updateNode(OptionList* ol, node_t* n);
+OptionList* createOptionList();
+OptionList* addOptionToList(Option* o, OptionList* ol);
+Option* createOption(char* I, char* V);
+node_t *createNode(char* value);
+graph_t *createGraph();
+graph_t* addNodeToGraph(node_t* n, graph_t* g);
+}
+#endif
+
+
+uint hash(char* s);
+
+void debug_print(char* s);
 
 CoupleList* createEdgeList();
 

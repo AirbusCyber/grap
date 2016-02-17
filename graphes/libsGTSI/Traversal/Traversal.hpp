@@ -19,9 +19,13 @@ using namespace std;
 
 extern "C" {
 #include "symbol.h"
+} 
+
 #include "graph.h"
 #include "nodeIO.h"
-} extern char *labCharToString(vsize_t label);
+
+
+extern char *labCharToString(vsize_t label);
 
 enum TypeMotParcours {
   TYPE_M1,
