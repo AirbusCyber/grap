@@ -11,6 +11,7 @@
 
 #include "symbol.h"
 #include "ga_types.h"
+#include "node_info.hpp"
 
 /*!
  @brief Constants for the status of node during graph exploration.

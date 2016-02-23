@@ -11,9 +11,9 @@
 
 // #include "graph2.h"
 
-// int yyerror(graph_t **Sgraph, yyscan_t scanner, const char *msg) {
+int yyerror(graph_t **Sgraph, yyscan_t scanner, const char *msg) {
     // Add error handling routine as needed
-// }
+}
  
 %}
 

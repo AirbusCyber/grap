@@ -40,7 +40,7 @@ typedef struct OptionList
   Option** options;
 } OptionList;
 
-#ifdef __cplusplus
+
 extern "C" { 
 void debug_print(char*);
 CoupleList* createEdgeList();
@@ -55,7 +55,6 @@ node_t *createNode(char* value);
 graph_t *createGraph();
 graph_t* addNodeToGraph(node_t* n, graph_t* g);
 }
-#endif
 
 
 uint hash(char* s);

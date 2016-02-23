@@ -16,12 +16,10 @@
 #include "graph.h"
 #include "return_status.h"
 
-#ifdef __cplusplus
 extern "C" { 
 status_t graph_from_file (graph_t ** pgraph, FILE * fp);
 void graph_fprint (FILE * fp, graph_t * graph);
 }
-#endif
 
 graph_t *getGraphFromFile (FILE * f); // implemented in graphParser.c
 

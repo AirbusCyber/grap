@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 2.6)
 project(grap)
 CMAKE_POLICY(SET CMP0015 NEW)
-set(CMAKE_CXX_FLAGS " -std=c++11")
 
-set(CMAKE_CXX_FLAGS_VALGRIND "-g")
-set(CMAKE_C_FLAGS_VALGRIND "-g")
+set(CMAKE_CXX_FLAGS " -std=c++11")
+set(CMAKE_C_FLAGS " -std=c++11")
+
+set(CMAKE_CXX_FLAGS_VALGRIND " -g")
+set(CMAKE_C_FLAGS_VALGRIND " -g")
 
 set(CMAKE_CXX_FLAGS_DEBUG " -g -fsanitize=address")
 set(CMAKE_C_FLAGS_DEBUG " -g -fsanitize=address")
@@ -12,6 +14,10 @@ set(CMAKE_C_FLAGS_DEBUG " -g -fsanitize=address")
 # No optimization on "Release" (it induces bugs in the parser)
 set(CMAKE_CXX_FLAGS_RELEASE "")
 set(CMAKE_C_FLAGS_RELEASE "")
+
+# Force C++
+SET(CMAKE_C_COMPILER ${CMAKE_CXX_COMPILER})
+
 
 include_directories(
 	./

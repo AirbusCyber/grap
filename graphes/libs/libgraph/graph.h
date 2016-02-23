@@ -40,11 +40,9 @@ typedef struct graph_t {
  */
 graph_t* graph_alloc(vsize_t max_size);
 
-#ifdef __cplusplus
 extern "C" { 
 void graph_free(graph_t* graph);
 }
-#endif
 
 /*!
  @brief Graph freeing procedure.
