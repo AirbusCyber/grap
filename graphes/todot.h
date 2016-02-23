@@ -8,8 +8,6 @@
 #include <limits>
 #include <fstream>
 
-// extern "C" {
 #include "graphIO.h"
-// }
 
 #endif
