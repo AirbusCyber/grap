@@ -1,3 +1,6 @@
+#ifndef NODEINFO_HPP
+#define NODEINFO_HPP
+
 #include <list>
 #include <string>
 #include <functional>
@@ -75,3 +78,5 @@ public:
   
   bool evaluate(NodeInfo* pattern, NodeInfo* test);
 };
+
+#endif
