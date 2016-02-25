@@ -259,10 +259,11 @@ void test_NodeInfo(){
   
   // cn evaluates to false
   std::cout << "Testing not and not not: ";
-  CondNode* cn_not = new CondNode();
-  cn_not->children = new std::list<CondNode*>();
-  cn_not->children->push_front(cn);
-  cn_not->unary_operator = std::logical_not<bool>();
+  std::list<CondNode*>* children = new std::list<CondNode*>();
+  children = new std::list<CondNode*>();
+  children->push_front(cn);
+  CondNode* cn_not = new CondNode(children, std::logical_not<bool>());
+  
   r = cn_not->evaluate(np, nt);
   print_leaf_result(r, "! ", false);
   
@@ -275,11 +276,12 @@ void test_NodeInfo(){
   
   
   std::cout << "Testing or on multiple operands: ";
-  CondNode* cn_or = new CondNode();
-  cn_or->children = new std::list<CondNode*>();
-  cn_or->children->push_front(cn);
-  cn_or->children->push_front(cn_not);
-  cn_or->binary_operator = std::logical_or<bool>();
+  std::list<CondNode*>* children2 = new std::list<CondNode*>();
+  children2 = new std::list<CondNode*>();
+  children2->push_front(cn);
+  children2->push_front(cn_not);
+  
+  CondNode* cn_or = new CondNode(children2, std::logical_or<bool>());
   r = cn_or->evaluate(np, nt);
   print_leaf_result(r, "2 ", false);
   

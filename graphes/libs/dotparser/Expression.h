@@ -13,6 +13,11 @@
 #include <stddef.h>
 #include <string.h>
 
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "node_info.hpp"
+
 // graph_t* graph_alloc(vsize_t max_size);
 // void graph_free(graph_t* graph);
 
@@ -40,7 +45,6 @@ typedef struct OptionList
   Option** options;
 } OptionList;
 
-
 extern "C" { 
 void debug_print(char*);
 CoupleList* createEdgeList();
@@ -55,7 +59,6 @@ node_t *createNode(char* value);
 graph_t *createGraph();
 graph_t* addNodeToGraph(node_t* n, graph_t* g);
 }
-
 
 uint hash(char* s);
 

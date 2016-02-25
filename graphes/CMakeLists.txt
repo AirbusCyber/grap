@@ -103,7 +103,7 @@ add_library(libGTSI libGTSI.cpp
 
 # grap (GTSI)
 add_executable(GTSI-grap GTSI-grap.cpp)
-target_link_libraries(GTSI-grap libGTSI graph)
+target_link_libraries(GTSI-grap libGTSI graph nodeinfo)
 
 # tests
 add_executable(tests tests.cpp)
@@ -111,4 +111,4 @@ target_link_libraries(tests libGTSI graph pthread nodeinfo)
 
 # todot
 add_executable(todot todot.cpp)
-target_link_libraries(todot graph)
+target_link_libraries(todot graph nodeinfo)

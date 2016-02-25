@@ -5,6 +5,7 @@
 #include <string>
 #include <functional>
 #include <iostream>
+#include <assert.h>
 
 extern "C" {
 #include "ga_types.h"
@@ -12,6 +13,8 @@ extern "C" {
 
 class NodeInfo {
 public:
+  NodeInfo();
+  
   std::string toString();
   
   bool matches(NodeInfo* test);
@@ -50,9 +53,11 @@ public:
 class ComparisonFunctions{
 public:
   static bool str_equals(void*, void*);
-//   static bool str_contains(void*, void*);
+  static bool str_contains(void*, void*);
 //   static bool str_begins_with(void*, void*);
   
+  static bool bool_true(void*, void*);
+  static bool bool_false(void*, void*);
   static bool bool_test_true(void*, void*);
   static bool bool_equals(void*, void*);
   
@@ -64,9 +69,13 @@ public:
 class CondNode{
 public:
   // Evaluate:
-  // Two children: returns binary_operator(c1, c2)
+  // Many (2+) children: returns binary_operator(binary_operator(c1, c2), c3) ...
   // One child: returns unary_operator(c)
   // No children: returns comparison(pattern_field, pattern, test_field, test)
+  
+  CondNode();
+  CondNode(std::list<CondNode*>*, std::function<bool(bool)>);
+  CondNode(std::list<CondNode*>*, std::function<bool(bool, bool)>);
   
   std::list<CondNode*>* children;
   std::function<bool(bool, bool)> binary_operator;

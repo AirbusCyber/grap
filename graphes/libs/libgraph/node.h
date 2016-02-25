@@ -59,6 +59,11 @@ typedef struct node_t {
    */
   uint64_t node_id;
 
+  NodeInfo* info;
+  
+  // Only for patterns
+  CondNode* condition;
+  
   /*!
    @brief Symbol associated to the node, type is enum symb_t but explicit size
    for a more portable data structure.
