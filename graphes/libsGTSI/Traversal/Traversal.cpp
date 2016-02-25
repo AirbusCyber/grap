@@ -185,14 +185,14 @@ bool MotParcours::sameRepeatAndCF(MotParcours * m) {
   if (this->version != m->version)
     return false;
 
-  bool r = (this->minRepeat == m->minRepeat)
-    and(this->hasMaxRepeat == m->hasMaxRepeat)
-    and((not this->hasMaxRepeat) or this->maxRepeat == m->maxRepeat)
-    and(this->minChildrenNumber == m->minChildrenNumber)
-    and(this->hasMaxChildrenNumber == m->hasMaxChildrenNumber)
-    and((not this->hasMaxChildrenNumber) or this->maxChildrenNumber == m->maxChildrenNumber)
-    and(this->hasMaxFathersNumber == m->hasMaxFathersNumber)
-    and((not this->hasMaxFathersNumber) or this->maxFathersNumber == m->maxFathersNumber);
+  bool r = (this->info->minRepeat == m->info->minRepeat)
+    and(this->info->has_maxRepeat == m->info->has_maxRepeat)
+    and((not this->info->has_maxRepeat) or this->info->maxRepeat == m->info->maxRepeat)
+    and(this->info->minChildrenNumber == m->info->minChildrenNumber)
+    and(this->info->has_maxChildrenNumber == m->info->has_maxChildrenNumber)
+    and((not this->info->has_maxChildrenNumber) or this->info->maxChildrenNumber == m->info->maxChildrenNumber)
+    and(this->info->has_maxFathersNumber == m->info->has_maxFathersNumber)
+    and((not this->info->has_maxFathersNumber) or this->info->maxFathersNumber == m->info->maxFathersNumber);
 
   return r;
 }
@@ -317,6 +317,8 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
       m->has_symbol = false;
       m->i = pere->list_id;
       m->addV2Info(ss);
+      m->info = ss->info;
+      m->condition = ss->condition;
       p->addMot(m);
 
       sc = pere;
@@ -329,6 +331,8 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
         m->has_symbol = true;
         m->symbol = ss->symb;
         m->addV2Info(ss);
+        m->info = ss->info;
+        m->condition = ss->condition;
         p->addMot(m);
         p_is_epsilon = false;
       }
@@ -341,6 +345,8 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
         m->has_symbol = true;
         m->symbol = ss->symb;
         m->addV2Info(ss);
+        m->info = ss->info;
+        m->condition = ss->condition;
         p->addMot(m);
       }
 
@@ -364,6 +370,8 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
       m->k = k;
       m->has_symbol = false;
       m->addV2Info(ss);
+      m->info = ss->info;
+      m->condition = ss->condition;
       p->addMot(m);
       sc = ss;
     }
@@ -384,34 +392,36 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
 bool MotParcours::matchesSymbol(node_t * n, bool checkLabels) {
   if (not checkLabels)
     return true;
+  
+  return this->condition->evaluate(this->info, n->info);
 
-  if (this->version == 2) {
-    if (this->csymbtype == LABEL_STAR)
-      return true;
-
-    string n_symb_str;
-    if (n->version == 2) {
-      n_symb_str = string(n->csymb);
-    }
-    else {
-      n_symb_str = string(symbToString(n->symb));
-    }
-
-    if (this->csymbtype == LABEL_EXACT_STRING) {
-      return n_symb_str == this->csymb;
-    }
-    else if (this->csymbtype == LABEL_REGEX or this->csymbtype == LABEL_SUBSTRING or this->csymbtype == LABEL_EXACT_OPCODE or this->csymbtype == LABEL_GENERIC_OPCODE) {
-      std::regex e(".*" + this->csymb + ".*");
-//       std::cmatch cm;           // same as std::match_results<const char*> cm;
-      bool ret = std::regex_match(n_symb_str, e, std::regex_constants::match_default);
-//       std::cout << "string literal with " << cm.size() << " matches\n";
-//       std::cout << string(this->csymb) << " / " << n_symb_str << ": " << ret << "\n";
-      return ret;
-    }
-  }
-  else {
-    return this->symbol == n->symb;
-  }
+//   if (this->version == 2) {
+//     if (this->csymbtype == LABEL_STAR)
+//       return true;
+// 
+//     string n_symb_str;
+//     if (n->version == 2) {
+//       n_symb_str = string(n->csymb);
+//     }
+//     else {
+//       n_symb_str = string(symbToString(n->symb));
+//     }
+// 
+//     if (this->csymbtype == LABEL_EXACT_STRING) {
+//       return n_symb_str == this->csymb;
+//     }
+//     else if (this->csymbtype == LABEL_REGEX or this->csymbtype == LABEL_SUBSTRING or this->csymbtype == LABEL_EXACT_OPCODE or this->csymbtype == LABEL_GENERIC_OPCODE) {
+//       std::regex e(".*" + this->csymb + ".*");
+// //       std::cmatch cm;           // same as std::match_results<const char*> cm;
+//       bool ret = std::regex_match(n_symb_str, e, std::regex_constants::match_default);
+// //       std::cout << "string literal with " << cm.size() << " matches\n";
+// //       std::cout << string(this->csymb) << " / " << n_symb_str << ": " << ret << "\n";
+//       return ret;
+//     }
+//   }
+//   else {
+//     return this->symbol == n->symb;
+//   }
 }
 
 bool MotParcours::matchesCF(node_t * n) {

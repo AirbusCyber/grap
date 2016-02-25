@@ -85,6 +85,8 @@ bool ComparisonFunctions::str_equals(void* a1, void* a2)
   std::string* s1 = static_cast<std::string *>(a1);
   std::string* s2 = static_cast<std::string *>(a2);
   
+//   std::cout << "cmp " << *s1 << " VS " << *s2 << "\n";
+  
   return *s1 == *s2;
 }
 

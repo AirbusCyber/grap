@@ -23,6 +23,7 @@ extern "C" {
 
 #include "graph.h"
 #include "nodeIO.h"
+#include "node_info.hpp"
 
 
 extern char *labCharToString(vsize_t label);
@@ -49,6 +50,9 @@ public:
   bool sameSymbol(MotParcours * m, bool);
   bool sameRepeatAndCF(MotParcours * m);
   void addV2Info(node_t * n);
+  
+  NodeInfo* info;
+  CondNode* condition;
 
   // for version 2:
   label_t csymbtype;
@@ -88,7 +92,7 @@ void freeRetourParcoursDepuisSommet(Parcours::RetourParcoursDepuisSommet rt);
 
 typedef std::tuple < node_t *, uint8_t, node_t * >TupleQueue;
 Parcours *parcoursLargeur(graph_t * graph, vsize_t root, vsize_t W);
-Parcours *newParcours();
+// Parcours *newParcours();
 std::unordered_set < Parcours * >parcoursFromGraph(graph_t *, vsize_t, bool);
 
 class ParcoursNode {
