@@ -6,7 +6,7 @@
 int compar(const void *l, const void *r) {
   const dictPair *dl = (const dictPair *) l;
   const dictPair *dr = (const dictPair *) r;
-
+  
   if (dl->key < dr->key)
     return -1;
   if (dl->key > dr->key)
