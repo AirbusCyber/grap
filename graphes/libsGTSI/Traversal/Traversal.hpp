@@ -33,9 +33,9 @@ class MotParcours {
 public:
   TypeMotParcours type;
   bool has_symbol;
-  int i;
+  vsize_t i;
   bool alpha_is_R;
-  int k;
+  uint8_t k;
   MotParcours();
   string toString();
   bool matchesSymbol(node_t * n, bool);
@@ -51,7 +51,7 @@ public:
 class Parcours {
 public:
   bool complete;
-  int size;
+  vsize_t size;
   MotParcours **mots;
   Parcours();
   string toString();
@@ -79,7 +79,7 @@ public:
   ParcoursNode(std::list < ParcoursNode * >fils, MotParcours * mot, uint64_t id);
   bool addGraphFromNode(graph_t *, node_t *, vsize_t W, bool checkLabels);
   vsize_t addGraph(graph_t *, vsize_t W, vsize_t maxLearn, bool checkLabels);
-  bool addParcours(Parcours * p, int index, bool checkLabels);
+  bool addParcours(Parcours * p, vsize_t index, bool checkLabels);
   void saveParcoursNodeToDot(string path);
   string toDotPartiel();
   string toDot();

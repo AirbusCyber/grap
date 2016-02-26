@@ -76,7 +76,6 @@ int main(int argc, char *argv[]) {
   }
 
   char valence = 2;
-  int n = 0;
 
   graph_t *gr;
   gr = getGraphFromFile(fpPattern);
@@ -101,12 +100,12 @@ int main(int argc, char *argv[]) {
   vsize_t count = rt.first;
 
   if (not optionQuiet) {
-    printf("%d traversal(s) possible in %s.\n", count, pathTest);
-    printf("Pattern graph (%s) has %d nodes.\nTest graph (%s) has %d nodes.\n", pathPattern, n_pattern, pathTest, gr->nodes.size);
+    printf("%d traversal(s) possible in %s.\n", (int) count, pathTest);
+    printf("Pattern graph (%s) has %d nodes.\nTest graph (%s) has %d nodes.\n", pathPattern, (int) n_pattern, pathTest, (int) gr->nodes.size);
   }
   else{
     if (count > 0){
-     printf("%s %d\n", pathTest, count); 
+     printf("%s %d\n", pathTest, (int) count); 
     }
   }
 
@@ -124,10 +123,9 @@ int main(int argc, char *argv[]) {
       std::map < string, std::list < node_t * >*>::iterator it2;
       for (it2 = p_found_nodes->begin(); it2 != p_found_nodes->end(); it2++) {
         std::list < node_t * >*node_list = (*it2).second;
-        vsize_t k;
 
         if (not node_list->empty()) {
-          vsize_t k = 0;
+          k = 0;
           for (std::list < node_t * >::iterator itn = node_list->begin(); itn != node_list->end(); ++itn) {
             node_t *n = *itn;
             cout << (*it2).first;

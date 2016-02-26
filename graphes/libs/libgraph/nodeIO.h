@@ -37,4 +37,7 @@ size_t node_to_dot(const node_t* node, const node_t* root, size_t, FILE* fp);
  */
 size_t node_edges_to_dot(const node_t* node, FILE* fp);
 
+int printVK(FILE * fp, char *key, char *value, char virg);
+int printVKint(FILE * fp, char *key, int value, char virg);
+
 #endif /* MK_NODEIO_H */

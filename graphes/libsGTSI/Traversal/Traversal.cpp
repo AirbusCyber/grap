@@ -146,7 +146,7 @@ bool Parcours::equals(Parcours * p, bool checkLabels) {
 
 
 string Parcours::toString() {
-  int i;
+  size_t i;
   string s = "";
   for (i = 0; i < this->size; i++) {
     s += this->mots[i]->toString();
@@ -371,8 +371,8 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
                 if ((not m->info->has_maxRepeat or r < m->info->maxRepeat) and sc->children_nb == 1 and sc->children[0]->fathers_nb == 1 and m->matchesSymbol(sc->children[0], checkLabels) and m->matchesCF(sc->children[0])) {
 //                   printf("%x !r\n", sc->address);
                   
-                  unordered_set < node_t * >::iterator it = numerotes.find(sc->children[0]);
-                  if (it != numerotes.end()) break;
+                  unordered_set < node_t * >::iterator it_find = numerotes.find(sc->children[0]);
+                  if (it_find != numerotes.end()) break;
                   
                   // le fils trouvé n'est pas numéroté
                   // s'il l'était déjà, on n'aurait pas itéré pas dessus
@@ -516,10 +516,10 @@ ParcoursNode::ParcoursNode() {
   this->feuille = false;
 }
 
-ParcoursNode::ParcoursNode(std::list < ParcoursNode * >fils, MotParcours * mot, uint64_t id) {
-  this->fils = fils;
-  this->mot = mot;
-  this->id = id;
+ParcoursNode::ParcoursNode(std::list < ParcoursNode * >_fils, MotParcours * _mot, uint64_t _id) {
+  this->fils = _fils;
+  this->mot = _mot;
+  this->id = _id;
 }
 
 bool ParcoursNode::addGraphFromNode(graph_t * gr, node_t * r, vsize_t W, bool checkLabels) {
@@ -602,7 +602,7 @@ void ParcoursNode::saveParcoursNodeToDot(string path) {
   ofs.close();
 }
 
-bool ParcoursNode::addParcours(Parcours * p, int index, bool checkLabels) {
+bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {
   if (index >= p->size) {
     bool b = this->feuille;
     this->feuille = true;
@@ -635,8 +635,8 @@ vsize_t ParcoursNode::parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool 
     list < vsize_t >::iterator it = ret.begin();
 
     for (it = ret.begin(); it != ret.end(); it++) {
-      vsize_t id = *it;
-      if (get < 1 > (leaves.insert(id)) or countAllMatches) {
+      vsize_t _id = *it;
+      if (get < 1 > (leaves.insert(_id)) or countAllMatches) {
 //         printf("possible from node: %d ; leave: %d\n", n, id);
         count++;
       }

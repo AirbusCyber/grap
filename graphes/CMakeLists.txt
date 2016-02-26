@@ -2,14 +2,17 @@ cmake_minimum_required(VERSION 2.6)
 project(grap)
 CMAKE_POLICY(SET CMP0015 NEW)
 
-set(CMAKE_CXX_FLAGS " -std=c++11")
-set(CMAKE_C_FLAGS " -std=c++11")
+set(CMAKE_CXX_FLAGS " -std=c++11 -pedantic -Wall -Wno-write-strings -Wextra -Wcast-align -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Woverloaded-virtual -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Wno-unused")
+set(CMAKE_C_FLAGS " -std=c++11 -pedantic -Wall -Wno-write-strings -Wextra -Wcast-align -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Woverloaded-virtual -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Wno-unused")
 
 set(CMAKE_CXX_FLAGS_VALGRIND " -g")
 set(CMAKE_C_FLAGS_VALGRIND " -g")
 
 set(CMAKE_CXX_FLAGS_DEBUG " -g -fsanitize=address")
 set(CMAKE_C_FLAGS_DEBUG " -g -fsanitize=address")
+
+set(CMAKE_CXX_FLAGS_ERRALL " -g -pedantic -Wall -Wextra -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Werror -Wno-unused")
+set(CMAKE_C_FLAGS_ERRALL " -g -pedantic -Wall -Wextra -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Werror -Wno-unused")
 
 # No optimization on "Release" (it induces bugs in the parser)
 set(CMAKE_CXX_FLAGS_RELEASE "")
@@ -21,7 +24,6 @@ SET(CMAKE_C_COMPILER ${CMAKE_CXX_COMPILER})
 
 include_directories(
 	./
-	src/
 	libs/include/
 	libs/libgraph/
 	libsGTSI/

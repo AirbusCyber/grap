@@ -46,26 +46,13 @@ typedef struct OptionList
   Option** options;
 } OptionList;
 
-extern "C" { 
-void debug_print(char*);
-CoupleList* createEdgeList();
-CoupleList* addEdgeToList(Couple* c, CoupleList* cl);
-Couple* createEdge(char* f, char* c, OptionList* ol);
-graph_t* addEdgesToGraph(CoupleList* cl, graph_t* g);
-node_t* updateNode(OptionList* ol, node_t* n);
-OptionList* createOptionList();
-OptionList* addOptionToList(Option* o, OptionList* ol);
-Option* createOption(char* I, char* V);
-node_t *createNode(char* value);
-graph_t *createGraph();
-graph_t* addNodeToGraph(node_t* n, graph_t* g);
-}
-
 uint hash(char* s);
 
 void debug_print(char* s);
 
 CoupleList* createEdgeList();
+void freeEdgeList(CoupleList* cl);
+char *removeQuotes(char *s);
 
 CoupleList* addEdgeToList(Couple* c, CoupleList* cl);
 

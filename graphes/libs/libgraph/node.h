@@ -144,12 +144,6 @@ typedef struct node_t {
 node_t* node_alloc();
 
 /*!
- @brief Reset node.
- @param node The node to reset.
- */
-void node_reset(node_t* node);
-
-/*!
  @brief Overwrite a node with an other.
 
  Internal structures of node1 are free'd.
@@ -164,12 +158,6 @@ node_t* node_copy(node_t* node1, const node_t* node2);
  @param node The node to free.
  */
 void node_free(node_t* node);
-
-/*!
- @brief Reset the node to default values.
- @param node The node to reset.
- */
-void node_reset(node_t* node);
 
 /*!
  @brief Set the number of children of the node.

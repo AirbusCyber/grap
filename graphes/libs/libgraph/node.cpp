@@ -16,13 +16,6 @@ void node_set_fathers_nb (node_t * node, vsize_t nb) {
   node->fathers = (node_t**) realloc(node->fathers, node->fathers_nb * sizeof(node_t*));
 }
 
-void node_reset (node_t * node) {
-  free(node->fathers);
-  free(node->children);
-
-  memset (node, 0, sizeof(node_t));
-}
-
 node_t *node_copy (node_t * node1, const node_t * node2) {
   /* free tables of fathers/children */
   free(node1->fathers);

@@ -21,6 +21,6 @@ char optionFuncs;
 void print_leaf_result(bool r, string, bool);
 void test_NodeInfo();
 void printDescription ();
-void test_GTSI (graph_t ** grPattern, int nPattern, graph_t * grTest, int expected, bool checkLabels, std::string desc, bool exportTree, string treePath);
+void test_GTSI (graph_t ** grPattern, size_t nPattern, graph_t * grTest, size_t expected, bool checkLabels, std::string desc, bool exportTree, string treePath);
 
 #endif

@@ -30,7 +30,7 @@ graph_t *getGraphFromFile (FILE * f) {
   YY_BUFFER_STATE state;
 
   fseek (f, 0, SEEK_END);
-  long fsize = ftell (f);
+  size_t fsize = (size_t) ftell (f);
   fseek (f, 0, SEEK_SET);
   
   char *buf = (char *) malloc (fsize + 1);

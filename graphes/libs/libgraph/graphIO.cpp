@@ -2,7 +2,6 @@
 
 void graph_fprint(FILE* fp, graph_t* graph) {
   struct node_list_iterator_t *node_it;
-  node_t* node;
 
   fprintf(fp, "Digraph G {\n");
 

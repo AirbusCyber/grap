@@ -36,10 +36,10 @@ void printDescription() {
   std::cout << "Test 15: [manual] Non-regression test for bug in graph traversal (child number i in -k>i terms was not checked).\n";
 }
 
-string Red = "\e[1;31m";
-string Green = "\e[1;32m";
-string Blue = "\e[1;33m";
-string Color_Off = "\e[0m";
+string Red = "\x1b[1;31m";
+string Green = "\x1b[1;32m";
+string Blue = "\x1b[1;33m";
+string Color_Off = "\x1b[0m";
 
 int main(int argc, char *argv[]) {    
   if (argc >= 2) {
@@ -63,17 +63,17 @@ int main(int argc, char *argv[]) {
     std::string pathTest = dirPath + "test.dot";
 
     // read expected results
-    vsize_t expected_gtsi_with_labels = -1;
-    vsize_t expected_gtsi_no_labels = -1;
+    size_t expected_gtsi_with_labels = 0;
+    size_t expected_gtsi_no_labels = 0;
     std::ifstream f_res_gtsi(dirPath + "expected_gtsi");
 
     if (f_res_gtsi.good()) {
       string sLine;
 
       getline(f_res_gtsi, sLine);
-      expected_gtsi_with_labels = atoi(sLine.c_str());
+      expected_gtsi_with_labels = (size_t) atoi(sLine.c_str());
       getline(f_res_gtsi, sLine);
-      expected_gtsi_no_labels = atoi(sLine.c_str());
+      expected_gtsi_no_labels = (size_t) atoi(sLine.c_str());
     }
 
     f_res_gtsi.close();
@@ -305,7 +305,7 @@ void test_NodeInfo(){
   cout << endl;
 }
 
-void test_GTSI(graph_t ** grPattern, int nPattern, graph_t * grTest, int expected, bool checkLabels, std::string desc, bool exportTree, string treePath) {
+void test_GTSI(graph_t ** grPattern, size_t nPattern, graph_t * grTest, size_t expected, bool checkLabels, std::string desc, bool exportTree, string treePath) {
   string color;
   std::cout << "GTSI" + desc + ":\n";
 
@@ -322,12 +322,12 @@ void test_GTSI(graph_t ** grPattern, int nPattern, graph_t * grTest, int expecte
     bool added = tree.addGraphFromNode(grPattern[i], grPattern[i]->root, siteSize, checkLabels);
 
     if (not added)
-      printf("WARNING: pattern graph %d was not added to traversal tree because it already exists there.\n", i);
+      printf("WARNING: pattern graph %d was not added to traversal tree because it already exists there.\n", (int) i);
   }
 
   tree.saveParcoursNodeToDot(treePath);
 
-  printf("%d traversals reconstructed from pattern graph.\n", tree.countLeaves());
+  printf("%d traversals reconstructed from pattern graph.\n", (int) tree.countLeaves());
 
   vsize_t count = tree.parcourir(grTest, siteSize, checkLabels, true);
   if (count != expected) {
@@ -336,7 +336,7 @@ void test_GTSI(graph_t ** grPattern, int nPattern, graph_t * grTest, int expecte
   else {
     color = Green;
   }
-  printf("%s%d traversals possible in test graph (expected: %d) with tree.%s\n", color.c_str(), count, expected, Color_Off.c_str());
+  printf("%s%d traversals possible in test graph (expected: %d) with tree.%s\n", color.c_str(), (int) count, (int) expected, Color_Off.c_str());
   
 
   if (nPattern == 1) {    
@@ -351,7 +351,7 @@ void test_GTSI(graph_t ** grPattern, int nPattern, graph_t * grTest, int expecte
     else {
       color = Green;
     }
-    printf("%s%d traversals possible in test graph (expected: %d) with a single traversal.%s\n", color.c_str(), count2, expected, Color_Off.c_str());
+    printf("%s%d traversals possible in test graph (expected: %d) with a single traversal.%s\n", color.c_str(), (int) count2, (int) expected, Color_Off.c_str());
   
     //     freeRetourParcoursDepuisSommet(rt); 
   }
