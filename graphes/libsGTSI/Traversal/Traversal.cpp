@@ -11,27 +11,10 @@ string MotParcours::toString() {
   string s = "";
 
   if (this->type == TYPE_M1) {
-    if (this->version == 2) {
       s += "(";
-    }
 
     s += "1: ";
-    if (this->version == 2) {
-      if (this->csymbtype != LABEL_STAR) {
-        s += this->csymb;
-        s += "(";
-        s += string(csymbtypeToString(this->csymbtype));
-        s += ")";
-      }
-      else {
-        s += string(csymbtypeToString(this->csymbtype));
-      }
-
-    }
-    else {
-      char *desc = labCharToString(this->symbol);
-      s += string(desc);
-    }
+    s += this->info->inst_str;
   }
   else if (this->type == TYPE_M2) {
     s += "-";
@@ -43,148 +26,129 @@ string MotParcours::toString() {
       s += "> ";
     }
 
-    if (this->version == 2) {
-      s += "(";
-    }
+    s += "(";
     s += i2s(this->i);
-    if (this->has_symbol) {
-      if (this->version == 2) {
-        s += ": ";
-        if (this->csymbtype != LABEL_STAR) {
-          s += this->csymb;
-          s += "(";
-          s += string(csymbtypeToString(this->csymbtype));
-          s += ")";
-        }
-        else {
-          s += string(csymbtypeToString(this->csymbtype));
-        }
-      }
-      else {
-        s += ": ";
-        char *desc = labCharToString(this->symbol);
-        s += string(desc);
-      }
-    }
+    s += ": ";
+    s += this->info->inst_str;
   }
   else {
-    s += "ERR";
     printf("ERROR in MotParcours::toString.\n");
+    return "ERR";
   }
 
-  if (this->version == 2) {
-    s += ")";
-    if (this->minRepeat == 1 and not this->hasMaxRepeat) {
-      s += "+";
+  s += ")";
+  
+  if (this->info->minRepeat == 1 and not this->info->has_maxRepeat) {
+    s += "+";
+  }
+  else if (this->info->minRepeat == 0 and not this->info->has_maxRepeat) {
+    s += "*";
+  }
+  else {
+    s += "{" + i2s(this->info->minRepeat) + ",";
+    if (this->info->has_maxRepeat) {
+      s += i2s(this->info->maxRepeat);
     }
-    else if (this->minRepeat == 0 and not this->hasMaxRepeat) {
-      s += "*";
+    s += "}";
+  }
+  
+  if (this->info->has_maxChildrenNumber or this->info->has_maxFathersNumber or this->info->minChildrenNumber != 0 or this->info->minFathersNumber != 0) {
+    s += "_";
+    bool one = false;
+    if (this->info->minChildrenNumber > 0) {
+      s += "mc=" + i2s(this->info->minChildrenNumber);
+      one = true;
     }
-    else {
-      s += "{" + i2s(this->minRepeat) + ",";
-      if (this->hasMaxRepeat) {
-        s += i2s(this->maxRepeat);
-      }
-      s += "}";
+    if (this->info->has_maxChildrenNumber) {
+      if (one)
+        s += ",";
+      s += "mc=" + i2s(this->info->maxChildrenNumber);
+      one = true;
     }
-    if (this->hasMaxChildrenNumber or this->hasMaxFathersNumber or this->minChildrenNumber != 0 or this->minFathersNumber != 0) {
-      s += "_";
-      bool one = false;
-      if (this->minChildrenNumber > 0) {
-        s += "mc=" + i2s(this->minChildrenNumber);
-        one = true;
-      }
-      if (this->hasMaxChildrenNumber) {
-        if (one)
-          s += ",";
-        s += "mc=" + i2s(this->maxChildrenNumber);
-        one = true;
-      }
-      if (this->minFathersNumber > 0) {
-        if (one)
-          s += ",";
-        s += "mf=" + i2s(this->minFathersNumber);
-        one = true;
-      }
-      if (this->hasMaxFathersNumber) {
-        if (one)
-          s += ",";
-        s += "mc=" + i2s(this->hasMaxFathersNumber);
-        one = true;
-      }
+    if (this->info->minFathersNumber > 0) {
+      if (one)
+        s += ",";
+      s += "mf=" + i2s(this->info->minFathersNumber);
+      one = true;
+    }
+    if (this->info->has_maxFathersNumber) {
+      if (one)
+        s += ",";
+      s += "mc=" + i2s(this->info->has_maxFathersNumber);
+      one = true;
     }
   }
 
+  s += "?(" + this->condition->toString() + ")";
+  
   return s;
 }
 
-void MotParcours::addV2Info(node_t * n) {
-  if (n != NULL and n->version == 2) {
-    this->version = 2;
-    this->csymbtype = n->csymbType;
-    this->csymb = n->csymb;
-    this->minChildrenNumber = n->minChildrenNumber;
-    this->minFathersNumber = n->minFathersNumber;
-    this->minRepeat = n->minRepeat;
-
-    if (n->hasMaxChildrenNumber) {
-      this->hasMaxChildrenNumber = true;
-      this->maxChildrenNumber = n->maxChildrenNumber;
-    }
-    else {
-      this->hasMaxChildrenNumber = false;
-    }
-
-    if (n->hasMaxFathersNumber) {
-      this->hasMaxFathersNumber = true;
-      this->maxFathersNumber = n->maxFathersNumber;
-    }
-    else {
-      this->hasMaxFathersNumber = false;
-    }
-
-    if (n->hasMaxRepeat) {
-      this->hasMaxRepeat = true;
-      this->maxRepeat = n->maxRepeat;
-    }
-    else {
-      this->hasMaxRepeat = false;
-    }
-
-    if (n->get) {
-      this->get = true;
-      this->getid = std::string(n->getid);
-    }
-    else {
-      this->get = false;
-    }
-  }
-  else {
-    this->version = 1;
-    this->get = false;
-  }
-}
+// void MotParcours::addV2Info(node_t * n) {
+//   if (n != NULL and n->version == 2) {
+//     this->version = 2;
+//     this->csymbtype = n->csymbType;
+//     this->csymb = n->csymb;
+//     this->minChildrenNumber = n->minChildrenNumber;
+//     this->minFathersNumber = n->minFathersNumber;
+//     this->minRepeat = n->minRepeat;
+// 
+//     if (n->hasMaxChildrenNumber) {
+//       this->hasMaxChildrenNumber = true;
+//       this->maxChildrenNumber = n->maxChildrenNumber;
+//     }
+//     else {
+//       this->hasMaxChildrenNumber = false;
+//     }
+// 
+//     if (n->hasMaxFathersNumber) {
+//       this->hasMaxFathersNumber = true;
+//       this->maxFathersNumber = n->maxFathersNumber;
+//     }
+//     else {
+//       this->hasMaxFathersNumber = false;
+//     }
+// 
+//     if (n->hasMaxRepeat) {
+//       this->hasMaxRepeat = true;
+//       this->maxRepeat = n->maxRepeat;
+//     }
+//     else {
+//       this->hasMaxRepeat = false;
+//     }
+// 
+//     if (n->get) {
+//       this->get = true;
+//       this->getid = std::string(n->getid);
+//     }
+//     else {
+//       this->get = false;
+//     }
+//   }
+//   else {
+//     this->version = 1;
+//     this->get = false;
+//   }
+// }
 
 bool MotParcours::sameSymbol(MotParcours * m, bool checkLabels) {
   if (not checkLabels)
     return true;
 
-  if (this->version != m->version)
-    return false;
-
-  if (this->version == 2) {
-    return (this->csymbtype == m->csymbtype)
-      and(this->csymb == m->csymb);
-  }
-  else {
-    return this->symbol == m->symbol;
-  }
+  return this->condition->equals(m->condition);
+//   if (this->version != m->version)
+//     return false;
+// 
+//   if (this->version == 2) {
+//     return (this->csymbtype == m->csymbtype)
+//       and(this->csymb == m->csymb);
+//   }
+//   else {
+//     return this->symbol == m->symbol;
+//   }
 }
 
 bool MotParcours::sameRepeatAndCF(MotParcours * m) {
-  if (this->version != m->version)
-    return false;
-
   bool r = (this->info->minRepeat == m->info->minRepeat)
     and(this->info->has_maxRepeat == m->info->has_maxRepeat)
     and((not this->info->has_maxRepeat) or this->info->maxRepeat == m->info->maxRepeat)
@@ -198,29 +162,18 @@ bool MotParcours::sameRepeatAndCF(MotParcours * m) {
 }
 
 bool MotParcours::equals(MotParcours * m, bool checkLabels) {
-  if (this->version != m->version)
-    return false;
-
-//   printf("type: %d %d\n", this->type, m->type);
   if (this->type == m->type) {
-//     printf("type passed\n");
     if (this->type == TYPE_M1) {
-      return this->symbol == m->symbol and(this->version != 2 or this->sameRepeatAndCF(m));
+      // TODO: true forces to check labels when constructing tree, it enables to pass test 6. Is test 6 faulty ?
+      return this->sameSymbol(m, checkLabels) and this->sameRepeatAndCF(m);
     }
     else {
       if (this->alpha_is_R == m->alpha_is_R) {
         if (this->alpha_is_R) {
-          return (this->i == m->i)
-            and(this->has_symbol == m->has_symbol)
-            and((not this->has_symbol) or this->sameSymbol(m, checkLabels))
-            and(this->version != 2 or this->sameRepeatAndCF(m));
+          return this->i == m->i and this->sameSymbol(m, checkLabels) and this->sameRepeatAndCF(m);
         }
         else {
-          return (this->k == m->k)
-            and(this->i == m->i)
-            and(this->has_symbol == m->has_symbol)
-            and((not this->has_symbol) or this->sameSymbol(m, checkLabels))
-            and(this->version != 2 or this->sameRepeatAndCF(m));
+          return this->k == m->k and this->i == m->i and this->sameSymbol(m, checkLabels) and this->sameRepeatAndCF(m);
         }
       }
       else {
@@ -316,7 +269,7 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
       m->alpha_is_R = true;
       m->has_symbol = false;
       m->i = pere->list_id;
-      m->addV2Info(ss);
+//       m->addV2Info(ss);
       m->info = ss->info;
       m->condition = ss->condition;
       p->addMot(m);
@@ -329,8 +282,8 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
         m = new MotParcours();
         m->type = TYPE_M1;
         m->has_symbol = true;
-        m->symbol = ss->symb;
-        m->addV2Info(ss);
+//         m->symbol = ss->symb;
+//         m->addV2Info(ss);
         m->info = ss->info;
         m->condition = ss->condition;
         p->addMot(m);
@@ -343,8 +296,8 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
         m->i = i;
         m->k = k;
         m->has_symbol = true;
-        m->symbol = ss->symb;
-        m->addV2Info(ss);
+//         m->symbol = ss->symb;
+//         m->addV2Info(ss);
         m->info = ss->info;
         m->condition = ss->condition;
         p->addMot(m);
@@ -369,7 +322,7 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
       m->i = ss->list_id;
       m->k = k;
       m->has_symbol = false;
-      m->addV2Info(ss);
+//       m->addV2Info(ss);
       m->info = ss->info;
       m->condition = ss->condition;
       p->addMot(m);
@@ -425,11 +378,9 @@ bool MotParcours::matchesSymbol(node_t * n, bool checkLabels) {
 }
 
 bool MotParcours::matchesCF(node_t * n) {
-  if (this->version != 2)
-    return false;
-
-  return this->minChildrenNumber <= n->children_nb and this->minFathersNumber <= n->fathers_nb and((not this->hasMaxChildrenNumber) or n->children_nb <= this->maxChildrenNumber)
-    and((not this->hasMaxFathersNumber) or n->fathers_nb <= this->maxFathersNumber);
+  // TODO: use n->children_nb or n->info->childrenNumber ? Same with father ?
+  return this->info->minChildrenNumber <= n->children_nb and this->info->minFathersNumber <= n->fathers_nb and((not this->info->has_maxChildrenNumber) or n->children_nb <= this->info->maxChildrenNumber)
+    and((not this->info->has_maxFathersNumber) or n->fathers_nb <= this->info->maxFathersNumber);
 }
 
 Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * graph, vsize_t vroot, vsize_t W, bool checkLabels, bool printFound) {
@@ -447,15 +398,16 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
   std::pair < node_t *, node_t * >*numeros = (std::pair < node_t *, node_t * >*)calloc(W, sizeof(std::pair < node_t *, node_t * >));
   vsize_t max_numeros = 0;
 
-  if (this->size >= 1 and this->mots[0]->type == TYPE_M1 and this->mots[0]->matchesSymbol(nI, checkLabels) and(this->mots[0]->version != 2 or this->mots[0]->matchesCF(nI))) {
+  if (this->size >= 1 and this->mots[0]->type == TYPE_M1 and this->mots[0]->matchesSymbol(nI, checkLabels) and(this->mots[0]->matchesCF(nI))) {
+//     cout << this->mots[0]->toString() << "\n";
     numeros[max_numeros] = std::pair < node_t *, node_t * >(sc, NULL);
     max_numeros++;
     numerotes.insert(sc);
 
-    if (printFound and this->mots[0]->get) {
+    if (printFound and this->mots[0]->info->get) {
       std::list < node_t * >*list_nodes_1 = new std::list < node_t * >();
       list_nodes_1->push_back(sc);
-      found_nodes->insert(std::pair < string, std::list < node_t * >*>(this->mots[0]->getid, list_nodes_1));
+      found_nodes->insert(std::pair < string, std::list < node_t * >*>(this->mots[0]->info->getid, list_nodes_1));
     }
   }
   else {
@@ -469,6 +421,7 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
 //     cout << "sc_in: " << sc->csymb << "\n";
     
     MotParcours *m = this->mots[i];
+//     cout << m->toString() << "\n";
     if (m->alpha_is_R) {
       if (max_numeros >= m->i) {
         std::pair < node_t *, node_t * >p = numeros[m->i - 1];
@@ -491,7 +444,7 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
         unordered_set < node_t * >::iterator it = numerotes.find(f);
         if (it == numerotes.end()) {
           // f n'est pas numéroté
-          if (m->matchesSymbol(f, checkLabels) and(m->version != 2 or m->matchesCF(f)) and max_numeros < m->i) {
+          if (m->matchesSymbol(f, checkLabels) and m->matchesCF(f) and max_numeros < m->i) {
 //             printf("%x: not numbered, found\n", f->address);
             vsize_t r = 1;
             numeros[max_numeros] = std::pair < node_t *, node_t * >(f, NULL);
@@ -500,13 +453,13 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
             sc = f;
 
             std::list < node_t * >*list_nodes = new std::list < node_t * >();
-            if (printFound and m->get) {
+            if (printFound and m->info->get) {
               list_nodes->push_back((node_t *) sc);
             }
 
-            if (m->version == 2 and(not m->hasMaxRepeat or m->maxRepeat > 1)) {
+            if (not m->info->has_maxRepeat or m->info->maxRepeat > 1) {
               while (true) {
-                if ((not m->hasMaxRepeat or r < m->maxRepeat) and sc->children_nb == 1 and sc->children[0]->fathers_nb == 1 and m->matchesSymbol(sc->children[0], checkLabels) and m->matchesCF(sc->children[0])) {
+                if ((not m->info->has_maxRepeat or r < m->info->maxRepeat) and sc->children_nb == 1 and sc->children[0]->fathers_nb == 1 and m->matchesSymbol(sc->children[0], checkLabels) and m->matchesCF(sc->children[0])) {
 //                   printf("%x !r\n", sc->address);
                   
                   unordered_set < node_t * >::iterator it = numerotes.find(sc->children[0]);
@@ -517,7 +470,7 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
                   sc = sc->children[0];
                   r++;
 
-                  if (printFound and m->get) list_nodes->push_back((node_t *) sc);
+                  if (printFound and m->info->get) list_nodes->push_back((node_t *) sc);
                 }
                 else {
 //                   printf("%x not repeat\n", sc->address);
@@ -528,12 +481,12 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
               numeros[max_numeros - 1].second = sc;
             }
 
-            if (printFound and m->get) found_nodes->insert(std::pair < string, std::list < node_t * >*>(m->getid, list_nodes));
+            if (printFound and m->info->get) found_nodes->insert(std::pair < string, std::list < node_t * >*>(m->info->getid, list_nodes));
             else delete list_nodes;
             
             // TODO: attention, on peut renvoyer false alors qu'on a "simplement" tenté de boucler dans la mauvaise branche
             // FIX: il faut nécessairement tenter les autres branches
-            if (m->version == 2 and r < m->minRepeat) {
+            if (r < m->info->minRepeat) {
 //               printf("%d < %d -> ret\n", r, m->minRepeat);
               free(numeros);
               return RetourParcoursDepuisSommet(false, found_nodes);
@@ -754,6 +707,7 @@ bool ParcoursNode::addParcours(Parcours * p, int index, bool checkLabels) {
   list < ParcoursNode * >::iterator it;
   for (it = this->fils.begin(); it != this->fils.end(); it++) {
     ParcoursNode *f = (*it);
+    
     if (f->mot->equals(m, checkLabels)) {
       return f->addParcours(p, index + 1, checkLabels);
     }
@@ -830,7 +784,7 @@ list < vsize_t > ParcoursNode::parcourirDepuisSommetRec(bool racine, graph_t * g
 
 ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph_t * gr, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, unordered_set < node_t * >numerotes, bool checkLabels) {
   if (m->type == TYPE_M1) {
-    if (m->matchesSymbol(s, checkLabels) and(m->version != 2 or m->matchesCF(s))) {
+    if (m->matchesSymbol(s, checkLabels) and m->matchesCF(s)) {
 
       assert(max_numeros == 0);
 
@@ -864,7 +818,7 @@ ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph
         unordered_set < node_t * >::iterator it = numerotes.find(f);
         if (it == numerotes.end()) {
           // f n'est pas numéroté
-          if ((m->matchesSymbol(f, checkLabels) and(m->version != 2 or m->matchesCF(f)) and max_numeros < m->i)) {
+          if ((m->matchesSymbol(f, checkLabels) and m->matchesCF(f) and max_numeros < m->i)) {
 
             assert(max_numeros == m->i - 1);
 
@@ -875,9 +829,9 @@ ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph
             max_numeros++;
             s = f;
 
-            if (m->version == 2 and(not m->hasMaxRepeat or m->maxRepeat > 1)) {
+            if (not m->info->has_maxRepeat or m->info->maxRepeat > 1) {
               while (true) {
-                if ((not m->hasMaxRepeat or r < m->maxRepeat) and s->children_nb == 1 and s->children[0]->fathers_nb == 1 and m->matchesSymbol(s->children[0], checkLabels) and m->matchesCF(s->children[0])) {
+                if ((not m->info->has_maxRepeat or r < m->info->maxRepeat) and s->children_nb == 1 and s->children[0]->fathers_nb == 1 and m->matchesSymbol(s->children[0], checkLabels) and m->matchesCF(s->children[0])) {
                   s = s->children[0];
                   r++;
                 }
@@ -889,7 +843,7 @@ ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph
               numeros[max_numeros - 1].second = s;
             
 
-              if (r < m->minRepeat) {
+              if (r < m->info->minRepeat) {
                 // pas trouvé, TODO: attention au branchement
                 return std::make_tuple(false, last_s, numeros, last_max_numeros, numerotes);
               }

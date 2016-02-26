@@ -82,7 +82,7 @@ status_t graph_from_file(graph_t** pgraph, FILE* fp) {
       /* it's a node */
       node_from_file(node, fp);
       new_node = node_list_append(&graph->nodes, node->node_id);
-      new_node->symb = node->symb;
+//       new_node->symb = node->symb;
       break;
 
     case 'e': {

@@ -62,41 +62,43 @@ typedef struct node_t {
   NodeInfo* info;
   
   // Only for patterns
+  // TODO: differentiate parsing of pattern and test graphs, fill has_condition
+//   bool has_condition;
   CondNode* condition;
   
   /*!
    @brief Symbol associated to the node, type is enum symb_t but explicit size
    for a more portable data structure.
    */
-  symb_t symb;
+//   symb_t symb;
   
   // for matching (if enhanced node)
   /* Node version:
   * 1: original
   * 2: grap variant (enhanced)
   */
-  uint8_t version;
+//   uint8_t version;
 //   enum repeat_t repeat;
-  enum label_t csymbType;
-  char* csymb;
-  uint8_t minChildrenNumber;
-  char hasMaxChildrenNumber;
-  uint8_t maxChildrenNumber;
-  uint8_t minFathersNumber;
-  char hasMaxFathersNumber;
-  uint8_t maxFathersNumber;
+//   enum label_t csymbType;
+//   char* csymb;
+//   uint8_t minChildrenNumber;
+//   char hasMaxChildrenNumber;
+//   uint8_t maxChildrenNumber;
+//   uint8_t minFathersNumber;
+//   char hasMaxFathersNumber;
+//   uint8_t maxFathersNumber;
   
-  vsize_t minRepeat;
-  char hasMaxRepeat;
-  vsize_t maxRepeat;
+//   vsize_t minRepeat;
+//   char hasMaxRepeat;
+//   vsize_t maxRepeat;
   
-  char get;
-  char* getid;
+//   char get;
+//   char* getid;
   
-  char hasAddress;
-  vsize_t address;
+//   char hasAddress;
+//   vsize_t address;
   
-  char isRoot;
+//   char isRoot;
   
 
   /*!

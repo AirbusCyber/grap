@@ -14,36 +14,36 @@ int printVKint(FILE * fp, char *key, int value, char virg) {
     return fprintf(fp, "%s = \"%d\"", key, value);
 }
 
-char *csymbtypeToString(enum label_t cst) {
-  char *rs;
-  switch (cst) {
-  case LABEL_STAR:
-    rs = (char*) "*";
-    break;
-  case LABEL_GENERIC_OPCODE:
-    rs = (char*) "gopcode";
-    break;
-  case LABEL_EXACT_OPCODE:
-    rs = (char*) "opcode";
-    break;
-  case LABEL_SUBSTRING:
-    rs = (char*) "substring";
-    break;
-  case LABEL_EXACT_STRING:
-    rs = (char*) "string";
-    break;
-  case LABEL_REGEX:
-    rs = (char*) "regex";
-    break;
-  default:
-    rs = (char*) "string";
-  }
-
-  char *s = (char *) malloc((strlen(rs) + 1) * sizeof(char));
-  memcpy(s, rs, (strlen(rs) + 1) * sizeof(char));
-  s[strlen(s)] = 0;
-  return s;
-}
+// char *csymbtypeToString(enum label_t cst) {
+//   char *rs;
+//   switch (cst) {
+//   case LABEL_STAR:
+//     rs = (char*) "*";
+//     break;
+//   case LABEL_GENERIC_OPCODE:
+//     rs = (char*) "gopcode";
+//     break;
+//   case LABEL_EXACT_OPCODE:
+//     rs = (char*) "opcode";
+//     break;
+//   case LABEL_SUBSTRING:
+//     rs = (char*) "substring";
+//     break;
+//   case LABEL_EXACT_STRING:
+//     rs = (char*) "string";
+//     break;
+//   case LABEL_REGEX:
+//     rs = (char*) "regex";
+//     break;
+//   default:
+//     rs = (char*) "string";
+//   }
+// 
+//   char *s = (char *) malloc((strlen(rs) + 1) * sizeof(char));
+//   memcpy(s, rs, (strlen(rs) + 1) * sizeof(char));
+//   s[strlen(s)] = 0;
+//   return s;
+// }
 
 char *symbToString(vsize_t symb) {
   char *rs;
@@ -113,74 +113,66 @@ size_t node_to_dot(const node_t * node, const node_t * root, size_t node_number,
   size_t ret;
 
   ret = fprintf(fp, "\"%" PRIx64 "\" [", node->node_id);
-  char *s = symbToString(node->symb);
+  char *s = (char*) node->info->inst_str.c_str();
 
   ret += fprintf(fp, "symb = ");
   ret += fprintf(fp, "%s", s);
 
+  //printing label
+  fprintf(fp, ", label = \"%" PRIx64 "(%d) : ", node->node_id, (int) node_number);
+  char *ss;
+  ret += fprintf(fp, "%s", "(");
+  ret += fprintf(fp, "%s", node->info->inst_str.c_str());
+  ret += fprintf(fp, "%s", ")");
 
-  if (node->version != 2) {
-    fprintf(fp, ", label = \"%" PRIx64 "(%d) : ", node->node_id, (int) node_number);
-    ret += fprintf(fp, "%s", s);
-    ret += fprintf(fp, "%s", "\"");
+  if (node->info->minRepeat > 1 || !node->info->has_maxRepeat || node->info->maxRepeat > 1) {
+    ret += fprintf(fp, "{%d,", node->info->minRepeat);
+
+    if (node->info->has_maxRepeat) {
+      ret += fprintf(fp, "%d}", node->info->maxRepeat);
+    }
+    else {
+      ret += fprintf(fp, "}");
+    }
   }
-  else {
-    //printing label
-    fprintf(fp, ", label = \"%" PRIx64 "(%d) : ", node->node_id, (int) node_number);
-    char *ss;
-    ret += fprintf(fp, "%s", "(");
-    ret += fprintf(fp, "%s", node->csymb);
-    ret += fprintf(fp, "%s", ")");
 
-    if (node->minRepeat > 1 || !node->hasMaxRepeat || node->maxRepeat > 1) {
-      ret += fprintf(fp, "{%d,", node->minRepeat);
-
-      if (node->hasMaxRepeat) {
-        ret += fprintf(fp, "%d}", node->maxRepeat);
-      }
-      else {
-        ret += fprintf(fp, "}");
-      }
-    }
-
-    if (node->minChildrenNumber > 0) {
-      ret += fprintf(fp, "(c>=%d)", node->minChildrenNumber);
-    }
-    if (node->hasMaxChildrenNumber) {
-      ret += fprintf(fp, "(c<=%d)", node->maxChildrenNumber);
-    }
-    if (node->minFathersNumber > 0) {
-      ret += fprintf(fp, "(f>=%d)", node->minFathersNumber);
-    }
-    if (node->hasMaxFathersNumber) {
-      ret += fprintf(fp, "(f<=%d)", node->maxFathersNumber);
-    }
-    ret += fprintf(fp, "%s", "\"");
-
-    //printing other props
-    ss = csymbtypeToString(node->csymbType);
-    ret += printVK(fp, (char*) "csymbtype", ss, 1);
-    ret += printVK(fp, (char*) "csymb", node->csymb, 1);
-    if (node->minRepeat != 1)
-      ret += printVKint(fp, (char*) "minrepeat", node->minRepeat, 1);
-    if (node->hasMaxRepeat == 1)
-      ret += printVKint(fp, (char*) "maxnrepeat", node->maxRepeat, 1);
-    free(ss);
-    char *str = (char*) malloc(4 * sizeof(char));
-    snprintf(str, 4, "%d", node->minChildrenNumber);
-    ret += printVK(fp, (char*) "minchildren", str, 1);
-    if (node->hasMaxChildrenNumber) {
-      snprintf(str, 4, "%d", node->maxChildrenNumber);
-      ret += printVK(fp, (char*) "maxchildren", str, 1);
-    }
-    snprintf(str, 4, "%d", node->minFathersNumber);
-    ret += printVK(fp, (char*) "minfathers", str, 1);
-    if (node->hasMaxFathersNumber) {
-      snprintf(str, 4, "%d", node->maxFathersNumber);
-      ret += printVK(fp, (char*) "maxfathers", str, 1);
-    }
-    free(str);
+  if (node->info->minChildrenNumber > 0) {
+    ret += fprintf(fp, "(c>=%d)", node->info->minChildrenNumber);
   }
+  if (node->info->has_maxChildrenNumber) {
+    ret += fprintf(fp, "(c<=%d)", node->info->maxChildrenNumber);
+  }
+  if (node->info->minFathersNumber > 0) {
+    ret += fprintf(fp, "(f>=%d)", node->info->minFathersNumber);
+  }
+  if (node->info->has_maxFathersNumber) {
+    ret += fprintf(fp, "(f<=%d)", node->info->maxFathersNumber);
+  }
+  ret += fprintf(fp, "%s", "\"");
+
+  //printing other props
+//   ss = csymbtypeToString(node->csymbType);
+//   ret += printVK(fp, (char*) "csymbtype", ss, 1);
+//   ret += printVK(fp, (char*) "csymb", node->csymb, 1);
+  if (node->info->minRepeat != 1)
+    ret += printVKint(fp, (char*) "minrepeat", node->info->minRepeat, 1);
+  if (node->info->has_maxRepeat == 1)
+    ret += printVKint(fp, (char*) "maxnrepeat", node->info->maxRepeat, 1);
+  free(ss);
+  char *str = (char*) malloc(4 * sizeof(char));
+  snprintf(str, 4, "%d", node->info->minChildrenNumber);
+  ret += printVK(fp, (char*) "minchildren", str, 1);
+  if (node->info->has_maxChildrenNumber) {
+    snprintf(str, 4, "%d", node->info->maxChildrenNumber);
+    ret += printVK(fp, (char*) "maxchildren", str, 1);
+  }
+  snprintf(str, 4, "%d", node->info->minFathersNumber);
+  ret += printVK(fp, (char*) "minfathers", str, 1);
+  if (node->info->has_maxFathersNumber) {
+    snprintf(str, 4, "%d", node->info->maxFathersNumber);
+    ret += printVK(fp, (char*) "maxfathers", str, 1);
+  }
+  free(str);
   free(s);
 
   if (node == root)
@@ -212,8 +204,8 @@ size_t node_to_file(const node_t * node, FILE * fp) {
   count = fwrite_le_swap(&node->node_id, sizeof(node->node_id), 1, fp);
   ret += count * sizeof(node->node_id);
 
-  count = fwrite_le_swap(&node->symb, sizeof(node->symb), 1, fp);
-  ret += count * sizeof(node->symb);
+//   count = fwrite_le_swap(&node->symb, sizeof(node->symb), 1, fp);
+//   ret += count * sizeof(node->symb);
 
   return ret;
 }
@@ -242,7 +234,7 @@ size_t node_from_file(node_t * node, FILE * fp) {
 
   ret = 0;
   ret += fread_le_swap(&node->node_id, sizeof(node->node_id), 1, fp) * sizeof(node->node_id);
-  ret += fread_le_swap(&node->symb, sizeof(node->symb), 1, fp) * sizeof(node->symb);
+//   ret += fread_le_swap(&node->symb, sizeof(node->symb), 1, fp) * sizeof(node->symb);
 
   return ret;
 }

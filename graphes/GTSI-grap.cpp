@@ -133,8 +133,8 @@ int main(int argc, char *argv[]) {
             cout << (*it2).first;
             if (node_list->size() > 1) cout << k;
             cout << ": ";
-            if (n->hasAddress) cout << "0x" << std::hex << n->address << ", ";
-            cout << n->csymb;
+            if (n->info->has_address) cout << "0x" << std::hex << n->info->address << ", ";
+            cout << n->info->inst_str;
             cout << endl;
             k++;
           }

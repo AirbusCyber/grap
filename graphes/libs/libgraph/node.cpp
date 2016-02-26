@@ -56,8 +56,8 @@ node_t *node_copy (node_t * node1, const node_t * node2) {
 void node_free (node_t * node) {
   free(node->children);
   free(node->fathers);
-  if (node->csymb) free(node->csymb);
-  if (node->getid) free(node->getid);
+//   if (node->csymb) free(node->csymb);
+//   if (node->getid) free(node->getid);
   free(node);
 }
 

@@ -145,7 +145,7 @@ void test_NodeInfo(){
   CondNode* cn = new CondNode();
   cn->pattern_field = (void* NodeInfo::*) &NodeInfo::has_address;
   cn->test_field = (void* NodeInfo::*) &NodeInfo::has_address;
-  cn->comparison = ComparisonFunctions::bool_equals;
+  cn->comparison = ComparisonFunEnum::bool_equals;
   cn->children = new std::list<CondNode*>();
     
   np->has_address = false;
@@ -164,7 +164,7 @@ void test_NodeInfo(){
   std::cout << "Testing bool_test_true: ";
   cn = new CondNode();
   cn->test_field = (void* NodeInfo::*) &NodeInfo::has_address;
-  cn->comparison = ComparisonFunctions::bool_test_true;
+  cn->comparison = ComparisonFunEnum::bool_test_true;
   cn->children = new std::list<CondNode*>();
     
   nt->has_address = true;
@@ -182,7 +182,7 @@ void test_NodeInfo(){
   cn = new CondNode();
   cn->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
   cn->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-  cn->comparison = ComparisonFunctions::str_equals;
+  cn->comparison = ComparisonFunEnum::str_equals;
   cn->children = new std::list<CondNode*>();
     
   np->inst_str = "xor";
@@ -201,7 +201,7 @@ void test_NodeInfo(){
   cn = new CondNode();
   cn->pattern_field = (void* NodeInfo::*) &NodeInfo::maxChildrenNumber;
   cn->test_field = (void* NodeInfo::*) &NodeInfo::childrenNumber;
-  cn->comparison = ComparisonFunctions::uint8t_equals;
+  cn->comparison = ComparisonFunEnum::uint8t_equals;
   cn->children = new std::list<CondNode*>();
     
   np->maxChildrenNumber = 2;
@@ -221,7 +221,7 @@ void test_NodeInfo(){
   cn = new CondNode();
   cn->pattern_field = (void* NodeInfo::*) &NodeInfo::maxChildrenNumber;
   cn->test_field = (void* NodeInfo::*) &NodeInfo::childrenNumber;
-  cn->comparison = ComparisonFunctions::uint8t_gt;
+  cn->comparison = ComparisonFunEnum::uint8t_gt;
   cn->children = new std::list<CondNode*>();
     
   np->maxChildrenNumber = 2;
@@ -244,7 +244,7 @@ void test_NodeInfo(){
   cn = new CondNode();
   cn->pattern_field = (void* NodeInfo::*) &NodeInfo::address;
   cn->test_field = (void* NodeInfo::*) &NodeInfo::address;
-  cn->comparison = ComparisonFunctions::vsizet_equals;
+  cn->comparison = ComparisonFunEnum::vsizet_equals;
   cn->children = new std::list<CondNode*>();
     
   np->address = 2;
@@ -262,7 +262,7 @@ void test_NodeInfo(){
   std::list<CondNode*>* children = new std::list<CondNode*>();
   children = new std::list<CondNode*>();
   children->push_front(cn);
-  CondNode* cn_not = new CondNode(children, std::logical_not<bool>());
+  CondNode* cn_not = new CondNode(children, UnOpEnum::logical_not);
   
   r = cn_not->evaluate(np, nt);
   print_leaf_result(r, "! ", false);
@@ -270,7 +270,7 @@ void test_NodeInfo(){
   CondNode* cn_not2 = new CondNode();
   cn_not2->children = new std::list<CondNode*>();
   cn_not2->children->push_front(cn_not);
-  cn_not2->unary_operator = std::logical_not<bool>();
+  cn_not2->unary_operator = UnOpEnum::logical_not;
   r = cn_not2->evaluate(np, nt);
   print_leaf_result(not r, "!! ", true);
   
@@ -281,7 +281,7 @@ void test_NodeInfo(){
   children2->push_front(cn);
   children2->push_front(cn_not);
   
-  CondNode* cn_or = new CondNode(children2, std::logical_or<bool>());
+  CondNode* cn_or = new CondNode(children2, BinOpEnum::logical_or);
   r = cn_or->evaluate(np, nt);
   print_leaf_result(r, "2 ", false);
   
@@ -295,7 +295,7 @@ void test_NodeInfo(){
   cn_and->children = new std::list<CondNode*>();
   cn_and->children->push_front(cn);
   cn_and->children->push_front(cn_not);
-  cn_and->binary_operator = std::logical_and<bool>();
+  cn_and->binary_operator =  BinOpEnum::logical_and;
   r = cn_and->evaluate(np, nt);
   print_leaf_result(not r, "2 ", false);
   

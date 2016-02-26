@@ -35,10 +35,8 @@ enum TypeMotParcours {
 
 class MotParcours {
 public:
-  int version;                  // 1: original; 2: enhanced
-  char type;
+  TypeMotParcours type;
   bool has_symbol;
-  symb_t symbol;
   int i;
   bool alpha_is_R;
   int k;
@@ -49,33 +47,14 @@ public:
   bool equals(MotParcours * m, bool checkLabels);
   bool sameSymbol(MotParcours * m, bool);
   bool sameRepeatAndCF(MotParcours * m);
-  void addV2Info(node_t * n);
   
   NodeInfo* info;
   CondNode* condition;
-
-  // for version 2:
-  label_t csymbtype;
-  string csymb;
-//   repeat_t repeat;
-  uint8_t minChildrenNumber;
-  bool hasMaxChildrenNumber;
-  uint8_t maxChildrenNumber;
-  uint8_t minFathersNumber;
-  bool hasMaxFathersNumber;
-  uint8_t maxFathersNumber;
-  vsize_t minRepeat;
-  bool hasMaxRepeat;
-  vsize_t maxRepeat;
-
-  bool get;
-  string getid;
 };
 
 class Parcours {
 public:
   bool complete;
-  int version;                  // 1: original; 2: enhanced
   int size;
   MotParcours **mots;
   Parcours();
@@ -92,7 +71,6 @@ void freeRetourParcoursDepuisSommet(Parcours::RetourParcoursDepuisSommet rt);
 
 typedef std::tuple < node_t *, uint8_t, node_t * >TupleQueue;
 Parcours *parcoursLargeur(graph_t * graph, vsize_t root, vsize_t W);
-// Parcours *newParcours();
 std::unordered_set < Parcours * >parcoursFromGraph(graph_t *, vsize_t, bool);
 
 class ParcoursNode {

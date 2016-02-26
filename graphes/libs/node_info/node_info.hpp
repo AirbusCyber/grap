@@ -30,6 +30,7 @@ public:
   
   
   // Only for test
+  // TODO: it should be updated with node, do not use for now
   uint8_t childrenNumber;
   uint8_t fathersNumber;
   
@@ -48,6 +49,48 @@ public:
   
   bool get;
   std::string getid;
+};
+
+enum ComparisonFunEnum {
+  str_equals,
+  str_contains,
+  bool_true,
+  bool_false,
+  bool_test_true,
+  bool_equals,
+  vsizet_equals,
+  uint8t_equals,
+  uint8t_gt
+};
+
+static const char * desc_ComparisonFunEnum[] = {
+  "str_equals",
+  "str_contains",
+  "bool_true",
+  "bool_false",
+  "bool_test_true",
+  "bool_equals",
+  "vsizet_equals",
+  "uint8t_equals",
+  "uint8t_gt"
+};
+
+enum UnOpEnum {
+  logical_not
+};
+
+static const char * desc_UnOpEnum[] = {
+  "logical_not"
+};
+
+enum BinOpEnum {
+  logical_or,
+  logical_and
+};
+
+static const char * desc_BinOpEnum[] = {
+  "logical_or",
+  "logical_and"
 };
 
 class ComparisonFunctions{
@@ -74,18 +117,27 @@ public:
   // No children: returns comparison(pattern_field, pattern, test_field, test)
   
   CondNode();
-  CondNode(std::list<CondNode*>*, std::function<bool(bool)>);
-  CondNode(std::list<CondNode*>*, std::function<bool(bool, bool)>);
+  CondNode(std::list<CondNode*>*, UnOpEnum);
+  CondNode(std::list<CondNode*>*, BinOpEnum);
   
   std::list<CondNode*>* children;
-  std::function<bool(bool, bool)> binary_operator;
-  std::function<bool(bool)> unary_operator;
+  UnOpEnum unary_operator;
+  BinOpEnum binary_operator;
+  
+  bool unary_fun(bool);
+  bool binary_fun(bool, bool);
   
   void* NodeInfo::* pattern_field;
   void* NodeInfo::* test_field;
-  std::function<bool(void*, void*)> comparison;
+  
+  bool comparison_fun(void*, void*);
+  ComparisonFunEnum comparison;
   
   bool evaluate(NodeInfo* pattern, NodeInfo* test);
+  
+  bool equals(CondNode* cn);
+  
+  std::string toString();
 };
 
 #endif
