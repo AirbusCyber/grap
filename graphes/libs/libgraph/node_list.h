@@ -88,13 +88,6 @@ void node_list_set_all_unexplored(node_list_t * list);
 vsize_t node_list_size(const node_list_t * list);
 
 /*!
- @brief Get the number of nodes in the list after reduction.
- @param list The node list.
- @return Number of nodes.
- */
-vsize_t node_list_size_reduc(const node_list_t * list);
-
-/*!
  @brief Add an empty node to the list at index node_id.
  Node index must not already exist !
  @param list The node list.

@@ -96,7 +96,7 @@ add_library(graph
 add_library(nodeinfo libs/node_info/node_info.cpp)
 
 # GTSI
-add_library(libGTSI libGTSI.cpp
+add_library(libGTSI
       libsGTSI/utils-gtsi.cpp
       libsGTSI/Traversal/Traversal.cpp
 )

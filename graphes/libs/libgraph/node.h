@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "symbol.h"
 #include "ga_types.h"
 #include "node_info.hpp"
 

@@ -25,13 +25,6 @@ typedef struct graph_t {
    @see node.h
    */
   node_t* root;
-  
-  
-  /* Graph version:
-   * 1: original
-   * 2: grap variant
-   */
-  uint8_t version;
 } graph_t;
 
 /*!

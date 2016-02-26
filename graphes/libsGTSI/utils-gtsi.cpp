@@ -17,10 +17,6 @@ string h2s(uint64_t a){
 }
 
 string i2s(int a){
-//   string str;
-//   char* buff = (char*) calloc(16, sizeof(char));
-//   sprintf(buff, "%ld", (long int) a);
-//   str += buff;
   return std::to_string(a);
 }
 

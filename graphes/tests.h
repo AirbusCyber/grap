@@ -15,7 +15,7 @@ extern "C" {
 //#include "libGraphBinAlgo.h"
 #include "graphParser.h"
 }
-#include "libGTSI.h"
+#include "Traversal.hpp"
 char optionFuncs;
 
 void print_leaf_result(bool r, string, bool);

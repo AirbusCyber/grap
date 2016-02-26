@@ -9,5 +9,6 @@
 #include <fstream>
 
 #include "graphIO.h"
+#include "graphParser.h"
 
 #endif

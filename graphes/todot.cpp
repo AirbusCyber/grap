@@ -20,9 +20,11 @@ int main(int argc, char* argv[]){
     return 1;
   }
 
-  graph_from_file(&gr, fpIn);
+  gr = getGraphFromFile(fpIn);
   fclose(fpIn);
 
-  graph_fprint(fpOut, gr);
+  if (gr != NULL){
+    graph_fprint(fpOut, gr);
+  }
   fclose(fpOut);
 }

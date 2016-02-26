@@ -8,46 +8,37 @@ node_t *node_alloc () {
 
 void node_set_children_nb (node_t * node, vsize_t nb) {
   node->children_nb = nb;
-  node->children = MY_REALLOC (node->children, node->children_nb, node_t *);
+  node->children = (node_t**) realloc(node->children, node->children_nb * sizeof(node_t*));
 }
 
 void node_set_fathers_nb (node_t * node, vsize_t nb) {
   node->fathers_nb = nb;
-  node->fathers = MY_REALLOC (node->fathers, node->fathers_nb, node_t *);
+  node->fathers = (node_t**) realloc(node->fathers, node->fathers_nb * sizeof(node_t*));
 }
 
 void node_reset (node_t * node) {
-  MY_FREE (node->fathers);
-  MY_FREE (node->children);
+  free(node->fathers);
+  free(node->children);
 
-  MY_BZERO (node);
-  /* USE bzero()
-     node->explored = UNEXPLORED;
-
-     node->fathers_nb = 0;
-     node->children_nb = 0;
-
-     node->fathers = NULL;
-     node->children = NULL;
-   */
+  memset (node, 0, sizeof(node_t));
 }
 
 node_t *node_copy (node_t * node1, const node_t * node2) {
   /* free tables of fathers/children */
-  MY_FREE (node1->fathers);
-  MY_FREE (node1->children);
+  free(node1->fathers);
+  free(node1->children);
 
   memcpy (node1, node2, sizeof (node_t));
 
   /* copy fathers */
   if (node2->fathers_nb > 0) {
-    node1->fathers = MY_MALLOC (node2->fathers_nb, node_t *);
+    node1->fathers = (node_t**) malloc(node2->fathers_nb * sizeof(node_t*));
     memcpy (node1->fathers, node2->fathers, node1->fathers_nb * sizeof (node_t *));
   }
 
   /* copy children */
   if (node2->fathers_nb > 0) {
-    node1->children = MY_MALLOC (node2->children_nb, node_t *);
+    node1->children = (node_t**) malloc(node2->children_nb * sizeof(node_t*));
     memcpy (node1->children, node2->children, node2->children_nb * sizeof (node_t *));
   }
   return node1;

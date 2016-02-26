@@ -84,68 +84,11 @@ string MotParcours::toString() {
   return s;
 }
 
-// void MotParcours::addV2Info(node_t * n) {
-//   if (n != NULL and n->version == 2) {
-//     this->version = 2;
-//     this->csymbtype = n->csymbType;
-//     this->csymb = n->csymb;
-//     this->minChildrenNumber = n->minChildrenNumber;
-//     this->minFathersNumber = n->minFathersNumber;
-//     this->minRepeat = n->minRepeat;
-// 
-//     if (n->hasMaxChildrenNumber) {
-//       this->hasMaxChildrenNumber = true;
-//       this->maxChildrenNumber = n->maxChildrenNumber;
-//     }
-//     else {
-//       this->hasMaxChildrenNumber = false;
-//     }
-// 
-//     if (n->hasMaxFathersNumber) {
-//       this->hasMaxFathersNumber = true;
-//       this->maxFathersNumber = n->maxFathersNumber;
-//     }
-//     else {
-//       this->hasMaxFathersNumber = false;
-//     }
-// 
-//     if (n->hasMaxRepeat) {
-//       this->hasMaxRepeat = true;
-//       this->maxRepeat = n->maxRepeat;
-//     }
-//     else {
-//       this->hasMaxRepeat = false;
-//     }
-// 
-//     if (n->get) {
-//       this->get = true;
-//       this->getid = std::string(n->getid);
-//     }
-//     else {
-//       this->get = false;
-//     }
-//   }
-//   else {
-//     this->version = 1;
-//     this->get = false;
-//   }
-// }
-
 bool MotParcours::sameSymbol(MotParcours * m, bool checkLabels) {
   if (not checkLabels)
     return true;
 
   return this->condition->equals(m->condition);
-//   if (this->version != m->version)
-//     return false;
-// 
-//   if (this->version == 2) {
-//     return (this->csymbtype == m->csymbtype)
-//       and(this->csymb == m->csymb);
-//   }
-//   else {
-//     return this->symbol == m->symbol;
-//   }
 }
 
 bool MotParcours::sameRepeatAndCF(MotParcours * m) {
@@ -269,7 +212,6 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
       m->alpha_is_R = true;
       m->has_symbol = false;
       m->i = pere->list_id;
-//       m->addV2Info(ss);
       m->info = ss->info;
       m->condition = ss->condition;
       p->addMot(m);
@@ -282,8 +224,6 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
         m = new MotParcours();
         m->type = TYPE_M1;
         m->has_symbol = true;
-//         m->symbol = ss->symb;
-//         m->addV2Info(ss);
         m->info = ss->info;
         m->condition = ss->condition;
         p->addMot(m);
@@ -296,8 +236,6 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
         m->i = i;
         m->k = k;
         m->has_symbol = true;
-//         m->symbol = ss->symb;
-//         m->addV2Info(ss);
         m->info = ss->info;
         m->condition = ss->condition;
         p->addMot(m);
@@ -322,7 +260,6 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
       m->i = ss->list_id;
       m->k = k;
       m->has_symbol = false;
-//       m->addV2Info(ss);
       m->info = ss->info;
       m->condition = ss->condition;
       p->addMot(m);
@@ -347,34 +284,6 @@ bool MotParcours::matchesSymbol(node_t * n, bool checkLabels) {
     return true;
   
   return this->condition->evaluate(this->info, n->info);
-
-//   if (this->version == 2) {
-//     if (this->csymbtype == LABEL_STAR)
-//       return true;
-// 
-//     string n_symb_str;
-//     if (n->version == 2) {
-//       n_symb_str = string(n->csymb);
-//     }
-//     else {
-//       n_symb_str = string(symbToString(n->symb));
-//     }
-// 
-//     if (this->csymbtype == LABEL_EXACT_STRING) {
-//       return n_symb_str == this->csymb;
-//     }
-//     else if (this->csymbtype == LABEL_REGEX or this->csymbtype == LABEL_SUBSTRING or this->csymbtype == LABEL_EXACT_OPCODE or this->csymbtype == LABEL_GENERIC_OPCODE) {
-//       std::regex e(".*" + this->csymb + ".*");
-// //       std::cmatch cm;           // same as std::match_results<const char*> cm;
-//       bool ret = std::regex_match(n_symb_str, e, std::regex_constants::match_default);
-// //       std::cout << "string literal with " << cm.size() << " matches\n";
-// //       std::cout << string(this->csymb) << " / " << n_symb_str << ": " << ret << "\n";
-//       return ret;
-//     }
-//   }
-//   else {
-//     return this->symbol == n->symb;
-//   }
 }
 
 bool MotParcours::matchesCF(node_t * n) {
@@ -627,10 +536,6 @@ vsize_t ParcoursNode::addGraph(graph_t * gr, vsize_t W, vsize_t maxLearn, bool c
     if (maxLearn == 0 || added < maxLearn) {
       p = parcoursLargeur(gr, n, W);
 
-//       if (p->size > 1){
-//       std::cout << p->toString() + "\n";
-//       }
-
       if (p->complete) {
         if (this->addParcours(p, 0, checkLabels)) {
           std::cout << p->toString() + "\n";
@@ -744,7 +649,6 @@ list < vsize_t > ParcoursNode::parcourirDepuisSommet(graph_t * gr, vsize_t v, vs
   unordered_set < node_t * >numerotes;
   node_t *r = node_list_item(&gr->nodes, v);
 
-//   node_t **numeros = (node_t **) calloc(W, sizeof(node_t *));
   std::pair < node_t *, node_t * >*numeros = (std::pair < node_t *, node_t * >*)calloc(W, sizeof(std::pair < node_t *, node_t * >));
   vsize_t max_numeros = 0;
   list < vsize_t > l = this->parcourirDepuisSommetRec(true, gr, r, W, numeros, max_numeros, numerotes, checkLabels);

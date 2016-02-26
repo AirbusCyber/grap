@@ -4,7 +4,6 @@
 void node_list_build(node_list_t * list, vsize_t max_size) {
   list->size = max_size;
   list->count = 0;
-//   list->storage = (node_t**) calloc(max_size, sizeof(node_t*));
   list->storage = NULL;
   list->nodes_dict = dict_alloc();
 }
@@ -40,16 +39,6 @@ void node_list_free(node_list_t * list) {
   dict_free(list->nodes_dict);
 }
 
-// void node_list_reset(node_list_t * list) {
-//   vsize_t i;
-//   for (i = 0; i < list->count; i++) {
-//     node_reset(list->storage[i]);
-//   }
-//   list->count = 0;
-//   dict_free(list->nodes_dict);
-//   list->nodes_dict = dict_alloc();
-// }
-
 node_t * node_list_item(const node_list_t * list, vsize_t index) {
   return list->storage[index];
 }
@@ -63,19 +52,6 @@ void node_list_set_all_unexplored(node_list_t * list) {
 
 vsize_t node_list_size(const node_list_t * list) {
   return list->count;
-}
-
-vsize_t node_list_size_reduc(const node_list_t * list) {
-  vsize_t index,Node_count;
-
-  Node_count=0;
-  for (index = 0; index < node_list_size(list); ++index) {
-	    node_t* node = node_list_item(list, index);
-	    if (node->fathers_nb ==0 && node->children_nb ==0)
-	    	continue;
-	    Node_count++;
-   }
-  return Node_count;
 }
 
 node_t* node_list_append(node_list_t * list, uint64_t node_id) {

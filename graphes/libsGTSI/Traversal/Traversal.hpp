@@ -17,10 +17,6 @@
 #include <regex>
 using namespace std;
 
-extern "C" {
-#include "symbol.h"
-} 
-
 #include "graph.h"
 #include "nodeIO.h"
 #include "node_info.hpp"
