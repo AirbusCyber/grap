@@ -5,7 +5,7 @@
  * To generate the parser run: "bison Parser.y"
  */
  
-#include "Expression.h"
+#include "Expression.hpp"
 #include "Parser.h"
 #include "Lexer.h"
 

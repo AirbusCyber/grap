@@ -8,7 +8,7 @@
 #include <assert.h>
 
 extern "C" {
-#include "ga_types.h"
+#include "ga_types.hpp"
 }
 
 class NodeInfo {

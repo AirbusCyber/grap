@@ -8,7 +8,7 @@
 #include <limits>
 #include <fstream>
 
-#include "graphIO.h"
-#include "graphParser.h"
+#include "graphIO.hpp"
+#include "graphParser.hpp"
 
 #endif

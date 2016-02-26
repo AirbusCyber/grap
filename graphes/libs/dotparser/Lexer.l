@@ -4,8 +4,8 @@
  * Lexer.l file
  * To generate the lexical analyzer run: "flex Lexer.l"
  */
- 
-#include "Expression.h"
+
+#include "Expression.hpp"
 #include "Parser.h"
 
 #include <stdio.h>

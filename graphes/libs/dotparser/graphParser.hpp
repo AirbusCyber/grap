@@ -1,12 +1,12 @@
 #ifndef GRAPHPARSER_H
 #define GRAPHPARSER_H
 
-#include "Expression.h"
-#include "Parser.h"
+#include "Expression.hpp"
+#include "Parser.hpp"
 #include "Lexer.h"
 
-#include "graph.h"
-#include "graphIO.h"
+#include "graph.hpp"
+#include "graphIO.hpp"
  
 #include <stdio.h>
 

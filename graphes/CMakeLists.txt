@@ -71,18 +71,18 @@ ADD_CUSTOM_COMMAND(
 #			libs/dotparser/Expression.c
 #)
 add_library(graph
-      libs/libgraph/graph.h
+      libs/libgraph/graph.hpp
       libs/libgraph/graph.cpp
-      libs/libgraph/graphIO.h
+      libs/libgraph/graphIO.hpp
       libs/libgraph/graphIO.cpp
-      libs/libgraph/node.h
+      libs/libgraph/node.hpp
       libs/libgraph/node.cpp
-      libs/libgraph/node_list.h
+      libs/libgraph/node_list.hpp
       libs/libgraph/node_list.cpp
-      libs/libgraph/nodeIO.h
+      libs/libgraph/nodeIO.hpp
       libs/libgraph/nodeIO.cpp
       libs/dict/dict.cpp
-      libs/dict/dict.h
+      libs/dict/dict.hpp
       libs/dotparser/graphParser.cpp
       libs/dotparser/Expression.cpp
       Lexer.c 

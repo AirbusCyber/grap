@@ -1,4 +1,4 @@
-#include "graphIO.h"
+#include "graphIO.hpp"
 
 void graph_fprint(FILE* fp, graph_t* graph) {
   struct node_list_iterator_t *node_it;

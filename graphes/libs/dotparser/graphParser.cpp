@@ -1,4 +1,4 @@
-#include "graphParser.h"
+#include "graphParser.hpp"
 
 graph_t *getGraph (const char *expr) {
   graph_t *graph;

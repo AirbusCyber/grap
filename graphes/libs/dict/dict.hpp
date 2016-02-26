@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "node.h"
+#include "node.hpp"
 
 typedef struct
 {

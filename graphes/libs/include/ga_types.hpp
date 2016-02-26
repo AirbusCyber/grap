@@ -16,5 +16,5 @@
  */
 typedef uint64_t vsize_t;
 
-#include "my_assert.h"
+#include "my_assert.hpp"
 #endif

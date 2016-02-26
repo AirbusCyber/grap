@@ -1,4 +1,4 @@
-#include "node.h"
+#include "node.hpp"
 
 node_t *node_alloc () {
   node_t *node = (node_t*) calloc (1, sizeof(node_t));

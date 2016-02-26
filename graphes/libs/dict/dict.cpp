@@ -1,7 +1,7 @@
 #ifndef DICT_C
 #define DICT_C
 
-#include "dict.h"
+#include "dict.hpp"
 
 int compar(const void *l, const void *r) {
   const dictPair *dl = (const dictPair *) l;

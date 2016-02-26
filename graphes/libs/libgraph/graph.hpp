@@ -7,8 +7,8 @@
  A graph is seen as a list of node with a root.
  */
 
-#include "node.h"
-#include "node_list.h"
+#include "node.hpp"
+#include "node_list.hpp"
 
 /*!
  @brief Define a structure for rooted and directed graphs

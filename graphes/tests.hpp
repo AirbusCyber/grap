@@ -11,9 +11,8 @@
 #include "node_info.hpp"
 
 extern "C" {
-#include "graphIO.h"
-//#include "libGraphBinAlgo.h"
-#include "graphParser.h"
+#include "graphIO.hpp"
+#include "graphParser.hpp"
 }
 #include "Traversal.hpp"
 char optionFuncs;

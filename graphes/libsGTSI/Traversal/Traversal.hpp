@@ -11,14 +11,14 @@
 #include <list>
 #include <forward_list>
 #include <queue>
-#include "utils-gtsi.h"
+#include "utils-gtsi.hpp"
 #include <fstream>
 #include <assert.h>
 #include <regex>
 using namespace std;
 
-#include "graph.h"
-#include "nodeIO.h"
+#include "graph.hpp"
+#include "nodeIO.hpp"
 #include "node_info.hpp"
 
 

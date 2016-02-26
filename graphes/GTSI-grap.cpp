@@ -1,4 +1,4 @@
-#include "GTSI-grap.h"
+#include "GTSI-grap.hpp"
 
 char optionFuncs;
 char optionLabels;

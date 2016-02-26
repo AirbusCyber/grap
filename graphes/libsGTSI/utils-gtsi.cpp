@@ -1,7 +1,7 @@
 #ifndef UTILS_CPP
 #define UTILS_CPP
 
-#include "utils-gtsi.h"
+#include "utils-gtsi.hpp"
 
 
 string b2s(bool b){

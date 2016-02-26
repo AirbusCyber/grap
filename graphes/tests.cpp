@@ -1,4 +1,4 @@
-#include "tests.h"
+#include "tests.hpp"
 
 void printDescription() {
   std::cout << "Tests are done as follows.\n";

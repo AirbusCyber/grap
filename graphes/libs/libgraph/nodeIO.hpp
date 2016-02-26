@@ -7,7 +7,7 @@
  */
 
 #include <stdio.h>
-#include "node.h"
+#include "node.hpp"
 
 // char *symbToString(vsize_t symb);
 // char *csymbtypeToString(enum label_t cst);

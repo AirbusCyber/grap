@@ -1,4 +1,4 @@
-#include "graph.h"
+#include "graph.hpp"
 
 graph_t* graph_alloc(vsize_t max_size) {
   graph_t* graph;

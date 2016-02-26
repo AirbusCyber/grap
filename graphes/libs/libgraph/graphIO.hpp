@@ -4,7 +4,7 @@
 #define GRAPHBINMAGIC "GRAPHBIN"
 #define GRAPHBINMAGIC_LEN 8
 
-#include "nodeIO.h"
+#include "nodeIO.hpp"
 
 /*!
  @file graphIO.h
@@ -12,7 +12,7 @@
  */
 #include <stdio.h>
 
-#include "graph.h"
+#include "graph.hpp"
 
 /*!
  @brief Print a a graph.

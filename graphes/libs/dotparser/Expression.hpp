@@ -7,8 +7,8 @@
 #ifndef __EXPRESSION_H__
 #define __EXPRESSION_H__
 
-#include "graph.h"
-#include "graphIO.h"
+#include "graph.hpp"
+#include "graphIO.hpp"
 // #include <cstddef>
 #include <stddef.h>
 #include <string.h>

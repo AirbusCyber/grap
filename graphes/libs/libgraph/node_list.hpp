@@ -1,8 +1,8 @@
 #ifndef NODE_LIST_H
 #define NODE_LIST_H
 
-#include "node.h"
-#include "dict.h"
+#include "node.hpp"
+#include "dict.hpp"
   
 /*!
  @file node_list.h

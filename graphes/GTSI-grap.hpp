@@ -2,7 +2,7 @@
 #define GTSIGRAP_H
 
 #include "Traversal.hpp"
-#include "graphParser.h"
+#include "graphParser.hpp"
 
 void printUsage();
 int main(int argc, char *argv[]);
