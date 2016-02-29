@@ -10,14 +10,12 @@ void printDescription() {
   std::cout << "\n";
   std::cout << "GTSI:\n";
   std::cout << "  Pattern graphs are cut into sites (site size: minimum size between pattern graphs).\n";
-  std::cout << "  Learning: via traversal tree.\n";
-  std::cout << "  Testing: via traversal tree (with sites)\n";
+  std::cout << "  Learning: via traversal tree and with a single traversal (when there is only one pattern graph).\n";
+  std::cout << "  Testing: via traversal tree (with sites) and with a single traversal.\n";
   std::cout << "  The result is the sum, for each node in the test graph, of the number of traversals possible from this node.\n";
+  std::cout << "  Note that if two pattern graphs are identical, they will produce the same traversal and this traversal will only be counted once.\n";
   std::cout << "\n";
-//   std::cout << "Considerations:\n";
-//   std::cout << "  1 - GTSI and SIDT use trees and won't process twice the same pattern graph ; Ullmann will. Hence one should be careful not to submit identical pattern graphs to Ullmann and expect to compare results with GTSI or SIDT.\n";
-//   std::cout << "  2 - On these tests the libraries are used in a way that allow easy comparison of results and the expected SIDT <= GTSI <= Ullmann. This is because the pattern graphs always have the same size which is the site size. Be careful that this is not always the case. \n";
-//   std::cout << "\n";
+
   std::cout << "Test 0:  [manual] small identical graphs.\n";
   std::cout << "Test 1:  [manual] small test graph with one child more (to a leaf) than pattern.\n";
   std::cout << "Test 2:  [manual] small test graph with one edge more (leaf -> leaf) than pattern.\n";
@@ -30,9 +28,9 @@ void printDescription() {
   std::cout << "Test 9:  [manual] generic pattern on Mirage sample.\n";
   std::cout << "Test 10: [manual] generic pattern on Mirage sample with extraction.\n";
   std::cout << "Test 11: [manual] simple loop pattern on Mirage sample.\n";
-  std::cout << "Test 12: [reference to disas.py] same as test 9  but with PandaPE's disassembler.\n";
-  std::cout << "Test 13: [reference to disas.py] same as test 10 but with PandaPE's disassembler.\n";
-  std::cout << "Test 14: [reference to disas.py] same as test 11 but with PandaPE's disassembler. PandaPE does not loop rep instructions (hence 12 -> 2).\n";
+  std::cout << "Test 12: [reference to 9] same as test 9  but with PandaPE's disassembler.\n";
+  std::cout << "Test 13: [reference to 10] same as test 10 but with PandaPE's disassembler.\n";
+  std::cout << "Test 14: [reference to 11] same as test 11 but with PandaPE's disassembler. PandaPE does not loop rep instructions (hence 12 -> 2).\n";
   std::cout << "Test 15: [manual] Non-regression test for bug in graph traversal (child number i in -k>i terms was not checked).\n";
 }
 
@@ -319,14 +317,19 @@ void test_GTSI(graph_t ** grPattern, size_t nPattern, graph_t * grTest, size_t e
   ParcoursNode tree = ParcoursNode();
 
   for (i = 0; i < nPattern; i++) {
+    graph_fprint(stdout, grPattern[i]);
+    
     bool added = tree.addGraphFromNode(grPattern[i], grPattern[i]->root, siteSize, checkLabels);
 
-    if (not added)
+    if (not added){
       printf("WARNING: pattern graph %d was not added to traversal tree because it already exists there.\n", (int) i);
+    }
   }
 
-  tree.saveParcoursNodeToDot(treePath);
-
+  if (exportTree){
+    tree.saveParcoursNodeToDot(treePath);
+  }
+  
   printf("%d traversals reconstructed from pattern graph.\n", (int) tree.countLeaves());
 
   vsize_t count = tree.parcourir(grTest, siteSize, checkLabels, true);

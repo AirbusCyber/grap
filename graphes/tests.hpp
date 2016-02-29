@@ -9,11 +9,8 @@
 #include <fstream>
 #include <cstdlib>
 #include "node_info.hpp"
-
-extern "C" {
 #include "graphIO.hpp"
 #include "graphParser.hpp"
-}
 #include "Traversal.hpp"
 char optionFuncs;
 

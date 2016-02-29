@@ -21,6 +21,7 @@ struct dict *dict_alloc() {
 }
 
 node_t *dict_insert(struct dict * d, uint64_t k, node_t * v) {
+  // TODO: implement malloc_or_fail
   dictPair *p = (dictPair*) malloc(sizeof(dictPair));
   p->key = k;
   p->value = v;

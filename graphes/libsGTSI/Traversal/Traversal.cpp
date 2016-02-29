@@ -20,75 +20,79 @@ string MotParcours::toString() {
     s += "-";
     if (this->alpha_is_R) {
       s += "R> ";
+      s += std::to_string(this->i);
     }
     else {
       s += i2s(this->k);
       s += "> ";
     }
 
-    s += "(";
-    s += i2s(this->i);
-    s += ": ";
-    s += this->info->inst_str;
+    if (this->has_symbol){
+      s += "(";
+      s += i2s(this->i);
+      s += ": ";
+      s += this->info->inst_str;
+      s += ")";
+    }
   }
   else {
     printf("ERROR in MotParcours::toString.\n");
     return "ERR";
   }
-
-  s += ")";
   
-  if (this->info->minRepeat == 1 and not this->info->has_maxRepeat) {
-    s += "+";
-  }
-  else if (this->info->minRepeat == 0 and not this->info->has_maxRepeat) {
-    s += "*";
-  }
-  else {
-    s += "{" + i2s(this->info->minRepeat) + ",";
-    if (this->info->has_maxRepeat) {
-      s += i2s(this->info->maxRepeat);
+  if (this->has_symbol){
+    if (this->info->minRepeat == 1 and not this->info->has_maxRepeat) {
+      s += "+";
     }
-    s += "}";
-  }
-  
-  if (this->info->has_maxChildrenNumber or this->info->has_maxFathersNumber or this->info->minChildrenNumber != 0 or this->info->minFathersNumber != 0) {
-    s += "_";
-    bool one = false;
-    if (this->info->minChildrenNumber > 0) {
-      s += "mc=" + i2s(this->info->minChildrenNumber);
-      one = true;
+    else if (this->info->minRepeat == 0 and not this->info->has_maxRepeat) {
+      s += "*";
     }
-    if (this->info->has_maxChildrenNumber) {
-      if (one)
-        s += ",";
-      s += "mc=" + i2s(this->info->maxChildrenNumber);
-      one = true;
+    else {
+      s += "{" + i2s(this->info->minRepeat) + ",";
+      if (this->info->has_maxRepeat) {
+        s += i2s(this->info->maxRepeat);
+      }
+      s += "}";
     }
-    if (this->info->minFathersNumber > 0) {
-      if (one)
-        s += ",";
-      s += "mf=" + i2s(this->info->minFathersNumber);
-      one = true;
+    
+    if (this->info->has_maxChildrenNumber or this->info->has_maxFathersNumber or this->info->minChildrenNumber != 0 or this->info->minFathersNumber != 0) {
+      s += "_";
+      bool one = false;
+      if (this->info->minChildrenNumber > 0) {
+        s += "mc=" + i2s(this->info->minChildrenNumber);
+        one = true;
+      }
+      if (this->info->has_maxChildrenNumber) {
+        if (one)
+          s += ",";
+        s += "mc=" + i2s(this->info->maxChildrenNumber);
+        one = true;
+      }
+      if (this->info->minFathersNumber > 0) {
+        if (one)
+          s += ",";
+        s += "mf=" + i2s(this->info->minFathersNumber);
+        one = true;
+      }
+      if (this->info->has_maxFathersNumber) {
+        if (one)
+          s += ",";
+        s += "mc=" + i2s(this->info->has_maxFathersNumber);
+        one = true;
+      }
     }
-    if (this->info->has_maxFathersNumber) {
-      if (one)
-        s += ",";
-      s += "mc=" + i2s(this->info->has_maxFathersNumber);
-      one = true;
-    }
-  }
 
-  s += "?(" + this->condition->toString() + ")";
+    s += "?(" + this->condition->toString() + ")";
+  }
   
   return s;
 }
 
 bool MotParcours::sameSymbol(MotParcours * m, bool checkLabels) {
-  if (not checkLabels)
-    return true;
-
-  return this->condition->equals(m->condition);
+  std::cout << this->info->toString() << " VS \n" << m->info->toString() << " : " << (this->info->equals(m->info)) << "\n";
+  
+  // TODO: etre plus malin avec les comparaisons (ne prendre que les champs de condition en compte dans la comparaison des infos ?)
+  return (not checkLabels) or (this->info->equals(m->info) and this->condition->equals(m->condition));
 }
 
 bool MotParcours::sameRepeatAndCF(MotParcours * m) {
@@ -107,7 +111,6 @@ bool MotParcours::sameRepeatAndCF(MotParcours * m) {
 bool MotParcours::equals(MotParcours * m, bool checkLabels) {
   if (this->type == m->type) {
     if (this->type == TYPE_M1) {
-      // TODO: true forces to check labels when constructing tree, it enables to pass test 6. Is test 6 faulty ?
       return this->sameSymbol(m, checkLabels) and this->sameRepeatAndCF(m);
     }
     else {
@@ -124,7 +127,7 @@ bool MotParcours::equals(MotParcours * m, bool checkLabels) {
       }
     }
   }
-  printf("type not passed\n");
+  
   return false;
 }
 
@@ -524,6 +527,7 @@ ParcoursNode::ParcoursNode(std::list < ParcoursNode * >_fils, MotParcours * _mot
 
 bool ParcoursNode::addGraphFromNode(graph_t * gr, node_t * r, vsize_t W, bool checkLabels) {
   Parcours *p = parcoursLargeur(gr, r->list_id, W);
+  std::cout << p->toString();
   return this->addParcours(p, 0, checkLabels);
 }
 
@@ -614,6 +618,7 @@ bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {
     ParcoursNode *f = (*it);
     
     if (f->mot->equals(m, checkLabels)) {
+//       std::cout << "equals " << f->mot->toString() << "\n";
       return f->addParcours(p, index + 1, checkLabels);
     }
   }
@@ -664,6 +669,7 @@ list < vsize_t > ParcoursNode::parcourirDepuisSommetRec(bool racine, graph_t * g
     l.push_back(this->id);
   }
 
+  // TODO: implement release_assert ?
   assert(this->feuille or racine or not this->fils.empty());
 
   list < ParcoursNode * >::iterator it;
@@ -761,7 +767,23 @@ ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph
           }
         }
         else if (not m->has_symbol) {
-          return std::make_tuple(true, f, numeros, max_numeros, numerotes);
+          // Verify that f is numbered m->i:
+                      
+          if (max_numeros >= m->i) {
+            std::pair < node_t *, node_t * >p = numeros[m->i - 1];
+            
+            if (p.first != f){
+              return std::make_tuple(false, f, numeros, max_numeros, numerotes);
+            }
+            
+            if (p.second == NULL) s = p.first;
+            else s = p.second;
+          }
+          else{
+              return std::make_tuple(false, f, numeros, max_numeros, numerotes);
+          }
+          
+          return std::make_tuple(true, s, numeros, max_numeros, numerotes);
         }
         else {
           return std::make_tuple(false, s, numeros, max_numeros, numerotes);

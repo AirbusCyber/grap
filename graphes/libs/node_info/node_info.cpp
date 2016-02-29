@@ -20,6 +20,89 @@ NodeInfo::NodeInfo(){
   this->getid = "";
 }
 
+std::string NodeInfo::toString()
+{
+  std::string s = "";
+  s += this->inst_str;
+  s += "(";
+  
+  if (this->is_root){
+    s += "root";
+  }
+  else {
+    s += "noroot"; 
+  }
+  s += ", ";
+  
+  if (this->has_address){
+    s += "address=";
+//     s += h2s(this->address);
+  }
+  else {
+    s += "noaddress"; 
+  }
+  s += ", ";
+  
+  s += "cn=" + std::to_string((uint) this->childrenNumber);
+  s += ", fn=" + std::to_string((uint) this->fathersNumber);
+  
+  if (this->has_maxChildrenNumber){
+   s += ", maxcn=" + std::to_string((uint) this->maxChildrenNumber); 
+  }
+  else {
+   s += ", nomaxcn"; 
+  }
+  s += ", mincn=" + std::to_string((uint) this->minChildrenNumber); 
+  
+  if (this->has_maxFathersNumber){
+   s += ", maxfn=" + std::to_string((uint) this->maxFathersNumber); 
+  }
+  else {
+   s += ", nomaxfn"; 
+  }
+  s += ", minfn=" + std::to_string((uint) this->minFathersNumber); 
+  
+  s += ", minrepeat=" + std::to_string((uint) this->minRepeat);
+  
+  if (this->has_maxRepeat){
+    s += ", maxrepeat=" + std::to_string((uint) this->maxRepeat);
+  }
+  else {
+    s += ", nomaxrepeat"; 
+  }
+  
+  if (this->get){
+    s += ", get=" + this->getid;
+  }
+  else {
+    s += ", noget"; 
+  }
+  
+  return s;
+}
+
+
+bool NodeInfo::equals(NodeInfo* ni){
+  return this->inst_str == ni->inst_str
+         and this-> is_root == ni->is_root
+         and this->has_address == ni->has_address
+         and (not this->has_address or (this->address == ni->address))
+         and this->childrenNumber == ni->childrenNumber
+         and this->fathersNumber == ni->fathersNumber
+         and this->minChildrenNumber == ni->minChildrenNumber
+         and this->has_maxChildrenNumber == ni->has_maxChildrenNumber
+         and (not this->has_maxChildrenNumber or (this->maxChildrenNumber == ni->maxChildrenNumber))
+         and this->minFathersNumber == ni->minFathersNumber
+         and this->has_maxFathersNumber == ni->has_maxFathersNumber
+         and (not this->has_maxFathersNumber or (this->maxFathersNumber == ni->maxFathersNumber))
+         and this->minRepeat == ni->minRepeat
+         and this->has_maxRepeat == ni->has_maxRepeat
+         and (not this->has_maxRepeat or (this->maxRepeat == ni->maxRepeat))
+         and this->get == ni->get
+         and (not this->get or (this->getid == ni->getid));
+}
+
+
 CondNode::CondNode(){
   std::list<CondNode*>* cn = new std::list<CondNode*>();
   this->children = cn;
