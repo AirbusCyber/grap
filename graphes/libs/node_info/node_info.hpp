@@ -6,12 +6,7 @@
 #include <functional>
 #include <iostream>
 #include <assert.h>
-
-extern "C" {
 #include "ga_types.hpp"
-}
-
-// #include "utils-gtsi.hpp"
 
 class NodeInfo {
 public:

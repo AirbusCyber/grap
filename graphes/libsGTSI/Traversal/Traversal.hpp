@@ -69,6 +69,7 @@ typedef std::tuple < node_t *, uint8_t, node_t * >TupleQueue;
 Parcours *parcoursLargeur(graph_t * graph, vsize_t root, vsize_t W);
 std::unordered_set < Parcours * >parcoursFromGraph(graph_t *, vsize_t, bool);
 
+// TODO: implémenter la remontée des id (getid) des solutions
 class ParcoursNode {
 public:
   uint64_t id;

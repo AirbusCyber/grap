@@ -89,7 +89,7 @@ string MotParcours::toString() {
 }
 
 bool MotParcours::sameSymbol(MotParcours * m, bool checkLabels) {
-  std::cout << this->info->toString() << " VS \n" << m->info->toString() << " : " << (this->info->equals(m->info)) << "\n";
+//   std::cout << this->info->toString() << " VS \n" << m->info->toString() << " : " << (this->info->equals(m->info)) << "\n";
   
   // TODO: etre plus malin avec les comparaisons (ne prendre que les champs de condition en compte dans la comparaison des infos ?)
   return (not checkLabels) or (this->info->equals(m->info) and this->condition->equals(m->condition));
@@ -393,8 +393,12 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
               numeros[max_numeros - 1].second = sc;
             }
 
-            if (printFound and m->info->get) found_nodes->insert(std::pair < string, std::list < node_t * >*>(m->info->getid, list_nodes));
-            else delete list_nodes;
+            if (printFound and m->info->get) {
+              found_nodes->insert(std::pair < string, std::list < node_t * >*>(m->info->getid, list_nodes));
+            }
+            else{
+              delete list_nodes;
+            }
             
             // TODO: attention, on peut renvoyer false alors qu'on a "simplement" tenté de boucler dans la mauvaise branche
             // FIX: il faut nécessairement tenter les autres branches
@@ -527,7 +531,6 @@ ParcoursNode::ParcoursNode(std::list < ParcoursNode * >_fils, MotParcours * _mot
 
 bool ParcoursNode::addGraphFromNode(graph_t * gr, node_t * r, vsize_t W, bool checkLabels) {
   Parcours *p = parcoursLargeur(gr, r->list_id, W);
-  std::cout << p->toString();
   return this->addParcours(p, 0, checkLabels);
 }
 
@@ -642,7 +645,8 @@ vsize_t ParcoursNode::parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool 
     for (it = ret.begin(); it != ret.end(); it++) {
       vsize_t _id = *it;
       if (get < 1 > (leaves.insert(_id)) or countAllMatches) {
-//         printf("possible from node: %d ; leave: %d\n", n, id);
+        node_t *r = node_list_item(&gr->nodes, n);
+//         printf("possible from node: %s ; leaf: 0x%x\n", r->info->inst_str.c_str(), (int) _id);
         count++;
       }
     }
@@ -742,6 +746,9 @@ ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph
             if (not m->info->has_maxRepeat or m->info->maxRepeat > 1) {
               while (true) {
                 if ((not m->info->has_maxRepeat or r < m->info->maxRepeat) and s->children_nb == 1 and s->children[0]->fathers_nb == 1 and m->matchesSymbol(s->children[0], checkLabels) and m->matchesCF(s->children[0])) {
+                  unordered_set < node_t * >::iterator it_find = numerotes.find(s->children[0]);
+                  if (it_find != numerotes.end()) break;
+                  
                   s = s->children[0];
                   r++;
                 }
@@ -752,7 +759,6 @@ ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph
 
               numeros[max_numeros - 1].second = s;
             
-
               if (r < m->info->minRepeat) {
                 // pas trouvé, TODO: attention au branchement
                 return std::make_tuple(false, last_s, numeros, last_max_numeros, numerotes);
@@ -760,7 +766,7 @@ ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph
             }
             
             numerotes.insert(f);
-            return std::make_tuple(true, f, numeros, max_numeros, numerotes);
+            return std::make_tuple(true, s, numeros, max_numeros, numerotes);
           }
           else {
             return std::make_tuple(false, s, numeros, max_numeros, numerotes);
@@ -776,8 +782,12 @@ ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph
               return std::make_tuple(false, f, numeros, max_numeros, numerotes);
             }
             
-            if (p.second == NULL) s = p.first;
-            else s = p.second;
+            if (p.second == NULL){
+              s = p.first;
+            }
+            else{
+              s = p.second;
+            }
           }
           else{
               return std::make_tuple(false, f, numeros, max_numeros, numerotes);

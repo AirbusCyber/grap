@@ -316,9 +316,7 @@ void test_GTSI(graph_t ** grPattern, size_t nPattern, graph_t * grTest, size_t e
 
   ParcoursNode tree = ParcoursNode();
 
-  for (i = 0; i < nPattern; i++) {
-    graph_fprint(stdout, grPattern[i]);
-    
+  for (i = 0; i < nPattern; i++) {    
     bool added = tree.addGraphFromNode(grPattern[i], grPattern[i]->root, siteSize, checkLabels);
 
     if (not added){
