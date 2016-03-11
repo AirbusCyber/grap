@@ -295,7 +295,7 @@ bool MotParcours::matchesCF(node_t * n) {
     and((not this->info->has_maxFathersNumber) or n->fathers_nb <= this->info->maxFathersNumber);
 }
 
-Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * graph, vsize_t vroot, vsize_t W, bool checkLabels, bool printFound) {
+Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * graph, vsize_t vroot, vsize_t W, bool checkLabels, bool returnFound) {
 //   cout << this->toString() << "\n";
 
   node_t *sc;
@@ -316,7 +316,7 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
     max_numeros++;
     numerotes.insert(sc);
 
-    if (printFound and this->mots[0]->info->get) {
+    if (returnFound and this->mots[0]->info->get) {
       std::list < node_t * >*list_nodes_1 = new std::list < node_t * >();
       list_nodes_1->push_back(sc);
       found_nodes->insert(std::pair < string, std::list < node_t * >*>(this->mots[0]->info->getid, list_nodes_1));
@@ -365,35 +365,30 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
             sc = f;
 
             std::list < node_t * >*list_nodes = new std::list < node_t * >();
-            if (printFound and m->info->get) {
+            if (returnFound and m->info->get) {
               list_nodes->push_back((node_t *) sc);
             }
 
             if (not m->info->has_maxRepeat or m->info->maxRepeat > 1) {
-              while (true) {
-                if ((not m->info->has_maxRepeat or r < m->info->maxRepeat) and sc->children_nb == 1 and sc->children[0]->fathers_nb == 1 and m->matchesSymbol(sc->children[0], checkLabels) and m->matchesCF(sc->children[0])) {
-//                   printf("%x !r\n", sc->address);
-                  
+              while ((not m->info->has_maxRepeat or r < m->info->maxRepeat) and sc->children_nb == 1 and sc->children[0]->fathers_nb == 1 and m->matchesSymbol(sc->children[0], checkLabels) and m->matchesCF(sc->children[0])) {                  
                   unordered_set < node_t * >::iterator it_find = numerotes.find(sc->children[0]);
-                  if (it_find != numerotes.end()) break;
+                  if (it_find != numerotes.end()) {
+                    // We don't make a block from an already numbered (visited) node
+                    break;
+                  }
                   
-                  // le fils trouvé n'est pas numéroté
-                  // s'il l'était déjà, on n'aurait pas itéré pas dessus
                   sc = sc->children[0];
                   r++;
 
-                  if (printFound and m->info->get) list_nodes->push_back((node_t *) sc);
+                  if (returnFound and m->info->get){
+                    list_nodes->push_back((node_t *) sc);
+                  }
                 }
-                else {
-//                   printf("%x not repeat\n", sc->address);
-                  break;
-                }
-              }
               
               numeros[max_numeros - 1].second = sc;
             }
 
-            if (printFound and m->info->get) {
+            if (returnFound and m->info->get) {
               found_nodes->insert(std::pair < string, std::list < node_t * >*>(m->info->getid, list_nodes));
             }
             else{
