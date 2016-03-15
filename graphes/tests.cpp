@@ -1,3 +1,6 @@
+#ifndef TESTS_CPP
+#define TESTS_CPP
+
 #include "tests.hpp"
 
 void printDescription() {
@@ -371,3 +374,5 @@ void print_leaf_result(bool r, string desc, bool end_bool){
     cout << Red << desc << Color_Off << end_str;
   }
 }
+
+#endif

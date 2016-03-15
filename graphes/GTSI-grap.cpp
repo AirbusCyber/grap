@@ -7,8 +7,9 @@ void printUsage() {
   printf("Use GTSI-grap to learn and scan sites.\n");
   printf("Usage : ./GTSI-grap [options] patternFile testFile\n");
   printf("Options are :\n");
-  printf("        -v verbose\n");
-  printf("        -q quiet\n");
+  printf("        -h or --help: print this message\n");
+  printf("        -v:           verbose\n");
+  printf("        -q:           quiet\n");
   printf("        -ncl or -ncs or --no-check-labels : do not check the symbols (labels) of sites\n");
 }
 
@@ -32,7 +33,7 @@ int main(int argc, char *argv[]) {
 
   int a;
   for (a = 1; a < argc; a++) {
-    if (strcmp(argv[a], "-h") == 0 || strcmp(argv[a], "-help") == 0 || strcmp(argv[a], "--help") == 0) {
+    if (strcmp(argv[a], "-h") == 0 || strcmp(argv[a], "--help") == 0 || strcmp(argv[a], "--help") == 0) {
       printUsage();
       return 0;
     }
