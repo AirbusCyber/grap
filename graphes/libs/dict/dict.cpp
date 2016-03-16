@@ -15,14 +15,13 @@ int compar(const void *l, const void *r) {
 }
 
 struct dict *dict_alloc() {
-  struct dict *d = (struct dict *) malloc(sizeof(dict));
+  struct dict *d = (struct dict *) malloc_or_quit(sizeof(dict));
   d->root = NULL;
   return d;
 }
 
 node_t *dict_insert(struct dict * d, uint64_t k, node_t * v) {
-  // TODO: implement malloc_or_fail
-  dictPair *p = (dictPair*) malloc(sizeof(dictPair));
+  dictPair *p = (dictPair*) malloc_or_quit(sizeof(dictPair));
   p->key = k;
   p->value = v;
 
@@ -38,7 +37,7 @@ node_t *dict_insert(struct dict * d, uint64_t k, node_t * v) {
 
 
 node_t *dict_find(struct dict * d, uint64_t k) {
-  dictPair *p = (dictPair*) malloc(sizeof(dictPair));
+  dictPair *p = (dictPair*) malloc_or_quit(sizeof(dictPair));
   p->key = k;
 
   dictPair *r = (dictPair *) tfind(p, &d->root, compar);
@@ -52,7 +51,7 @@ node_t *dict_find(struct dict * d, uint64_t k) {
 
 
 void dict_delete(struct dict *d, uint64_t k) {
-  dictPair *p = (dictPair*) malloc(sizeof(dictPair));
+  dictPair *p = (dictPair*) malloc_or_quit(sizeof(dictPair));
   p->key = k;
 
   tdelete(p, &d->root, compar);

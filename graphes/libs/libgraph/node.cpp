@@ -1,19 +1,19 @@
 #include "node.hpp"
 
 node_t *node_alloc () {
-  node_t *node = (node_t*) calloc (1, sizeof(node_t));
+  node_t *node = (node_t*) calloc_or_quit (1, sizeof(node_t));
 
   return node;
 }
 
 void node_set_children_nb (node_t * node, vsize_t nb) {
   node->children_nb = nb;
-  node->children = (node_t**) realloc(node->children, node->children_nb * sizeof(node_t*));
+  node->children = (node_t**) realloc_or_quit(node->children, node->children_nb * sizeof(node_t*));
 }
 
 void node_set_fathers_nb (node_t * node, vsize_t nb) {
   node->fathers_nb = nb;
-  node->fathers = (node_t**) realloc(node->fathers, node->fathers_nb * sizeof(node_t*));
+  node->fathers = (node_t**) realloc_or_quit(node->fathers, node->fathers_nb * sizeof(node_t*));
 }
 
 node_t *node_copy (node_t * node1, const node_t * node2) {
@@ -25,13 +25,13 @@ node_t *node_copy (node_t * node1, const node_t * node2) {
 
   /* copy fathers */
   if (node2->fathers_nb > 0) {
-    node1->fathers = (node_t**) malloc(node2->fathers_nb * sizeof(node_t*));
+    node1->fathers = (node_t**) malloc_or_quit(node2->fathers_nb * sizeof(node_t*));
     memcpy (node1->fathers, node2->fathers, node1->fathers_nb * sizeof (node_t *));
   }
 
   /* copy children */
   if (node2->fathers_nb > 0) {
-    node1->children = (node_t**) malloc(node2->children_nb * sizeof(node_t*));
+    node1->children = (node_t**) malloc_or_quit(node2->children_nb * sizeof(node_t*));
     memcpy (node1->children, node2->children, node2->children_nb * sizeof (node_t *));
   }
   return node1;

@@ -1,8 +1,8 @@
-#ifndef MK_GA_TYPES_H
-#define MK_GA_TYPES_H
+#ifndef MK_GA_TYPES_HPP
+#define MK_GA_TYPES_HPP
 
 /*!
- @file ga_types.h
+ @file ga_types.hpp
  @brief Define all basic types that will be used in the whole project.
  And custom typed allocator, allowing stronger type checking.
  */
@@ -17,4 +17,5 @@
 typedef uint64_t vsize_t;
 
 #include "my_assert.hpp"
+#include "my_alloc.hpp"
 #endif

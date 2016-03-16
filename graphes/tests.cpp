@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 //         break;
 //       fclose(fpPattern);
       
-      grPattern = (graph_t **) std::realloc(grPattern, (j + 1) * sizeof(graph_t *));
+      grPattern = (graph_t **) realloc_or_quit(grPattern, (j + 1) * sizeof(graph_t *));
       grPattern[j] = getGraphFromPath(pathPattern.c_str());
       
       if (grPattern[j] == NULL){

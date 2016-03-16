@@ -11,7 +11,7 @@ void debug_print(char *s) {
 }
 
 CoupleList *createEdgeList() {
-  CoupleList *cl = (CoupleList *) malloc(sizeof(CoupleList));
+  CoupleList *cl = (CoupleList *) malloc_or_quit(sizeof(CoupleList));
   cl->size = 0;
   cl->couples = NULL;
 
@@ -19,7 +19,7 @@ CoupleList *createEdgeList() {
 }
 
 CoupleList *addEdgeToList(Couple * c, CoupleList * cl) {
-  cl->couples = (Couple **) realloc(cl->couples, (cl->size + 1) * sizeof(Couple *));
+  cl->couples = (Couple **) realloc_or_quit(cl->couples, (cl->size + 1) * sizeof(Couple *));
   cl->couples[cl->size] = c;
   cl->size++;
 
@@ -37,7 +37,7 @@ void freeEdgeList(CoupleList* cl){
 }
 
 Couple *createEdge(char *f, char *c, OptionList* ol) {
-  Couple *e = (Couple *) malloc(sizeof(Couple));
+  Couple *e = (Couple *) malloc_or_quit(sizeof(Couple));
   e->x = hash(f);
   e->y = hash(c);
   
@@ -85,7 +85,7 @@ node_t *createNode(char *value) {
   uint id = hash(value);
   free(value);
 
-  node_t *node = (node_t *) calloc(1, sizeof(node_t));
+  node_t *node = (node_t *) calloc_or_quit(1, sizeof(node_t));
   node->children = NULL;
   node->fathers = NULL;
   node->children_nb = 0;
@@ -116,7 +116,7 @@ graph_t *addNodeToGraph(node_t * n, graph_t * g) {
 }
 
 char *removeQuotes(char *s) {
-  char *s2 = (char *) malloc((strlen(s) + 1) * sizeof(char));
+  char *s2 = (char *) malloc_or_quit((strlen(s) + 1) * sizeof(char));
   size_t i;
   size_t k = 0;
 
@@ -271,7 +271,7 @@ node_t *updateNode(OptionList * ol, node_t * n) {
 }
 
 OptionList *createOptionList() {
-  OptionList *ol = (OptionList *) malloc(sizeof(OptionList));
+  OptionList *ol = (OptionList *) malloc_or_quit(sizeof(OptionList));
   ol->size = 0;
   ol->options = NULL;
 
@@ -279,7 +279,7 @@ OptionList *createOptionList() {
 }
 
 OptionList *addOptionToList(Option * o, OptionList * ol) {
-  ol->options = (Option **) realloc(ol->options, (ol->size + 1) * sizeof(Option *));
+  ol->options = (Option **) realloc_or_quit(ol->options, (ol->size + 1) * sizeof(Option *));
   ol->options[ol->size] = o;
   ol->size++;
 
@@ -287,12 +287,12 @@ OptionList *addOptionToList(Option * o, OptionList * ol) {
 }
 
 Option *createOption(char *I, char *V) {
-  Option *o = (Option *) malloc(sizeof(Option));
+  Option *o = (Option *) malloc_or_quit(sizeof(Option));
 
-  char *key = (char *) malloc((strlen(I) + 1) * sizeof(char));
+  char *key = (char *) malloc_or_quit((strlen(I) + 1) * sizeof(char));
   strcpy(key, I);
 
-  char *value = (char *) malloc((strlen(V) + 1) * sizeof(char));
+  char *value = (char *) malloc_or_quit((strlen(V) + 1) * sizeof(char));
   strcpy(value, V);
 
   o->id = key;

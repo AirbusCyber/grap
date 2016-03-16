@@ -160,7 +160,7 @@ string Parcours::toString() {
 
 
 void Parcours::addMot(MotParcours * m) {
-  this->mots = (MotParcours **) realloc(this->mots, (this->size + 1) * sizeof(MotParcours *));
+  this->mots = (MotParcours **) realloc_or_quit(this->mots, (this->size + 1) * sizeof(MotParcours *));
   this->mots[this->size] = m;
   this->size++;
   assert(m->type == TYPE_M1 or m->type == TYPE_M2);
@@ -306,8 +306,8 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
   unordered_set < node_t * >numerotes;
   std::map < string, std::list < node_t * >*>*found_nodes = new std::map < string, std::list < node_t * >*>();
 
-//   node_t **numeros = (node_t **) calloc(W, sizeof(node_t *));
-  std::pair < node_t *, node_t * >*numeros = (std::pair < node_t *, node_t * >*)calloc(W, sizeof(std::pair < node_t *, node_t * >));
+//   node_t **numeros = (node_t **) calloc_or_quit(W, sizeof(node_t *));
+  std::pair < node_t *, node_t * >*numeros = (std::pair < node_t *, node_t * >*)calloc_or_quit(W, sizeof(std::pair < node_t *, node_t * >));
   vsize_t max_numeros = 0;
 
   if (this->size >= 1 and this->mots[0]->type == TYPE_M1 and this->mots[0]->matchesSymbol(nI, checkLabels) and(this->mots[0]->matchesCF(nI))) {
@@ -653,7 +653,7 @@ list < vsize_t > ParcoursNode::parcourirDepuisSommet(graph_t * gr, vsize_t v, vs
   unordered_set < node_t * >numerotes;
   node_t *r = node_list_item(&gr->nodes, v);
 
-  std::pair < node_t *, node_t * >*numeros = (std::pair < node_t *, node_t * >*)calloc(W, sizeof(std::pair < node_t *, node_t * >));
+  std::pair < node_t *, node_t * >*numeros = (std::pair < node_t *, node_t * >*)calloc_or_quit(W, sizeof(std::pair < node_t *, node_t * >));
   vsize_t max_numeros = 0;
   list < vsize_t > l = this->parcourirDepuisSommetRec(true, gr, r, W, numeros, max_numeros, numerotes, checkLabels);
   free(numeros);
@@ -668,7 +668,6 @@ list < vsize_t > ParcoursNode::parcourirDepuisSommetRec(bool racine, graph_t * g
     l.push_back(this->id);
   }
 
-  // TODO: implement release_assert ?
   assert(this->feuille or racine or not this->fils.empty());
 
   list < ParcoursNode * >::iterator it;

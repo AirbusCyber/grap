@@ -35,6 +35,8 @@ include_directories(
         libs/node_info/
 )
 
+add_library(common libs/include/my_alloc.cpp)
+
 #shared libs
 #add_library(dict 
 #      libs/dict/dict.c
@@ -73,6 +75,7 @@ ADD_CUSTOM_COMMAND(
 #			libs/dotparser/Expression.c
 #)
 add_library(graph
+      libs/include/my_alloc.cpp
       libs/libgraph/graph.hpp
       libs/libgraph/graph.cpp
       libs/libgraph/graphIO.hpp
@@ -107,12 +110,12 @@ add_library(libGTSI
 
 # grap (GTSI)
 add_executable(GTSI-grap GTSI-grap.cpp)
-target_link_libraries(GTSI-grap libGTSI graph nodeinfo)
+target_link_libraries(GTSI-grap common libGTSI graph nodeinfo)
 
 # tests
 add_executable(tests tests.cpp)
-target_link_libraries(tests libGTSI graph pthread nodeinfo)
+target_link_libraries(tests common libGTSI graph pthread nodeinfo)
 
 # todot
 add_executable(todot todot.cpp)
-target_link_libraries(todot graph nodeinfo)
+target_link_libraries(todot common graph nodeinfo)

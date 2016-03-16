@@ -12,6 +12,7 @@
 #include "graphIO.hpp"
 #include "graphParser.hpp"
 #include "Traversal.hpp"
+#include "my_alloc.hpp"
 char optionFuncs;
 
 void print_leaf_result(bool r, string, bool);

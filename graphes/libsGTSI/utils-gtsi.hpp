@@ -2,6 +2,7 @@
 #define UTILS_GTSI_H
 
 #include <string>
+#include "my_alloc.hpp"
 
 using namespace std;
 

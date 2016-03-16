@@ -10,7 +10,7 @@ string b2s(bool b){
 
 string h2s(uint64_t a){
   string str;
-  char* buff = (char*) calloc(16, sizeof(char));
+  char* buff = (char*) calloc_or_quit(16, sizeof(char));
   sprintf(buff, "%lx", (long int) a);
   str += buff;
   return str;
