@@ -43,13 +43,6 @@ node_t * node_list_item(const node_list_t * list, vsize_t index) {
   return list->storage[index];
 }
 
-void node_list_set_all_unexplored(node_list_t * list) {
-  vsize_t i;
-  for (i = 0; i < list->count; i++) {
-    list->storage[i]->explored = UNEXPLORED;
-  }
-}
-
 vsize_t node_list_size(const node_list_t * list) {
   return list->count;
 }

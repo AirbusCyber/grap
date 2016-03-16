@@ -90,7 +90,6 @@ node_t *createNode(char *value) {
   node->fathers = NULL;
   node->children_nb = 0;
   node->fathers_nb = 0;
-  node->explored = UNEXPLORED;
   node->list_id = 0;
   node->node_id = id;  
   node->info = new NodeInfo();

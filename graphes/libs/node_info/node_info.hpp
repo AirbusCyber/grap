@@ -27,7 +27,7 @@ public:
   
   
   // Only for test
-  // TODO: it should be updated with node, do not use for now
+  // TODO: it should be updated with node (or be pointers ?), do not use for now
   uint8_t childrenNumber;
   uint8_t fathersNumber;
   

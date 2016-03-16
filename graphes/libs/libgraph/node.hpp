@@ -13,17 +13,6 @@
 #include "node_info.hpp"
 
 /*!
- @brief Constants for the status of node during graph exploration.
- @see node_t
- */
-enum node_explore_t {
-  UNEXPLORED = 0,
-  UNDER_EXPLORATION,
-  EXPLORED,
-  EXPLORE_OUT_OF_BOUND
-};
-
-/*!
  @brief Constants for the repeat status of enhanced nodes.
  */
 // enum repeat_t {
@@ -98,12 +87,6 @@ typedef struct node_t {
 //   vsize_t address;
   
 //   char isRoot;
-  
-
-  /*!
-   @brief Exploration status of the node.
-   */
-  enum node_explore_t explored;
 
   /*!
    @brief Number of fathers.
@@ -220,12 +203,6 @@ node_t* node_father(node_t* node, size_t index);
  pointer.
  */
 const node_t* node_father_const(const node_t* node, size_t index);
-
-/*!
- @brief Initialize the exploration status of a node to unexplored.
- @param node The node.
- */
-void node_init_unexplored(node_t* node);
 
 /*!
  @brief Remove all instances of a node from the fathers node list of a node.

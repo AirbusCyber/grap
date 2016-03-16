@@ -76,10 +76,6 @@ const node_t *node_father_const (const node_t * node, size_t index) {
   return node->fathers[index];
 }
 
-void node_init_unexplored (node_t * node) {
-  node->explored = UNEXPLORED;
-}
-
 void node_remove_father (node_t * node, node_t * to_remove) {
   vsize_t i, shift;
 

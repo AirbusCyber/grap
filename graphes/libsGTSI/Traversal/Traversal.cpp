@@ -169,7 +169,6 @@ void Parcours::addMot(MotParcours * m) {
 Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
   Parcours *p = new Parcours();
 
-  //all inputgraph nodes to unexplored(0):
   node_list_t *listI = &(graph->nodes);
 
   node_t *nI;
@@ -178,8 +177,6 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
   vsize_t s = 0;
   nI = node_list_item(listI, vroot);
   node_t* original_root = nI;
-
-  assert(nI != NULL);
   
   std::map <node_t*, vsize_t> node_ids = std::map <node_t*, vsize_t>();
   std::map<node_t*, vsize_t>::iterator node_ids_search;

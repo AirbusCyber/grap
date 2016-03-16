@@ -75,12 +75,6 @@ void node_list_free(node_list_t * list);
 node_t * node_list_item(const node_list_t * list, vsize_t index);
 
 /*!
- @brief Set all nodes as unexplored
- @param list The node list.
- */
-void node_list_set_all_unexplored(node_list_t * list);
-
-/*!
  @brief Get the number of nodes in the list.
  @param list The node list.
  @return Number of nodes.
