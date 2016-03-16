@@ -114,7 +114,7 @@ target_link_libraries(GTSI-grap common libGTSI graph nodeinfo)
 
 # tests
 add_executable(tests tests.cpp)
-target_link_libraries(tests common libGTSI graph pthread nodeinfo)
+target_link_libraries(tests seccomp common libGTSI graph pthread nodeinfo)
 
 # todot
 add_executable(todot todot.cpp)

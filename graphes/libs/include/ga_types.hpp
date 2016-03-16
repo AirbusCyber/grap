@@ -15,7 +15,6 @@
  @brief Type of memory pointers.
  */
 typedef size_t vsize_t;
-// typedef uint64_t vsize_t;
 
 #include "my_assert.hpp"
 #include "my_alloc.hpp"

@@ -13,8 +13,14 @@
 #include "graphParser.hpp"
 #include "Traversal.hpp"
 #include "my_alloc.hpp"
+
+#include <sys/prctl.h>
+#include <seccomp.h>
+
 char optionFuncs;
 
+void drop_privileges();
+int main(int argc, char *argv[]);
 void print_leaf_result(bool r, string, bool);
 void test_NodeInfo();
 void printDescription ();

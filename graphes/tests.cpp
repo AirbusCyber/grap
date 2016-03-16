@@ -42,7 +42,27 @@ string Green = "\x1b[1;32m";
 string Blue = "\x1b[1;33m";
 string Color_Off = "\x1b[0m";
 
-int main(int argc, char *argv[]) {    
+void drop_privileges(){
+  scmp_filter_ctx ctx;
+  
+  // release: SCMP_ACT_KILL
+  // use SCMP_ACT_TRAP or SCMP_ACT_TRACE(0) for debug
+  ctx = seccomp_init(SCMP_ACT_TRAP); 
+
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(rt_sigreturn), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(open), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mmap), 0);
+  
+  int r = seccomp_load(ctx);
+  RELEASE_ASSERT(r == 0);
+}
+
+int main(int argc, char *argv[]) {
+//   drop_privileges();
+  
   if (argc >= 2) {
     printDescription();
     return 1;
