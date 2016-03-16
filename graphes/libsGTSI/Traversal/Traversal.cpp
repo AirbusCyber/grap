@@ -167,8 +167,6 @@ void Parcours::addMot(MotParcours * m) {
 }
 
 Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
-  //WARNING : after calling this function, the ->list_id fields for nodes in inputGraph are changed
-  //TODO: change that !!!
   Parcours *p = new Parcours();
 
   //all inputgraph nodes to unexplored(0):
@@ -182,8 +180,10 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
   node_t* original_root = nI;
 
   assert(nI != NULL);
-
-  nI->list_id = (vsize_t) 1;
+  
+  std::map <node_t*, vsize_t> node_ids = std::map <node_t*, vsize_t>();
+  std::map<node_t*, vsize_t>::iterator node_ids_search;
+  node_ids.insert(std::pair<node_t*, vsize_t>(nI, 1));
 
   std::queue < TupleQueue > queue3;
   queue3.push(std::make_tuple((node_t *) NULL, (vsize_t) 0, nI));
@@ -214,7 +214,11 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
       m->type = TYPE_M2;
       m->alpha_is_R = true;
       m->has_symbol = false;
-      m->i = pere->list_id;
+      
+      node_ids_search = node_ids.find(pere);
+      RELEASE_ASSERT(node_ids_search != node_ids.end());
+      m->i = node_ids_search->second;
+      
       m->info = ss->info;
       m->condition = ss->condition;
       p->addMot(m);
@@ -244,7 +248,7 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
         p->addMot(m);
       }
 
-      ss->list_id = i;
+      node_ids.insert(std::pair<node_t*, vsize_t>(ss, i));
       i++;
       sc = ss;
 
@@ -260,7 +264,11 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
       m = new MotParcours();
       m->type = TYPE_M2;
       m->alpha_is_R = false;
-      m->i = ss->list_id;
+      
+      node_ids_search = node_ids.find(ss);
+      RELEASE_ASSERT(node_ids_search != node_ids.end());
+      m->i = node_ids_search->second;
+      
       m->k = k;
       m->has_symbol = false;
       m->info = ss->info;
@@ -277,8 +285,7 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
   else {
     p->complete = false;
   }
-  
-  original_root->list_id = vroot;
+ 
   return p;
 }
 
