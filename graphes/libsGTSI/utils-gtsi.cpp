@@ -16,8 +16,4 @@ string h2s(uint64_t a){
   return str;
 }
 
-string i2s(int a){
-  return std::to_string(a);
-}
-
 #endif

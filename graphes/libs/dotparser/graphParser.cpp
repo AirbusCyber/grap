@@ -34,7 +34,9 @@ graph_t *getGraphFromFile (FILE * f) {
   fseek (f, 0, SEEK_SET);
   
   char *buf = (char *) malloc (fsize + 1);
-  fread (buf, fsize, 1, f);
+  size_t  read = fread (buf, 1, fsize, f);
+  RELEASE_ASSERT(read == fsize);
+  
   buf[fsize] = 0;
 
   if (yylex_init (&scanner)) {

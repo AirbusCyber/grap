@@ -20,16 +20,16 @@ string MotParcours::toString() {
     s += "-";
     if (this->alpha_is_R) {
       s += "R> ";
-      s += std::to_string(this->i);
+      s += std::to_string((int) this->i);
     }
     else {
-      s += i2s(this->k);
+      s += std::to_string((int) this->k);
       s += "> ";
     }
 
     if (this->has_symbol){
       s += "(";
-      s += i2s(this->i);
+      s += std::to_string((int) this->i);
       s += ": ";
       s += this->info->inst_str;
       s += ")";
@@ -48,9 +48,9 @@ string MotParcours::toString() {
       s += "*";
     }
     else {
-      s += "{" + i2s(this->info->minRepeat) + ",";
+      s += "{" + std::to_string(this->info->minRepeat) + ",";
       if (this->info->has_maxRepeat) {
-        s += i2s(this->info->maxRepeat);
+        s += std::to_string(this->info->maxRepeat);
       }
       s += "}";
     }
@@ -59,25 +59,25 @@ string MotParcours::toString() {
       s += "_";
       bool one = false;
       if (this->info->minChildrenNumber > 0) {
-        s += "mc=" + i2s(this->info->minChildrenNumber);
+        s += "mc=" + std::to_string((int) this->info->minChildrenNumber);
         one = true;
       }
       if (this->info->has_maxChildrenNumber) {
         if (one)
           s += ",";
-        s += "mc=" + i2s(this->info->maxChildrenNumber);
+        s += "mc=" + std::to_string((int) this->info->maxChildrenNumber);
         one = true;
       }
       if (this->info->minFathersNumber > 0) {
         if (one)
           s += ",";
-        s += "mf=" + i2s(this->info->minFathersNumber);
+        s += "mf=" + std::to_string((int) this->info->minFathersNumber);
         one = true;
       }
       if (this->info->has_maxFathersNumber) {
         if (one)
           s += ",";
-        s += "mc=" + i2s(this->info->has_maxFathersNumber);
+        s += "mc=" + std::to_string((int) this->info->has_maxFathersNumber);
         one = true;
       }
     }
@@ -534,7 +534,7 @@ bool ParcoursNode::addGraphFromNode(graph_t * gr, node_t * r, vsize_t W, bool ch
 }
 
 vsize_t ParcoursNode::addGraph(graph_t * gr, vsize_t W, vsize_t maxLearn, bool checkLabels) {
-  Parcours *p;
+  Parcours *p = NULL;
   vsize_t n;
   vsize_t added = 0;
 
@@ -572,7 +572,7 @@ string ParcoursNode::toString() {
 string ParcoursNode::toDotPartiel() {
   string s;
   s += "\"";
-  s += i2s(this->id);
+  s += std::to_string(this->id);
   if (not this->feuille)
     s += "\" [label=\"";
   else
@@ -583,9 +583,9 @@ string ParcoursNode::toDotPartiel() {
   for (it = this->fils.begin(); it != this->fils.end(); it++) {
     ParcoursNode *f = (*it);
     s += "\"";
-    s += i2s(this->id);
+    s += std::to_string(this->id);
     s += "\" -> \"";
-    s += i2s(f->id);
+    s += std::to_string(f->id);
     s += "\" [label=\"";
     s += f->mot->toString();
     s += "\"]\n";
