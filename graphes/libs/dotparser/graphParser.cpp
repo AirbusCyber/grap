@@ -41,12 +41,14 @@ graph_t *getGraphFromFile (FILE * f) {
 
   if (yylex_init (&scanner)) {
     // couldn't initialize
+    std::cout << "ERR: couldn't initialize yylex." << std::endl;
     return NULL;
   }
 
   state = yy_scan_string (buf, scanner);
   if (yyparse (&graph, scanner)) {
     // error parsing
+    std::cout << "ERR: parsing failed." << std::endl;
     return NULL;
   }
 

@@ -78,10 +78,18 @@ int main(int argc, char *argv[]) {
 
   char valence = 2;
 
+  if (optionVerbose){
+    cout << "Parsing pattern file." << endl; 
+  }
+  
   graph_t *gr;
   gr = getGraphFromFile(fpPattern);
   vsize_t n_pattern = gr->nodes.size;
   fclose(fpPattern);
+  
+  if (optionVerbose){
+    cout << "Done." << endl; 
+  }
 
   vsize_t siteSize = gr->nodes.size;
 
@@ -92,10 +100,19 @@ int main(int argc, char *argv[]) {
     printf("Warning: Pattern graph is not connected.\n");
   }
   graph_free(gr);
+  
+  if (optionVerbose){
+    cout << "Parsing test file." << endl; 
+  }
 
   gr = getGraphFromFile(fpTest);
-  vsize_t n_test = gr->nodes.size;
+  vsize_t n_test;
+  n_test = gr->nodes.size;
   fclose(fpTest);
+  
+  if (optionVerbose){
+    cout << "Done." << endl; 
+  }
 
   Parcours::RetourParcours rt = parcours->parcourir(gr, siteSize, checkLabels, true, not optionQuiet);
   vsize_t count = rt.first;
@@ -110,15 +127,15 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  std::unordered_set < std::map < string, std::list < node_t * >*>*>set_gotten = rt.second;
+  std::unordered_set < std::map < string, std::list < node_t * >*>*>* set_gotten = rt.second;
 
-  if (not set_gotten.empty()) {
+  if (not set_gotten->empty()) {
     std::cout << "\nExtracted nodes:\n";
     std::unordered_set < std::map < string, std::list < node_t * >*>*>::iterator it;
 
-    vsize_t k = 1;
-    for (it = set_gotten.begin(); it != set_gotten.end(); it++) {
-      std::cout << "Match " << std::dec << k << "\n";
+    vsize_t i = 1;
+    for (it = set_gotten->begin(); it != set_gotten->end(); it++) {
+      std::cout << "Match " << std::dec << i << "\n";
 
       std::map < string, std::list < node_t * >*>*p_found_nodes = *it;
       std::map < string, std::list < node_t * >*>::iterator it2;
@@ -126,7 +143,7 @@ int main(int argc, char *argv[]) {
         std::list < node_t * >*node_list = (*it2).second;
 
         if (not node_list->empty()) {
-          k = 0;
+          vsize_t k = 0;
           for (std::list < node_t * >::iterator itn = node_list->begin(); itn != node_list->end(); ++itn) {
             node_t *n = *itn;
             cout << (*it2).first;
@@ -140,7 +157,7 @@ int main(int argc, char *argv[]) {
         }
       }
 
-      k++;
+      i++;
     }
   }
 

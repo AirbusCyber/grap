@@ -186,6 +186,7 @@ node_t *updateNode(OptionList * ol, node_t * n) {
 //       else if (strcmp(v, "string") == 0) {
 //         n->csymbType = LABEL_EXACT_STRING;
 //       }
+
       else if (strcmp(v, "substring") == 0) {        
         n->condition->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
         n->condition->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;

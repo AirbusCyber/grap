@@ -11,6 +11,8 @@
 
 // #include "graph2.h"
 
+#define YYINITDEPTH 200000
+
 int yyerror(graph_t **Sgraph, yyscan_t scanner, const char *msg) {
     // Add error handling routine as needed
 }
@@ -18,12 +20,10 @@ int yyerror(graph_t **Sgraph, yyscan_t scanner, const char *msg) {
 %}
 
 %code requires {
-
 #ifndef YY_TYPEDEF_YY_SCANNER_T
 #define YY_TYPEDEF_YY_SCANNER_T
 typedef void* yyscan_t;
 #endif
-
 }
 %error-verbose
 

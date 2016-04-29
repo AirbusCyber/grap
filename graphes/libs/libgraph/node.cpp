@@ -42,6 +42,8 @@ void node_free (node_t * node) {
   free(node->fathers);
 //   if (node->csymb) free(node->csymb);
 //   if (node->getid) free(node->getid);
+//   free(node->info); // be careful, node info are also used in Parcours and ParcoursNode
+//   node->condition->freeCondition(); // be careful, node conditions are also used in Parcours and ParcoursNode
   free(node);
 }
 

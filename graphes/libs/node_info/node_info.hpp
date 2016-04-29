@@ -135,6 +135,8 @@ public:
   bool equals(CondNode* cn);
   
   std::string toString();
+  
+  void freeCondition();
 };
 
 #endif

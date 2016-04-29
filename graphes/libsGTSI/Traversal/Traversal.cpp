@@ -472,16 +472,20 @@ void freeRetourParcoursDepuisSommet(Parcours::RetourParcoursDepuisSommet rt){
 Parcours::RetourParcours Parcours::parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool countAllMatches, bool printFound) {
   vsize_t n;
   vsize_t count = 0;
-  std::unordered_set < std::map < string, std::list < node_t * >*>*>set_gotten;
+  std::unordered_set < std::map < string, std::list < node_t * >*>*>* set_gotten = new std::unordered_set < std::map < string, std::list < node_t * >*>*>();
   for (n = 0; n < gr->nodes.size; n++) {
     RetourParcoursDepuisSommet rt = this->parcourirDepuisSommet(gr, n, W, checkLabels, printFound);
     if (rt.first) {
-      if (printFound and not rt.second->empty())
-        set_gotten.insert(rt.second);
-      if (not countAllMatches)
+      if (printFound and not rt.second->empty()){
+        set_gotten->insert(rt.second);
+      }
+      
+      if (not countAllMatches){
         return RetourParcours(1, set_gotten);
-      else
+      }
+      else{
         count++;
+      }
     }
     else{
       freeRetourParcoursDepuisSommet(rt);

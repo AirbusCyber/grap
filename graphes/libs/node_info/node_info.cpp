@@ -354,3 +354,16 @@ std::string CondNode::toString(){
   }
 }
 
+void CondNode::freeCondition(){
+  std::list<CondNode*>::iterator it = this->children->begin();
+
+  while(it != this->children->end()){
+    (*it)->freeCondition();
+    
+    it++;
+  }
+  
+  delete this;
+}
+
+
