@@ -12,6 +12,7 @@
 // #include "graph2.h"
 
 #define YYINITDEPTH 200000
+#define YYMAXDEPTH 1000000
 
 int yyerror(graph_t **Sgraph, yyscan_t scanner, const char *msg) {
     // Add error handling routine as needed
