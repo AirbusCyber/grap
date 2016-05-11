@@ -36,7 +36,7 @@ void printDescription() {
   std::cout << "Test 14: [reference to 11] same as test 11 but with PandaPE's disassembler. PandaPE does not loop rep instructions (hence 12 -> 2).\n";
   std::cout << "Test 15: [manual] Non-regression test for bug in graph traversal (child number i in -k>i terms was not checked).\n";
   std::cout << "Test 16: [manual] Test for lazy repeat option (zero out of three match).\n";
-  std::cout << "Test 16: [manual] Test for lazy repeat option (one out of three match).\n";
+  std::cout << "Test 17: [manual] Test for lazy repeat option (one out of three match).\n";
 }
 
 string Red = "\x1b[1;31m";
