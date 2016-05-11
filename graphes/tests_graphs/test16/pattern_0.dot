@@ -1,0 +1,7 @@
+Digraph G {
+"A" [label = "add", csymb="add", csymbtype="string", options="root"]
+"B" [label = "*", csymbtype="*", minrepeat=0, maxrepeat=3]
+"C" [label = "cmp"]
+"A" -> "B" [label = "1"]
+"B" -> "C" [label = "2"]
+}
