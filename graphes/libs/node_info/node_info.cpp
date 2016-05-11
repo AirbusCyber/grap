@@ -349,6 +349,7 @@ std::string CondNode::toString(){
 
         it++;
       }
+      s += ")";
       
       return s;
   }

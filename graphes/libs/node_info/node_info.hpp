@@ -43,6 +43,7 @@ public:
   vsize_t minRepeat;
   bool has_maxRepeat;
   vsize_t maxRepeat;
+  bool lazyRepeat;
   
   bool get;
   std::string getid;

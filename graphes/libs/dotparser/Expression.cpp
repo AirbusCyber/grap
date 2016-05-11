@@ -138,6 +138,7 @@ node_t *updateNode(OptionList * ol, node_t * n) {
   char hasMaxRepeat = 0;
   
   n->condition = new CondNode();
+  n->info->lazyRepeat = false;
   bool cond_filled = false;
 
   for (i = 0; i < ol->size; i++) {
@@ -227,6 +228,14 @@ node_t *updateNode(OptionList * ol, node_t * n) {
       hasMaxRepeat = 1;
       n->info->has_maxRepeat = true;
       n->info->maxRepeat = (vsize_t) atoi(v);
+    }
+    else if (strcmp(id, "lazyrepeat") == 0){
+      if (strcmp(v, "true") == 0){
+	n->info->lazyRepeat = true;
+      }
+      else{
+	n->info->lazyRepeat = false;
+      }
     }
     else if (strcmp(id, "minchildren") == 0) {
       n->info->minChildrenNumber = (vsize_t) atoi(v);
