@@ -107,6 +107,7 @@ CondNode::CondNode(){
   std::list<CondNode*>* cn = new std::list<CondNode*>();
   this->children = cn;
   this->comparison = ComparisonFunEnum::bool_false;
+  this->has_fixed_pattern_info = false;
 }
 
 CondNode::CondNode(std::list<CondNode*>* cn, UnOpEnum un_op){
@@ -114,6 +115,7 @@ CondNode::CondNode(std::list<CondNode*>* cn, UnOpEnum un_op){
   
   this->children = cn;
   this->unary_operator = un_op;
+  this->has_fixed_pattern_info = false;
 }
 
 CondNode::CondNode(std::list<CondNode*>* cn, BinOpEnum bin_op){
@@ -121,6 +123,7 @@ CondNode::CondNode(std::list<CondNode*>* cn, BinOpEnum bin_op){
   
   this->children = cn;
   this->binary_operator = bin_op;
+  this->has_fixed_pattern_info = false;
 }
 
 bool ComparisonFunctions::bool_equals(void* a1, void* a2)
@@ -154,6 +157,8 @@ bool ComparisonFunctions::str_contains(void* a1, void* a2)
   std::string* s2 = static_cast<std::string *>(a2);
   
   std::size_t found = s2->find(*s1);
+  
+//   std::cout << "is " << *s1 << " in " << *s2 << " ?\n";
   
   if (found!=std::string::npos){
     return true;
@@ -260,9 +265,13 @@ bool CondNode::binary_fun(bool b1, bool b2){
 
 bool CondNode::evaluate(NodeInfo* pattern, NodeInfo* test)
 {
+  if (this->has_fixed_pattern_info){
+    pattern = this->fixed_pattern_info; 
+  }
+  
   vsize_t nc = this->children->size();
   
-  if (nc == 0){ 
+  if (nc == 0){
    return this->comparison_fun(&((*pattern).*(this->pattern_field)), &((*test).*(this->test_field)));
   }
   else if (nc == 1){
@@ -287,6 +296,7 @@ bool CondNode::evaluate(NodeInfo* pattern, NodeInfo* test)
 bool CondNode::equals(CondNode* cn){
   vsize_t nc = this->children->size();
   if (nc != cn->children->size()) return false;
+  if (this->has_fixed_pattern_info != cn->has_fixed_pattern_info or (this->has_fixed_pattern_info and (this->fixed_pattern_info != cn->fixed_pattern_info))) return false;
   
   if (nc == 0){
     bool r = (this->pattern_field == cn->pattern_field)
@@ -321,6 +331,12 @@ bool CondNode::equals(CondNode* cn){
     return r;
   }
 }
+
+// CondNode* CondNode::AddLazyCond(node_t* n)
+// {
+//   return this;
+// }
+
 
 std::string CondNode::toString(){
   std::string s;

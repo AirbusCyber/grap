@@ -166,6 +166,28 @@ void Parcours::addMot(MotParcours * m) {
   assert(m->type == TYPE_M1 or m->type == TYPE_M2);
 }
 
+CondNode* computeCond(node_t* n){
+  if (not n->info->lazyRepeat or n->children_nb == 0){
+    return n->condition;
+  }
+  else {
+    // If lazy repeat, the condition of the first child should be excluded
+    node_t* c = n->children[0];
+
+    std::list<CondNode*>* not_child = new std::list<CondNode*>();
+    not_child = new std::list<CondNode*>();
+    not_child->push_front(c->condition);
+    CondNode* cn_not = new CondNode(not_child, UnOpEnum::logical_not);
+    cn_not->has_fixed_pattern_info = true;
+    cn_not->fixed_pattern_info = c->info;
+    
+    std::list<CondNode*>* and_children = new std::list<CondNode*>();
+    and_children->push_front(n->condition);
+    and_children->push_front(cn_not);
+    return new CondNode(and_children, BinOpEnum::logical_and);
+  }
+}
+
 Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
   Parcours *p = new Parcours();
 
@@ -217,7 +239,7 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
       m->i = node_ids_search->second;
       
       m->info = ss->info;
-      m->condition = ss->condition;
+      m->condition = computeCond(ss);
       p->addMot(m);
 
       sc = pere;
@@ -229,7 +251,7 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
         m->type = TYPE_M1;
         m->has_symbol = true;
         m->info = ss->info;
-        m->condition = ss->condition;
+        m->condition = computeCond(ss);
         p->addMot(m);
         p_is_epsilon = false;
       }
@@ -241,7 +263,7 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
         m->k = k;
         m->has_symbol = true;
         m->info = ss->info;
-        m->condition = ss->condition;
+        m->condition = computeCond(ss);
         p->addMot(m);
       }
 
@@ -269,7 +291,7 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
       m->k = k;
       m->has_symbol = false;
       m->info = ss->info;
-      m->condition = ss->condition;
+      m->condition = computeCond(ss);
       p->addMot(m);
       sc = ss;
     }
@@ -361,18 +383,9 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
         if (it == numerotes.end()) {
           // f n'est pas numéroté
           bool cond_m = m->matchesSymbol(f, checkLabels) and m->matchesCF(f) and max_numeros < m->i;
+          bool cond_lazy = m->info->minRepeat == 0 and m->info->lazyRepeat and not checkLabels;
     
-          // Dealing with lazy repeat
-          bool cond_not_pm = true;
-          if (m->info->lazyRepeat and i+1 < this->size){
-            MotParcours* nm = this->mots[i+1];
-            
-            if (nm->matchesSymbol(sc->children[0], checkLabels) and nm->matchesCF(sc->children[0])){
-              cond_not_pm = false;
-            }
-          }
-    
-          if (cond_m and cond_not_pm) {
+          if (cond_m and not cond_lazy) {
 //             printf("%x: not numbered, found\n", f->address);
             vsize_t r = 1;
             numeros[max_numeros] = std::pair < node_t *, node_t * >(f, NULL);
@@ -390,13 +403,10 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
                       and sc->children_nb == 1 and sc->children[0]->fathers_nb == 1 
                       and m->matchesSymbol(sc->children[0], checkLabels) and m->matchesCF(sc->children[0])) 
               {
-                // Dealing with lazy repeat
-                if (m->info->lazyRepeat and i+1 < this->size){
-                  MotParcours* nm = this->mots[i+1];
-                  
-                  if (nm->matchesSymbol(sc->children[0], checkLabels) and nm->matchesCF(sc->children[0])){
-                    break; 
-                  }
+                
+                // If lazy repeat and labels are not checked... this is a corner case: take the least repeat as possible
+                if (r >= m->info->minRepeat and m->info->lazyRepeat and not checkLabels){
+                  break;
                 }
                 
                 unordered_set < node_t * >::iterator it_find = numerotes.find(sc->children[0]);
@@ -764,7 +774,10 @@ ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph
         unordered_set < node_t * >::iterator it = numerotes.find(f);
         if (it == numerotes.end()) {
           // f n'est pas numéroté
-          if ((m->matchesSymbol(f, checkLabels) and m->matchesCF(f) and max_numeros < m->i)) {
+          bool cond_symbol = (m->matchesSymbol(f, checkLabels) and m->matchesCF(f) and max_numeros < m->i);
+          bool cond_lazy = m->info->minRepeat == 0 and m->info->lazyRepeat and not checkLabels;
+          
+          if (cond_symbol and not cond_lazy) {
 
             assert(max_numeros == m->i - 1);
 
@@ -777,8 +790,12 @@ ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph
 
             if (not m->info->has_maxRepeat or m->info->maxRepeat > 1) {
               while (true) {
+                // If lazy repeat and labels are not checked... this is a corner case: take the least repeat as possible
+                if (r >= m->info->minRepeat and m->info->lazyRepeat and not checkLabels) break;
+                
                 if ((not m->info->has_maxRepeat or r < m->info->maxRepeat) and s->children_nb == 1 and s->children[0]->fathers_nb == 1 and m->matchesSymbol(s->children[0], checkLabels) and m->matchesCF(s->children[0])) {
                   unordered_set < node_t * >::iterator it_find = numerotes.find(s->children[0]);
+                  
                   if (it_find != numerotes.end()) break;
                   
                   s = s->children[0];
@@ -801,6 +818,15 @@ ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph
             return std::make_tuple(true, s, numeros, max_numeros, numerotes);
           }
           else {
+            if (m->info->minRepeat == 0){
+              // It is a ghost node: you can do a back reference (-R> max_numeros) but it is not really matched
+              // Thus it can still be "numerote" and referenced by another MotParcours
+              numeros[max_numeros] = std::pair < node_t *, node_t * >(f, NULL);
+              max_numeros++;
+              
+              return std::make_tuple(true, s, numeros, max_numeros, numerotes);
+            }
+            
             return std::make_tuple(false, s, numeros, max_numeros, numerotes);
           }
         }

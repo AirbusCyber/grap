@@ -48,6 +48,8 @@ public:
   CondNode* condition;
 };
 
+CondNode* computeCond(node_t* n);
+
 class Parcours {
 public:
   bool complete;

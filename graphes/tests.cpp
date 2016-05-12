@@ -67,7 +67,9 @@ void drop_privileges(){
 }
 
 int main(int argc, char *argv[]) {
+  //TODO: fix seccomp
 //   drop_privileges();
+
   
   if (argc >= 2) {
     printDescription();

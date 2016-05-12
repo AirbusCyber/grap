@@ -118,6 +118,8 @@ public:
   CondNode(std::list<CondNode*>*, UnOpEnum);
   CondNode(std::list<CondNode*>*, BinOpEnum);
   
+  CondNode* AddLazyCond(NodeInfo*);
+  
   std::list<CondNode*>* children;
   UnOpEnum unary_operator;
   BinOpEnum binary_operator;
@@ -127,6 +129,9 @@ public:
   
   void* NodeInfo::* pattern_field;
   void* NodeInfo::* test_field;
+  
+  bool has_fixed_pattern_info;
+  NodeInfo* fixed_pattern_info;
   
   bool comparison_fun(void*, void*);
   ComparisonFunEnum comparison;
