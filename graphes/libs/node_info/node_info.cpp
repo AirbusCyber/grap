@@ -332,12 +332,6 @@ bool CondNode::equals(CondNode* cn){
   }
 }
 
-// CondNode* CondNode::AddLazyCond(node_t* n)
-// {
-//   return this;
-// }
-
-
 std::string CondNode::toString(){
   std::string s;
   
