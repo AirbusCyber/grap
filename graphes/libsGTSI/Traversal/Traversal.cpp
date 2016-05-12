@@ -434,6 +434,7 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
           else {
             if (m->info->minRepeat == 0){
               // It is a ghost node: you can do a back reference (-R> max_numeros) but it is not really matched
+              // Thus it can still be "numerote" and referenced by another MotParcours
               numeros[max_numeros] = std::pair < node_t *, node_t * >(f, NULL);
               max_numeros++;
               
