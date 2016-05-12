@@ -231,10 +231,10 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     }
     else if (strcmp(id, "lazyrepeat") == 0){
       if (strcmp(v, "true") == 0){
-	n->info->lazyRepeat = true;
+        n->info->lazyRepeat = true;
       }
       else{
-	n->info->lazyRepeat = false;
+        n->info->lazyRepeat = false;
       }
     }
     else if (strcmp(id, "minchildren") == 0) {

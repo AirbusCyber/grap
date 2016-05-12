@@ -282,7 +282,7 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
   else {
     p->complete = false;
   }
- 
+
   return p;
 }
 
@@ -360,18 +360,18 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
         unordered_set < node_t * >::iterator it = numerotes.find(f);
         if (it == numerotes.end()) {
           // f n'est pas numéroté
-	  bool cond_m = m->matchesSymbol(f, checkLabels) and m->matchesCF(f) and max_numeros < m->i;
-	  
-	  // Dealing with lazy repeat
-	  bool cond_not_pm = true;
-	  if (m->info->lazyRepeat and i+1 < this->size){
-	    MotParcours* nm = this->mots[i+1];
-	    
-	    if (nm->matchesSymbol(sc->children[0], checkLabels) and nm->matchesCF(sc->children[0])){
-	      cond_not_pm = false;
-	    }
-	  }
-	  
+          bool cond_m = m->matchesSymbol(f, checkLabels) and m->matchesCF(f) and max_numeros < m->i;
+    
+          // Dealing with lazy repeat
+          bool cond_not_pm = true;
+          if (m->info->lazyRepeat and i+1 < this->size){
+            MotParcours* nm = this->mots[i+1];
+            
+            if (nm->matchesSymbol(sc->children[0], checkLabels) and nm->matchesCF(sc->children[0])){
+              cond_not_pm = false;
+            }
+          }
+    
           if (cond_m and cond_not_pm) {
 //             printf("%x: not numbered, found\n", f->address);
             vsize_t r = 1;
@@ -387,32 +387,31 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
 
             if (not m->info->has_maxRepeat or m->info->maxRepeat > 1) {
               while ((not m->info->has_maxRepeat or r < m->info->maxRepeat) 
-		     and sc->children_nb == 1 and sc->children[0]->fathers_nb == 1 
-		     and m->matchesSymbol(sc->children[0], checkLabels) and m->matchesCF(sc->children[0])) 
-	      {
-		
-		// Dealing with lazy repeat
-		if (m->info->lazyRepeat and i+1 < this->size){
-		  MotParcours* nm = this->mots[i+1];
-		  
-		  if (nm->matchesSymbol(sc->children[0], checkLabels) and nm->matchesCF(sc->children[0])){
-		    break; 
-		  }
-		}
-		
-		unordered_set < node_t * >::iterator it_find = numerotes.find(sc->children[0]);
-		if (it_find != numerotes.end()) {
-		  // We don't make a block from an already numbered (visited) node
-		  break;
-		}
-		
-		sc = sc->children[0];
-		r++;
+                      and sc->children_nb == 1 and sc->children[0]->fathers_nb == 1 
+                      and m->matchesSymbol(sc->children[0], checkLabels) and m->matchesCF(sc->children[0])) 
+              {
+                // Dealing with lazy repeat
+                if (m->info->lazyRepeat and i+1 < this->size){
+                  MotParcours* nm = this->mots[i+1];
+                  
+                  if (nm->matchesSymbol(sc->children[0], checkLabels) and nm->matchesCF(sc->children[0])){
+                    break; 
+                  }
+                }
+                
+                unordered_set < node_t * >::iterator it_find = numerotes.find(sc->children[0]);
+                if (it_find != numerotes.end()) {
+                  // We don't make a block from an already numbered (visited) node
+                  break;
+                }
+                
+                sc = sc->children[0];
+                r++;
 
-		if (returnFound and m->info->get){
-		  list_nodes->push_back((node_t *) sc);
-		}
-	      }
+                if (returnFound and m->info->get){
+                  list_nodes->push_back((node_t *) sc);
+                }
+              }
               
               numeros[max_numeros - 1].second = sc;
             }
@@ -433,10 +432,14 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
             }
           }
           else {
-	    if (m->info->minRepeat == 0){
-	      continue; 
-	    }
-	    
+            if (m->info->minRepeat == 0){
+              // It is a ghost node: you can do a back reference (-R> max_numeros) but it is not really matched
+              numeros[max_numeros] = std::pair < node_t *, node_t * >(f, NULL);
+              max_numeros++;
+              
+              continue; 
+            }
+    
 //             printf("%x: not numbered, not found\n", f->address);
             free(numeros);
             return RetourParcoursDepuisSommet(false, found_nodes);
@@ -459,9 +462,6 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
               free(numeros);
               return RetourParcoursDepuisSommet(false, found_nodes);
           }
-     
-          
-//           cout << "sc: " << sc->csymb << "\n" ;
         }
         else {
 //           printf("has symbol ; sc: %x\n", sc->address);
