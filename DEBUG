@@ -9,5 +9,5 @@ cmake -DCMAKE_BUILD_TYPE=Debug .
 Tests avec Valgrind:
 cmake -DCMAKE_BUILD_TYPE=Valgrind .
 make
-valgrind --leak-check=full --track-origins=yes --show-reachable=yes ./tests
+valgrind --max-stackframe=2000344 --leak-check=full --track-origins=yes --show-reachable=yes ./tests
 

@@ -332,30 +332,95 @@ bool CondNode::equals(CondNode* cn){
   }
 }
 
-std::string CondNode::toString(){
+std::string CondNode::field_toString(NodeInfo* ni)
+{
+  void* v;
+  std::string* s;
+  bool* b;
+  vsize_t* n;
+  uint8_t* i;
+  
+  switch (this->comparison){
+    case bool_equals:
+      v = &((*ni).*(this->pattern_field));
+      b = static_cast<bool*>(v);
+      return *b ? "true" : "false";
+      
+    case bool_false:
+      return "";
+      
+    case bool_true:
+      return "";
+      
+    case bool_test_true:
+      return "";
+      
+    case vsizet_equals:
+      v = &((*ni).*(this->pattern_field));
+      n = static_cast<vsize_t*>(v);
+      return std::to_string(*n);
+      
+    case str_contains:
+      v = &((*ni).*(this->pattern_field));
+      s = static_cast<std::string*>(v);
+      return *s;
+      
+    case str_equals:
+      v = &((*ni).*(this->pattern_field));
+      s = static_cast<std::string*>(v);
+      return *s;
+      
+    case uint8t_equals:
+      v = &((*ni).*(this->pattern_field));
+      i = static_cast<std::uint8_t*>(v);
+      return std::to_string(*i);
+      
+    case uint8t_gt:
+      v = &((*ni).*(this->pattern_field));
+      i = static_cast<std::uint8_t*>(v);
+      return std::to_string(*i);
+      
+    default:
+      std::cerr << "ERR in node_info.cpp : unknown comparison_fun\n";
+      return "";
+  }
+}
+
+
+std::string CondNode::toString(NodeInfo* ni){
   std::string s;
+  std::string r;
+  
+  if (this->has_fixed_pattern_info){
+    ni = this->fixed_pattern_info; 
+  }
   
   switch (this->children->size()){
     case 0:
-      return desc_ComparisonFunEnum[this->comparison];
+      s = desc_ComparisonFunEnum[this->comparison];
+      r = this->field_toString(ni);
+      if (r.length() != 0){
+        s += ":" + r; 
+      }
+      return s;
     
     case 1:
       s = desc_UnOpEnum[this->unary_operator];
       s += "(";
-      s += this->children->front()->toString();
+      s += this->children->front()->toString(ni);
       s += ")";
       return s;
       
     default:
       s = desc_BinOpEnum[this->binary_operator];
       s += "(";
-      s += this->children->front()->toString();
+      s += this->children->front()->toString(ni);
       
       std::list<CondNode*>::iterator it = this->children->begin();
       it++;
 
       while(it != this->children->end()){
-        s += ", " + (*it)->toString();
+        s += ", " + (*it)->toString(ni);
 
         it++;
       }

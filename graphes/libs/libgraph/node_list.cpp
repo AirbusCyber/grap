@@ -28,11 +28,11 @@ void node_list_add(node_list_t * list, node_t* node) {
   }
 }
 
-void node_list_free(node_list_t * list) {
+void node_list_free(node_list_t * list, bool free_info) {
   vsize_t i;
 
   for (i = 0; i < list->size; i++) {
-    node_free(list->storage[i]);
+    node_free(list->storage[i], free_info);
   }
   
   free(list->storage);

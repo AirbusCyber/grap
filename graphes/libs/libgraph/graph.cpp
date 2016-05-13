@@ -9,9 +9,9 @@ graph_t* graph_alloc(vsize_t max_size) {
   return graph;
 }
 
-void graph_free(graph_t* graph) {
+void graph_free(graph_t* graph, bool free_info) {
   if(graph) {
-    node_list_free(&(graph->nodes));
+    node_list_free(&(graph->nodes), free_info);
     free(graph);
   }
 }

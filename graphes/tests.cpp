@@ -153,10 +153,10 @@ int main(int argc, char *argv[]) {
     test_GTSI(grPattern, nPattern, grTest, expected_gtsi_no_labels, false, " (Don't check labels)", true, "gtsi-nl-" + std::to_string(i) + ".dot");
 
     for (j=0; j<nPattern; j++){
-      graph_free(grPattern[j]);
+      graph_free(grPattern[j], true);
     }
     
-    graph_free(grTest);
+    graph_free(grTest, true);
     
     std::cout << "\n";
     i++;

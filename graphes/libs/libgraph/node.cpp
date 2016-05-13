@@ -37,13 +37,15 @@ node_t *node_copy (node_t * node1, const node_t * node2) {
   return node1;
 }
 
-void node_free (node_t * node) {
+void node_free (node_t * node, bool free_info) {
   free(node->children);
   free(node->fathers);
-//   if (node->csymb) free(node->csymb);
-//   if (node->getid) free(node->getid);
-//   free(node->info); // be careful, node info are also used in Parcours and ParcoursNode
-//   node->condition->freeCondition(); // be careful, node conditions are also used in Parcours and ParcoursNode
+  
+  if (free_info){
+    // be careful, node info and node conditions are also used in Parcours and ParcoursNode
+    delete(node->info);
+    node->condition->freeCondition();
+  }
   free(node);
 }
 

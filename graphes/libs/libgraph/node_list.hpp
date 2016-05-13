@@ -59,7 +59,7 @@ void node_list_add(node_list_t * list, node_t* node);
  @brief Free all internal structures used.
  @param list The list to free.
  */
-void node_list_free(node_list_t * list);
+void node_list_free(node_list_t * list, bool free_info);
 
 /*!
  @brief Reset the list.

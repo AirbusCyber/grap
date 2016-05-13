@@ -8,8 +8,9 @@ void printUsage() {
   printf("Usage : ./GTSI-grap [options] patternFile testFile\n");
   printf("Options are :\n");
   printf("        -h or --help: print this message\n");
-  printf("        -v:           verbose\n");
-  printf("        -q:           quiet\n");
+  printf("        -v or --verbose\n");
+  printf("        -d or --debug\n");
+  printf("        -q or --quiet\n");
   printf("        -ncl or -ncs or --no-check-labels : do not check the symbols (labels) of sites\n");
 }
 
@@ -29,11 +30,13 @@ int main(int argc, char *argv[]) {
   bool scanOk = false;
   bool checkLabels = true;
   bool optionVerbose = false;
+  bool optionDebug = false;
   bool optionQuiet = false;
 
+  // Parsing options
   int a;
   for (a = 1; a < argc; a++) {
-    if (strcmp(argv[a], "-h") == 0 || strcmp(argv[a], "--help") == 0 || strcmp(argv[a], "--help") == 0) {
+    if (strcmp(argv[a], "-h") == 0 || strcmp(argv[a], "--help") == 0) {
       printUsage();
       return 0;
     }
@@ -42,6 +45,9 @@ int main(int argc, char *argv[]) {
     }
     else if (strcmp(argv[a], "-q") == 0 || strcmp(argv[a], "--quiet") == 0) {
       optionQuiet = true;
+    }
+    else if (strcmp(argv[a], "-d") == 0 || strcmp(argv[a], "--debug") == 0) {
+      optionDebug = true;
     }
     else if (strcmp(argv[a], "-ncl") == 0 || strcmp(argv[a], "-ncs") == 0 || strcmp(argv[a], "--no-check-labels") == 0) {
       checkLabels = false;
@@ -76,50 +82,52 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  char valence = 2;
-
   if (optionVerbose){
     cout << "Parsing pattern file." << endl; 
   }
   
-  graph_t *gr;
-  gr = getGraphFromFile(fpPattern);
-  vsize_t n_pattern = gr->nodes.size;
+  graph_t *pattern_graph = getGraphFromFile(fpPattern);
+  vsize_t n_pattern = pattern_graph->nodes.size;
   fclose(fpPattern);
   
   if (optionVerbose){
     cout << "Done." << endl; 
   }
 
-  vsize_t siteSize = gr->nodes.size;
-
-  Parcours *parcours = parcoursLargeur(gr, gr->root->list_id, siteSize);
-//   cout << parcours->toString() << "\n";
+  // Generate Parcours from a breadth-first-search of the pattern graph
+  Parcours *parcours = parcoursLargeur(pattern_graph, pattern_graph->root->list_id, pattern_graph->nodes.size);
+  
+  if (optionDebug){
+    cout << "Pattern Parcours is:\n" << parcours->toString() << "\n";
+  }
 
   if (not parcours->complete) {
     printf("Warning: Pattern graph is not connected.\n");
   }
-  graph_free(gr);
+  
+  // Free test graph but not nodes' info: they are referenced by parcours
+//   graph_free(gr, false);
   
   if (optionVerbose){
     cout << "Parsing test file." << endl; 
   }
 
-  gr = getGraphFromFile(fpTest);
+  graph_t *test_graph = getGraphFromFile(fpTest);
   vsize_t n_test;
-  n_test = gr->nodes.size;
+  n_test = test_graph->nodes.size;
   fclose(fpTest);
   
   if (optionVerbose){
     cout << "Done." << endl; 
   }
 
-  Parcours::RetourParcours rt = parcours->parcourir(gr, siteSize, checkLabels, true, not optionQuiet);
+  // Find possible traversals of parcours in test graph
+  Parcours::RetourParcours rt = parcours->parcourir(test_graph, pattern_graph->nodes.size, checkLabels, true, not optionQuiet);
   vsize_t count = rt.first;
 
   if (not optionQuiet) {
     printf("%d traversal(s) possible in %s.\n", (int) count, pathTest);
-    printf("Pattern graph (%s) has %d nodes.\nTest graph (%s) has %d nodes.\n", pathPattern, (int) n_pattern, pathTest, (int) gr->nodes.size);
+    printf("Pattern graph (%s) has %d nodes.\nTest graph (%s) has %d nodes.\n", pathPattern, (int) n_pattern, pathTest, (int) test_graph->nodes.size);
   }
   else{
     if (count > 0){
@@ -127,8 +135,8 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  // Parse matches and print the extracted nodes
   std::unordered_set < std::map < string, std::list < node_t * >*>*>* set_gotten = rt.second;
-
   if (not set_gotten->empty()) {
     std::cout << "\nExtracted nodes:\n";
     std::unordered_set < std::map < string, std::list < node_t * >*>*>::iterator it;
@@ -161,5 +169,6 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  graph_free(gr);
+  graph_free(pattern_graph, true);
+  graph_free(test_graph, true);
 }

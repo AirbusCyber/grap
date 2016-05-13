@@ -97,7 +97,7 @@ node_t* node_copy(node_t* node1, const node_t* node2);
  @brief Free the node.
  @param node The node to free.
  */
-void node_free(node_t* node);
+void node_free(node_t* node, bool free_info);
 
 /*!
  @brief Set the number of children of the node.

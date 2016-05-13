@@ -11,10 +11,10 @@ string MotParcours::toString() {
   string s = "";
 
   if (this->type == TYPE_M1) {
-      s += "(";
-
-    s += "1: ";
-    s += this->info->inst_str;
+//     s += "(";
+    s += "1:";
+//     s += this->info->inst_str;
+//     s += ")";
   }
   else if (this->type == TYPE_M2) {
     s += "-";
@@ -28,15 +28,15 @@ string MotParcours::toString() {
     }
 
     if (this->has_symbol){
-      s += "(";
+//       s += "(";
       s += std::to_string((int) this->i);
-      s += ": ";
-      s += this->info->inst_str;
-      s += ")";
+      s += ":";
+//       s += this->info->inst_str;
+//       s += ")";
     }
   }
   else {
-    printf("ERROR in MotParcours::toString.\n");
+    std::cerr << "ERROR in MotParcours::toString.\n";
     return "ERR";
   }
   
@@ -48,41 +48,49 @@ string MotParcours::toString() {
       s += "*";
     }
     else {
-      s += "{" + std::to_string(this->info->minRepeat) + ",";
-      if (this->info->has_maxRepeat) {
-        s += std::to_string(this->info->maxRepeat);
+      if (this->info->has_maxRepeat and this->info->minRepeat == this->info->maxRepeat){
+        if (this->info->minRepeat != 1){
+          s += "{" + std::to_string(this->info->minRepeat);
+          s += "}";
+        }
       }
-      s += "}";
+      else{
+        s += "{" + std::to_string(this->info->minRepeat) + ",";
+        if (this->info->has_maxRepeat) {
+          s += std::to_string(this->info->maxRepeat);
+        }
+        s += "}";
+      }
     }
     
     if (this->info->has_maxChildrenNumber or this->info->has_maxFathersNumber or this->info->minChildrenNumber != 0 or this->info->minFathersNumber != 0) {
       s += "_";
       bool one = false;
       if (this->info->minChildrenNumber > 0) {
-        s += "mc=" + std::to_string((int) this->info->minChildrenNumber);
+        s += "minc=" + std::to_string((int) this->info->minChildrenNumber);
         one = true;
       }
       if (this->info->has_maxChildrenNumber) {
         if (one)
           s += ",";
-        s += "mc=" + std::to_string((int) this->info->maxChildrenNumber);
+        s += "maxc=" + std::to_string((int) this->info->maxChildrenNumber);
         one = true;
       }
       if (this->info->minFathersNumber > 0) {
         if (one)
           s += ",";
-        s += "mf=" + std::to_string((int) this->info->minFathersNumber);
+        s += "minf=" + std::to_string((int) this->info->minFathersNumber);
         one = true;
       }
       if (this->info->has_maxFathersNumber) {
         if (one)
           s += ",";
-        s += "mc=" + std::to_string((int) this->info->has_maxFathersNumber);
+        s += "maxf=" + std::to_string((int) this->info->maxFathersNumber);
         one = true;
       }
     }
 
-    s += "?(" + this->condition->toString() + ")";
+    s += "?" + this->condition->toString(this->info);
   }
   
   return s;
@@ -172,19 +180,26 @@ CondNode* computeCond(node_t* n){
   }
   else {
     // If lazy repeat, the condition of the first child should be excluded
-    node_t* c = n->children[0];
+    node_t* child = n->children[0];
 
     std::list<CondNode*>* not_child = new std::list<CondNode*>();
     not_child = new std::list<CondNode*>();
-    not_child->push_front(c->condition);
+    not_child->push_front(child->condition);
     CondNode* cn_not = new CondNode(not_child, UnOpEnum::logical_not);
     cn_not->has_fixed_pattern_info = true;
-    cn_not->fixed_pattern_info = c->info;
+    cn_not->fixed_pattern_info = child->info;
     
-    std::list<CondNode*>* and_children = new std::list<CondNode*>();
-    and_children->push_front(n->condition);
-    and_children->push_front(cn_not);
-    return new CondNode(and_children, BinOpEnum::logical_and);
+    if (n->condition->children->size() == 0 and n->condition->comparison == bool_true){
+      // The original condition is only "true": then the new one is "not(child->condition)"
+      return cn_not;
+    }
+    else{
+      // Otherwise the new condition is "n->condition and not (child->condition)"
+      std::list<CondNode*>* and_children = new std::list<CondNode*>();
+      and_children->push_front(n->condition);
+      and_children->push_front(cn_not);
+      return new CondNode(and_children, BinOpEnum::logical_and);
+    }
   }
 }
 

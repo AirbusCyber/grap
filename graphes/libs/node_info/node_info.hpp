@@ -61,15 +61,24 @@ enum ComparisonFunEnum {
   uint8t_gt
 };
 
-static const char * desc_ComparisonFunEnum[] = {
+static const std::string desc_ComparisonFunEnum[] = {
+// str_equals:
   "str_equals",
+// str_contains:
   "str_contains",
-  "bool_true",
-  "bool_false",
+// bool_true:
+  "true",
+// bool_false:
+  "false",
+// bool_test_true:
   "bool_test_true",
+// bool_equals:
   "bool_equals",
+// vsizet_equals:
   "vsizet_equals",
+// uint8t_equals:
   "uint8t_equals",
+// uint8t_gt:
   "uint8t_gt"
 };
 
@@ -77,8 +86,9 @@ enum UnOpEnum {
   logical_not
 };
 
-static const char * desc_UnOpEnum[] = {
-  "logical_not"
+static const std::string desc_UnOpEnum[] = {
+// logical_not:
+  "not"
 };
 
 enum BinOpEnum {
@@ -86,9 +96,11 @@ enum BinOpEnum {
   logical_and
 };
 
-static const char * desc_BinOpEnum[] = {
-  "logical_or",
-  "logical_and"
+static const std::string desc_BinOpEnum[] = {
+// logical_or:
+  "or",
+// logical_and:
+  "and"
 };
 
 class ComparisonFunctions{
@@ -140,7 +152,8 @@ public:
   
   bool equals(CondNode* cn);
   
-  std::string toString();
+  std::string toString(NodeInfo*);
+  std::string field_toString(NodeInfo*);
   
   void freeCondition();
 };

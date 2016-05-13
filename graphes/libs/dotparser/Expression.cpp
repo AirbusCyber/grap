@@ -91,7 +91,7 @@ node_t *createNode(char *value) {
   node->children_nb = 0;
   node->fathers_nb = 0;
   node->list_id = 0;
-  node->node_id = id;  
+  node->node_id = id;
   node->info = new NodeInfo();
 
   return node;

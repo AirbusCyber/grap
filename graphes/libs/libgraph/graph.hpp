@@ -33,14 +33,11 @@ typedef struct graph_t {
  */
 graph_t* graph_alloc(vsize_t max_size);
 
-extern "C" { 
-void graph_free(graph_t* graph);
-}
-
 /*!
  @brief Graph freeing procedure.
  @param graph The graph to free.
+ @param free_info Wether to free nodes' info, be sure that they are not used elsewhere (Parcours).
  */
-void graph_free(graph_t* graph);
+void graph_free(graph_t* graph, bool free_info);
 
 #endif
