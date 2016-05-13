@@ -373,12 +373,12 @@ std::string CondNode::field_toString(NodeInfo* ni)
     case uint8t_equals:
       v = &((*ni).*(this->pattern_field));
       i = static_cast<std::uint8_t*>(v);
-      return std::to_string(*i);
+      return std::to_string((int) *i);
       
     case uint8t_gt:
       v = &((*ni).*(this->pattern_field));
       i = static_cast<std::uint8_t*>(v);
-      return std::to_string(*i);
+      return std::to_string((int) *i);
       
     default:
       std::cerr << "ERR in node_info.cpp : unknown comparison_fun\n";
