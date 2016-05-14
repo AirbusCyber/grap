@@ -385,7 +385,7 @@ void test_GTSI(graph_t ** grPattern, size_t nPattern, graph_t * grTest, size_t e
     }
     printf("%s%d traversals possible in test graph (expected: %d) with a single traversal.%s\n", color.c_str(), (int) count2, (int) expected, Color_Off.c_str());
   
-    //     freeRetourParcoursDepuisSommet(rt); 
+    delete(rt.second);
   }
   
 }

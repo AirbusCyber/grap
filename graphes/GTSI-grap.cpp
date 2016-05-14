@@ -169,6 +169,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  delete(set_gotten);
   graph_free(pattern_graph, true);
   graph_free(test_graph, true);
 }
