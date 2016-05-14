@@ -142,13 +142,10 @@ node_t *updateNode(OptionList * ol, node_t * n) {
   bool cond_filled = false;
 
   for (i = 0; i < ol->size; i++) {
-    char free_v = 1;
     char *v = removeQuotes(ol->options[i]->value);
     char *id = ol->options[i]->id;
 
     if (hasSymb == 0 && hasCSymb == 0 && strcmp(id, "label") == 0) {
-      
-      free_v = 0;
       n->info->inst_str = v;
     }
     else if (strcmp(id, "root") == 0 || (strcmp(id, "fillcolor") == 0 && strcmp(v, "orange") == 0)) {
@@ -160,7 +157,6 @@ node_t *updateNode(OptionList * ol, node_t * n) {
       std::cout << "TODO: symb option deprecated\n";
     }
     else if (strcmp(id, "csymb") == 0) {
-      free_v = 0;
       hasCSymb = 1;
       
       n->info->inst_str = v;
@@ -252,8 +248,6 @@ node_t *updateNode(OptionList * ol, node_t * n) {
       n->info->maxFathersNumber = (vsize_t) atoi(v);
     }
     else if (strcmp(id, "getid") == 0) {
-      free_v = 0;
-      
       n->info->get = true;
       n->info->getid = v;
     }
@@ -262,7 +256,7 @@ node_t *updateNode(OptionList * ol, node_t * n) {
       n->info->address = (vsize_t) strtol(v, NULL, 16);
     }
     
-    if (free_v) free(v);
+    free(v);
   }
 
   if (hasMinRepeat && !hasMaxRepeat) {
