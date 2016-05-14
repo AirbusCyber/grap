@@ -43,6 +43,7 @@ string Red = "\x1b[1;31m";
 string Green = "\x1b[1;32m";
 string Blue = "\x1b[1;33m";
 string Color_Off = "\x1b[0m";
+bool debug = true;
 
 void drop_privileges(){
   scmp_filter_ctx ctx;
@@ -82,14 +83,17 @@ int main(int argc, char *argv[]) {
   graph_t **grPattern = nullptr;
   graph_t *grPattern2 = nullptr;
   graph_t *grTest = nullptr;
-
-  FILE* fpPattern;
-  FILE* fpTest;
   
   vsize_t i = 0;
   while (i < std::numeric_limits < vsize_t >::max()) {
     std::string dirPath = "tests_graphs/test" + std::to_string(i) + "/";
     std::string pathTest = dirPath + "test.dot";
+    
+    grTest = getGraphFromPath(pathTest.c_str());
+    if (grTest == NULL){
+      std::cout << "Can't read next test.dot file, probably reached the end of tests.\n";
+      break;
+    }
 
     // read expected results
     size_t expected_gtsi_with_labels = 0;
@@ -107,48 +111,39 @@ int main(int argc, char *argv[]) {
 
     f_res_gtsi.close();
 
-    fpTest = fopen(pathTest.c_str(), "r");
-    if (fpTest == NULL) {
-//       fprintf(stderr, "Can't open pattern or test graph\n");
-      break;
-    }
     cout << Blue;
     std::cout << "Running test " + std::to_string(i) + "\n";
     cout << Color_Off;
+       
+    if (debug){
+      std::cout << "Test graph is:\n";
+      graph_fprint (stdout, grTest);
+    }
 
     vsize_t j = 0;
     vsize_t nPattern = 0;
-//     grPattern = (graph_t **) std::malloc(0*sizeof(graph_t *));
-
-    while (j < std::numeric_limits < vsize_t >::max()) {
+    while (j < std::numeric_limits < vsize_t >::max()) {      
       std::string pathPattern = dirPath + "pattern_" + to_string(j) + ".dot";
-//       fpPattern = fopen(pathPattern.c_str(), "r");
-
-//       if (fpPattern == NULL)
-//         break;
-//       fclose(fpPattern);
-      
       grPattern = (graph_t **) realloc_or_quit(grPattern, (j + 1) * sizeof(graph_t *));
       grPattern[j] = getGraphFromPath(pathPattern.c_str());
       
       if (grPattern[j] == NULL){
-       break; 
+       break;
       }
       
-//       graph_fprint(stdout, grPattern[j]);
-//       graph_from_file(&grPattern[j], fpPattern);
+      if (debug){
+	std::cout << "Pattern graph " << j << " is:\n";
+	graph_fprint(stdout, grPattern[j]);
+      }
       j++;
       nPattern++;
     }
 
-    if (nPattern == 0)
+    if (nPattern == 0){
       break;
+    }
 
-    grTest = getGraphFromPath(pathTest.c_str());
-
-//     graph_fprint (stdout, grTest);
-
-    // GTSIs
+    // GTSI with and without labels
     test_GTSI(grPattern, nPattern, grTest, expected_gtsi_with_labels, true, " (Check labels)", true, "gtsi-l-" + std::to_string(i) + ".dot");
     test_GTSI(grPattern, nPattern, grTest, expected_gtsi_no_labels, false, " (Don't check labels)", true, "gtsi-nl-" + std::to_string(i) + ".dot");
 
