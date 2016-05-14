@@ -509,6 +509,20 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
   return RetourParcoursDepuisSommet(true, found_nodes);
 }
 
+void freeMapGotten(std::map < string, std::list < node_t * >*>* map_gotten){
+  // Map: associates a string with a list of nodes
+  // Frees each list associated with a string, then free the map ; does not free the nodes
+  
+  std::map < string, std::list < node_t * >*>::iterator it;
+  for (it = map_gotten->begin(); it != map_gotten->end(); it++) {
+    std::list < node_t * >*node_list = (*it).second;
+    
+    delete(node_list);
+  }
+
+  delete(map_gotten);
+}
+
 void freeRetourParcoursDepuisSommet(Parcours::RetourParcoursDepuisSommet rt){
     // freeing found nodes
     std::map < string, std::list < node_t * >*>* found_nodes = rt.second;
@@ -524,15 +538,18 @@ void freeRetourParcoursDepuisSommet(Parcours::RetourParcoursDepuisSommet rt){
     delete rt.second;
 }
 
-Parcours::RetourParcours Parcours::parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool countAllMatches, bool printFound) {
+Parcours::RetourParcours Parcours::parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool countAllMatches, bool getId) {
   vsize_t n;
   vsize_t count = 0;
   std::unordered_set < std::map < string, std::list < node_t * >*>*>* set_gotten = new std::unordered_set < std::map < string, std::list < node_t * >*>*>();
   for (n = 0; n < gr->nodes.size; n++) {
-    RetourParcoursDepuisSommet rt = this->parcourirDepuisSommet(gr, n, W, checkLabels, printFound);
+    RetourParcoursDepuisSommet rt = this->parcourirDepuisSommet(gr, n, W, checkLabels, getId);
     if (rt.first) {
-      if (printFound and not rt.second->empty()){
+      if (getId and not rt.second->empty()){
         set_gotten->insert(rt.second);
+      }
+      else {
+	freeMapGotten(rt.second);
       }
       
       if (not countAllMatches){

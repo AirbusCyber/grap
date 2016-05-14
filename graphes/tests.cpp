@@ -373,7 +373,7 @@ void test_GTSI(graph_t ** grPattern, size_t nPattern, graph_t * grTest, size_t e
 
   if (nPattern == 1) {    
     Parcours *p = parcoursLargeur(grPattern[0], grPattern[0]->root->list_id, siteSize);
-    Parcours::RetourParcours rt = p->parcourir(grTest, siteSize, checkLabels, true, true);
+    Parcours::RetourParcours rt = p->parcourir(grTest, siteSize, checkLabels, true, false);
     delete p;
     vsize_t count2 = rt.first;
 

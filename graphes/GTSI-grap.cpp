@@ -166,9 +166,11 @@ int main(int argc, char *argv[]) {
       }
 
       i++;
+      
+      freeMapGotten(p_found_nodes);
     }
   }
-
+  
   delete(set_gotten);
   graph_free(pattern_graph, true);
   graph_free(test_graph, true);

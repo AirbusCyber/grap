@@ -61,10 +61,11 @@ public:
   typedef std::pair < bool, std::map < string, std::list < node_t * >*>*>RetourParcoursDepuisSommet;
   RetourParcoursDepuisSommet parcourirDepuisSommet(graph_t *, vsize_t root, vsize_t W, bool checkLabels, bool printFound);
   typedef std::pair < vsize_t, std::unordered_set < std::map < string, std::list < node_t * >*>*>*>RetourParcours;
-  RetourParcours parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool countAllMatches, bool printFound);
+  RetourParcours parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool countAllMatches, bool getId);
   bool equals(Parcours *, bool checkLabels);
 };
 
+void freeMapGotten(std::map < string, std::list < node_t * >*>*);
 void freeRetourParcoursDepuisSommet(Parcours::RetourParcoursDepuisSommet rt);
 
 typedef std::tuple < node_t *, uint8_t, node_t * >TupleQueue;
