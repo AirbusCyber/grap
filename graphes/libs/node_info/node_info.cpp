@@ -439,6 +439,7 @@ void CondNode::freeCondition(){
     it++;
   }
   
+  delete this->children;
   delete this;
 }
 
