@@ -181,7 +181,7 @@ void test_NodeInfo(){
   r = cn->evaluate(np, nt);
   print_leaf_result(not r, "!= ", true);
   
-  delete cn;
+  cn->freeCondition(true);
   
   
   std::cout << "Testing bool_test_true: ";
@@ -198,7 +198,7 @@ void test_NodeInfo(){
   r = cn->evaluate(np, nt);
   print_leaf_result(not r, "!= ", true);
   
-  delete cn;
+  cn->freeCondition(true);
   
   
   std::cout << "Testing str_equals: ";
@@ -217,7 +217,7 @@ void test_NodeInfo(){
   r = cn->evaluate(np, nt);
   print_leaf_result(not r, "!= ", true);
   
-  delete cn;
+  cn->freeCondition(true);
   
   
   std::cout << "Testing uint8_equals: ";
@@ -236,7 +236,7 @@ void test_NodeInfo(){
   r = cn->evaluate(np, nt);
   print_leaf_result(not r, "!= ", true);
 
-  delete cn;
+  cn->freeCondition(true);
   
   
   // Shoud return true iff pattern >= test
@@ -260,7 +260,7 @@ void test_NodeInfo(){
   r = cn->evaluate(np, nt);
   print_leaf_result(r, "> ", true);
 
-  delete cn;
+  cn->freeCondition(true);
   
   
   std::cout << "Testing vsizet_equals: ";
@@ -325,6 +325,26 @@ void test_NodeInfo(){
   cn_and->children->push_front(cn_not2);
   r = cn_and->evaluate(np, nt);
   print_leaf_result(not r, "3 ", true);
+
+  cn->freeCondition(true);
+  cn = NULL;
+  
+  if (cn_not2 != NULL){
+    cn_not2->freeCondition(true);
+    cn_not2 = NULL;
+  }
+  if (cn_not != NULL){
+    cn_not->freeCondition(true);
+    cn_not = NULL;
+  }
+  if (cn_or != NULL){
+    cn_or->freeCondition(true);
+    cn_or = NULL;
+  }
+  if (cn_and != NULL){
+    cn_and->freeCondition(true);
+    cn_and = NULL;
+  }
   
   cout << endl;
 }
@@ -340,10 +360,10 @@ void test_GTSI(graph_t ** grPattern, size_t nPattern, graph_t * grTest, size_t e
       siteSize = grPattern[i]->nodes.count;
   }
 
-  ParcoursNode tree = ParcoursNode();
+  ParcoursNode* tree = new ParcoursNode();
 
   for (i = 0; i < nPattern; i++) {    
-    bool added = tree.addGraphFromNode(grPattern[i], grPattern[i]->root, siteSize, checkLabels);
+    bool added = tree->addGraphFromNode(grPattern[i], grPattern[i]->root, siteSize, checkLabels);
 
     if (not added){
       printf("WARNING: pattern graph %d was not added to traversal tree because it already exists there.\n", (int) i);
@@ -351,12 +371,12 @@ void test_GTSI(graph_t ** grPattern, size_t nPattern, graph_t * grTest, size_t e
   }
 
   if (exportTree){
-    tree.saveParcoursNodeToDot(treePath);
+    tree->saveParcoursNodeToDot(treePath);
   }
   
-  printf("%d traversals reconstructed from pattern graph.\n", (int) tree.countLeaves());
+  printf("%d traversals reconstructed from pattern graph.\n", (int) tree->countLeaves());
 
-  vsize_t count = tree.parcourir(grTest, siteSize, checkLabels, true);
+  vsize_t count = tree->parcourir(grTest, siteSize, checkLabels, true);
   if (count != expected) {
     color = Red;
   }
@@ -365,11 +385,12 @@ void test_GTSI(graph_t ** grPattern, size_t nPattern, graph_t * grTest, size_t e
   }
   printf("%s%d traversals possible in test graph (expected: %d) with tree.%s\n", color.c_str(), (int) count, (int) expected, Color_Off.c_str());
   
+  tree->freeParcoursNode(); 
 
-  if (nPattern == 1) {    
+  
+  if (nPattern == 1) {
     Parcours *p = parcoursLargeur(grPattern[0], grPattern[0]->root->list_id, siteSize);
     Parcours::RetourParcours rt = p->parcourir(grTest, siteSize, checkLabels, true, false);
-    delete p;
     vsize_t count2 = rt.first;
 
     if (count2 != expected) {
@@ -381,6 +402,7 @@ void test_GTSI(graph_t ** grPattern, size_t nPattern, graph_t * grTest, size_t e
     printf("%s%d traversals possible in test graph (expected: %d) with a single traversal.%s\n", color.c_str(), (int) count2, (int) expected, Color_Off.c_str());
   
     delete(rt.second);
+    p->freeParcours(true);
   }
   
 }

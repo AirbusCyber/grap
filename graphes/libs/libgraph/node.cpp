@@ -1,4 +1,5 @@
 #include "node.hpp"
+#include <boost/concept_check.hpp>
 
 node_t *node_alloc () {
   node_t *node = (node_t*) calloc_or_quit (1, sizeof(node_t));
@@ -44,7 +45,9 @@ void node_free (node_t * node, bool free_info) {
   if (free_info){
     // be careful, node info and node conditions are also used in Parcours and ParcoursNode
     delete(node->info);
-    node->condition->freeCondition();
+    node->info = NULL;
+    node->condition->freeCondition(true);
+    node->condition = NULL;
   }
   free(node);
 }

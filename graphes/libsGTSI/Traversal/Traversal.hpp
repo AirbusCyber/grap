@@ -63,6 +63,7 @@ public:
   typedef std::pair < vsize_t, std::unordered_set < std::map < string, std::list < node_t * >*>*>*>RetourParcours;
   RetourParcours parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool countAllMatches, bool getId);
   bool equals(Parcours *, bool checkLabels);
+  void freeParcours(bool free_mots);
 };
 
 void freeMapGotten(std::map < string, std::list < node_t * >*>*);
@@ -96,6 +97,7 @@ public:
   RetourEtape etape(MotParcours * m, node_t *, graph_t *, std::pair < node_t *, node_t * >*, vsize_t, unordered_set < node_t * >, bool);
   vsize_t countLeaves();
   vsize_t countFinal();
+  void freeParcoursNode();
 };
 
 

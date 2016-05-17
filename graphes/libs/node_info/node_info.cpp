@@ -430,17 +430,26 @@ std::string CondNode::toString(NodeInfo* ni){
   }
 }
 
-void CondNode::freeCondition(){
-  std::list<CondNode*>::iterator it = this->children->begin();
+void CondNode::freeCondition(bool delete_condition){
+  if (this->children != NULL){
+    std::list<CondNode*>::iterator it = this->children->begin();
 
-  while(it != this->children->end()){
-    (*it)->freeCondition();
+    while(it != this->children->end()){
+      if ((*it) != NULL){
+        (*it)->freeCondition(false);
+        (*it) = NULL;
+      }
+      
+      it++;
+    }
     
-    it++;
+    delete this->children;
+    this->children = NULL;
   }
   
-  delete this->children;
-  delete this;
+//   if (delete_condition){
+//     delete this;
+//   }
 }
 
 

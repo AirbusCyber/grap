@@ -566,6 +566,23 @@ Parcours::RetourParcours Parcours::parcourir(graph_t * gr, vsize_t W, bool check
   return RetourParcours(count, set_gotten);
 }
 
+void Parcours::freeParcours(bool free_mots)
+{
+  
+  if (free_mots){
+    vsize_t i;
+    for (i = 0; i < this->size; i++){
+      if (this->mots[i] != NULL){
+        delete this->mots[i];
+      }
+    }
+  }
+  
+  free(this->mots);
+  delete(this);
+}
+
+
 unordered_set < Parcours * >parcoursFromGraph(graph_t * gr, vsize_t W, bool checkLabels) {
   unordered_set < Parcours * >parcours;
   Parcours *p;
@@ -596,6 +613,7 @@ unordered_set < Parcours * >parcoursFromGraph(graph_t * gr, vsize_t W, bool chec
 ParcoursNode::ParcoursNode() {
   this->id = 0;
   this->feuille = false;
+  this->mot = NULL;
 }
 
 ParcoursNode::ParcoursNode(std::list < ParcoursNode * >_fils, MotParcours * _mot, uint64_t _id) {
@@ -606,7 +624,9 @@ ParcoursNode::ParcoursNode(std::list < ParcoursNode * >_fils, MotParcours * _mot
 
 bool ParcoursNode::addGraphFromNode(graph_t * gr, node_t * r, vsize_t W, bool checkLabels) {
   Parcours *p = parcoursLargeur(gr, r->list_id, W);
-  return this->addParcours(p, 0, checkLabels);
+  bool ret = this->addParcours(p, 0, checkLabels);
+  p->freeParcours(false);
+  return ret;
 }
 
 vsize_t ParcoursNode::addGraph(graph_t * gr, vsize_t W, vsize_t maxLearn, bool checkLabels) {
@@ -929,5 +949,21 @@ vsize_t ParcoursNode::countFinal() {
   }
   return count;
 }
+
+void ParcoursNode::freeParcoursNode()
+{
+  list < ParcoursNode * >::iterator it;
+  for (it = this->fils.begin(); it != this->fils.end(); it++) {
+    ParcoursNode *f = (*it);
+    f->freeParcoursNode();
+  }
+  
+  if (this->mot != NULL){
+    delete this->mot;
+  }
+  
+  delete this;
+}
+
 
 #endif

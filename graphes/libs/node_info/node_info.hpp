@@ -155,7 +155,7 @@ public:
   std::string toString(NodeInfo*);
   std::string field_toString(NodeInfo*);
   
-  void freeCondition();
+  void freeCondition(bool delete_condition);
 };
 
 #endif
