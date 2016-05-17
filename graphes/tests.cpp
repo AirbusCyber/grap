@@ -43,7 +43,7 @@ string Red = "\x1b[1;31m";
 string Green = "\x1b[1;32m";
 string Blue = "\x1b[1;33m";
 string Color_Off = "\x1b[0m";
-bool debug = true;
+bool debug = false;
 
 void drop_privileges(){
   scmp_filter_ctx ctx;
