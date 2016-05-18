@@ -345,6 +345,8 @@ void test_NodeInfo(){
     CondNode::freeCondition(&cn_and, true, false);
     cn_and = NULL;
   }
+  delete(np);
+  delete(nt);
   
   cout << endl;
 }
