@@ -132,8 +132,8 @@ int main(int argc, char *argv[]) {
       }
       
       if (debug){
-	std::cout << "Pattern graph " << j << " is:\n";
-	graph_fprint(stdout, grPattern[j]);
+        std::cout << "Pattern graph " << j << " is:\n";
+        graph_fprint(stdout, grPattern[j]);
       }
       j++;
       nPattern++;
@@ -169,7 +169,7 @@ void test_NodeInfo(){
   cn->pattern_field = (void* NodeInfo::*) &NodeInfo::has_address;
   cn->test_field = (void* NodeInfo::*) &NodeInfo::has_address;
   cn->comparison = ComparisonFunEnum::bool_equals;
-  cn->children = new std::list<CondNode*>();
+  cn->children = new std::list<CondNode**>();
     
   np->has_address = false;
   nt->has_address = false;
@@ -181,14 +181,14 @@ void test_NodeInfo(){
   r = cn->evaluate(np, nt);
   print_leaf_result(not r, "!= ", true);
   
-  cn->freeCondition(true);
+  CondNode::freeCondition(&cn, true, false);
   
   
   std::cout << "Testing bool_test_true: ";
   cn = new CondNode();
   cn->test_field = (void* NodeInfo::*) &NodeInfo::has_address;
   cn->comparison = ComparisonFunEnum::bool_test_true;
-  cn->children = new std::list<CondNode*>();
+  cn->children = new std::list<CondNode**>();
     
   nt->has_address = true;
   r = cn->evaluate(np, nt);
@@ -198,7 +198,7 @@ void test_NodeInfo(){
   r = cn->evaluate(np, nt);
   print_leaf_result(not r, "!= ", true);
   
-  cn->freeCondition(true);
+  CondNode::freeCondition(&cn, true, false);
   
   
   std::cout << "Testing str_equals: ";
@@ -206,7 +206,7 @@ void test_NodeInfo(){
   cn->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
   cn->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
   cn->comparison = ComparisonFunEnum::str_equals;
-  cn->children = new std::list<CondNode*>();
+  cn->children = new std::list<CondNode**>();
     
   np->inst_str = "xor";
   nt->inst_str = "xor";
@@ -217,7 +217,7 @@ void test_NodeInfo(){
   r = cn->evaluate(np, nt);
   print_leaf_result(not r, "!= ", true);
   
-  cn->freeCondition(true);
+  CondNode::freeCondition(&cn, true, false);
   
   
   std::cout << "Testing uint8_equals: ";
@@ -225,7 +225,7 @@ void test_NodeInfo(){
   cn->pattern_field = (void* NodeInfo::*) &NodeInfo::maxChildrenNumber;
   cn->test_field = (void* NodeInfo::*) &NodeInfo::childrenNumber;
   cn->comparison = ComparisonFunEnum::uint8t_equals;
-  cn->children = new std::list<CondNode*>();
+  cn->children = new std::list<CondNode**>();
     
   np->maxChildrenNumber = 2;
   nt->childrenNumber = 2;
@@ -236,7 +236,7 @@ void test_NodeInfo(){
   r = cn->evaluate(np, nt);
   print_leaf_result(not r, "!= ", true);
 
-  cn->freeCondition(true);
+  CondNode::freeCondition(&cn, true, false);
   
   
   // Shoud return true iff pattern >= test
@@ -245,7 +245,7 @@ void test_NodeInfo(){
   cn->pattern_field = (void* NodeInfo::*) &NodeInfo::maxChildrenNumber;
   cn->test_field = (void* NodeInfo::*) &NodeInfo::childrenNumber;
   cn->comparison = ComparisonFunEnum::uint8t_gt;
-  cn->children = new std::list<CondNode*>();
+  cn->children = new std::list<CondNode**>();
     
   np->maxChildrenNumber = 2;
   nt->childrenNumber = 2;
@@ -260,7 +260,7 @@ void test_NodeInfo(){
   r = cn->evaluate(np, nt);
   print_leaf_result(r, "> ", true);
 
-  cn->freeCondition(true);
+  CondNode::freeCondition(&cn, true, false);
   
   
   std::cout << "Testing vsizet_equals: ";
@@ -268,7 +268,7 @@ void test_NodeInfo(){
   cn->pattern_field = (void* NodeInfo::*) &NodeInfo::address;
   cn->test_field = (void* NodeInfo::*) &NodeInfo::address;
   cn->comparison = ComparisonFunEnum::vsizet_equals;
-  cn->children = new std::list<CondNode*>();
+  cn->children = new std::list<CondNode**>();
     
   np->address = 2;
   nt->address = 2;
@@ -282,67 +282,67 @@ void test_NodeInfo(){
   
   // cn evaluates to false
   std::cout << "Testing not and not not: ";
-  std::list<CondNode*>* children = new std::list<CondNode*>();
-  children = new std::list<CondNode*>();
-  children->push_front(cn);
+  std::list<CondNode**>* children = new std::list<CondNode**>();
+  children = new std::list<CondNode**>();
+  children->push_front(&cn);
   CondNode* cn_not = new CondNode(children, UnOpEnum::logical_not);
   
   r = cn_not->evaluate(np, nt);
   print_leaf_result(r, "! ", false);
   
   CondNode* cn_not2 = new CondNode();
-  cn_not2->children = new std::list<CondNode*>();
-  cn_not2->children->push_front(cn_not);
+  cn_not2->children = new std::list<CondNode**>();
+  cn_not2->children->push_front(&cn_not);
   cn_not2->unary_operator = UnOpEnum::logical_not;
   r = cn_not2->evaluate(np, nt);
   print_leaf_result(not r, "!! ", true);
   
   
   std::cout << "Testing or on multiple operands: ";
-  std::list<CondNode*>* children2 = new std::list<CondNode*>();
-  children2 = new std::list<CondNode*>();
-  children2->push_front(cn);
-  children2->push_front(cn_not);
+  std::list<CondNode**>* children2 = new std::list<CondNode**>();
+  children2 = new std::list<CondNode**>();
+  children2->push_front(&cn);
+  children2->push_front(&cn_not);
   
   CondNode* cn_or = new CondNode(children2, BinOpEnum::logical_or);
   r = cn_or->evaluate(np, nt);
   print_leaf_result(r, "2 ", false);
   
-  cn_or->children->push_front(cn_not2);
+  cn_or->children->push_front(&cn_not2);
   r = cn_or->evaluate(np, nt);
   print_leaf_result(r, "3 ", true);
   
   
   std::cout << "Testing and on multiple operands: ";
   CondNode* cn_and = new CondNode();
-  cn_and->children = new std::list<CondNode*>();
-  cn_and->children->push_front(cn);
-  cn_and->children->push_front(cn_not);
+  cn_and->children = new std::list<CondNode**>();
+  cn_and->children->push_front(&cn);
+  cn_and->children->push_front(&cn_not);
   cn_and->binary_operator =  BinOpEnum::logical_and;
   r = cn_and->evaluate(np, nt);
   print_leaf_result(not r, "2 ", false);
   
-  cn_and->children->push_front(cn_not2);
+  cn_and->children->push_front(&cn_not2);
   r = cn_and->evaluate(np, nt);
   print_leaf_result(not r, "3 ", true);
 
-  cn->freeCondition(true);
+  CondNode::freeCondition(&cn, true, false);
   cn = NULL;
   
   if (cn_not2 != NULL){
-    cn_not2->freeCondition(true);
+    CondNode::freeCondition(&cn_not2, true, false);
     cn_not2 = NULL;
   }
   if (cn_not != NULL){
-    cn_not->freeCondition(true);
+    CondNode::freeCondition(&cn_not, true, false);
     cn_not = NULL;
   }
   if (cn_or != NULL){
-    cn_or->freeCondition(true);
+    CondNode::freeCondition(&cn_or, true, false);
     cn_or = NULL;
   }
   if (cn_and != NULL){
-    cn_and->freeCondition(true);
+    CondNode::freeCondition(&cn_and, true, false);
     cn_and = NULL;
   }
   

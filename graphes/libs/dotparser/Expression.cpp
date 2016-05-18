@@ -137,9 +137,14 @@ node_t *updateNode(OptionList * ol, node_t * n) {
   char hasMinRepeat = 0;
   char hasMaxRepeat = 0;
   
-  n->condition = new CondNode();
+  CondNode* cn = new CondNode();
+  CondNode** cn_tmp = (CondNode**) malloc(sizeof(CondNode*));
+  *cn_tmp = cn;
+  n->condition = cn_tmp;
   n->info->lazyRepeat = false;
   bool cond_filled = false;
+  
+//   printf("allocating %p %p\n", (void*) cn_tmp, (void*) cn);
 
   for (i = 0; i < ol->size; i++) {
     char *v = removeQuotes(ol->options[i]->value);
@@ -163,7 +168,7 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     }
     else if (strcmp(id, "symbtype") == 0 || strcmp(id, "csymbtype") == 0) {
       if (strcmp(v, "none") == 0 || strcmp(v, "*") == 0) {        
-        n->condition->comparison = ComparisonFunEnum::bool_true;
+        (*(n->condition))->comparison = ComparisonFunEnum::bool_true;
         cond_filled = true;
       }
       
@@ -171,9 +176,9 @@ node_t *updateNode(OptionList * ol, node_t * n) {
 //       else if (strcmp(v, "generic") == 0 || strcmp(v, "gopcode") == 0) {
 //         n->csymbType = LABEL_GENERIC_OPCODE;
 //         
-//         n->condition->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-//         n->condition->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-//         n->condition->comparison = ComparisonFunctions::str_equals();
+//         (*(n->condition))->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
+//         (*(n->condition))->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
+//         (*(n->condition))->comparison = ComparisonFunctions::str_equals();
 //       }
 
 //       TODO: opcode
@@ -185,9 +190,9 @@ node_t *updateNode(OptionList * ol, node_t * n) {
 //       }
 
       else if (strcmp(v, "substring") == 0) {        
-        n->condition->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-        n->condition->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-        n->condition->comparison = ComparisonFunEnum::str_contains;
+        (*(n->condition))->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
+        (*(n->condition))->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
+        (*(n->condition))->comparison = ComparisonFunEnum::str_contains;
         cond_filled = true;
       }
       
@@ -264,9 +269,9 @@ node_t *updateNode(OptionList * ol, node_t * n) {
   }
   
   if ((not cond_filled) and n->info->inst_str != ""){
-    n->condition->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-    n->condition->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-    n->condition->comparison = ComparisonFunEnum::str_equals;
+    (*(n->condition))->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
+    (*(n->condition))->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
+    (*(n->condition))->comparison = ComparisonFunEnum::str_equals;
   }
 
   freeOptionList(ol);

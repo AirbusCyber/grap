@@ -43,7 +43,7 @@ typedef struct node_t {
   // Only for patterns
   // TODO: differentiate parsing of pattern and test graphs, fill has_condition
 //   bool has_condition;
-  CondNode* condition;
+  CondNode** condition;
   
   /*!
    @brief Number of fathers.

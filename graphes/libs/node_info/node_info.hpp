@@ -127,12 +127,10 @@ public:
   // No children: returns comparison(pattern_field, pattern, test_field, test)
   
   CondNode();
-  CondNode(std::list<CondNode*>*, UnOpEnum);
-  CondNode(std::list<CondNode*>*, BinOpEnum);
+  CondNode(std::list<CondNode**>*, UnOpEnum);
+  CondNode(std::list<CondNode**>*, BinOpEnum);
   
-  CondNode* AddLazyCond(NodeInfo*);
-  
-  std::list<CondNode*>* children;
+  std::list<CondNode**>* children;
   UnOpEnum unary_operator;
   BinOpEnum binary_operator;
   
@@ -150,12 +148,12 @@ public:
   
   bool evaluate(NodeInfo* pattern, NodeInfo* test);
   
-  bool equals(CondNode* cn);
+  bool equals(CondNode** cn);
   
   std::string toString(NodeInfo*);
   std::string field_toString(NodeInfo*);
   
-  void freeCondition(bool delete_condition);
+  static void freeCondition(CondNode** cn, bool delete_condition, bool free_pointer);
 };
 
 #endif

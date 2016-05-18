@@ -90,7 +90,7 @@ string MotParcours::toString() {
       }
     }
 
-    s += "?" + this->condition->toString(this->info);
+    s += "?" + (*(this->condition))->toString(this->info);
   }
   
   return s;
@@ -100,10 +100,10 @@ bool MotParcours::sameSymbol(MotParcours * m, bool checkLabels) {
 //   std::cout << this->info->toString() << " VS \n" << m->info->toString() << " : " << (this->info->equals(m->info)) << "\n";
   
   // TODO: etre plus malin avec les comparaisons (ne prendre que les champs de condition en compte dans la comparaison des infos ?)
-  return (not checkLabels) or (this->info->equals(m->info) and this->condition->equals(m->condition));
+  return (not checkLabels) or (this->info->equals(m->info) and (*this->condition)->equals(m->condition));
 }
 
-bool MotParcours::sameRepeatAndCF(MotParcours * m) {
+bool MotParcours::sameRepeatAndCF(MotParcours * m) {  
   bool r = (this->info->minRepeat == m->info->minRepeat)
     and(this->info->has_maxRepeat == m->info->has_maxRepeat)
     and((not this->info->has_maxRepeat) or this->info->maxRepeat == m->info->maxRepeat)
@@ -124,7 +124,7 @@ bool MotParcours::equals(MotParcours * m, bool checkLabels) {
     else {
       if (this->alpha_is_R == m->alpha_is_R) {
         if (this->alpha_is_R) {
-          return this->i == m->i and this->sameSymbol(m, checkLabels) and this->sameRepeatAndCF(m);
+          return this->i == m->i;
         }
         else {
           return this->k == m->k and this->i == m->i and this->sameSymbol(m, checkLabels) and this->sameRepeatAndCF(m);
@@ -174,7 +174,7 @@ void Parcours::addMot(MotParcours * m) {
   assert(m->type == TYPE_M1 or m->type == TYPE_M2);
 }
 
-CondNode* computeCond(node_t* n){
+CondNode** computeCond(node_t* n){
   if (not n->info->lazyRepeat or n->children_nb == 0){
     return n->condition;
   }
@@ -182,23 +182,28 @@ CondNode* computeCond(node_t* n){
     // If lazy repeat, the condition of the first child should be excluded
     node_t* child = n->children[0];
 
-    std::list<CondNode*>* not_child = new std::list<CondNode*>();
-    not_child = new std::list<CondNode*>();
+    std::list<CondNode**>* not_child = new std::list<CondNode**>();
+    not_child = new std::list<CondNode**>();
     not_child->push_front(child->condition);
-    CondNode* cn_not = new CondNode(not_child, UnOpEnum::logical_not);
-    cn_not->has_fixed_pattern_info = true;
-    cn_not->fixed_pattern_info = child->info;
+    CondNode* cn_tmp = new CondNode(not_child, UnOpEnum::logical_not);
+    CondNode** cn_not = (CondNode**) malloc(sizeof(CondNode*));
+    *cn_not = cn_tmp;
+    (*cn_not)->has_fixed_pattern_info = true;
+    (*cn_not)->fixed_pattern_info = child->info;
     
-    if (n->condition->children->size() == 0 and n->condition->comparison == bool_true){
+    if ((*(n->condition))->children->size() == 0 and (*(n->condition))->comparison == bool_true){
       // The original condition is only "true": then the new one is "not(child->condition)"
       return cn_not;
     }
     else{
       // Otherwise the new condition is "n->condition and not (child->condition)"
-      std::list<CondNode*>* and_children = new std::list<CondNode*>();
+      std::list<CondNode**>* and_children = new std::list<CondNode**>();
       and_children->push_front(n->condition);
       and_children->push_front(cn_not);
-      return new CondNode(and_children, BinOpEnum::logical_and);
+      CondNode* cn = new CondNode(and_children, BinOpEnum::logical_and);
+      CondNode** cn_ret = (CondNode**) malloc(sizeof(CondNode*));
+      cn_ret = &cn;
+      return cn_ret;
     }
   }
 }
@@ -253,8 +258,8 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
       RELEASE_ASSERT(node_ids_search != node_ids.end());
       m->i = node_ids_search->second;
       
-      m->info = ss->info;
-      m->condition = computeCond(ss);
+      m->info = NULL;
+      m->condition = NULL;
       p->addMot(m);
 
       sc = pere;
@@ -327,7 +332,7 @@ bool MotParcours::matchesSymbol(node_t * n, bool checkLabels) {
   if (not checkLabels)
     return true;
   
-  return this->condition->evaluate(this->info, n->info);
+  return (*(this->condition))->evaluate(this->info, n->info);
 }
 
 bool MotParcours::matchesCF(node_t * n) {
@@ -549,7 +554,7 @@ Parcours::RetourParcours Parcours::parcourir(graph_t * gr, vsize_t W, bool check
         set_gotten->insert(rt.second);
       }
       else {
-	freeMapGotten(rt.second);
+        freeMapGotten(rt.second);
       }
       
       if (not countAllMatches){
@@ -568,11 +573,14 @@ Parcours::RetourParcours Parcours::parcourir(graph_t * gr, vsize_t W, bool check
 
 void Parcours::freeParcours(bool free_mots)
 {
-  
   if (free_mots){
     vsize_t i;
     for (i = 0; i < this->size; i++){
       if (this->mots[i] != NULL){
+        if (this->mots[i]->condition != NULL){
+          CondNode::freeCondition(this->mots[i]->condition, false, true);
+          this->mots[i]->condition = NULL;
+        }
         delete this->mots[i];
       }
     }

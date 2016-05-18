@@ -104,13 +104,13 @@ bool NodeInfo::equals(NodeInfo* ni){
 
 
 CondNode::CondNode(){
-  std::list<CondNode*>* cn = new std::list<CondNode*>();
+  std::list<CondNode**>* cn = new std::list<CondNode**>();
   this->children = cn;
   this->comparison = ComparisonFunEnum::bool_false;
   this->has_fixed_pattern_info = false;
 }
 
-CondNode::CondNode(std::list<CondNode*>* cn, UnOpEnum un_op){
+CondNode::CondNode(std::list<CondNode**>* cn, UnOpEnum un_op){
   assert(cn->size() == 1);
   
   this->children = cn;
@@ -118,7 +118,7 @@ CondNode::CondNode(std::list<CondNode*>* cn, UnOpEnum un_op){
   this->has_fixed_pattern_info = false;
 }
 
-CondNode::CondNode(std::list<CondNode*>* cn, BinOpEnum bin_op){
+CondNode::CondNode(std::list<CondNode**>* cn, BinOpEnum bin_op){
   assert(cn->size() >= 2);
   
   this->children = cn;
@@ -275,17 +275,18 @@ bool CondNode::evaluate(NodeInfo* pattern, NodeInfo* test)
    return this->comparison_fun(&((*pattern).*(this->pattern_field)), &((*test).*(this->test_field)));
   }
   else if (nc == 1){
-   return this->unary_fun(this->children->front()->evaluate(pattern, test)); 
+   return this->unary_fun((*(this->children->front()))->evaluate(pattern, test)); 
   }
   else{
     // 2 or more children
-    bool r = this->children->front()->evaluate(pattern, test);
+    bool r = (*(this->children->front()))->evaluate(pattern, test);
     
-    std::list<CondNode*>::iterator it = this->children->begin();
+    std::list<CondNode**>::iterator it = this->children->begin();
     it++;
     
     while(it != this->children->end()){
-      r = this->binary_fun(r, (*it)->evaluate(pattern, test));
+      CondNode** cn = *it;
+      r = this->binary_fun(r, (*cn)->evaluate(pattern, test));
       
      it++; 
     }
@@ -293,22 +294,22 @@ bool CondNode::evaluate(NodeInfo* pattern, NodeInfo* test)
   }
 }
 
-bool CondNode::equals(CondNode* cn){
+bool CondNode::equals(CondNode** cn){
   vsize_t nc = this->children->size();
-  if (nc != cn->children->size()) return false;
-  if (this->has_fixed_pattern_info != cn->has_fixed_pattern_info or (this->has_fixed_pattern_info and (this->fixed_pattern_info != cn->fixed_pattern_info))) return false;
+  if (nc != (*cn)->children->size()) return false;
+  if (this->has_fixed_pattern_info != (*cn)->has_fixed_pattern_info or (this->has_fixed_pattern_info and (this->fixed_pattern_info != (*cn)->fixed_pattern_info))) return false;
   
   if (nc == 0){
-    bool r = (this->pattern_field == cn->pattern_field)
-              and (this->test_field == cn->test_field)
-              and (this->comparison == cn->comparison);
+    bool r = (this->pattern_field == (*cn)->pattern_field)
+              and (this->test_field == (*cn)->test_field)
+              and (this->comparison == (*cn)->comparison);
     return r;
   }
   else if(nc == 1){
-    bool r = (this->unary_operator == cn->unary_operator);
+    bool r = (this->unary_operator == (*cn)->unary_operator);
     
     if (r){
-      r = this->children->front()->equals(cn->children->front());
+      r = (*(this->children->front()))->equals((*cn)->children->front());
     }
     
     return r;
@@ -317,11 +318,12 @@ bool CondNode::equals(CondNode* cn){
     bool r = true;
     
     if (r){
-      std::list<CondNode*>::iterator it = this->children->begin();
-      std::list<CondNode*>::iterator it2 = cn->children->begin();
+      std::list<CondNode**>::iterator it = this->children->begin();
+      std::list<CondNode**>::iterator it2 = (*cn)->children->begin();
       
-      while(r and it != this->children->end() and it2 != cn->children->end()){
-        r = r and ((*it)->equals(*it2));
+      while(r and it != this->children->end() and it2 != (*cn)->children->end()){
+        CondNode** cn_tmp = *it;
+        r = r and ((*cn_tmp)->equals(*it2));
 
         it++; 
         it2++;
@@ -407,20 +409,21 @@ std::string CondNode::toString(NodeInfo* ni){
     case 1:
       s = desc_UnOpEnum[this->unary_operator];
       s += "(";
-      s += this->children->front()->toString(ni);
+      s += (*(this->children->front()))->toString(ni);
       s += ")";
       return s;
       
     default:
       s = desc_BinOpEnum[this->binary_operator];
       s += "(";
-      s += this->children->front()->toString(ni);
+      s += (*(this->children->front()))->toString(ni);
       
-      std::list<CondNode*>::iterator it = this->children->begin();
+      std::list<CondNode**>::iterator it = this->children->begin();
       it++;
 
       while(it != this->children->end()){
-        s += ", " + (*it)->toString(ni);
+        CondNode** cn_tmp = *it;
+        s += ", " + (*cn_tmp)->toString(ni);
 
         it++;
       }
@@ -430,26 +433,39 @@ std::string CondNode::toString(NodeInfo* ni){
   }
 }
 
-void CondNode::freeCondition(bool delete_condition){
-  if (this->children != NULL){
-    std::list<CondNode*>::iterator it = this->children->begin();
-
-    while(it != this->children->end()){
-      if ((*it) != NULL){
-        (*it)->freeCondition(false);
-        (*it) = NULL;
-      }
-      
-      it++;
+void CondNode::freeCondition(CondNode** cn, bool free_condition, bool free_pointer){  
+  if (not free_condition){
+    if (cn != NULL){
+      cn = NULL;
     }
-    
-    delete this->children;
-    this->children = NULL;
+    return;
   }
   
-//   if (delete_condition){
-//     delete this;
-//   }
+  if (cn != NULL){
+    if (*cn != NULL){
+      if ((*cn)->children != NULL){
+        std::list<CondNode**>::iterator it = (*cn)->children->begin();
+
+        vsize_t i = 0;
+        while(it != (*cn)->children->end()){
+          CondNode::freeCondition(*it, free_condition, free_pointer);
+          *it = NULL;
+          
+          it++;
+          i++;
+        }
+        
+          delete (*cn)->children;
+          (*cn)->children = NULL;
+      }
+      
+          delete(*cn);
+          *cn = NULL;
+    }
+        if (free_pointer){
+          free(cn);
+        }
+  }
 }
 
 
