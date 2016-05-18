@@ -60,6 +60,7 @@ void dict_delete(struct dict *d, uint64_t k) {
 
 void dict_free(struct dict *d) {
   tdestroy(d->root, free);
+  free(d);
 }
 
 #endif
