@@ -573,7 +573,7 @@ Parcours::RetourParcours Parcours::parcourir(graph_t * gr, vsize_t W, bool check
 }
 
 void Parcours::freeParcours(bool free_mots)
-{
+{ 
   if (free_mots){
     vsize_t i;
     for (i = 0; i < this->size; i++){
@@ -726,6 +726,7 @@ bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {
     
     if (f->mot->equals(m, checkLabels)) {
 //       std::cout << "equals " << f->mot->toString() << "\n";
+      delete(m);
       return f->addParcours(p, index + 1, checkLabels);
     }
   }

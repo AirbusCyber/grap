@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
   graph_t *grTest = nullptr;
   
   vsize_t i = 0;
-  while (i < std::numeric_limits < vsize_t >::max()) {
+  while (i < 16) {
     std::string dirPath = "tests_graphs/test" + std::to_string(i) + "/";
     std::string pathTest = dirPath + "test.dot";
     
