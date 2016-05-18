@@ -127,6 +127,7 @@ public:
   // No children: returns comparison(pattern_field, pattern, test_field, test)
   
   CondNode();
+  CondNode(std::list<CondNode**>* cn);
   CondNode(std::list<CondNode**>*, UnOpEnum);
   CondNode(std::list<CondNode**>*, BinOpEnum);
   

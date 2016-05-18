@@ -184,7 +184,6 @@ CondNode** computeCond(node_t* n){
     node_t* child = n->children[0];
 
     std::list<CondNode**>* not_child = new std::list<CondNode**>();
-    not_child = new std::list<CondNode**>();
     not_child->push_front(child->condition);
     CondNode* cn_tmp = new CondNode(not_child, UnOpEnum::logical_not);
     CondNode** cn_not = (CondNode**) malloc(sizeof(CondNode*));

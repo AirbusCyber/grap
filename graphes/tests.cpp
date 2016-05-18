@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
   graph_t *grTest = nullptr;
   
   vsize_t i = 0;
-  while (i < 16) {
+  while (i < std::numeric_limits < vsize_t >::max()) {
     std::string dirPath = "tests_graphs/test" + std::to_string(i) + "/";
     std::string pathTest = dirPath + "test.dot";
     
@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
 
     vsize_t j = 0;
     vsize_t nPattern = 0;
-    while (j < std::numeric_limits < vsize_t >::max()) {      
+    while (j < std::numeric_limits < vsize_t >::max()) {
       std::string pathPattern = dirPath + "pattern_" + to_string(j) + ".dot";
       grPattern = (graph_t **) realloc_or_quit(grPattern, (j + 1) * sizeof(graph_t *));
       grPattern[j] = getGraphFromPath(pathPattern.c_str());
@@ -156,6 +156,8 @@ int main(int argc, char *argv[]) {
     std::cout << "\n";
     i++;
   }
+  
+  free(grPattern);
 }
 
 void test_NodeInfo(){
@@ -169,7 +171,6 @@ void test_NodeInfo(){
   cn->pattern_field = (void* NodeInfo::*) &NodeInfo::has_address;
   cn->test_field = (void* NodeInfo::*) &NodeInfo::has_address;
   cn->comparison = ComparisonFunEnum::bool_equals;
-  cn->children = new std::list<CondNode**>();
     
   np->has_address = false;
   nt->has_address = false;
@@ -188,7 +189,6 @@ void test_NodeInfo(){
   cn = new CondNode();
   cn->test_field = (void* NodeInfo::*) &NodeInfo::has_address;
   cn->comparison = ComparisonFunEnum::bool_test_true;
-  cn->children = new std::list<CondNode**>();
     
   nt->has_address = true;
   r = cn->evaluate(np, nt);
@@ -206,7 +206,6 @@ void test_NodeInfo(){
   cn->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
   cn->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
   cn->comparison = ComparisonFunEnum::str_equals;
-  cn->children = new std::list<CondNode**>();
     
   np->inst_str = "xor";
   nt->inst_str = "xor";
@@ -225,7 +224,6 @@ void test_NodeInfo(){
   cn->pattern_field = (void* NodeInfo::*) &NodeInfo::maxChildrenNumber;
   cn->test_field = (void* NodeInfo::*) &NodeInfo::childrenNumber;
   cn->comparison = ComparisonFunEnum::uint8t_equals;
-  cn->children = new std::list<CondNode**>();
     
   np->maxChildrenNumber = 2;
   nt->childrenNumber = 2;
@@ -245,7 +243,6 @@ void test_NodeInfo(){
   cn->pattern_field = (void* NodeInfo::*) &NodeInfo::maxChildrenNumber;
   cn->test_field = (void* NodeInfo::*) &NodeInfo::childrenNumber;
   cn->comparison = ComparisonFunEnum::uint8t_gt;
-  cn->children = new std::list<CondNode**>();
     
   np->maxChildrenNumber = 2;
   nt->childrenNumber = 2;
@@ -268,7 +265,6 @@ void test_NodeInfo(){
   cn->pattern_field = (void* NodeInfo::*) &NodeInfo::address;
   cn->test_field = (void* NodeInfo::*) &NodeInfo::address;
   cn->comparison = ComparisonFunEnum::vsizet_equals;
-  cn->children = new std::list<CondNode**>();
     
   np->address = 2;
   nt->address = 2;
@@ -283,7 +279,6 @@ void test_NodeInfo(){
   // cn evaluates to false
   std::cout << "Testing not and not not: ";
   std::list<CondNode**>* children = new std::list<CondNode**>();
-  children = new std::list<CondNode**>();
   children->push_front(&cn);
   CondNode* cn_not = new CondNode(children, UnOpEnum::logical_not);
   
@@ -291,7 +286,6 @@ void test_NodeInfo(){
   print_leaf_result(r, "! ", false);
   
   CondNode* cn_not2 = new CondNode();
-  cn_not2->children = new std::list<CondNode**>();
   cn_not2->children->push_front(&cn_not);
   cn_not2->unary_operator = UnOpEnum::logical_not;
   r = cn_not2->evaluate(np, nt);
@@ -300,7 +294,6 @@ void test_NodeInfo(){
   
   std::cout << "Testing or on multiple operands: ";
   std::list<CondNode**>* children2 = new std::list<CondNode**>();
-  children2 = new std::list<CondNode**>();
   children2->push_front(&cn);
   children2->push_front(&cn_not);
   
@@ -315,7 +308,6 @@ void test_NodeInfo(){
   
   std::cout << "Testing and on multiple operands: ";
   CondNode* cn_and = new CondNode();
-  cn_and->children = new std::list<CondNode**>();
   cn_and->children->push_front(&cn);
   cn_and->children->push_front(&cn_not);
   cn_and->binary_operator =  BinOpEnum::logical_and;

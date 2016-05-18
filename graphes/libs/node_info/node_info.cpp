@@ -110,6 +110,12 @@ CondNode::CondNode(){
   this->has_fixed_pattern_info = false;
 }
 
+CondNode::CondNode(std::list<CondNode**>* cn){
+  this->children = cn;
+  this->comparison = ComparisonFunEnum::bool_false;
+  this->has_fixed_pattern_info = false;
+}
+
 CondNode::CondNode(std::list<CondNode**>* cn, UnOpEnum un_op){
   assert(cn->size() == 1);
   
