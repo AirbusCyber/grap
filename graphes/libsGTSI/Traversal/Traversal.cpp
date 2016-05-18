@@ -180,6 +180,7 @@ CondNode** computeCond(node_t* n){
   }
   else {
     // If lazy repeat, the condition of the first child should be excluded
+    // TODO: there is no way to properly delete those "derived" conditions
     node_t* child = n->children[0];
 
     std::list<CondNode**>* not_child = new std::list<CondNode**>();
