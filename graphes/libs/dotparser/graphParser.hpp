@@ -2,7 +2,7 @@
 #define GRAPHPARSER_H
 
 #include "Expression.hpp"
-#include "Parser.hpp"
+#include "Parser.h"
 #include "Lexer.h"
 
 #include "graph.hpp"
