@@ -69,20 +69,20 @@ graph_t *addEdgesToGraph(CoupleList * cl, graph_t * g) {
   return g;
 }
 
-uint hash(char *s) {
-  uint h = 0;
+vsize_t hash(char *s) {
+  vsize_t h = 0;
   size_t i;
 
   for (i = 0; i < strlen(s); i++) {
     if (s[i] != '"') {
-      h = 131 * h + ((uint) s[i]);
+      h = 131 * h + ((vsize_t) s[i]);
     }
   }
   return h;
 }
 
 node_t *createNode(char *value) {
-  uint id = hash(value);
+  vsize_t id = hash(value);
   free(value);
 
   node_t *node = (node_t *) calloc_or_quit(1, sizeof(node_t));

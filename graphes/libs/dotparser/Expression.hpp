@@ -24,8 +24,8 @@
 
 typedef struct Couple
 {
-  uint x;
-  uint y;
+  vsize_t x;
+  vsize_t y;
 } Couple;
 
 typedef struct CoupleList
@@ -46,7 +46,7 @@ typedef struct OptionList
   Option** options;
 } OptionList;
 
-uint hash(char* s);
+vsize_t hash(char* s);
 
 void debug_print(char* s);
 
