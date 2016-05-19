@@ -7,14 +7,6 @@
 
 #include <stdio.h>
 
-#ifndef likely
-# ifdef _MSC_VER
-#  define likely(x)   (x)
-# else
-#  define likely(x)   __builtin_expect(!!(x), 1)
-# endif
-#endif
-
 #ifndef unlikely
 # ifdef _MSC_VER
 #  define unlikely(x) (x)

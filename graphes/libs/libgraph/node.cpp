@@ -1,5 +1,4 @@
 #include "node.hpp"
-#include <boost/concept_check.hpp>
 
 node_t *node_alloc () {
   node_t *node = (node_t*) calloc_or_quit (1, sizeof(node_t));

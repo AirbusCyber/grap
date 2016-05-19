@@ -228,7 +228,6 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
   queue3.push(std::make_tuple((node_t *) NULL, (vsize_t) 0, nI));
   s++;
   int a = 0;
-  node_t *child;
   TupleQueue tq;
   node_t *pere;
   node_t *ss;

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <assert.h>
 #include "ga_types.hpp"
+#include <iso646.h> // defines "or", "and" as alternatives to ||, && ; alternative: don't use them !
 
 class NodeInfo {
 public:

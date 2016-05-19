@@ -36,7 +36,7 @@ typedef struct node_t {
    For statically extraction code address is chosen (begin or maybe end of
    block).
    */
-  uint64_t node_id;
+  vsize_t node_id;
 
   NodeInfo* info;
   

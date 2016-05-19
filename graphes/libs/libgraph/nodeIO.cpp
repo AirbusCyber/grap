@@ -56,23 +56,23 @@ size_t node_to_dot(const node_t * node, const node_t * root, size_t node_number,
 
   //printing other props
   if (node->info->minRepeat != 1)
-    ret += (size_t) printVKint(fp, (const char*) "minrepeat", node->info->minRepeat, 1);
+    ret += (size_t) printVKint(fp, (char*) "minrepeat", node->info->minRepeat, 1);
   if (node->info->has_maxRepeat == 1)
-    ret += (size_t) printVKint(fp, (const char*) "maxrepeat", node->info->maxRepeat, 1);
+    ret += (size_t) printVKint(fp, (char*) "maxrepeat", node->info->maxRepeat, 1);
   if (node->info->lazyRepeat)
     ret += (size_t) fprintf(fp, ", lazyrepeat=true");
   char *str = (char*) malloc(4 * sizeof(char));
   snprintf(str, 4, "%d", node->info->minChildrenNumber);
-  ret += (size_t) printVK(fp, (const char*) "minchildren", str, 1);
+  ret += (size_t) printVK(fp, (char*) "minchildren", str, 1);
   if (node->info->has_maxChildrenNumber) {
     snprintf(str, 4, "%d", node->info->maxChildrenNumber);
-    ret += (size_t) printVK(fp, (const char*) "maxchildren", str, 1);
+    ret += (size_t) printVK(fp, (char*) "maxchildren", str, 1);
   }
   snprintf(str, 4, "%d", node->info->minFathersNumber);
-  ret += (size_t) printVK(fp, (const char*) "minfathers", str, 1);
+  ret += (size_t) printVK(fp, (char*) "minfathers", str, 1);
   if (node->info->has_maxFathersNumber) {
     snprintf(str, 4, "%d", node->info->maxFathersNumber);
-    ret += (size_t) printVK(fp, (const char*) "maxfathers", str, 1);
+    ret += (size_t) printVK(fp, (char*) "maxfathers", str, 1);
   }
   free(str);
 

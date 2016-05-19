@@ -11,7 +11,8 @@
 
 typedef struct
 {
-  u_int64_t key;
+//   u_int64_t key;
+  uint64_t key;
   node_t* value;
 } dictPair;
 

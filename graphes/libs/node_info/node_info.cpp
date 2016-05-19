@@ -43,29 +43,29 @@ std::string NodeInfo::toString()
   }
   s += ", ";
   
-  s += "cn=" + std::to_string((uint) this->childrenNumber);
-  s += ", fn=" + std::to_string((uint) this->fathersNumber);
+  s += "cn=" + std::to_string((vsize_t) this->childrenNumber);
+  s += ", fn=" + std::to_string((vsize_t) this->fathersNumber);
   
   if (this->has_maxChildrenNumber){
-   s += ", maxcn=" + std::to_string((uint) this->maxChildrenNumber); 
+   s += ", maxcn=" + std::to_string((vsize_t) this->maxChildrenNumber); 
   }
   else {
    s += ", nomaxcn"; 
   }
-  s += ", mincn=" + std::to_string((uint) this->minChildrenNumber); 
+  s += ", mincn=" + std::to_string((vsize_t) this->minChildrenNumber); 
   
   if (this->has_maxFathersNumber){
-   s += ", maxfn=" + std::to_string((uint) this->maxFathersNumber); 
+   s += ", maxfn=" + std::to_string((vsize_t) this->maxFathersNumber); 
   }
   else {
    s += ", nomaxfn"; 
   }
-  s += ", minfn=" + std::to_string((uint) this->minFathersNumber); 
+  s += ", minfn=" + std::to_string((vsize_t) this->minFathersNumber); 
   
-  s += ", minrepeat=" + std::to_string((uint) this->minRepeat);
+  s += ", minrepeat=" + std::to_string((vsize_t) this->minRepeat);
   
   if (this->has_maxRepeat){
-    s += ", maxrepeat=" + std::to_string((uint) this->maxRepeat);
+    s += ", maxrepeat=" + std::to_string((vsize_t) this->maxRepeat);
   }
   else {
     s += ", nomaxrepeat"; 

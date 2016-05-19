@@ -76,7 +76,7 @@ std::unordered_set < Parcours * >parcoursFromGraph(graph_t *, vsize_t, bool);
 // TODO: implémenter la remontée des id (getid) des solutions
 class ParcoursNode {
 public:
-  uint64_t id;
+  vsize_t id;
   bool feuille;
   MotParcours *mot;
   std::list < ParcoursNode * >fils;
