@@ -2,7 +2,7 @@
 #define NODE_LIST_H
 
 #include "node.hpp"
-#include "dict.hpp"
+#include <map>
   
 /*!
  @file node_list.h
@@ -40,11 +40,11 @@ typedef struct node_list_t {
    @brief Number of node allocated in the node array.
    */
   vsize_t count;
-  
+
   /*!
-  @brief Dictionary (or map) used when loading graph from dot file
+  @brief Map used when loading graph from dot file
   */
-  struct dict *nodes_dict;
+  std::map < vsize_t, node_t * >* nodes_map;
 } node_list_t;
 
 /*!

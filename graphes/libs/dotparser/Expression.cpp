@@ -54,8 +54,21 @@ graph_t *addEdgesToGraph(CoupleList * cl, graph_t * g) {
   node_t *c;
 
   for (i = cl->size - 1; i >= 0; i--) {
-    f = dict_find(g->nodes.nodes_dict, cl->couples[i]->x);
-    c = dict_find(g->nodes.nodes_dict, cl->couples[i]->y);
+    std::map< vsize_t, node_t * >::iterator id_it = g->nodes.nodes_map->find(cl->couples[i]->x);
+    if (id_it == g->nodes.nodes_map->end()){
+      f = NULL; 
+    }
+    else {
+      f = id_it->second;
+    }
+    
+    id_it = g->nodes.nodes_map->find(cl->couples[i]->y);
+    if (id_it == g->nodes.nodes_map->end()){
+      c = NULL; 
+    }
+    else {
+      c = id_it->second;
+    }
 
     if (f == NULL || c == NULL) {
       printf("WARNING: when adding a node, father or child was not found in graph.\n");
@@ -106,7 +119,6 @@ graph_t *createGraph() {
 
 graph_t *addNodeToGraph(node_t * n, graph_t * g) {
   node_list_add(&g->nodes, n);
-  node_t *r = dict_find(g->nodes.nodes_dict, n->node_id);
 
   if (g->nodes.size == 1 || n->info->is_root)
     g->root = n;
@@ -143,8 +155,6 @@ node_t *updateNode(OptionList * ol, node_t * n) {
   n->condition = cn_tmp;
   n->info->lazyRepeat = false;
   bool cond_filled = false;
-  
-//   printf("allocating %p %p\n", (void*) cn_tmp, (void*) cn);
 
   for (i = 0; i < ol->size; i++) {
     char *v = removeQuotes(ol->options[i]->value);

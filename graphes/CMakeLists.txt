@@ -30,18 +30,11 @@ include_directories(
   libs/libgraph/
   libsGTSI/
   libsGTSI/Traversal/
-  libs/dict/
   libs/dotparser/
   libs/node_info/
 )
 
 add_library(common libs/include/my_alloc.cpp)
-
-#shared libs
-#add_library(dict 
-#      libs/dict/dict.c
-#      libs/dict/dict.h
-#)
 
 # Dot parser
 # Create target for the parser
@@ -85,8 +78,6 @@ add_library(graph
   libs/libgraph/node_list.cpp
   libs/libgraph/nodeIO.hpp
   libs/libgraph/nodeIO.cpp
-  libs/dict/dict.cpp
-  libs/dict/dict.hpp
   libs/dotparser/graphParser.cpp
   libs/dotparser/Expression.cpp
   Parser.c
