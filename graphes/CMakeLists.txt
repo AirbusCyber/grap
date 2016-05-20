@@ -25,14 +25,14 @@ SET(CMAKE_C_COMPILER ${CMAKE_CXX_COMPILER})
 
 
 include_directories(
-	./
-	libs/include/
-	libs/libgraph/
-	libsGTSI/
-	libsGTSI/Traversal/
-	libs/dict/
-	libs/dotparser/
-        libs/node_info/
+  ./
+  libs/include/
+  libs/libgraph/
+  libsGTSI/
+  libsGTSI/Traversal/
+  libs/dict/
+  libs/dotparser/
+  libs/node_info/
 )
 
 add_library(common libs/include/my_alloc.cpp)
@@ -45,29 +45,28 @@ add_library(common libs/include/my_alloc.cpp)
 
 # Dot parser
 # Create target for the parser
-ADD_CUSTOM_TARGET(simpledotparser echo "Creating dotparser")
+#ADD_CUSTOM_TARGET(simpledotparser echo "Creating dotparser")
 
 # Create custom command for flex/lex (note the outputs)
 ADD_CUSTOM_COMMAND(
-   OUTPUT Lexer.c
-   COMMAND flex
-   ARGS    libs/dotparser/Lexer.l
-   DEPENDS  libs/dotparser/Lexer.l
+  OUTPUT Lexer.c
+  COMMAND flex
+  ARGS    libs/dotparser/Lexer.l
+  DEPENDS  libs/dotparser/Lexer.l
 )
 
 # Create custom command for bison/yacc (note the DEPENDS)
 ADD_CUSTOM_COMMAND(
-   OUTPUT Parser.c
-   COMMAND bison
-   ARGS -y libs/dotparser/Parser.y
-   DEPENDS Lexer.c
-   DEPENDS libs/dotparser/Parser.y
+  OUTPUT Parser.c
+  COMMAND bison
+  ARGS -y libs/dotparser/Parser.y
+  DEPENDS Lexer.c
+  DEPENDS libs/dotparser/Parser.y
 )
 
 # Add parser.c to the list of sources
 # SET(Foo_SRCS ${Foo_SRCS} Parser.c)
 
-#add_library(parser Parser.c Lexer.c)
 #add_library(libsimpledotparser 
 #			libs/dotparser/graphParser.c 
 #			Lexer.c 
@@ -75,24 +74,26 @@ ADD_CUSTOM_COMMAND(
 #			libs/dotparser/Expression.c
 #)
 add_library(graph
-      libs/include/my_alloc.cpp
-      libs/libgraph/graph.hpp
-      libs/libgraph/graph.cpp
-      libs/libgraph/graphIO.hpp
-      libs/libgraph/graphIO.cpp
-      libs/libgraph/node.hpp
-      libs/libgraph/node.cpp
-      libs/libgraph/node_list.hpp
-      libs/libgraph/node_list.cpp
-      libs/libgraph/nodeIO.hpp
-      libs/libgraph/nodeIO.cpp
-      libs/dict/dict.cpp
-      libs/dict/dict.hpp
-      libs/dotparser/graphParser.cpp
-      libs/dotparser/Expression.cpp
-      Lexer.c 
-      Parser.c 
+  libs/include/my_alloc.cpp
+  libs/libgraph/graph.hpp
+  libs/libgraph/graph.cpp
+  libs/libgraph/graphIO.hpp
+  libs/libgraph/graphIO.cpp
+  libs/libgraph/node.hpp
+  libs/libgraph/node.cpp
+  libs/libgraph/node_list.hpp
+  libs/libgraph/node_list.cpp
+  libs/libgraph/nodeIO.hpp
+  libs/libgraph/nodeIO.cpp
+  libs/dict/dict.cpp
+  libs/dict/dict.hpp
+  libs/dotparser/graphParser.cpp
+  libs/dotparser/Expression.cpp
+  Parser.c
+  Lexer.c
 )
+
+
 #add_executable(sdp libs/dotparser/main.c)
 
 #add_executable(sdp libs/dotparser/main.c libs/dotparser/graphParser.c Lexer.c Parser.c libs/dotparser/Expression.c)
@@ -104,8 +105,8 @@ add_library(nodeinfo libs/node_info/node_info.cpp)
 
 # GTSI
 add_library(libGTSI
-      libsGTSI/utils-gtsi.cpp
-      libsGTSI/Traversal/Traversal.cpp
+  libsGTSI/utils-gtsi.cpp
+  libsGTSI/Traversal/Traversal.cpp
 )
 
 # grap (GTSI)
@@ -114,7 +115,7 @@ target_link_libraries(GTSI-grap common libGTSI graph nodeinfo)
 
 # tests
 add_executable(tests tests.cpp)
-target_link_libraries(tests seccomp common libGTSI graph pthread nodeinfo)
+target_link_libraries(tests seccomp common libGTSI graph nodeinfo)
 
 # todot
 add_executable(todot todot.cpp)

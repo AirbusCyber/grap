@@ -16,6 +16,7 @@
 
 int yyerror(graph_t **Sgraph, yyscan_t scanner, const char *msg) {
     // Add error handling routine as needed
+    return 0;
 }
  
 %}

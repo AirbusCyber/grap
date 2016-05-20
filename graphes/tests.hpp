@@ -11,7 +11,6 @@
 #include "Traversal.hpp"
 #include "my_alloc.hpp"
 
-#include <sys/prctl.h>
 #include <seccomp.h>
 
 char optionFuncs;
