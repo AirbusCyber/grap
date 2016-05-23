@@ -2,6 +2,7 @@
 #define MY_ALLOC_HPP
 
 #include "ga_types.hpp"
+#include <iso646.h>
 
 void* malloc_or_quit(size_t s);
 void* calloc_or_quit(size_t n, size_t s);

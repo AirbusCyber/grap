@@ -3,11 +3,15 @@ Deux composants sont nécessaires : le désassembleur et l'analyse de graphes
 Désassembleur:
 cf PandaPE
 
-Graphes:
+Compiler la partie graphes sous Linux:
 cd graphes/
 cmake -DCMAKE_BUILD_TYPE=Release .
 make
 
+Sous Windows (avec Visual Studio installé):
+cd graphes/
+cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release .
+nmake
 
 
 Utilisation du script grap:
