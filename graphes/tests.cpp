@@ -39,12 +39,21 @@ void printDescription() {
   std::cout << "Test 17: [manual] Test for lazy repeat option (one out of three match).\n";
 }
 
+#ifdef _MSC_VER
+string Red = "";
+string Green = "";
+string Blue = "";
+string Color_Off = "";
+#else
 string Red = "\x1b[1;31m";
 string Green = "\x1b[1;32m";
 string Blue = "\x1b[1;33m";
 string Color_Off = "\x1b[0m";
+#endif
+
 bool debug = false;
 
+#ifndef _MSC_VER
 void drop_privileges(){
   scmp_filter_ctx ctx;
   
@@ -66,10 +75,13 @@ void drop_privileges(){
   int r = seccomp_load(ctx);
   RELEASE_ASSERT(r == 0);
 }
+#endif
 
 int main(int argc, char *argv[]) {
-  //TODO: fix seccomp
+#ifndef _MSC_VER
+//TODO: fix seccomp
 //   drop_privileges();
+#endif
 
   
   if (argc >= 2) {

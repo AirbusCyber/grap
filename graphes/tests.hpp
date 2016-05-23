@@ -11,7 +11,9 @@
 #include "Traversal.hpp"
 #include "my_alloc.hpp"
 
-#include <seccomp.h>
+#ifndef _MSC_VER
+  #include <seccomp.h>
+#endif
 
 char optionFuncs;
 
