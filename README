@@ -9,7 +9,7 @@ cmake -DCMAKE_BUILD_TYPE=Release .
 make
 
 Sous Windows (avec Visual Studio installé):
-cd graphes/
+Il est nécessaire de générer les fichiers du parseur (Lexer.cpp, Lexer.h, Parser.cpp et Parser.h) avec flex et bison (sous Linux par exemple), puis, dans le dossier graphes/:
 cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release .
 nmake
 

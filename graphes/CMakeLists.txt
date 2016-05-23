@@ -38,10 +38,10 @@ include_directories(
 # Dot parser
 # Create custom command for flex/lex
 if(${MSVC})
-  if (EXISTS Lexer.cpp AND EXISTS Parser.cpp)
-    message("Found Lexer.cpp and Parser.cpp.")
+  if (EXISTS Lexer.cpp AND EXISTS Lexer.h AND EXISTS Parser.cpp AND EXISTS Parser.h)
+    message("Found Lexer.cpp, Lexer.h, Parser.cpp and Parser.h.")
   else()
-    message("Lexer.cpp or Parser.cpp not found: generate them with flex / bison (with make on Linux) then put them in the current directory.")
+    message("Lexer.cpp, Lexer.h, Parser.cpp or Parser.h not found: generate them with flex / bison (with make on Linux) then put them in the current directory.")
   endif()
 else()
   ADD_CUSTOM_COMMAND(
