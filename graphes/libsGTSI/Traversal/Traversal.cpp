@@ -341,175 +341,185 @@ bool MotParcours::matchesCF(node_t * n) {
 }
 
 Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * graph, vsize_t vroot, vsize_t W, bool checkLabels, bool returnFound) {
-//   cout << this->toString() << "\n";
-
-  node_t *sc;
-  node_list_t *listI = &(graph->nodes);
-  node_t *nI;
-  nI = node_list_item(listI, vroot);
-  sc = nI;
-  unordered_set < node_t * >numerotes;
+// TODO: Should we try to match as regular expressions (by trying all repeat numbers for instance) ?
+  
+  node_t *current_node;
+  current_node = node_list_item(&(graph->nodes), vroot);
+  
+  // set of all nodes already numbered
+  unordered_set < node_t * >numbered; 
+  
+  // map associating a string (getid value) to a list of matched nodes 
   std::map < string, std::list < node_t * >*>*found_nodes = new std::map < string, std::list < node_t * >*>();
+  
+  // array of pairs: each numbered node has a first matching node and may have (when repeat) a (different) last matching node
+  std::pair < node_t *, node_t * >*numbers = (std::pair < node_t *, node_t * >*)calloc_or_quit(W, sizeof(std::pair < node_t *, node_t * >));
+  // nodes will be numbered 1, 2, 3.. ; max_numbered keeps track of the latest numbered given
+  vsize_t max_numbered = 0;
 
-//   node_t **numeros = (node_t **) calloc_or_quit(W, sizeof(node_t *));
-  std::pair < node_t *, node_t * >*numeros = (std::pair < node_t *, node_t * >*)calloc_or_quit(W, sizeof(std::pair < node_t *, node_t * >));
-  vsize_t max_numeros = 0;
-
-  if (this->size >= 1 and this->mots[0]->type == TYPE_M1 and this->mots[0]->matchesSymbol(nI, checkLabels) and(this->mots[0]->matchesCF(nI))) {
-//     cout << this->mots[0]->toString() << "\n";
-    numeros[max_numeros] = std::pair < node_t *, node_t * >(sc, NULL);
-    max_numeros++;
-    numerotes.insert(sc);
+  // Match first word (mot): it has to number a matching first node
+  if (this->size >= 1 and this->mots[0]->type == TYPE_M1 and this->mots[0]->matchesSymbol(current_node, checkLabels) and(this->mots[0]->matchesCF(current_node))) {
+    numbers[max_numbered] = std::pair < node_t *, node_t * >(current_node, NULL);
+    max_numbered++;
+    numbered.insert(current_node);
 
     if (returnFound and this->mots[0]->info->get) {
-      std::list < node_t * >*list_nodes_1 = new std::list < node_t * >();
-      list_nodes_1->push_back(sc);
-      found_nodes->insert(std::pair < string, std::list < node_t * >*>(this->mots[0]->info->getid, list_nodes_1));
+      std::list < node_t * >*list_nodes = new std::list < node_t * >();
+      list_nodes->push_back(current_node);
+      found_nodes->insert(std::pair < string, std::list < node_t * >*>(this->mots[0]->info->getid, list_nodes));
     }
   }
   else {
-    free(numeros);
+    free(numbers);
     return RetourParcoursDepuisSommet(false, found_nodes);
   }
-//   cout << "sc_begin: " << sc->csymb << "\n";
 
-  size_t i;
-  for (i = 1; i < this->size; i++) {
-//     cout << "sc_in: " << sc->csymb << "\n";
-    
-    MotParcours *m = this->mots[i];
-//     cout << m->toString() << "\n";
+  for (size_t w = 1; w < this->size; w++) {
+    MotParcours *m = this->mots[w];
     if (m->alpha_is_R) {
-      if (max_numeros >= m->i) {
-        std::pair < node_t *, node_t * >p = numeros[m->i - 1];
-        if (p.second == NULL)
-          sc = p.first;
-        else
-          sc = p.second;
-        
-//         printf("R: %x\n", sc->node_id);
+      if (max_numbered >= m->i) {
+        std::pair < node_t *, node_t * >p = numbers[m->i - 1];
+        if (p.second == NULL) {
+          current_node = p.first;
+        }
+        else {
+          current_node = p.second;
+        }
       }
       else {
-        free(numeros);
+        // Case: m is of return type (R) to a node number (m->i) that was not attributed to a node yet
+        free(numbers);
         return RetourParcoursDepuisSommet(false, found_nodes);
       }
     }
     else {
-      if (m->k < sc->children_nb) {
-//         cout << m->toString() << "\n";
-        node_t *f = sc->children[m->k];
-        unordered_set < node_t * >::iterator it = numerotes.find(f);
-        if (it == numerotes.end()) {
-          // f n'est pas numéroté
-          bool cond_m = m->matchesSymbol(f, checkLabels) and m->matchesCF(f) and max_numeros < m->i;
+      // Case: m is not of return type but defines an edge to a child number (m->k)
+      if (m->k < current_node->children_nb) {
+        node_t *child_node = current_node->children[m->k];
+        unordered_set < node_t * >::iterator it = numbered.find(child_node);
+        if (it == numbered.end()) {
+          // Case: child_node is not yet numbered
+          
+          // cond_m: conditions match and there is no node already numbered m->i
+          bool cond_m = m->matchesSymbol(child_node, checkLabels) and m->matchesCF(child_node) and max_numbered < m->i;
+          
+          // cond_lazy: lazyrepeat is on, minrepeat is 0 and we don't check labels ; this is a corner case where 0 nodes should always be matched
           bool cond_lazy = m->info->minRepeat == 0 and m->info->lazyRepeat and not checkLabels;
     
           if (cond_m and not cond_lazy) {
-//             printf("%x: not numbered, found\n", f->address);
-            vsize_t r = 1;
-            numeros[max_numeros] = std::pair < node_t *, node_t * >(f, NULL);
-            max_numeros++;
-            numerotes.insert(f);
-            sc = f;
+            // Case: child_node matches with m: number child_node and try to repeat if necessary
+            // The entrypoint for this matched block numbered max_numbered is child_node
+            numbers[max_numbered] = std::pair < node_t *, node_t * >(child_node, NULL);
+            max_numbered++;
+            numbered.insert(child_node);
+            current_node = child_node;
+            vsize_t n_matched = 1;
 
-            std::list < node_t * >*list_nodes = new std::list < node_t * >();
+            std::list < node_t * >*list_nodes;
             if (returnFound and m->info->get) {
-              list_nodes->push_back((node_t *) sc);
+              list_nodes = new std::list < node_t * >();
+              list_nodes->push_back((node_t *) current_node);
             }
 
             if (not m->info->has_maxRepeat or m->info->maxRepeat > 1) {
-              while ((not m->info->has_maxRepeat or r < m->info->maxRepeat) 
-                      and sc->children_nb == 1 and sc->children[0]->fathers_nb == 1 
-                      and m->matchesSymbol(sc->children[0], checkLabels) and m->matchesCF(sc->children[0])) 
+              // Repeat is done on basic blocks (no incoming edge within, but no check is done on addresses)
+              while ((not m->info->has_maxRepeat or n_matched < m->info->maxRepeat)
+                      and current_node->children_nb == 1 and current_node->children[0]->fathers_nb == 1 
+                      and m->matchesSymbol(current_node->children[0], checkLabels) and m->matchesCF(current_node->children[0])) 
               {
                 
-                // If lazy repeat and labels are not checked... this is a corner case: take the least repeat as possible
-                if (r >= m->info->minRepeat and m->info->lazyRepeat and not checkLabels){
+
+                if (n_matched >= m->info->minRepeat and m->info->lazyRepeat and not checkLabels){
+                  // Case: lazyrepeat and labels are not checked ; this is a corner case
+                  // We take the least number of nodes accepted by repeat options
                   break;
                 }
                 
-                unordered_set < node_t * >::iterator it_find = numerotes.find(sc->children[0]);
-                if (it_find != numerotes.end()) {
-                  // We don't make a block from an already numbered (visited) node
+                unordered_set < node_t * >::iterator it_find = numbered.find(current_node->children[0]);
+                if (it_find != numbered.end()) {
+                  // Case: the reached node is already numbered
+                  // We won't add it to a block since it has already been defined elsewhere
                   break;
                 }
                 
-                sc = sc->children[0];
-                r++;
+                current_node = current_node->children[0];
+                n_matched++;
 
                 if (returnFound and m->info->get){
-                  list_nodes->push_back((node_t *) sc);
+                  list_nodes->push_back((node_t *) current_node);
                 }
               }
               
-              numeros[max_numeros - 1].second = sc;
+              // The exitpoint for this matched block numbered max_numbered is the last node reached with repeat
+              numbers[max_numbered - 1].second = current_node;
             }
 
             if (returnFound and m->info->get) {
               found_nodes->insert(std::pair < string, std::list < node_t * >*>(m->info->getid, list_nodes));
             }
-            else{
-              delete list_nodes;
-            }
             
-            // TODO: attention, on peut renvoyer false alors qu'on a "simplement" tenté de boucler dans la mauvaise branche
-            // FIX: il faut nécessairement tenter les autres branches
-            if (r < m->info->minRepeat) {
-//               printf("%d < %d -> ret\n", r, m->minRepeat);
-              free(numeros);
+            if (n_matched < m->info->minRepeat) {
+              // Case: not enough match
+              free(numbers);
               return RetourParcoursDepuisSommet(false, found_nodes);
             }
           }
-          else {
-            if (m->info->minRepeat == 0){
-              // It is a ghost node: you can do a back reference (-R> max_numeros) but it is not really matched
-              // Thus it can still be "numerote" and referenced by another MotParcours
-              numeros[max_numeros] = std::pair < node_t *, node_t * >(f, NULL);
-              max_numeros++;
-              
-              continue; 
-            }
-    
-//             printf("%x: not numbered, not found\n", f->address);
-            free(numeros);
+          else if (m->info->minRepeat == 0){
+            // Case: there was no match but it is allowed (minrepeat=0)
+            // It is a ghost node: you can do a back reference (-R> max_numeros) but it is not really matched
+            // Thus it can still be numbered and referenced by another MotParcours
+            numbers[max_numbered] = std::pair < node_t *, node_t * >(child_node, NULL);
+            max_numbered++;
+            
+            continue; 
+          }
+          else{      
+            // Case: there was no match and minrepeat > 0
+            free(numbers);
             return RetourParcoursDepuisSommet(false, found_nodes);
           }
         }
         else if (not m->has_symbol) {
-          // Verify that f is numbered m->i:
-          if (max_numeros >= m->i) {
-            std::pair < node_t *, node_t * >p = numeros[m->i - 1];
+          // Case: child_node is numbered and m does not define a new node
+          // We verify that child_node (gotten from current_node) is numbered m->i
+          if (max_numbered >= m->i) {
+            std::pair < node_t *, node_t * >p = numbers[m->i - 1];
             
-            if (p.first != f){
-              free(numeros);
+            if (p.first != child_node){
+              // Case: child_node and current_node's number m->i child are different
+              free(numbers);
               return RetourParcoursDepuisSommet(false, found_nodes);
             }
             
-            if (p.second == NULL) sc = p.first;
-            else sc = p.second;
+            if (p.second == NULL){
+              current_node = p.first;
+            }
+            else{
+              current_node = p.second;
+            }
           }
           else{
-              free(numeros);
-              return RetourParcoursDepuisSommet(false, found_nodes);
+            // Case: there is no node numbered m->i
+            free(numbers);
+            return RetourParcoursDepuisSommet(false, found_nodes);
           }
         }
         else {
-//           printf("has symbol ; sc: %x\n", sc->address);
-          free(numeros);
+          // Case: child_node is numbered and m does define a new node ; this should not happen
+          free(numbers);
           return RetourParcoursDepuisSommet(false, found_nodes);
         }
       }
       else {
-//         printf("no child with this number\n");
-        free(numeros);
+        // Case: current_node has no child with this number (m->k)
+        free(numbers);
         return RetourParcoursDepuisSommet(false, found_nodes);
       }
     }
-    
-//     cout << "sc_out: " << sc->csymb << "\n";
   }
 
-  free(numeros);
+  // The whole Parcours has successfully been traversed within the test graph
+  free(numbers);
   return RetourParcoursDepuisSommet(true, found_nodes);
 }
 
