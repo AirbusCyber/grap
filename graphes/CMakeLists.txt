@@ -42,41 +42,41 @@ if(${MSVC})
   if (EXISTS Lexer.cpp AND EXISTS Lexer.h AND EXISTS Parser.cpp AND EXISTS Parser.h)
     message("Found Lexer.cpp, Lexer.h, Parser.cpp and Parser.h.")
   else()
-    message("Lexer.cpp, Lexer.h, Parser.cpp or Parser.h not found: generate them with flex / bison (with make on Linux) then put them in the current directory.")
+    message("Lexer.cpp, Lexer.h, Parser.cpp or Parser.h not found: generate them
+    with flex / bison (with make on Linux) then put them in the current
+    directory.")
   endif()
 else()
-  ADD_CUSTOM_COMMAND(
-    OUTPUT Lexer.c
-    OUTPUT Lexer.h
-    COMMAND flex
-    ARGS    ${CMAKE_SOURCE_DIR}/libs/dotparser/Lexer.l
-    DEPENDS  ${CMAKE_SOURCE_DIR}/libs/dotparser/Lexer.l
-  )
 
-  # Copy Lexer.c to Lexer.cpp (so it will be compiled as a C++ file)
-  ADD_CUSTOM_COMMAND(
-    OUTPUT Lexer.cpp
-    COMMAND cp
-    ARGS    Lexer.c Lexer.cpp
-    DEPENDS  Lexer.c
-  )
+  find_package(BISON)
+  find_package(FLEX)
 
-  # Create custom command for bison/yacc
-  ADD_CUSTOM_COMMAND(
-    OUTPUT Parser.c
-    OUTPUT Parser.h
-    COMMAND bison
-    ARGS -y ${CMAKE_SOURCE_DIR}/libs/dotparser/Parser.y
-    DEPENDS ${CMAKE_SOURCE_DIR}/libs/dotparser/Parser.y
-  )
+  if (BISON_FOUND)
 
-  # Copy Parser.c to Parser.cpp (so it will be compiled as a C++ file)
-  ADD_CUSTOM_COMMAND(
-    OUTPUT Parser.cpp
-    COMMAND cp
-    ARGS    Parser.c Parser.cpp
-    DEPENDS  Parser.c
-  )
+    # Creation of the Parser
+    BISON_TARGET(Parser
+      ${CMAKE_SOURCE_DIR}/libs/dotparser/Parser.y
+      ${CMAKE_BINARY_DIR}/Parser.cpp
+      COMPILE_FLAGS "-y --defines=${CMAKE_BINARY_DIR}/Parser.h"
+      )
+
+    if(FLEX_FOUND)
+
+      # Creation of the Lexer
+      FLEX_TARGET(Scanner
+	${CMAKE_SOURCE_DIR}/libs/dotparser/Lexer.l
+	${CMAKE_BINARY_DIR}/Lexer.cpp
+	COMPILE_FLAGS "--header-file=${CMAKE_BINARY_DIR}/Lexer.h"
+	)
+
+      ADD_FLEX_BISON_DEPENDENCY(Scanner Parser)
+    else()
+      message("[-] Flex issues")
+    endif()
+  else()
+    message("[-] Bison issues")
+  endif()
+
 endif()
 
 # libgraph
@@ -94,8 +94,8 @@ add_library(graph
   libs/libgraph/nodeIO.cpp
   libs/dotparser/graphParser.cpp
   libs/dotparser/Expression.cpp
-  Parser.cpp
-  Lexer.cpp
+  ${BISON_Parser_OUTPUTS}
+  ${FLEX_Scanner_OUTPUTS}
 )
 
 # Libs

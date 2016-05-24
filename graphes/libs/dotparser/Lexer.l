@@ -12,7 +12,6 @@
  
 %}
 
-%option outfile="Lexer.c" header-file="Lexer.h"
 %option warn nodefault
  
 %option reentrant noyywrap never-interactive nounistd
