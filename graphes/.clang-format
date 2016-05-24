@@ -1,0 +1,6 @@
+---
+BasedOnStyle: LLVM
+BreakBeforeBraces: Stroustrup
+ColumnLimit: 80
+BreakBeforeBinaryOperators: NonAssignment
+AllowShortIfStatementsOnASingleLine: true
