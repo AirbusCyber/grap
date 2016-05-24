@@ -106,21 +106,18 @@ add_library(graph
 add_library(nodeinfo libs/node_info/node_info.cpp)
 
 # GTSI
-add_library(libGTSI
-  libsGTSI/utils-gtsi.cpp
-  libsGTSI/Traversal/Traversal.cpp
-)
+add_subdirectory(libsGTSI)
 
 # grap (GTSI-grap)
 add_executable(GTSI-grap GTSI-grap.cpp)
-target_link_libraries(GTSI-grap common libGTSI graph nodeinfo)
+target_link_libraries(GTSI-grap common GTSI graph nodeinfo)
 
 # tests
 add_executable(tests tests.cpp)
 if(${MSVC})
-  target_link_libraries(tests common libGTSI graph nodeinfo)
+  target_link_libraries(tests common GTSI graph nodeinfo)
 else()
-  target_link_libraries(tests seccomp common libGTSI graph nodeinfo)
+  target_link_libraries(tests seccomp common GTSI graph nodeinfo)
 endif()
 
 # todot
