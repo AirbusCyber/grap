@@ -5,5 +5,8 @@ set(SRCS_COMMON
   my_assert.hpp
   )
 
+#common library-object
+add_library(common-obj OBJECT ${SRCS_COMMON})
+
 # common types and functions (alloc_or_quit for instance)
-add_library(common ${SRCS_COMMON})
+add_library(common $<TARGET_OBJECTS:common-obj>)
