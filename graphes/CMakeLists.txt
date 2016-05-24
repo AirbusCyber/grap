@@ -102,8 +102,8 @@ add_library(graph
   Lexer.cpp
 )
 
-# Node Info
-add_library(nodeinfo libs/node_info/node_info.cpp)
+# Libs
+add_subdirectory(libs)
 
 # GTSI
 add_subdirectory(libsGTSI)
