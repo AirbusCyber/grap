@@ -27,7 +27,7 @@ endif()
 
 include_directories(
   ./
-  libs/include/
+  libs/common/
   libs/libgraph/
   libs/dotparser/
   libsGTSI/
@@ -79,13 +79,9 @@ else()
   )
 endif()
 
-
-# Common types and functions (alloc_or_quit for instance)
-add_library(common libs/include/my_alloc.cpp)
-
 # libgraph
 add_library(graph
-  libs/include/my_alloc.cpp
+  libs/common/my_alloc.cpp
   libs/libgraph/graph.hpp
   libs/libgraph/graph.cpp
   libs/libgraph/graphIO.hpp
