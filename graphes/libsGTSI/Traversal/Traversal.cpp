@@ -105,13 +105,13 @@ bool MotParcours::sameSymbol(MotParcours * m, bool checkLabels) {
 
 bool MotParcours::sameRepeatAndCF(MotParcours * m) {  
   bool r = (this->info->minRepeat == m->info->minRepeat)
-    and(this->info->has_maxRepeat == m->info->has_maxRepeat)
-    and((not this->info->has_maxRepeat) or this->info->maxRepeat == m->info->maxRepeat)
-    and(this->info->minChildrenNumber == m->info->minChildrenNumber)
-    and(this->info->has_maxChildrenNumber == m->info->has_maxChildrenNumber)
-    and((not this->info->has_maxChildrenNumber) or this->info->maxChildrenNumber == m->info->maxChildrenNumber)
-    and(this->info->has_maxFathersNumber == m->info->has_maxFathersNumber)
-    and((not this->info->has_maxFathersNumber) or this->info->maxFathersNumber == m->info->maxFathersNumber);
+    and (this->info->has_maxRepeat == m->info->has_maxRepeat)
+    and ((not this->info->has_maxRepeat) or this->info->maxRepeat == m->info->maxRepeat)
+    and (this->info->minChildrenNumber == m->info->minChildrenNumber)
+    and (this->info->has_maxChildrenNumber == m->info->has_maxChildrenNumber)
+    and ((not this->info->has_maxChildrenNumber) or this->info->maxChildrenNumber == m->info->maxChildrenNumber)
+    and (this->info->has_maxFathersNumber == m->info->has_maxFathersNumber)
+    and ((not this->info->has_maxFathersNumber) or this->info->maxFathersNumber == m->info->maxFathersNumber);
 
   return r;
 }
@@ -425,10 +425,8 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
               // Repeat is done on basic blocks (no incoming edge within, but no check is done on addresses)
               while ((not m->info->has_maxRepeat or n_matched < m->info->maxRepeat)
                       and current_node->children_nb == 1 and current_node->children[0]->fathers_nb == 1 
-                      and m->matchesSymbol(current_node->children[0], checkLabels) and m->matchesCF(current_node->children[0])) 
+                      and m->matchesSymbol(current_node->children[0], checkLabels) and m->matchesCF(current_node->children[0]))
               {
-                
-
                 if (n_matched >= m->info->minRepeat and m->info->lazyRepeat and not checkLabels){
                   // Case: lazyrepeat and labels are not checked ; this is a corner case
                   // We take the least number of nodes accepted by repeat options
