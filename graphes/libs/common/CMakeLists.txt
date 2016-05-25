@@ -1,3 +1,4 @@
+# sources
 set(SRCS_COMMON
   my_alloc.cpp
   ga_types.hpp
@@ -5,7 +6,7 @@ set(SRCS_COMMON
   my_assert.hpp
   )
 
-#common library-object
+# common object-library
 add_library(common-obj OBJECT ${SRCS_COMMON})
 
 # common types and functions (alloc_or_quit for instance)

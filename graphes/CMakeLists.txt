@@ -9,10 +9,15 @@ if(${MSVC})
   # Increase stack size
   set(CMAKE_EXE_LINKER_FLAGS "/STACK:1000000000")
 else()
-  set(CMAKE_CXX_FLAGS " -std=c++11 -pedantic -Wall -Wno-write-strings -Wextra -Wcast-align -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Woverloaded-virtual -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Wno-unused")
-
   # Less warnings in C in order to avoid warnings about flex/bison code
-  set(CMAKE_C_FLAGS " -std=c++11 -pedantic -Wall -Wno-write-strings -Wno-return-type -Wextra -Wcast-align -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-include-dirs -Wnoexcept -Woverloaded-virtual -Wshadow -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wundef -Wno-unused")
+  set(CMAKE_CXX_FLAGS " -std=c++11 -pedantic -Wall -Wno-write-strings -Wextra	\
+  -Wcast-align -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2		\
+  -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs	\
+  -Wnoexcept -Woverloaded-virtual -Wshadow -Wsign-conversion -Wsign-promo	\
+  -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef		\
+  -Wno-unused")
+
+
 
   set(CMAKE_CXX_FLAGS_VALGRIND " -g")
   set(CMAKE_C_FLAGS_VALGRIND " -g")
@@ -20,10 +25,21 @@ else()
   set(CMAKE_CXX_FLAGS_DEBUG " -g -fsanitize=address")
   set(CMAKE_C_FLAGS_DEBUG " -g -fsanitize=address")
 
-  set(CMAKE_CXX_FLAGS_ERRALL " -g -pedantic -Wall -Wextra -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Werror -Wno-unused")
-  set(CMAKE_C_FLAGS_ERRALL " -g -pedantic -Wall -Wextra -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Werror -Wno-unused")
-endif()
+  set(CMAKE_CXX_FLAGS_ERRALL " -g -pedantic -Wall -Wextra -Wcast-align		\
+  -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2		\
+  -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs	\
+  -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow	\
+  -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5	\
+  -Wswitch-default -Wundef -Werror -Wno-unused")
 
+  set(CMAKE_C_FLAGS_ERRALL " -g -pedantic -Wall -Wextra -Wcast-align		 \
+  -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self \
+  -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept		 \
+  -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow		 \
+  -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5	 \
+  -Wswitch-default -Wundef -Werror -Wno-unused")
+
+endif()
 
 include_directories(
   ./
@@ -33,69 +49,6 @@ include_directories(
   libsGTSI/
   libsGTSI/Traversal/
   libs/node_info/
-  ${CMAKE_BINARY_DIR}
-)
-
-# Dot parser
-# Create custom command for flex/lex
-if(${MSVC})
-  if (EXISTS Lexer.cpp AND EXISTS Lexer.h AND EXISTS Parser.cpp AND EXISTS Parser.h)
-    message("Found Lexer.cpp, Lexer.h, Parser.cpp and Parser.h.")
-  else()
-    message("Lexer.cpp, Lexer.h, Parser.cpp or Parser.h not found: generate them
-    with flex / bison (with make on Linux) then put them in the current
-    directory.")
-  endif()
-else()
-
-  find_package(BISON)
-  find_package(FLEX)
-
-  if (BISON_FOUND)
-
-    # Creation of the Parser
-    BISON_TARGET(Parser
-      ${CMAKE_SOURCE_DIR}/libs/dotparser/Parser.y
-      ${CMAKE_BINARY_DIR}/Parser.cpp
-      COMPILE_FLAGS "-y --defines=${CMAKE_BINARY_DIR}/Parser.h"
-      )
-
-    if(FLEX_FOUND)
-
-      # Creation of the Lexer
-      FLEX_TARGET(Scanner
-	${CMAKE_SOURCE_DIR}/libs/dotparser/Lexer.l
-	${CMAKE_BINARY_DIR}/Lexer.cpp
-	COMPILE_FLAGS "--header-file=${CMAKE_BINARY_DIR}/Lexer.h"
-	)
-
-      ADD_FLEX_BISON_DEPENDENCY(Scanner Parser)
-    else()
-      message("[-] Flex issues")
-    endif()
-  else()
-    message("[-] Bison issues")
-  endif()
-
-endif()
-
-# libgraph
-add_library(graph
-  libs/common/my_alloc.cpp
-  libs/libgraph/graph.hpp
-  libs/libgraph/graph.cpp
-  libs/libgraph/graphIO.hpp
-  libs/libgraph/graphIO.cpp
-  libs/libgraph/node.hpp
-  libs/libgraph/node.cpp
-  libs/libgraph/node_list.hpp
-  libs/libgraph/node_list.cpp
-  libs/libgraph/nodeIO.hpp
-  libs/libgraph/nodeIO.cpp
-  libs/dotparser/graphParser.cpp
-  libs/dotparser/Expression.cpp
-  ${BISON_Parser_OUTPUTS}
-  ${FLEX_Scanner_OUTPUTS}
 )
 
 # Libs
