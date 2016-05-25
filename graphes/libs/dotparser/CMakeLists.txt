@@ -19,7 +19,7 @@ else()
     BISON_TARGET(Parser
       Parser.y
       ${CMAKE_CURRENT_BINARY_DIR}/Parser.cpp
-      DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/Parser.h
+      DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/Parser.hpp
       COMPILE_FLAGS "-y"
       )
 
@@ -29,7 +29,7 @@ else()
       FLEX_TARGET(Scanner
 	Lexer.l
 	${CMAKE_CURRENT_BINARY_DIR}/Lexer.cpp
-	COMPILE_FLAGS "--header-file=${CMAKE_CURRENT_BINARY_DIR}/Lexer.h"
+	COMPILE_FLAGS "--header-file=${CMAKE_CURRENT_BINARY_DIR}/Lexer.hpp"
 	)
 
       ADD_FLEX_BISON_DEPENDENCY(Scanner Parser)

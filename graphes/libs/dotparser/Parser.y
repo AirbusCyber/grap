@@ -6,8 +6,8 @@
  */
  
 #include "Expression.hpp"
-#include "Parser.h"
-#include "Lexer.h"
+#include "Parser.hpp"
+#include "Lexer.hpp"
 
 // #include "graph2.h"
 
