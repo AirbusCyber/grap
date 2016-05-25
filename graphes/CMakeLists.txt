@@ -49,26 +49,15 @@ include_directories(
   libsGTSI/
   libsGTSI/Traversal/
   libs/node_info/
+  ${CMAKE_BINARY_DIR}/libs/dotparser/
 )
 
+# Libraries-----------------------------------------------------------------
 # Libs
 add_subdirectory(libs)
 
 # GTSI
 add_subdirectory(libsGTSI)
 
-# grap (GTSI-grap)
-add_executable(GTSI-grap GTSI-grap.cpp)
-target_link_libraries(GTSI-grap common GTSI graph nodeinfo)
-
-# tests
-add_executable(tests tests.cpp)
-if(${MSVC})
-  target_link_libraries(tests common GTSI graph nodeinfo)
-else()
-  target_link_libraries(tests seccomp common GTSI graph nodeinfo)
-endif()
-
-# todot
-add_executable(todot todot.cpp)
-target_link_libraries(todot common graph nodeinfo)
+# Executables---------------------------------------------------------------
+add_subdirectory(tools)
