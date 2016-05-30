@@ -6,8 +6,8 @@
  */
  
 #include "Expression.hpp"
-#include "Parser.h"
-#include "Lexer.h"
+#include "Parser.hpp"
+#include "Lexer.hpp"
 
 // #include "graph2.h"
 
@@ -31,9 +31,6 @@ typedef void* yyscan_t;
 
 %define api.pure
 
-%output  "Parser.c"
-%defines "Parser.h"
- 
 %lex-param   { yyscan_t scanner }
 %parse-param { graph_t **Sgraph }
 %parse-param { yyscan_t scanner }

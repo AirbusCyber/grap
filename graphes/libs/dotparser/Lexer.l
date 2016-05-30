@@ -6,13 +6,12 @@
  */
 
 #include "Expression.hpp"
-#include "Parser.h"
+#include "Parser.hpp"
 
 #include <stdio.h>
  
 %}
 
-%option outfile="Lexer.c" header-file="Lexer.h"
 %option warn nodefault
  
 %option reentrant noyywrap never-interactive nounistd

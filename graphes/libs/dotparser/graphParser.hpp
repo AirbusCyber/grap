@@ -2,8 +2,8 @@
 #define GRAPHPARSER_H
 
 #include "Expression.hpp"
-#include "Parser.h"
-#include "Lexer.h"
+#include "Parser.hpp"
+#include "Lexer.hpp"
 
 #include "graph.hpp"
 #include "graphIO.hpp"
@@ -20,3 +20,4 @@ graph_t* getGraphFromPath(const char* path);
 graph_t* getGraphFromFile(FILE* f);
 
 #endif
+
