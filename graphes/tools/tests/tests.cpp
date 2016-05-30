@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 //   drop_privileges();
 #endif
 
-  std::string dir_tests_base;
+  std::string dir_tests_base = "";
 
   if (argc >= 2) {
     if (strcmp(argv[1], "-h") == 0 or strcmp(argv[1], "--help") == 0) {
