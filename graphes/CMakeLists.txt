@@ -33,6 +33,7 @@ include_directories(
   libsGTSI/
   libsGTSI/Traversal/
   libs/node_info/
+  ${CMAKE_BINARY_DIR}
 )
 
 # Dot parser
@@ -48,8 +49,8 @@ else()
     OUTPUT Lexer.c
     OUTPUT Lexer.h
     COMMAND flex
-    ARGS    libs/dotparser/Lexer.l
-    DEPENDS  libs/dotparser/Lexer.l
+    ARGS    ${CMAKE_SOURCE_DIR}/libs/dotparser/Lexer.l
+    DEPENDS  ${CMAKE_SOURCE_DIR}/libs/dotparser/Lexer.l
   )
 
   # Copy Lexer.c to Lexer.cpp (so it will be compiled as a C++ file)
@@ -65,8 +66,8 @@ else()
     OUTPUT Parser.c
     OUTPUT Parser.h
     COMMAND bison
-    ARGS -y libs/dotparser/Parser.y
-    DEPENDS libs/dotparser/Parser.y
+    ARGS -y ${CMAKE_SOURCE_DIR}/libs/dotparser/Parser.y
+    DEPENDS ${CMAKE_SOURCE_DIR}/libs/dotparser/Parser.y
   )
 
   # Copy Parser.c to Parser.cpp (so it will be compiled as a C++ file)
