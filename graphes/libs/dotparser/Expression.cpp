@@ -38,8 +38,8 @@ void freeEdgeList(CoupleList* cl){
 
 Couple *createEdge(char *f, char *c, OptionList* ol) {
   Couple *e = (Couple *) malloc_or_quit(sizeof(Couple));
-  e->x = hash(f);
-  e->y = hash(c);
+  e->x = hash_func(f);
+  e->y = hash_func(c);
   
   free(f);
   free(c);
@@ -82,7 +82,7 @@ graph_t *addEdgesToGraph(CoupleList * cl, graph_t * g) {
   return g;
 }
 
-vsize_t hash(char *s) {
+vsize_t hash_func(char *s) {
   vsize_t h = 0;
   size_t i;
 
@@ -95,7 +95,7 @@ vsize_t hash(char *s) {
 }
 
 node_t *createNode(char *value) {
-  vsize_t id = hash(value);
+  vsize_t id = hash_func(value);
   free(value);
 
   node_t *node = (node_t *) calloc_or_quit(1, sizeof(node_t));
