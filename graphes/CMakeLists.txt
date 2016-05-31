@@ -2,6 +2,25 @@ cmake_minimum_required(VERSION 2.8)
 project(grap)
 CMAKE_POLICY(SET CMP0015 NEW)
 
+# Cmake Modules-------------------------------------------------------------
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake-modules")
+include(ListCombinations)
+
+# Variables-----------------------------------------------------------------
+# Describe property
+define_property(GLOBAL PROPERTY SRCS_BINDING
+    BRIEF_DOCS "Bindings sources"
+    FULL_DOCS "Bindings sources")
+
+set_property(GLOBAL PROPERTY SRCS_BINDING "")
+
+# Macros--------------------------------------------------------------------
+macro(binding_add_srcs var)
+  set_property(GLOBAL APPEND PROPERTY SRCS_BINDING "${var}")
+endmacro(binding_add_srcs)
+
+# Compiler------------------------------------------------------------------
 if(${MSVC})
   # Don't include uinstd.h in Lexer.h
   add_definitions(-DYY_NO_UNISTD_H)
@@ -46,3 +65,6 @@ add_subdirectory(libsGTSI)
 
 # Executables---------------------------------------------------------------
 add_subdirectory(tools)
+
+# Bindings------------------------------------------------------------------
+add_subdirectory(bindings)
