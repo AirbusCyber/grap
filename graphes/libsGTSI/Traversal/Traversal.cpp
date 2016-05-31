@@ -185,7 +185,7 @@ CondNode** computeCond(node_t* n){
 
     std::list<CondNode**>* not_child = new std::list<CondNode**>();
     not_child->push_front(child->condition);
-    CondNode* cn_tmp = new CondNode(not_child, UnOpEnum::logical_not);
+    CondNode* cn_tmp = new CondNode(not_child, UnOpEnum::logic_not);
     CondNode** cn_not = (CondNode**) malloc(sizeof(CondNode*));
     *cn_not = cn_tmp;
     (*cn_not)->has_fixed_pattern_info = true;
@@ -200,7 +200,7 @@ CondNode** computeCond(node_t* n){
       std::list<CondNode**>* and_children = new std::list<CondNode**>();
       and_children->push_front(n->condition);
       and_children->push_front(cn_not);
-      CondNode* cn = new CondNode(and_children, BinOpEnum::logical_and);
+      CondNode* cn = new CondNode(and_children, BinOpEnum::logic_and);
       CondNode** cn_ret = (CondNode**) malloc(sizeof(CondNode*));
       cn_ret = &cn;
       return cn_ret;

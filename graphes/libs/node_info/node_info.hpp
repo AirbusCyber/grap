@@ -84,7 +84,7 @@ static const std::string desc_ComparisonFunEnum[] = {
 };
 
 enum UnOpEnum {
-  logical_not
+  logic_not
 };
 
 static const std::string desc_UnOpEnum[] = {
@@ -93,8 +93,8 @@ static const std::string desc_UnOpEnum[] = {
 };
 
 enum BinOpEnum {
-  logical_or,
-  logical_and
+  logic_or,
+  logic_and
 };
 
 static const std::string desc_BinOpEnum[] = {
