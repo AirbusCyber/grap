@@ -25,3 +25,17 @@ Utilisation de graphes/GTSI-grap directement:
 ./GTSI-grap motif.dot prg.dot -ncl
 ./GTSI-grap motif.dot prg.dot -q
 
+
+# Binding
+
+Pour créer le binding python il est nécessaire d'ajouter l'option suivante dans `cmake`.
+
+```
+cmake -DPYTHON_BINDING=1
+```
+
+Pour installer celui-ci, il suffit d'exécuter la commande ci-après.
+
+```
+make install
+```
