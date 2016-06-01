@@ -99,37 +99,4 @@ node_t* node_list_append(node_list_t * list, uint64_t node_id);
  */
 node_t* node_list_find(node_list_t * list, uint64_t node_id);
 
-/*!
- @brief Malloc and initialize a new iterator. Next node will be the first.
- @param list The node list.
- @return The new iterator set up to the first node.
- */
-struct node_list_iterator_t* node_list_it_new(const node_list_t * list);
-
-/*!
- @brief Free an iterator.
- @param it The iterator to free.
- */
-void node_list_it_free(struct node_list_iterator_t* it);
-
-/*!
- @brief Rewind iterator. Next node will be the first.
- @param it Iterator to set up to the first node.
- */
-void node_list_it_rewind(struct node_list_iterator_t *it);
-
-/*!
- @brief Move the iterator to the next node, and return a pointer to it.
- @param it Iterator to set up to the first node.
- @return A pointer to the next node, or NULL it reaches the end of list.
- */
-node_t * node_list_it_get_next(struct node_list_iterator_t *it);
-
-/*!
- @brief Move the iterator to the previous node, and return a pointer to it.
- @param it Iterator to set up to the first node.
- @return A pointer to the next node, or NULL it reaches the begining of list.
- */
-node_t * node_list_it_get_prev(struct node_list_iterator_t *it);
-
 #endif

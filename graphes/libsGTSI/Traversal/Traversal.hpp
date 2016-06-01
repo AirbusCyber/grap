@@ -22,8 +22,6 @@ using namespace std;
 #include "node_info.hpp"
 
 
-extern char *labCharToString(vsize_t label);
-
 enum TypeMotParcours {
   TYPE_M1,
   TYPE_M2

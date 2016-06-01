@@ -15,7 +15,6 @@ public:
   
   std::string toString();
   
-  bool matches(NodeInfo* test);
   bool equals(NodeInfo* ni);
 
   // Node information (pattern and test)
