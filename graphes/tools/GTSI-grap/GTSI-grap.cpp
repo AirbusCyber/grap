@@ -136,10 +136,10 @@ int main(int argc, char *argv[]) {
   }
 
   // Parse matches and print the extracted nodes
-  std::unordered_set < std::map < string, std::list < node_t * >*>*>* set_gotten = rt.second;
+  std::set < std::map < string, std::list < node_t * >*>*>* set_gotten = rt.second;
   if (not set_gotten->empty()) {
     std::cout << "\nExtracted nodes:\n";
-    std::unordered_set < std::map < string, std::list < node_t * >*>*>::iterator it;
+    std::set < std::map < string, std::list < node_t * >*>*>::iterator it;
 
     vsize_t i = 1;
     for (it = set_gotten->begin(); it != set_gotten->end(); it++) {

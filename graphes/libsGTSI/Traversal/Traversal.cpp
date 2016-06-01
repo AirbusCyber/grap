@@ -238,7 +238,7 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
   size_t k2;
   node_t *f;
 
-  unordered_set < node_t * >explored;
+  set < node_t * >explored;
 
   while (not queue3.empty()) {
     tq = queue3.front();
@@ -246,7 +246,7 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
     k = std::get < 1 > (tq);
     ss = std::get < 2 > (tq);
 
-    unordered_set < node_t * >::iterator it = explored.find(ss);
+    set < node_t * >::iterator it = explored.find(ss);
     if ((it != explored.end()or i < W + 1) and sc != pere and not p_is_epsilon) {
       m = new MotParcours();
       m->type = TYPE_M2;
@@ -347,7 +347,7 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
   current_node = node_list_item(&(graph->nodes), vroot);
   
   // set of all nodes already numbered
-  unordered_set < node_t * >numbered; 
+  set < node_t * >numbered; 
   
   // map associating a string (getid value) to a list of matched nodes 
   std::map < string, std::list < node_t * >*>*found_nodes = new std::map < string, std::list < node_t * >*>();
@@ -396,7 +396,7 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
       // Case: m is not of return type but defines an edge to a child number (m->k)
       if (m->k < current_node->children_nb) {
         node_t *child_node = current_node->children[m->k];
-        unordered_set < node_t * >::iterator it = numbered.find(child_node);
+        set < node_t * >::iterator it = numbered.find(child_node);
         if (it == numbered.end()) {
           // Case: child_node is not yet numbered
           
@@ -435,7 +435,7 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
                   break;
                 }
                 
-                unordered_set < node_t * >::iterator it_find = numbered.find(current_node->children[0]);
+                set < node_t * >::iterator it_find = numbered.find(current_node->children[0]);
                 if (it_find != numbered.end()) {
                   // Case: the reached node is already numbered
                   // We won't add it to a block since it has already been defined elsewhere
@@ -555,7 +555,7 @@ void freeRetourParcoursDepuisSommet(Parcours::RetourParcoursDepuisSommet rt){
 Parcours::RetourParcours Parcours::parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool countAllMatches, bool getId) {
   vsize_t n;
   vsize_t count = 0;
-  std::unordered_set < std::map < string, std::list < node_t * >*>*>* set_gotten = new std::unordered_set < std::map < string, std::list < node_t * >*>*>();
+  std::set < std::map < string, std::list < node_t * >*>*>* set_gotten = new std::set < std::map < string, std::list < node_t * >*>*>();
   for (n = 0; n < gr->nodes.size; n++) {
     RetourParcoursDepuisSommet rt = this->parcourirDepuisSommet(gr, n, W, checkLabels, getId);
     if (rt.first) {
@@ -600,8 +600,8 @@ void Parcours::freeParcours(bool free_mots)
 }
 
 
-unordered_set < Parcours * >parcoursFromGraph(graph_t * gr, vsize_t W, bool checkLabels) {
-  unordered_set < Parcours * >parcours;
+set < Parcours * >parcoursFromGraph(graph_t * gr, vsize_t W, bool checkLabels) {
+  set < Parcours * >parcours;
   Parcours *p;
   vsize_t n;
 
@@ -610,7 +610,7 @@ unordered_set < Parcours * >parcoursFromGraph(graph_t * gr, vsize_t W, bool chec
 
     if (p->complete) {
       // check if duplicate:
-      unordered_set < Parcours * >::iterator it;
+      set < Parcours * >::iterator it;
       bool new_p = true;
       for (it = parcours.begin(); it != parcours.end(); it++) {
         Parcours *p2 = *it;
@@ -768,7 +768,7 @@ vsize_t ParcoursNode::parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool 
 }
 
 list < vsize_t > ParcoursNode::parcourirDepuisSommet(graph_t * gr, vsize_t v, vsize_t W, bool checkLabels) {
-  unordered_set < node_t * >numerotes;
+  set < node_t * >numerotes;
   node_t *r = node_list_item(&gr->nodes, v);
 
   std::pair < node_t *, node_t * >*numeros = (std::pair < node_t *, node_t * >*)calloc_or_quit(W, sizeof(std::pair < node_t *, node_t * >));
@@ -779,7 +779,7 @@ list < vsize_t > ParcoursNode::parcourirDepuisSommet(graph_t * gr, vsize_t v, vs
 }
 
 
-list < vsize_t > ParcoursNode::parcourirDepuisSommetRec(bool racine, graph_t * gr, node_t * r, vsize_t W, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, unordered_set < node_t * >numerotes, bool checkLabels) {
+list < vsize_t > ParcoursNode::parcourirDepuisSommetRec(bool racine, graph_t * gr, node_t * r, vsize_t W, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, set < node_t * >numerotes, bool checkLabels) {
   list < vsize_t > l;
 
   if (this->feuille) {
@@ -798,7 +798,7 @@ list < vsize_t > ParcoursNode::parcourirDepuisSommetRec(bool racine, graph_t * g
     node_t *node = get < 1 > (ret);
     numeros = get < 2 > (ret);
     vsize_t max_numeros_r = get < 3 > (ret);
-    unordered_set < node_t * >numerotes_r = get < 4 > (ret);
+    set < node_t * >numerotes_r = get < 4 > (ret);
 
     if (possible) {
       list < vsize_t > l2 = f->parcourirDepuisSommetRec(false, gr, node, W, numeros, max_numeros_r, numerotes_r, checkLabels);
@@ -808,7 +808,7 @@ list < vsize_t > ParcoursNode::parcourirDepuisSommetRec(bool racine, graph_t * g
   return l;
 }
 
-ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph_t * gr, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, unordered_set < node_t * >numerotes, bool checkLabels) {
+ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph_t * gr, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, set < node_t * >numerotes, bool checkLabels) {
   if (m->type == TYPE_M1) {
     if (m->matchesSymbol(s, checkLabels) and m->matchesCF(s)) {
 
@@ -841,7 +841,7 @@ ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph
     else {
       if (m->k < s->children_nb) {
         node_t *f = s->children[m->k];
-        unordered_set < node_t * >::iterator it = numerotes.find(f);
+        set < node_t * >::iterator it = numerotes.find(f);
         if (it == numerotes.end()) {
           // f n'est pas numéroté
           bool cond_symbol = (m->matchesSymbol(f, checkLabels) and m->matchesCF(f) and max_numeros < m->i);
@@ -864,7 +864,7 @@ ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph
                 if (r >= m->info->minRepeat and m->info->lazyRepeat and not checkLabels) break;
                 
                 if ((not m->info->has_maxRepeat or r < m->info->maxRepeat) and s->children_nb == 1 and s->children[0]->fathers_nb == 1 and m->matchesSymbol(s->children[0], checkLabels) and m->matchesCF(s->children[0])) {
-                  unordered_set < node_t * >::iterator it_find = numerotes.find(s->children[0]);
+                  set < node_t * >::iterator it_find = numerotes.find(s->children[0]);
                   
                   if (it_find != numerotes.end()) break;
                   
