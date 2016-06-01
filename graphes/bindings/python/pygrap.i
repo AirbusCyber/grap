@@ -1,5 +1,5 @@
-/* File: libgraph.i */
-%module libgraph
+/* File: pygrap.i */
+%module pygrap
 
 %{
 #define SWIG_FILE_WITH_INIT
