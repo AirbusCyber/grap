@@ -14,9 +14,26 @@ if(PYTHON_BINDING)
     INCLUDE(${SWIG_USE_FILE})
 
     # Python
-    FIND_PACKAGE(PythonLibs)
+    FIND_PACKAGE(PythonLibs REQUIRED)
+    FIND_PACKAGE(PythonInterp REQUIRED)
+    
+    if(PYTHONLIBS_FOUND AND PYTHONINTERP_FOUND)
 
-    if(PYTHONLIBS_FOUND)
+      # Environement
+      EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE}
+	-c "from sys import stdout; from distutils import sysconfig; stdout.write(sysconfig.get_python_lib())"
+	OUTPUT_VARIABLE PYTHON_LIB_DIR)
+      
+      IF (NOT PYTHON_SITE_DIR)
+	SET (PYTHON_SITE_DIR ${PYTHON_LIB_DIR})
+      ENDIF (NOT PYTHON_SITE_DIR)
+
+      # Print information
+      MESSAGE(STATUS "Python executable: ${PYTHON_EXECUTABLE}")
+      MESSAGE(STATUS "Python inc dir: ${PYTHON_INCLUDE_PATH}")
+      MESSAGE(STATUS "Python lib dir: ${PYTHON_LIB_DIR}")
+      MESSAGE(STATUS "Python libraries: ${PYTHON_LIBRARIES}")
+      MESSAGE(STATUS "Python site dir: ${PYTHON_SITE_DIR}")
 
       # Includes
       INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
@@ -27,6 +44,7 @@ if(PYTHON_BINDING)
       # Forcing the generation of the parser and lexer
       SET_SOURCE_FILES_PROPERTIES(${SRCS} PROPERTIES GENERATED TRUE)
 
+      # Generation
       SWIG_ADD_MODULE(pygrap python ${SWIG_FILE} ${SRCS})
 
       # Removed warnings for the binding
@@ -36,8 +54,12 @@ if(PYTHON_BINDING)
 	GENERATED TRUE)
       
       SWIG_LINK_LIBRARIES(pygrap ${PYTHON_LIBRARIES})
+
+      # Install
+      install(TARGETS ${SWIG_MODULE_pygrap_REAL_NAME} LIBRARY DESTINATION ${PYTHON_SITE_DIR})
+      install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pygrap.py DESTINATION ${PYTHON_SITE_DIR})
       
-    endif(PYTHONLIBS_FOUND)
+    endif(PYTHONLIBS_FOUND AND PYTHONINTERP_FOUND)
   endif(SWIG_FOUND)
   
 endif(PYTHON_BINDING)
