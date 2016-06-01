@@ -23,8 +23,14 @@ if(SWIG_FOUND)
     SET_SOURCE_FILES_PROPERTIES(${SWIG_FILE} PROPERTIES SWIG_FLAGS "-builtin")
     # Forcing the generation of the parser and lexer
     SET_SOURCE_FILES_PROPERTIES(${SRCS} PROPERTIES GENERATED TRUE)
-    
+
     SWIG_ADD_MODULE(libgraph python ${SWIG_FILE} ${SRCS})
+
+    # Removed warnings for the binding
+    SET_SOURCE_FILES_PROPERTIES(${SRCS} PROPERTIES COMPILE_FLAGS "-w")
+    SET_SOURCE_FILES_PROPERTIES(${swig_generated_file_fullname} PROPERTIES
+      COMPILE_FLAGS "-w"
+      GENERATED TRUE)
         
     SWIG_LINK_LIBRARIES(libgraph ${PYTHON_LIBRARIES})
     

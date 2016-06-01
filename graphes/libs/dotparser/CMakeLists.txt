@@ -54,6 +54,10 @@ set(SRCS_BISON
   ${BISON_Parser_OUTPUTS}
   )
 
+# Removed warnings for the parser and lexer
+SET_SOURCE_FILES_PROPERTIES(${SRCS_BISON} PROPERTIES
+  COMPILE_FLAGS "-w"
+  GENERATED TRUE)
 
 # Bindings
 list_combinations(SRCS_DOTPARSER_BINDING
