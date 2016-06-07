@@ -1,12 +1,16 @@
 # Change the location of executables
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set (TOOLS OFF CACHE BOOL "Tools")
 
-# grap (GTSI-grap)
-add_subdirectory(GTSI-grap)
+if(${TOOLS})
 
-# tests
-add_subdirectory(tests)
+  # grap (GTSI-grap)
+  add_subdirectory(GTSI-grap)
 
-# todot
-add_subdirectory(todot)
+  # tests
+  add_subdirectory(tests)
 
+  # todot
+  add_subdirectory(todot)
+
+endif(${TOOLS})
