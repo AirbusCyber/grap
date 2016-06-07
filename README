@@ -40,6 +40,14 @@ Pour installer celui-ci, il suffit d'exécuter la commande ci-après.
 make install
 ```
 
+# Tools
+
+Pour créer les outils il faut ajouter l'option ci-après à `cmake`.
+
+```
+cmake -DTOOLS=1
+```
+
 
 # Compilation Windows
 
