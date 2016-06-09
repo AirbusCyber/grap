@@ -352,7 +352,7 @@ void test_NodeInfo(){
   
   CondNode* cn_not2 = new CondNode();
   cn_not2->children->push_front(&cn_not);
-  cn_not2->unary_operator = UnOpEnum::logical_not;
+  cn_not2->unary_operator = UnOpEnum::logic_not;
   r = cn_not2->evaluate(np, nt);
   print_leaf_result(not r, "!! ", true);
   
@@ -375,7 +375,7 @@ void test_NodeInfo(){
   CondNode* cn_and = new CondNode();
   cn_and->children->push_front(&cn);
   cn_and->children->push_front(&cn_not);
-  cn_and->binary_operator =  BinOpEnum::logical_and;
+  cn_and->binary_operator =  BinOpEnum::logic_and;
   r = cn_and->evaluate(np, nt);
   print_leaf_result(not r, "2 ", false);
   

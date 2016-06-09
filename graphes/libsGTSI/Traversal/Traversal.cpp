@@ -186,7 +186,7 @@ CondNode** computeCond(node_t* n){
 
     std::list<CondNode**>* not_child = new std::list<CondNode**>();
     not_child->push_front(child->condition);
-    CondNode *cn_tmp = new CondNode(not_child, UnOpEnum::logical_not);
+    CondNode *cn_tmp = new CondNode(not_child, UnOpEnum::logic_not);
     CondNode **cn_not = (CondNode **)malloc_or_quit(sizeof(CondNode *));
     *cn_not = cn_tmp;
     (*cn_not)->has_fixed_pattern_info = true;
@@ -204,7 +204,7 @@ CondNode** computeCond(node_t* n){
       std::list<CondNode **> *and_children = new std::list<CondNode **>();
       and_children->push_front(n->condition);
       and_children->push_front(cn_not);
-      CondNode *cn = new CondNode(and_children, BinOpEnum::logical_and);
+      CondNode *cn = new CondNode(and_children, BinOpEnum::logic_and);
       CondNode **cn_ret = (CondNode **)malloc_or_quit(sizeof(CondNode *));
       cn_ret = &cn;
       return cn_ret;
@@ -826,7 +826,7 @@ list < vsize_t > ParcoursNode::parcourirDepuisSommetRec(bool racine, graph_t * g
   return l;
 }
 
-ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph_t * gr, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, unordered_set < node_t * >numerotes, bool checkLabels) {
+ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph_t * gr, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, set < node_t * >numerotes, bool checkLabels) {
   if (m->type == TYPE_M1) {
     if (m->matchesSymbol(s, checkLabels) and m->matchesCF(s)) {
 
