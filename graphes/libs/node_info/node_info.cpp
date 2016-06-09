@@ -246,7 +246,7 @@ bool CondNode::comparison_fun(void* a1, void* a2)
 
 bool CondNode::unary_fun(bool b){
   switch (this->unary_operator){
-    case logical_not:
+    case logic_not:
       return not b;
       
     default:
@@ -257,10 +257,10 @@ bool CondNode::unary_fun(bool b){
 
 bool CondNode::binary_fun(bool b1, bool b2){
   switch (this->binary_operator){
-    case logical_and:
+    case logic_and:
       return b1 and b2;
       
-    case logical_or:
+    case logic_or:
       return b1 or b2;
       
     default:

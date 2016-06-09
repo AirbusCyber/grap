@@ -64,7 +64,7 @@ void printDescription()
                "three match).\n";
 }
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 string Red = "";
 string Green = "";
 string Blue = "";
@@ -78,14 +78,13 @@ string Color_Off = "\x1b[0m";
 
 bool debug = false;
 
-#ifndef _MSC_VER
-void drop_privileges()
-{
+#ifndef _WIN32
+void drop_privileges(){
   scmp_filter_ctx ctx;
-
+  
   // release: SCMP_ACT_KILL
   // use SCMP_ACT_TRAP or SCMP_ACT_TRACE(0) for debug
-  ctx = seccomp_init(SCMP_ACT_TRAP);
+  ctx = seccomp_init(SCMP_ACT_TRAP); 
 
   // TODO: remove at least the open syscall by dropping privileges at a later
   // stage
@@ -98,16 +97,15 @@ void drop_privileges()
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mprotect), 0);
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(lseek), 0);
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(brk), 0);
-
+  
   int r = seccomp_load(ctx);
   RELEASE_ASSERT(r == 0);
 }
 #endif
 
-int main(int argc, char *argv[])
-{
-#ifndef _MSC_VER
-// TODO: fix seccomp
+int main(int argc, char *argv[]) {
+#ifndef _WIN32
+//TODO: fix seccomp
 //   drop_privileges();
 #endif
 
@@ -141,12 +139,12 @@ int main(int argc, char *argv[])
   graph_t **grPattern = nullptr;
   graph_t *grPattern2 = nullptr;
   graph_t *grTest = nullptr;
-
+  
   vsize_t i = 0;
   while (i < std::numeric_limits<vsize_t>::max()) {
     std::string dirPath = dir_tests_base + "/test" + std::to_string(i) + "/";
     std::string pathTest = dirPath + "test.dot";
-
+    
     grTest = getGraphFromPath(pathTest.c_str());
     if (grTest == NULL) {
       if (i > 0) {
@@ -168,9 +166,9 @@ int main(int argc, char *argv[])
       string sLine;
 
       getline(f_res_gtsi, sLine);
-      expected_gtsi_with_labels = (size_t)atoi(sLine.c_str());
+      expected_gtsi_with_labels = (size_t) atoi(sLine.c_str());
       getline(f_res_gtsi, sLine);
-      expected_gtsi_no_labels = (size_t)atoi(sLine.c_str());
+      expected_gtsi_no_labels = (size_t) atoi(sLine.c_str());
     }
 
     f_res_gtsi.close();
@@ -178,24 +176,24 @@ int main(int argc, char *argv[])
     cout << Blue;
     std::cout << "Running test " + std::to_string(i) + "\n";
     cout << Color_Off;
-
-    if (debug) {
+       
+    if (debug){
       std::cout << "Test graph is:\n";
-      graph_fprint(stdout, grTest);
+      graph_fprint (stdout, grTest);
     }
 
     vsize_t j = 0;
     vsize_t nPattern = 0;
-    while (j < std::numeric_limits<vsize_t>::max()) {
+    while (j < std::numeric_limits < vsize_t >::max()) {
       std::string pathPattern = dirPath + "pattern_" + to_string(j) + ".dot";
-      grPattern = (graph_t **)realloc_or_quit(grPattern, (j + 1) * sizeof(graph_t *));
+      grPattern = (graph_t **) realloc_or_quit(grPattern, (j + 1) * sizeof(graph_t *));
       grPattern[j] = getGraphFromPath(pathPattern.c_str());
-
-      if (grPattern[j] == NULL) {
-        break;
+      
+      if (grPattern[j] == NULL){
+       break;
       }
-
-      if (debug) {
+      
+      if (debug){
         std::cout << "Pattern graph " << j << " is:\n";
         graph_fprint(stdout, grPattern[j]);
       }
@@ -203,7 +201,7 @@ int main(int argc, char *argv[])
       nPattern++;
     }
 
-    if (nPattern == 0) {
+    if (nPattern == 0){
       break;
     }
 
@@ -217,188 +215,196 @@ int main(int argc, char *argv[])
     for (j = 0; j < nPattern; j++) {
       graph_free(grPattern[j], true);
     }
-
+    
     graph_free(grTest, true);
-
+    
     std::cout << "\n";
     i++;
   }
-
+  
   free(grPattern);
 }
 
-void test_NodeInfo()
-{
+void test_NodeInfo(){
   std::cout << "Testing comparisons (NodeList)." << endl;
-  NodeInfo *np = new NodeInfo();
-  NodeInfo *nt = new NodeInfo();
+  NodeInfo* np = new NodeInfo();
+  NodeInfo* nt = new NodeInfo();
 
+  
   std::cout << "Testing bool_equals: ";
-  CondNode *cn = new CondNode();
-  cn->pattern_field = (void *NodeInfo::*)&NodeInfo::has_address;
-  cn->test_field = (void *NodeInfo::*)&NodeInfo::has_address;
+  CondNode* cn = new CondNode();
+  cn->pattern_field = (void* NodeInfo::*) &NodeInfo::has_address;
+  cn->test_field = (void* NodeInfo::*) &NodeInfo::has_address;
   cn->comparison = ComparisonFunEnum::bool_equals;
-
+    
   np->has_address = false;
   nt->has_address = false;
   bool r = cn->evaluate(np, nt);
   print_leaf_result(r, "= ", false);
-
+  
   np->has_address = false;
   nt->has_address = true;
   r = cn->evaluate(np, nt);
   print_leaf_result(not r, "!= ", true);
-
+  
   CondNode::freeCondition(&cn, true, false);
-
+  
+  
   std::cout << "Testing bool_test_true: ";
   cn = new CondNode();
-  cn->test_field = (void *NodeInfo::*)&NodeInfo::has_address;
+  cn->test_field = (void* NodeInfo::*) &NodeInfo::has_address;
   cn->comparison = ComparisonFunEnum::bool_test_true;
-
+    
   nt->has_address = true;
   r = cn->evaluate(np, nt);
   print_leaf_result(r, "= ", false);
-
+  
   nt->has_address = false;
   r = cn->evaluate(np, nt);
   print_leaf_result(not r, "!= ", true);
-
+  
   CondNode::freeCondition(&cn, true, false);
-
+  
+  
   std::cout << "Testing str_equals: ";
   cn = new CondNode();
-  cn->pattern_field = (void *NodeInfo::*)&NodeInfo::inst_str;
-  cn->test_field = (void *NodeInfo::*)&NodeInfo::inst_str;
+  cn->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
+  cn->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
   cn->comparison = ComparisonFunEnum::str_equals;
-
+    
   np->inst_str = "xor";
   nt->inst_str = "xor";
   r = cn->evaluate(np, nt);
   print_leaf_result(r, "= ", false);
-
+  
   nt->inst_str = "mov";
   r = cn->evaluate(np, nt);
   print_leaf_result(not r, "!= ", true);
-
+  
   CondNode::freeCondition(&cn, true, false);
-
+  
+  
   std::cout << "Testing uint8_equals: ";
   cn = new CondNode();
-  cn->pattern_field = (void *NodeInfo::*)&NodeInfo::maxChildrenNumber;
-  cn->test_field = (void *NodeInfo::*)&NodeInfo::childrenNumber;
+  cn->pattern_field = (void* NodeInfo::*) &NodeInfo::maxChildrenNumber;
+  cn->test_field = (void* NodeInfo::*) &NodeInfo::childrenNumber;
   cn->comparison = ComparisonFunEnum::uint8t_equals;
-
+    
   np->maxChildrenNumber = 2;
   nt->childrenNumber = 2;
   r = cn->evaluate(np, nt);
   print_leaf_result(r, "= ", false);
-
+  
   np->maxChildrenNumber = 1;
   r = cn->evaluate(np, nt);
   print_leaf_result(not r, "!= ", true);
 
   CondNode::freeCondition(&cn, true, false);
-
+  
+  
   // Shoud return true iff pattern >= test
   std::cout << "Testing uint8_gt: ";
   cn = new CondNode();
-  cn->pattern_field = (void *NodeInfo::*)&NodeInfo::maxChildrenNumber;
-  cn->test_field = (void *NodeInfo::*)&NodeInfo::childrenNumber;
+  cn->pattern_field = (void* NodeInfo::*) &NodeInfo::maxChildrenNumber;
+  cn->test_field = (void* NodeInfo::*) &NodeInfo::childrenNumber;
   cn->comparison = ComparisonFunEnum::uint8t_gt;
-
+    
   np->maxChildrenNumber = 2;
   nt->childrenNumber = 2;
   r = cn->evaluate(np, nt);
   print_leaf_result(r, "= ", false);
-
+  
   np->maxChildrenNumber = 1;
   r = cn->evaluate(np, nt);
   print_leaf_result(not r, "< ", false);
-
+  
   np->maxChildrenNumber = 3;
   r = cn->evaluate(np, nt);
   print_leaf_result(r, "> ", true);
 
   CondNode::freeCondition(&cn, true, false);
-
+  
+  
   std::cout << "Testing vsizet_equals: ";
   cn = new CondNode();
-  cn->pattern_field = (void *NodeInfo::*)&NodeInfo::address;
-  cn->test_field = (void *NodeInfo::*)&NodeInfo::address;
+  cn->pattern_field = (void* NodeInfo::*) &NodeInfo::address;
+  cn->test_field = (void* NodeInfo::*) &NodeInfo::address;
   cn->comparison = ComparisonFunEnum::vsizet_equals;
-
+    
   np->address = 2;
   nt->address = 2;
   r = cn->evaluate(np, nt);
   print_leaf_result(r, "= ", false);
-
+  
   np->address = 1;
   r = cn->evaluate(np, nt);
   print_leaf_result(not r, "!= ", true);
-
+  
+  
   // cn evaluates to false
   std::cout << "Testing not and not not: ";
-  std::list<CondNode **> *children = new std::list<CondNode **>();
+  std::list<CondNode**>* children = new std::list<CondNode**>();
   children->push_front(&cn);
-  CondNode *cn_not = new CondNode(children, UnOpEnum::logical_not);
-
+  CondNode* cn_not = new CondNode(children, UnOpEnum::logic_not);
+  
   r = cn_not->evaluate(np, nt);
   print_leaf_result(r, "! ", false);
-
-  CondNode *cn_not2 = new CondNode();
+  
+  CondNode* cn_not2 = new CondNode();
   cn_not2->children->push_front(&cn_not);
   cn_not2->unary_operator = UnOpEnum::logical_not;
   r = cn_not2->evaluate(np, nt);
   print_leaf_result(not r, "!! ", true);
-
+  
+  
   std::cout << "Testing or on multiple operands: ";
-  std::list<CondNode **> *children2 = new std::list<CondNode **>();
+  std::list<CondNode**>* children2 = new std::list<CondNode**>();
   children2->push_front(&cn);
   children2->push_front(&cn_not);
-
-  CondNode *cn_or = new CondNode(children2, BinOpEnum::logical_or);
+  
+  CondNode* cn_or = new CondNode(children2, BinOpEnum::logic_or);
   r = cn_or->evaluate(np, nt);
   print_leaf_result(r, "2 ", false);
-
+  
   cn_or->children->push_front(&cn_not2);
   r = cn_or->evaluate(np, nt);
   print_leaf_result(r, "3 ", true);
-
+  
+  
   std::cout << "Testing and on multiple operands: ";
-  CondNode *cn_and = new CondNode();
+  CondNode* cn_and = new CondNode();
   cn_and->children->push_front(&cn);
   cn_and->children->push_front(&cn_not);
-  cn_and->binary_operator = BinOpEnum::logical_and;
+  cn_and->binary_operator =  BinOpEnum::logical_and;
   r = cn_and->evaluate(np, nt);
   print_leaf_result(not r, "2 ", false);
-
+  
   cn_and->children->push_front(&cn_not2);
   r = cn_and->evaluate(np, nt);
   print_leaf_result(not r, "3 ", true);
 
   CondNode::freeCondition(&cn, true, false);
   cn = NULL;
-
-  if (cn_not2 != NULL) {
+  
+  if (cn_not2 != NULL){
     CondNode::freeCondition(&cn_not2, true, false);
     cn_not2 = NULL;
   }
-  if (cn_not != NULL) {
+  if (cn_not != NULL){
     CondNode::freeCondition(&cn_not, true, false);
     cn_not = NULL;
   }
-  if (cn_or != NULL) {
+  if (cn_or != NULL){
     CondNode::freeCondition(&cn_or, true, false);
     cn_or = NULL;
   }
-  if (cn_and != NULL) {
+  if (cn_and != NULL){
     CondNode::freeCondition(&cn_and, true, false);
     cn_and = NULL;
   }
-  delete (np);
-  delete (nt);
-
+  delete(np);
+  delete(nt);
+  
   cout << endl;
 }
 
@@ -416,7 +422,7 @@ void test_GTSI(graph_t **grPattern, size_t nPattern, graph_t *grTest,
       siteSize = grPattern[i]->nodes.count;
   }
 
-  ParcoursNode *tree = new ParcoursNode();
+  ParcoursNode* tree = new ParcoursNode();
 
   for (i = 0; i < nPattern; i++) {
     bool added = tree->addGraphFromNode(grPattern[i], grPattern[i]->root,
@@ -429,12 +435,11 @@ void test_GTSI(graph_t **grPattern, size_t nPattern, graph_t *grTest,
     }
   }
 
-  if (exportTree) {
+  if (exportTree){
     tree->saveParcoursNodeToDot(treePath);
   }
-
-  printf("%d traversals reconstructed from pattern graph.\n",
-         (int)tree->countLeaves());
+  
+  printf("%d traversals reconstructed from pattern graph.\n", (int) tree->countLeaves());
 
   vsize_t count = tree->parcourir(grTest, siteSize, checkLabels, true);
   if (count != expected) {
@@ -443,11 +448,11 @@ void test_GTSI(graph_t **grPattern, size_t nPattern, graph_t *grTest,
   else {
     color = Green;
   }
-  printf("%s%d traversals possible in test graph (expected: %d) with tree.%s\n",
-         color.c_str(), (int)count, (int)expected, Color_Off.c_str());
+  printf("%s%d traversals possible in test graph (expected: %d) with tree.%s\n", color.c_str(), (int) count, (int) expected, Color_Off.c_str());
+  
+  tree->freeParcoursNode(); 
 
-  tree->freeParcoursNode();
-
+  
   if (nPattern == 1) {
     Parcours *p =
         parcoursLargeur(grPattern[0], grPattern[0]->root->list_id, siteSize);
@@ -468,6 +473,7 @@ void test_GTSI(graph_t **grPattern, size_t nPattern, graph_t *grTest,
     delete (rt.second);
     p->freeParcours(true);
   }
+  
 }
 
 void print_leaf_result(bool r, string desc, bool end_bool)

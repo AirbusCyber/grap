@@ -15,3 +15,8 @@ add_library(GTSI
   $<TARGET_OBJECTS:Traversal>
 )
 
+# Bindings
+list_combinations(SRCS_LIBGTSI_BINDING
+  PREFIXES ${CMAKE_CURRENT_SOURCE_DIR}/
+  SUFFIXES ${SRCS_LIBGTSI})
+binding_add_srcs("${SRCS_LIBGTSI_BINDING}")

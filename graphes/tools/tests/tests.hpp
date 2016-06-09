@@ -11,7 +11,7 @@
 #include "Traversal.hpp"
 #include "my_alloc.hpp"
 
-#ifndef _MSC_VER
+#ifndef _WIN32
   #include <seccomp.h>
 #endif
 

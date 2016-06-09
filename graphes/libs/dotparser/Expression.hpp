@@ -46,7 +46,7 @@ typedef struct OptionList
   Option** options;
 } OptionList;
 
-vsize_t hash(char* s);
+vsize_t hash_func(char* s);
 
 void debug_print(char* s);
 

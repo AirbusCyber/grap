@@ -39,7 +39,6 @@ else()
   else()
     message("[-] Bison issues")
   endif()
-
 endif()
 
 # sources
@@ -48,10 +47,26 @@ set(SRCS_DOTPARSER
   graphParser.hpp
   Expression.cpp
   Expression.hpp
+  )
+
+set(SRCS_BISON
   ${FLEX_Scanner_OUTPUTS}
   ${BISON_Parser_OUTPUTS}
   )
 
+# Removed warnings for the parser and lexer
+SET_SOURCE_FILES_PROPERTIES(${SRCS_BISON} PROPERTIES
+  COMPILE_FLAGS "-w"
+  GENERATED TRUE)
+
+# Bindings
+list_combinations(SRCS_DOTPARSER_BINDING
+  PREFIXES ${CMAKE_CURRENT_SOURCE_DIR}/
+  SUFFIXES ${SRCS_DOTPARSER})
+
+binding_add_srcs("${SRCS_DOTPARSER_BINDING}")
+binding_add_srcs("${SRCS_BISON}")
+
 # dotparser object-library
-add_library(dotparser-obj OBJECT ${SRCS_DOTPARSER} )
+add_library(dotparser-obj OBJECT ${SRCS_DOTPARSER} ${SRCS_BISON})
 
