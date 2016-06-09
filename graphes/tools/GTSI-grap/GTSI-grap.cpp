@@ -87,6 +87,11 @@ int main(int argc, char *argv[]) {
   }
   
   graph_t *pattern_graph = getGraphFromFile(fpPattern);
+  if (pattern_graph == NULL){
+    std::cerr <<  "Pattern graph could not be opened, existing.\n";
+    return 1;
+  }
+  
   vsize_t n_pattern = pattern_graph->nodes.size;
   fclose(fpPattern);
   
@@ -113,6 +118,11 @@ int main(int argc, char *argv[]) {
   }
 
   graph_t *test_graph = getGraphFromFile(fpTest);
+  if (test_graph == NULL){
+    std::cerr <<  "Test graph could not be opened, existing.\n";
+    return 1;
+  }
+  
   vsize_t n_test;
   n_test = test_graph->nodes.size;
   fclose(fpTest);
