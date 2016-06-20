@@ -474,4 +474,183 @@ void CondNode::freeCondition(CondNode** cn, bool free_condition, bool free_point
   }
 }
 
+CondNodeParser::CondNodeParser(){
+  this->has_next_token = false;
+}
+
+
+CondNode CondNodeParser::parseCondNode(std::string str){
+  CondNodeParser cnp = CondNodeParser();
+  cnp.tokenize(str);
+  return CondNode();
+}
+
+CondNodeToken::CondNodeToken(){
+
+}
+
+
+CondNodeToken::CondNodeToken(std::string str){
+//   std::cout << "parsing token " << str << std::endl;
+  
+  vsize_t size = str.length();
+  
+  if (str == "("){
+    this->type = "LP";
+    this->value = "";
+  }
+  else if (str == ")"){
+    this->type = "RP";
+    this->value = "";
+  }
+  else if (str == "or"){
+    this->type = "OR";
+    this->value = "";
+  }
+  else if (str == "and"){
+    this->type = "AND";
+    this->value = "";
+  }
+  else if (str == "==" or str == "!="){
+    this->type = "OP";
+    this->value = str;
+  }
+  else {
+    // TODO: replace "\"" with ""
+    this->type = "W";
+    this->value = str;
+  }
+}
+
+bool CondNodeToken::is_operator_char(char c){
+  switch (c){
+    case '(':
+    case ')':
+    case '=':
+    case '!':
+    case '<':
+    case '>':
+      return true;
+    default:
+      return false;
+  }
+}
+
+
+void CondNodeParser::tokenize(std::string str){
+  vsize_t i = 0;
+  vsize_t size = str.length();
+  vsize_t begin = 0;
+  
+  /* States:
+   * 0: no word began
+   * 1: operator began
+   * 2: word began
+   */
+  uint8_t state = 0;
+  
+  /* Types:
+   * 0: blank
+   * 1: operator char
+   * 2: word char
+   */
+  uint8_t char_type;
+  
+  while (i < size){
+    char c = str.at(i);
+    if (c == ' '){
+      char_type = 0; 
+    }
+    else if (CondNodeToken::is_operator_char(c)){
+      char_type = 1; 
+    }
+    else {
+      char_type = 2; 
+    }
+    
+    if (state == 0){
+      if (char_type == 1){
+	begin = i;
+	state = 1;
+      }
+      else if (char_type == 2){
+	begin = i;
+	state = 2;
+      }
+    }
+    else if (state == 1){
+      if (char_type == 0){
+	CondNodeToken t = CondNodeToken(str.substr(begin, i-begin));
+        this->tokens.push_back(t);
+	state = 0;
+      }
+      else if (char_type == 2){
+	CondNodeToken t = CondNodeToken(str.substr(begin, i-begin));
+        this->tokens.push_back(t);
+	
+	begin = i;
+	state = 2;
+      }
+    }
+    else if (state == 2){
+      if (char_type == 0){
+	CondNodeToken t = CondNodeToken(str.substr(begin, i-begin));
+        this->tokens.push_back(t);
+	state = 0;
+      }
+      else if (char_type == 1){
+	CondNodeToken t = CondNodeToken(str.substr(begin, i-begin));
+        this->tokens.push_back(t);
+	
+	begin = i;
+	state = 1;
+      }
+    }
+    
+    if (i == size - 1 and (state == 1 or state == 2)){
+      // Case: last character, end token
+      CondNodeToken t = CondNodeToken(str.substr(begin, i-begin+1));
+      this->tokens.push_back(t);
+    }
+    
+    i++;
+  }
+  
+  // print tokens:
+  std::list<CondNodeToken>::iterator it = this->tokens.begin();
+  while (it != this->tokens.end()){
+    CondNodeToken t = *it;
+    std::cout << t.type << " - " << t.value << std::endl;
+    it++;
+  }
+}
+
+void CondNodeParser::advance(){
+  if (this->tokens.size() != 0){
+    this->current_token = next_token;
+    this->next_token = this->tokens.front();
+    this->tokens.pop_front();
+    this->has_next_token = true;
+  }
+  else {
+    this->current_token = next_token;
+    this->has_next_token = false;
+  }
+}
+
+bool CondNodeParser::accept(std::string expected_type){
+  if (this->has_next_token and this->next_token.type == expected_type){
+    this->advance();
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+void CondNodeParser::except(std::__cxx11::string expected_type){
+  bool r = this->accept(expected_type);
+  RELEASE_ASSERT(r);
+}
+
 
