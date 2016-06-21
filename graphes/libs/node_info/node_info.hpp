@@ -6,6 +6,7 @@
 #include <functional>
 #include <iostream>
 #include <assert.h>
+#include <boost/concept_check.hpp>
 #include "ga_types.hpp"
 #include <iso646.h> // defines "or", "and" as alternatives to ||, && ; alternative: don't use them !
 
@@ -145,6 +146,9 @@ public:
   bool has_fixed_pattern_info;
   NodeInfo* fixed_pattern_info;
   
+  bool has_fixed_field;
+  void* fixed_field;
+  
   bool comparison_fun(void*, void*);
   ComparisonFunEnum comparison;
   
@@ -154,11 +158,9 @@ public:
   
   std::string toString(NodeInfo*);
   std::string field_toString(NodeInfo*);
+  std::string field_toString(void*);
   
   static void freeCondition(CondNode** cn, bool delete_condition, bool free_pointer);
-    
-  
-
 };
 
 class CondNodeToken{
@@ -173,7 +175,7 @@ public:
 
 class CondNodeParser{
 public:
-  static CondNode parseCondNode(std::string);
+  static CondNode* parseCondNode(std::string);
   CondNodeParser();
   
 private:
@@ -184,7 +186,11 @@ private:
   
   void advance();
   bool accept(std::string expected_type);
-  void except(std::string expected_type);
+  void expect(std::string expected_type);
+  
+  CondNode* expression();
+  CondNode* term();
+  CondNode* factor();
   
   void tokenize(std::string); 
 };

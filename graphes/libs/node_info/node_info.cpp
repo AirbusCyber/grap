@@ -108,12 +108,14 @@ CondNode::CondNode(){
   this->children = cn;
   this->comparison = ComparisonFunEnum::bool_false;
   this->has_fixed_pattern_info = false;
+  this->has_fixed_field = false;
 }
 
 CondNode::CondNode(std::list<CondNode**>* cn){
   this->children = cn;
   this->comparison = ComparisonFunEnum::bool_false;
   this->has_fixed_pattern_info = false;
+  this->has_fixed_field = false;
 }
 
 CondNode::CondNode(std::list<CondNode**>* cn, UnOpEnum un_op){
@@ -122,6 +124,7 @@ CondNode::CondNode(std::list<CondNode**>* cn, UnOpEnum un_op){
   this->children = cn;
   this->unary_operator = un_op;
   this->has_fixed_pattern_info = false;
+  this->has_fixed_field = false;
 }
 
 CondNode::CondNode(std::list<CondNode**>* cn, BinOpEnum bin_op){
@@ -130,6 +133,7 @@ CondNode::CondNode(std::list<CondNode**>* cn, BinOpEnum bin_op){
   this->children = cn;
   this->binary_operator = bin_op;
   this->has_fixed_pattern_info = false;
+  this->has_fixed_field = false;
 }
 
 bool ComparisonFunctions::bool_equals(void* a1, void* a2)
@@ -278,7 +282,12 @@ bool CondNode::evaluate(NodeInfo* pattern, NodeInfo* test)
   vsize_t nc = this->children->size();
   
   if (nc == 0){
-   return this->comparison_fun(&((*pattern).*(this->pattern_field)), &((*test).*(this->test_field)));
+   if (this->has_fixed_field){
+    return this->comparison_fun(this->fixed_field, &((*test).*(this->test_field)));
+   }
+   else{
+     return this->comparison_fun(&((*pattern).*(this->pattern_field)), &((*test).*(this->test_field)));
+   }
   }
   else if (nc == 1){
    return this->unary_fun((*(this->children->front()))->evaluate(pattern, test)); 
@@ -354,12 +363,8 @@ std::string CondNode::field_toString(NodeInfo* ni)
       b = static_cast<bool*>(v);
       return *b ? "true" : "false";
       
-    case bool_false:
-      return "";
-      
-    case bool_true:
-      return "";
-      
+    case bool_false:      
+    case bool_true:      
     case bool_test_true:
       return "";
       
@@ -368,36 +373,69 @@ std::string CondNode::field_toString(NodeInfo* ni)
       n = static_cast<vsize_t*>(v);
       return std::to_string(*n);
       
-    case str_contains:
-      v = &((*ni).*(this->pattern_field));
-      s = static_cast<std::string*>(v);
-      return *s;
-      
+    case str_contains:      
     case str_equals:
       v = &((*ni).*(this->pattern_field));
       s = static_cast<std::string*>(v);
       return *s;
       
-    case uint8t_equals:
-      v = &((*ni).*(this->pattern_field));
-      i = static_cast<std::uint8_t*>(v);
-      return std::to_string((int) *i);
-      
+    case uint8t_equals:      
     case uint8t_gt:
       v = &((*ni).*(this->pattern_field));
       i = static_cast<std::uint8_t*>(v);
       return std::to_string((int) *i);
       
     default:
-      std::cerr << "ERR in node_info.cpp : unknown comparison_fun\n";
+      std::cerr << "ERR in node_info.cpp : unknown comparison_fun" << std::endl;
       return "";
   }
 }
 
+std::string CondNode::field_toString(void* field)
+{
+  std::string* s;
+  bool* b;
+  vsize_t* n;
+  uint8_t* i;
+  
+  switch (this->comparison){
+    case bool_equals:
+      b = static_cast<bool*>(field);
+      return *b ? "true" : "false";
+      
+    case bool_false:      
+    case bool_true:      
+    case bool_test_true:
+      return "";
+      
+    case vsizet_equals:
+      n = static_cast<vsize_t*>(field);
+      return std::to_string(*n);
+      
+    case str_contains:      
+    case str_equals:
+      s = static_cast<std::string*>(field);
+      return *s;
+      
+    case uint8t_equals:      
+    case uint8t_gt:
+      i = static_cast<std::uint8_t*>(field);
+      return std::to_string((int) *i);
+      
+    default:
+      std::cerr << "ERR in node_info.cpp : unknown comparison_fun" << std::endl;
+      return "";
+  }
+}
 
 std::string CondNode::toString(NodeInfo* ni){
   std::string s;
   std::string r;
+  
+  if (ni == NULL and not this->has_fixed_pattern_info and not (this->children->size() == 0 and this->has_fixed_field)){
+    std::cerr << "ERR: missing node info" << std::endl;
+    return "";
+  }
   
   if (this->has_fixed_pattern_info){
     ni = this->fixed_pattern_info; 
@@ -406,7 +444,14 @@ std::string CondNode::toString(NodeInfo* ni){
   switch (this->children->size()){
     case 0:
       s = desc_ComparisonFunEnum[this->comparison];
-      r = this->field_toString(ni);
+      if (ni != NULL){
+        r = this->field_toString(ni);
+      }
+      else {
+        // Case: this->has_fixed_field is true
+        r = this->field_toString(fixed_field);
+      }
+      
       if (r.length() != 0){
         s += ":" + r; 
       }
@@ -474,21 +519,9 @@ void CondNode::freeCondition(CondNode** cn, bool free_condition, bool free_point
   }
 }
 
-CondNodeParser::CondNodeParser(){
-  this->has_next_token = false;
-}
-
-
-CondNode CondNodeParser::parseCondNode(std::string str){
-  CondNodeParser cnp = CondNodeParser();
-  cnp.tokenize(str);
-  return CondNode();
-}
-
 CondNodeToken::CondNodeToken(){
 
 }
-
 
 CondNodeToken::CondNodeToken(std::string str){
 //   std::cout << "parsing token " << str << std::endl;
@@ -534,6 +567,20 @@ bool CondNodeToken::is_operator_char(char c){
     default:
       return false;
   }
+}
+
+
+CondNodeParser::CondNodeParser(){
+  this->has_next_token = false;
+}
+
+
+CondNode* CondNodeParser::parseCondNode(std::string str){
+  CondNodeParser cnp = CondNodeParser();
+  cnp.tokenize(str);
+  cnp.advance();
+  CondNode* cn = cnp.expression();
+  return cn;
 }
 
 
@@ -640,6 +687,8 @@ void CondNodeParser::advance(){
 
 bool CondNodeParser::accept(std::string expected_type){
   if (this->has_next_token and this->next_token.type == expected_type){
+    std::cout << "accepted " << this->next_token.type << " (" << this->next_token.value << ")" << std::endl;
+    
     this->advance();
     return true;
   }
@@ -648,9 +697,73 @@ bool CondNodeParser::accept(std::string expected_type){
   }
 }
 
-void CondNodeParser::except(std::__cxx11::string expected_type){
+void CondNodeParser::expect(std::string expected_type){
   bool r = this->accept(expected_type);
+  
+  if (not r){
+    if (this->has_next_token){
+      std::cerr << "Expected " << expected_type << ", found " << this->next_token.type << " (" << this->next_token.value << ")" << std::endl;
+    }
+    else {
+      std::cerr << "End of expression reached." << std::endl; 
+    }
+  }
+  
   RELEASE_ASSERT(r);
 }
 
+CondNode* CondNodeParser::expression(){
+  CondNode* cn = this->term();
+  
+  while(this->accept("OR")){
+    this->term();
+//     cn = expr_value and this->term();
+  }
+  
+  return cn;
+}
 
+CondNode* CondNodeParser::term(){
+  CondNode* cn = this->factor();
+  
+  while (this->accept("AND")){
+    this->factor();
+//     cn = term_value and this->factor();  
+  }
+  
+  return cn;
+}
+
+CondNode* CondNodeParser::factor(){
+  CondNode* cn = new CondNode();
+  
+  if (this->accept("LP")){
+    cn = this->expression();
+    this->expect("RP");
+  }
+  else if (this->accept("NOT")){
+    cn = this->expression();
+  }
+  else if (this->accept("W")){
+//     factor_value = true; 
+//     factor_value = this->current_token.value; 
+    this->expect("OP");
+    
+    cn->comparison = ComparisonFunEnum::str_contains;
+    cn->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
+    cn->has_fixed_field = true;
+    std::string* str_ptr = new std::string();
+    *str_ptr = "xor";
+    cn->fixed_field = (void*) str_ptr;
+    
+    this->accept("W");
+    
+//     factor_value = true;
+//     factor_value = factor_value and this->current_token.value;
+  }
+  else {
+    RELEASE_ASSERT(false); 
+  }
+  
+  return cn;
+}

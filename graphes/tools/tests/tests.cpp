@@ -110,7 +110,8 @@ int main(int argc, char *argv[]) {
 #endif
 
   std::string s = "(a==3 or b==4) and g==lolilol or g ==   19";
-  CondNode cn = CondNodeParser::parseCondNode(s);
+  CondNode* cn = CondNodeParser::parseCondNode(s);
+  std::cout << cn->toString(NULL);
   return 0;
   
   std::string dir_tests_base = "";

@@ -150,9 +150,9 @@ node_t *updateNode(OptionList * ol, node_t * n) {
   char hasMaxRepeat = 0;
   
   CondNode* cn = new CondNode();
-  CondNode** cn_tmp = (CondNode**) malloc(sizeof(CondNode*));
-  *cn_tmp = cn;
-  n->condition = cn_tmp;
+  CondNode** cn_ptr = (CondNode**) malloc(sizeof(CondNode*));
+  *cn_ptr = cn;
+  n->condition = cn_ptr;
   n->info->lazyRepeat = false;
   bool cond_filled = false;
 
