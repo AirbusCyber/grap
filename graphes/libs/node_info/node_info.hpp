@@ -119,7 +119,6 @@ public:
   static bool uint8t_gt(void*, void*); // pattern >= test ?
 };
 
-
 class CondNode{
 public:
   // Evaluate:
@@ -156,37 +155,6 @@ public:
   std::string field_toString(NodeInfo*);
   
   static void freeCondition(CondNode** cn, bool delete_condition, bool free_pointer);
-    
-  
-
-};
-
-class CondNodeToken{
-public:
-  std::string type;
-  std::string value;
-  
-  CondNodeToken();
-  CondNodeToken(std::string);
-  static bool is_operator_char(char);
-};
-
-class CondNodeParser{
-public:
-  static CondNode parseCondNode(std::string);
-  CondNodeParser();
-  
-private:
-  std::list<CondNodeToken> tokens;
-  bool has_next_token;
-  CondNodeToken current_token;
-  CondNodeToken next_token;
-  
-  void advance();
-  bool accept(std::string expected_type);
-  void except(std::string expected_type);
-  
-  void tokenize(std::string); 
 };
 
 #endif

@@ -109,10 +109,6 @@ int main(int argc, char *argv[]) {
 //   drop_privileges();
 #endif
 
-  std::string s = "(a==3 or b==4) and g==lolilol or g ==   19";
-  CondNode cn = CondNodeParser::parseCondNode(s);
-  return 0;
-  
   std::string dir_tests_base = "";
 
   if (argc >= 2) {
