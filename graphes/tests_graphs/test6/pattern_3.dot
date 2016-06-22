@@ -1,5 +1,5 @@
 Digraph G {
-"A" [label = "INST" , options="root"]
+"A" [label = "INST" , root=true]
 "B" [label = "JCC"]
 "C" [label = "JCC"]
 "D" [label = "RET"]

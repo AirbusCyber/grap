@@ -740,7 +740,7 @@ void ParcoursNode::saveParcoursNodeToDot(string path) {
   ofs.close();
 }
 
-bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {
+bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {  
   if (index >= p->size) {
     bool b = this->feuille;
     this->feuille = true;
@@ -752,7 +752,6 @@ bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {
     ParcoursNode *f = (*it);
     
     if (f->mot->equals(m, checkLabels)) {
-//       std::cout << "equals " << f->mot->toString() << "\n";
       delete(m);
       return f->addParcours(p, index + 1, checkLabels);
     }

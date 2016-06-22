@@ -1,5 +1,5 @@
 Digraph G {
-"A" [label = "JMP" , options="root"]
+"A" [label = "JMP" , root=true]
 "B" [label = "CALL"]
 "C" [label = "INST"]
 "D" [label = "RET"]

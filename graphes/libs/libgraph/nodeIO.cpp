@@ -62,16 +62,16 @@ size_t node_to_dot(const node_t * node, const node_t * root, size_t node_number,
   if (node->info->lazyRepeat)
     ret += (size_t) fprintf(fp, ", lazyrepeat=true");
   char *str = (char*) malloc(4 * sizeof(char));
-  snprintf(str, 4, "%d", node->info->minChildrenNumber);
+  snprintf(str, 4, "%d", (uint) node->info->minChildrenNumber);
   ret += (size_t) printVK(fp, (char*) "minchildren", str, 1);
   if (node->info->has_maxChildrenNumber) {
-    snprintf(str, 4, "%d", node->info->maxChildrenNumber);
+    snprintf(str, 4, "%d", (uint) node->info->maxChildrenNumber);
     ret += (size_t) printVK(fp, (char*) "maxchildren", str, 1);
   }
-  snprintf(str, 4, "%d", node->info->minFathersNumber);
+  snprintf(str, 4, "%d", (uint) node->info->minFathersNumber);
   ret += (size_t) printVK(fp, (char*) "minfathers", str, 1);
   if (node->info->has_maxFathersNumber) {
-    snprintf(str, 4, "%d", node->info->maxFathersNumber);
+    snprintf(str, 4, "%d", (uint) node->info->maxFathersNumber);
     ret += (size_t) printVK(fp, (char*) "maxfathers", str, 1);
   }
   free(str);

@@ -79,6 +79,13 @@ graph_t *addEdgesToGraph(CoupleList * cl, graph_t * g) {
   }
 
   freeEdgeList(cl);
+  
+  vsize_t k;
+  for (k = 0; k < g->nodes.size; k++){
+    g->nodes.storage[k]->info->childrenNumber = g->nodes.storage[k]->children_nb;
+    g->nodes.storage[k]->info->fathersNumber = g->nodes.storage[k]->fathers_nb;
+  }
+  
   return g;
 }
 
@@ -163,6 +170,10 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     if (hasSymb == 0 && hasCSymb == 0 && strcmp(id, "label") == 0) {
       n->info->inst_str = v;
     }
+    else if (strcmp(id, "cond") == 0 || strcmp(id, "condition") == 0){
+      n->condition = CondNodeParser::parseCondNode(std::string(v));
+      cond_filled = true;
+    }
     else if (strcmp(id, "root") == 0 || (strcmp(id, "fillcolor") == 0 && strcmp(v, "orange") == 0)) {
       n->info->is_root = true;
     }
@@ -176,41 +187,17 @@ node_t *updateNode(OptionList * ol, node_t * n) {
       
       n->info->inst_str = v;
     }
-    else if (strcmp(id, "symbtype") == 0 || strcmp(id, "csymbtype") == 0) {
-      if (strcmp(v, "none") == 0 || strcmp(v, "*") == 0) {        
+    else if (not cond_filled and (strcmp(id, "symbtype") == 0 or strcmp(id, "csymbtype") == 0)) {
+      if (strcmp(v, "none") == 0 or strcmp(v, "*") == 0) {        
         (*(n->condition))->comparison = ComparisonFunEnum::bool_true;
         cond_filled = true;
       }
-      
-//       TODO: generic opcode
-//       else if (strcmp(v, "generic") == 0 || strcmp(v, "gopcode") == 0) {
-//         n->csymbType = LABEL_GENERIC_OPCODE;
-//         
-//         (*(n->condition))->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-//         (*(n->condition))->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-//         (*(n->condition))->comparison = ComparisonFunctions::str_equals();
-//       }
-
-//       TODO: opcode
-//       else if (strcmp(v, "opcode") == 0) {
-//         n->csymbType = LABEL_EXACT_OPCODE;
-//       }
-//       else if (strcmp(v, "string") == 0) {
-//         n->csymbType = LABEL_EXACT_STRING;
-//       }
-
       else if (strcmp(v, "substring") == 0) {        
         (*(n->condition))->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
         (*(n->condition))->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
         (*(n->condition))->comparison = ComparisonFunEnum::str_contains;
         cond_filled = true;
       }
-      
-//       TODO: regex
-//       else if (strcmp(v, "regex") == 0) {
-//         n->csymbType = LABEL_REGEX;
-//       }
-
     }
     else if (strcmp(id, "repeat") == 0) {
       if (strcmp(v, "*") == 0) {        
@@ -266,7 +253,7 @@ node_t *updateNode(OptionList * ol, node_t * n) {
       n->info->get = true;
       n->info->getid = v;
     }
-    else if (strcmp(id, "address") == 0) {
+    else if (strcmp(id, "addr") == 0 or strcmp(id, "address") == 0) {
       n->info->has_address = true;
       n->info->address = (vsize_t) strtol(v, NULL, 16);
     }
@@ -282,6 +269,10 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     (*(n->condition))->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
     (*(n->condition))->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
     (*(n->condition))->comparison = ComparisonFunEnum::str_equals;
+  }
+  
+  if (not n->info->has_address){
+    n->info->address = 0; 
   }
 
   freeOptionList(ol);

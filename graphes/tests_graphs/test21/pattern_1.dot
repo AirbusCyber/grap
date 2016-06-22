@@ -1,0 +1,5 @@
+Digraph G {
+"A" [label = "A", cond = true, getid=A, root=true]
+"B" [label = "B", cond = "nfathers >= 2", getid=B]
+"A" -> "B"
+}

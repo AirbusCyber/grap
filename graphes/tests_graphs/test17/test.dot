@@ -1,5 +1,5 @@
 Digraph G {
-"A" [label = "add", csymb="add", options="root"]
+"A" [label = "add", csymb="add", root=true]
 "B" [label = "xor", csymb="xor"]
 "C" [label = "cmp", csymb="cmp"]
 "A" -> "B" [label = "1"]

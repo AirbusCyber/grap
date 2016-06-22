@@ -10,6 +10,11 @@
 
 #include <stdio.h>
  
+/* IDS: simple labels (aaa, 7ffs)
+ * IDC: labels with quotes ("hello", "z97(e,e)", "xor eax, eax")
+ * IDV: labels with comparisons ("inst >= xor", "opcode==add", "inst == xor eax, eax")
+ */
+ 
 %}
 
 %option warn nodefault
@@ -21,6 +26,7 @@ DIGRAPH_HEADER  [dD]igraph
 IGNORE    "labeljust=r"
 IDS       [a-zA-Z0-9*+.]+
 IDC       \"[a-zA-Z0-9*+-._: \\(),\[\]]*\"
+IDV       \"[a-zA-Z0-9*+-._: \\(),\[\]=!<>]*\"
 LENS      "{"
 RENS      "}"
 LCRO      "["
@@ -39,6 +45,7 @@ WS        [ \r\n\t]*
 {DIGRAPH_HEADER}      { debug_print((char *) "digraph header!\n"); return TOKEN_DIGRAPH_HEADER; }
 {IDS}         { yylval->type_string = strdup(yytext); debug_print((char *) "ids: "); debug_print(yytext); debug_print((char *) "\n"); return TOKEN_ID; }
 {IDC}         { yylval->type_string = strdup(yytext); debug_print((char *) "idc: "); debug_print(yytext); debug_print((char *) "\n"); return TOKEN_ID; }
+{IDV}         { yylval->type_string = strdup(yytext); debug_print((char *) "idc: "); debug_print(yytext); debug_print((char *) "\n"); return TOKEN_IDV; }
 {LENS}        { debug_print((char *) "lens!\n"); return TOKEN_LENS; }
 {RENS}        { debug_print((char *) "rens!\n"); return TOKEN_RENS; }
 {LCRO}        { debug_print((char *) "lcro!\n"); return TOKEN_LCRO; }

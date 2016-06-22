@@ -62,6 +62,14 @@ void printDescription()
                "three match).\n";
   std::cout << "Test 17: [manual] Test for lazy repeat option (one out of "
                "three match).\n";
+  std::cout << "Test 18: [reference to 0] Same as test 0 but with conditions (co"
+               "nd=...).\n";
+  std::cout << "Test 19: [reference to 13] Same as test 0 but with conditions (c"
+               "ond=...).\n";
+  std::cout << "Test 20: [manual] Pattern with only one node, to test "
+                "conditions on addresses.\n";
+  std::cout << "Test 21: [manual] Test two patterns using conditions on the "
+                "number of fathers and children of nodes.\n";
 }
 
 #ifdef _WIN32
@@ -108,11 +116,6 @@ int main(int argc, char *argv[]) {
 //TODO: fix seccomp
 //   drop_privileges();
 #endif
-
-  std::string s = "(a==3 or b==4) and g==lolilol or g ==   19";
-  CondNode* cn = CondNodeParser::parseCondNode(s);
-  std::cout << cn->toString(NULL);
-  return 0;
   
   std::string dir_tests_base = "";
 
@@ -317,7 +320,7 @@ void test_NodeInfo(){
   np->maxChildrenNumber = 2;
   nt->childrenNumber = 2;
   r = cn->evaluate(np, nt);
-  print_leaf_result(r, "= ", false);
+  print_leaf_result(not r, "= ", false);
   
   np->maxChildrenNumber = 1;
   r = cn->evaluate(np, nt);
@@ -420,6 +423,7 @@ void test_GTSI(graph_t **grPattern, size_t nPattern, graph_t *grTest,
   string color;
   std::cout << "GTSI" + desc + ":\n";
 
+  // TODO: why do patterns need to have the same size ?
   vsize_t i;
   vsize_t siteSize = grPattern[0]->nodes.count;
   for (i = 1; i < nPattern; i++) {
@@ -432,7 +436,7 @@ void test_GTSI(graph_t **grPattern, size_t nPattern, graph_t *grTest,
   for (i = 0; i < nPattern; i++) {
     bool added = tree->addGraphFromNode(grPattern[i], grPattern[i]->root,
                                         siteSize, checkLabels);
-
+    
     if (not added) {
       printf("WARNING: pattern graph %d was not added to traversal tree "
              "because it already exists there.\n",

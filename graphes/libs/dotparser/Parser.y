@@ -49,8 +49,10 @@ typedef void* yyscan_t;
  
 %token TOKEN_DIGRAPH_HEADER
 %token <type_string> TOKEN_ID
+%token <type_string> TOKEN_IDV
 %token <type_string> OPTION_ID
 %token <type_string> TOKEN_OPTION_STR
+%type <type_string> option_value
 %token TOKEN_LENS
 %token TOKEN_RENS
 %token TOKEN_LCRO
@@ -107,10 +109,17 @@ option_list
     | option[O] TOKEN_VIRG option_list[L] { $$ = addOptionToList($O, $L); }
     | error { printf("Error parsing an option_list.\n"); }
     ;
-
+    
+option_value
+    :
+    TOKEN_ID[V] { $$ = $V; }
+    | TOKEN_IDV[V] { $$ = $V; }
+    ;
+    
 option
     :
-    TOKEN_ID[I] TOKEN_EQ TOKEN_ID[V] { $$ = createOption($I, $V); }
+    TOKEN_ID[I] { $$ = createOption($I, ""); }
+    | TOKEN_ID[I] TOKEN_EQ option_value[V] { $$ = createOption($I, $V); }
     ;
     
 edge_list

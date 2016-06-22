@@ -1,0 +1,7 @@
+Digraph G {
+"A" [label = "JCC" , root=true, addr = 0x401500]
+"B" [label = "INST", address=0x401503]
+"C" [label = "INST", addr="401506"]
+"A" -> "B" [label = "1"]
+"A" -> "C" [label = "2"]
+}

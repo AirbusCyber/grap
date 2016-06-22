@@ -8,7 +8,7 @@
 #include <assert.h>
 #include <boost/concept_check.hpp>
 #include "ga_types.hpp"
-#include <iso646.h> // defines "or", "and" as alternatives to ||, && ; alternative: don't use them !
+#include <iso646.h> // defines "or", "and" as alternatives to ||, &&
 
 class NodeInfo {
 public:
@@ -17,7 +17,7 @@ public:
   std::string toString();
   
   bool equals(NodeInfo* ni);
-
+  
   // Node information (pattern and test)
   std::string inst_str;
   
@@ -29,17 +29,17 @@ public:
   
   // Only for test
   // TODO: it should be updated with node (or be pointers ?), do not use for now
-  uint8_t childrenNumber;
-  uint8_t fathersNumber;
+  vsize_t childrenNumber;
+  vsize_t fathersNumber;
   
   // Only for pattern
-  uint8_t minChildrenNumber;
+  vsize_t minChildrenNumber;
   bool has_maxChildrenNumber;
-  uint8_t maxChildrenNumber;
+  vsize_t maxChildrenNumber;
   
-  uint8_t minFathersNumber;
+  vsize_t minFathersNumber;
   bool has_maxFathersNumber;
-  uint8_t maxFathersNumber;
+  vsize_t maxFathersNumber;
   
   vsize_t minRepeat;
   bool has_maxRepeat;
@@ -58,8 +58,15 @@ enum ComparisonFunEnum {
   bool_test_true,
   bool_equals,
   vsizet_equals,
+  vsizet_gt,
+  vsizet_geq,
+  vsizet_lt,
+  vsizet_leq,
   uint8t_equals,
-  uint8t_gt
+  uint8t_gt,
+  uint8t_geq,
+  uint8t_lt,
+  uint8t_leq
 };
 
 static const std::string desc_ComparisonFunEnum[] = {
@@ -77,10 +84,24 @@ static const std::string desc_ComparisonFunEnum[] = {
   "bool_equals",
 // vsizet_equals:
   "vsizet_equals",
+// vsizet_gt:
+  "vsizet_gt",
+// vsizet_geq:
+  "vsizet_geq",
+// vsizet_lt:
+  "vsizet_lt",
+// vsizet_leq:
+  "vsizet_leq",
 // uint8t_equals:
   "uint8t_equals",
 // uint8t_gt:
-  "uint8t_gt"
+  "uint8t_gt",
+// uint8t_geq:
+  "uint8t_geq",
+// uint8t_lt:
+  "uint8t_lt",
+// uint8t_leq:
+  "uint8t_leq"
 };
 
 enum UnOpEnum {
@@ -116,8 +137,15 @@ public:
   static bool bool_equals(void*, void*);
   
   static bool vsizet_equals(void*, void*);
+  static bool vsizet_gt(void*, void*); // pattern >= test ?
+  static bool vsizet_geq(void*, void*);
+  static bool vsizet_lt(void*, void*);
+  static bool vsizet_leq(void*, void*);
   static bool uint8t_equals(void*, void*);
-  static bool uint8t_gt(void*, void*); // pattern >= test ?
+  static bool uint8t_gt(void*, void*);
+  static bool uint8t_geq(void*, void*);
+  static bool uint8t_lt(void*, void*);
+  static bool uint8t_leq(void*, void*);
 };
 
 
@@ -132,6 +160,7 @@ public:
   CondNode(std::list<CondNode**>* cn);
   CondNode(std::list<CondNode**>*, UnOpEnum);
   CondNode(std::list<CondNode**>*, BinOpEnum);
+  CondNode(std::string key, std::string op, std::string value);
   
   std::list<CondNode**>* children;
   UnOpEnum unary_operator;
@@ -157,7 +186,6 @@ public:
   bool equals(CondNode** cn);
   
   std::string toString(NodeInfo*);
-  std::string field_toString(NodeInfo*);
   std::string field_toString(void*);
   
   static void freeCondition(CondNode** cn, bool delete_condition, bool free_pointer);
@@ -175,7 +203,7 @@ public:
 
 class CondNodeParser{
 public:
-  static CondNode* parseCondNode(std::string);
+  static CondNode** parseCondNode(std::string);
   CondNodeParser();
   
 private:
@@ -188,11 +216,13 @@ private:
   bool accept(std::string expected_type);
   void expect(std::string expected_type);
   
-  CondNode* expression();
-  CondNode* term();
-  CondNode* factor();
+  CondNode** expression();
+  CondNode** term();
+  CondNode** factor();
   
   void tokenize(std::string); 
+  
+  std::string tokens_to_string();
 };
 
 #endif
