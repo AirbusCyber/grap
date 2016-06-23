@@ -56,20 +56,22 @@ void printDescription()
   std::cout << "Test 14: [reference to 11] same as test 11 but with PandaPE's "
                "disassembler. PandaPE does not loop rep instructions (hence 12 "
                "-> 2).\n";
-  std::cout << "Test 15: [manual] Non-regression test for bug in graph "
+  std::cout << "Test 15: [manual] non-regression test for bug in graph "
                "traversal (child number i in -k>i terms was not checked).\n";
-  std::cout << "Test 16: [manual] Test for lazy repeat option (zero out of "
+  std::cout << "Test 16: [manual] test for lazy repeat option (zero out of "
                "three match).\n";
-  std::cout << "Test 17: [manual] Test for lazy repeat option (one out of "
+  std::cout << "Test 17: [manual] test for lazy repeat option (one out of "
                "three match).\n";
-  std::cout << "Test 18: [reference to 0] Same as test 0 but with conditions (co"
-               "nd=...).\n";
-  std::cout << "Test 19: [reference to 13] Same as test 0 but with conditions (c"
-               "ond=...).\n";
-  std::cout << "Test 20: [manual] Pattern with only one node, to test "
+  std::cout << "Test 18: [reference to 0] same as test 0 but with conditions "
+               "(cond=...).\n";
+  std::cout << "Test 19: [reference to 13] same as test 0 but with conditions "
+               "(cond=...).\n";
+  std::cout << "Test 20: [manual] pattern with only one node, to test "
                 "conditions on addresses.\n";
-  std::cout << "Test 21: [manual] Test two patterns using conditions on the "
+  std::cout << "Test 21: [manual] tests two patterns using conditions on the "
                 "number of fathers and children of nodes.\n";
+  std::cout << "Test 22: [manual] tests two patterns on the opcode field and "
+               "the not operator\n";
 }
 
 #ifdef _WIN32

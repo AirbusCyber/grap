@@ -2,6 +2,7 @@
 
 NodeInfo::NodeInfo(){
   this->inst_str = "";
+  this->opcode = "";
   this->is_root = false;
   this->has_address = false;
   this->address = 0;
@@ -142,8 +143,14 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
   this->has_fixed_pattern_info = false;
   this->has_fixed_field = true;
   
-  if (key == "inst" or key == "instruction"){
-    this->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
+  if (key == "inst" or key == "instruction" or key == "op" or key == "opcode"){
+    if (key == "op" or key == "opcode"){
+      this->test_field = (void* NodeInfo::*) &NodeInfo::opcode;
+    }
+    else{
+      // Case: inst or instruction
+      this->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
+    }
     std::string* str_ptr = new std::string();
     *str_ptr = value;
     this->fixed_field = (void*) str_ptr;
@@ -154,16 +161,13 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
     else if (op == ">=" or op == "contains"){
       this->comparison = ComparisonFunEnum::str_contains;
     }
-    else {
-      this->comparison = ComparisonFunEnum::str_contains;
+    else if (op == "beginswith"){
+      this->comparison = ComparisonFunEnum::str_beginswith;
     }
-  }
-  else if (key == "op" or key == "opcode"){
-    this->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-    std::string* str_ptr = new std::string();
-    *str_ptr = value;
-    this->fixed_field = (void*) str_ptr;
-    this->comparison = ComparisonFunEnum::str_contains;
+    else {
+      std::cerr << "Unknown string operator: " << op << std::endl;
+      RELEASE_ASSERT(false);
+    }
   }
   else if (key == "addr" or key == "address" 
     or key == "nf" or key == "nfathers" 
@@ -201,12 +205,13 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
       this->comparison = ComparisonFunEnum::vsizet_geq;
     }
     else {
-      this->comparison = ComparisonFunEnum::vsizet_equals;
+      std::cerr << "Unknown integer operator: " << op << std::endl;
+      RELEASE_ASSERT(false);
     }
   }
   else {
     std::cerr << "Unknown key in condition: " << key << std::endl;
-    RELEASE_ASSERT(false); 
+    RELEASE_ASSERT(false);
   }
 }
 
@@ -241,9 +246,8 @@ bool ComparisonFunctions::str_contains(void* a1, void* a2)
   std::string* s1 = static_cast<std::string *>(a1);
   std::string* s2 = static_cast<std::string *>(a2);
   
+  // Does s2 contain s1 ?
   std::size_t found = s2->find(*s1);
-  
-//   std::cout << "is " << *s1 << " in " << *s2 << " ?\n";
   
   if (found!=std::string::npos){
     return true;
@@ -258,9 +262,20 @@ bool ComparisonFunctions::str_equals(void* a1, void* a2)
   std::string* s1 = static_cast<std::string *>(a1);
   std::string* s2 = static_cast<std::string *>(a2);
   
-//   std::cout << "cmp " << *s1 << " VS " << *s2 << "\n";
-  
   return *s1 == *s2;
+}
+
+bool ComparisonFunctions::str_beginswith(void* a1, void* a2)
+{
+  std::string* s1 = static_cast<std::string *>(a1);
+  std::string* s2 = static_cast<std::string *>(a2);
+  
+  // Does s2 begin with s1 ?
+  vsize_t ls1 = (*s1).length();
+  if (ls1 > (*s1).length()){
+    return false;
+  }
+  return ((*s2).substr(0, ls1) == *s1);
 }
 
 bool ComparisonFunctions::uint8t_equals(void* a1, void* a2)
@@ -378,6 +393,9 @@ bool CondNode::comparison_fun(void* a1, void* a2)
       
     case str_equals:
       return ComparisonFunctions::str_equals(a1, a2);
+      
+    case str_beginswith:
+      return ComparisonFunctions::str_beginswith(a1, a2);
       
     case uint8t_equals:
       return ComparisonFunctions::uint8t_equals(a1, a2);
@@ -531,6 +549,7 @@ std::string CondNode::field_toString(void* field)
       
     case str_contains:      
     case str_equals:
+    case str_beginswith:
       s = static_cast<std::string*>(field);
       return *s;
       
@@ -664,8 +683,13 @@ CondNodeToken::CondNodeToken(std::string str){
     this->type = "AND";
     this->value = "";
   }
+  else if (str == "not"){
+    this->type = "NOT";
+    this->value = "";
+  }
   else if (str == "==" or str == "!=" or str == ">=" or str == "<=" 
-    or str == "<" or str == ">" or str == "is" or str == "contains"){
+    or str == "<" or str == ">" or str == "is" or str == "contains"
+    or str == "beginswith"){
     this->type = "OP";
     this->value = str;
   }
@@ -753,6 +777,18 @@ void CondNodeParser::tokenize(std::string str){
         CondNodeToken t = CondNodeToken(str.substr(begin, i-begin));
         this->tokens.push_back(t);
         state = 0;
+      }
+      else if (c == ')' or c == '('){
+        // Parenthesis always end a token
+        // It forces to tokenize then separately
+        
+        std::string s = "";
+        s += c;
+        CondNodeToken t = CondNodeToken(s);
+        this->tokens.push_back(t);
+        
+        begin = i;
+        state = 2;
       }
       else if (char_type == 2){
         CondNodeToken t = CondNodeToken(str.substr(begin, i-begin));
@@ -894,7 +930,10 @@ CondNode** CondNodeParser::factor(){
     }
   }
   else if (this->accept("NOT")){
-    cn = this->expression();
+    std::list<CondNode**>* not_child = new std::list<CondNode**>();
+    not_child->push_front(this->expression());
+    cn = (CondNode**) malloc_or_quit(sizeof(CondNode*));
+    *cn = new CondNode(not_child, UnOpEnum::logic_not);
   }
   else if (this->accept("W")){
     std::string key = this->current_token.value; 

@@ -20,6 +20,7 @@ public:
   
   // Node information (pattern and test)
   std::string inst_str;
+  std::string opcode;
   
   bool is_root;
   
@@ -27,8 +28,8 @@ public:
   vsize_t address;
   
   
-  // Only for test
-  // TODO: it should be updated with node (or be pointers ?), do not use for now
+  // Those fields are written at the end of the .dot parsing
+  // They should be updated if the graph is modified later
   vsize_t childrenNumber;
   vsize_t fathersNumber;
   
@@ -53,6 +54,7 @@ public:
 enum ComparisonFunEnum {
   str_equals,
   str_contains,
+  str_beginswith,
   bool_true,
   bool_false,
   bool_test_true,
@@ -74,6 +76,8 @@ static const std::string desc_ComparisonFunEnum[] = {
   "str_equals",
 // str_contains:
   "str_contains",
+// str_beginswith:
+  "str_beginswith",
 // bool_true:
   "true",
 // bool_false:
@@ -129,7 +133,7 @@ class ComparisonFunctions{
 public:
   static bool str_equals(void*, void*);
   static bool str_contains(void*, void*);
-//   static bool str_begins_with(void*, void*);
+  static bool str_beginswith(void*, void*);
   
   static bool bool_true(void*, void*);
   static bool bool_false(void*, void*);

@@ -182,10 +182,13 @@ node_t *updateNode(OptionList * ol, node_t * n) {
       
       std::cout << "TODO: symb option deprecated\n";
     }
-    else if (strcmp(id, "csymb") == 0) {
+    else if (strcmp(id, "inst") == 0 || strcmp(id, "instruction") == 0 || strcmp(id, "csymb") == 0) {
       hasCSymb = 1;
       
       n->info->inst_str = v;
+    }
+    else if (strcmp(id, "op") == 0 || strcmp(id, "opcode") == 0) {
+      n->info->opcode = v;
     }
     else if (not cond_filled and (strcmp(id, "symbtype") == 0 or strcmp(id, "csymbtype") == 0)) {
       if (strcmp(v, "none") == 0 or strcmp(v, "*") == 0) {        
@@ -273,6 +276,16 @@ node_t *updateNode(OptionList * ol, node_t * n) {
   
   if (not n->info->has_address){
     n->info->address = 0; 
+  }
+  
+  if (n->info->opcode == "" and n->info->inst_str != ""){
+    std::size_t found = n->info->inst_str.find_first_of(" ");
+    if (found!=std::string::npos){
+      n->info->opcode = n->info->inst_str.substr(0, found);
+    }
+    else {
+      n->info->opcode = n->info->inst_str;
+    }
   }
 
   freeOptionList(ol);
