@@ -9,7 +9,6 @@
 #include <boost/concept_check.hpp>
 #include "ga_types.hpp"
 #include <iso646.h> // defines "or", "and" as alternatives to ||, &&
-// #include <regex>
 #include <boost/regex.hpp>
 
 class NodeInfo {
