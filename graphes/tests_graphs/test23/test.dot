@@ -1,0 +1,7 @@
+Digraph G {
+"A" [label = "jne C" , root=true, addr = "0x401500"]
+"B" [label = "xor eax, eax", address="0x401503"]
+"C" [label = "cmp ecx, 3", addr="401506"]
+"A" -> "B" [label = "1"]
+"A" -> "C" [label = "2"]
+}

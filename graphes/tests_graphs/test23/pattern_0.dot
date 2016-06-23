@@ -1,0 +1,3 @@
+Digraph G {
+"A" [label = "A", cond="inst regex '.*(x)?or.*|.*[cmp]+.*'", getid=A]
+}

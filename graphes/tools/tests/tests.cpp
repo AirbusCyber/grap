@@ -72,6 +72,8 @@ void printDescription()
                 "number of fathers and children of nodes.\n";
   std::cout << "Test 22: [manual] tests two patterns on the opcode field and "
                "the not operator\n";
+  std::cout << "Test 23: [manual] tests regex "
+               "(cond = \"inst regex '.*(x)?or.*|.*[cmp]+.*'\")\n";
 }
 
 #ifdef _WIN32

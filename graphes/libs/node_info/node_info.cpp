@@ -164,6 +164,9 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
     else if (op == "beginswith"){
       this->comparison = ComparisonFunEnum::str_beginswith;
     }
+    else if (op == "regex"){
+      this->comparison = ComparisonFunEnum::str_regex;
+    }
     else {
       std::cerr << "Unknown string operator: " << op << std::endl;
       RELEASE_ASSERT(false);
@@ -276,6 +279,22 @@ bool ComparisonFunctions::str_beginswith(void* a1, void* a2)
     return false;
   }
   return ((*s2).substr(0, ls1) == *s1);
+}
+
+bool ComparisonFunctions::str_regex(void* a1, void* a2)
+{
+  std::string* s1 = static_cast<std::string *>(a1);
+  std::string* s2 = static_cast<std::string *>(a2);
+  
+  // Does s2 matches regex s1 ?  
+  try {
+    boost::regex txt_regex(*s1);
+    return boost::regex_match(*s2, txt_regex);
+  }
+  catch (...) {
+    std::cerr << "ERR: regex creation failed." << std::endl;
+    return false; 
+  }
 }
 
 bool ComparisonFunctions::uint8t_equals(void* a1, void* a2)
@@ -395,7 +414,10 @@ bool CondNode::comparison_fun(void* a1, void* a2)
       return ComparisonFunctions::str_equals(a1, a2);
       
     case str_beginswith:
-      return ComparisonFunctions::str_beginswith(a1, a2);
+      return ComparisonFunctions::str_beginswith(a1, a2);    
+      
+    case str_regex:
+      return ComparisonFunctions::str_regex(a1, a2);
       
     case uint8t_equals:
       return ComparisonFunctions::uint8t_equals(a1, a2);
@@ -550,6 +572,7 @@ std::string CondNode::field_toString(void* field)
     case str_contains:      
     case str_equals:
     case str_beginswith:
+    case str_regex:
       s = static_cast<std::string*>(field);
       return *s;
       
@@ -689,7 +712,7 @@ CondNodeToken::CondNodeToken(std::string str){
   }
   else if (str == "==" or str == "!=" or str == ">=" or str == "<=" 
     or str == "<" or str == ">" or str == "is" or str == "contains"
-    or str == "beginswith"){
+    or str == "beginswith" or str == "regex"){
     this->type = "OP";
     this->value = str;
   }
@@ -735,6 +758,8 @@ void CondNodeParser::tokenize(std::string str){
   vsize_t i = 0;
   vsize_t size = str.length();
   vsize_t begin = 0;
+  char token_delimiter = '\'';
+  bool delimiter_used = false;
   
   /* States:
    * 0: no word began
@@ -770,6 +795,10 @@ void CondNodeParser::tokenize(std::string str){
       else if (char_type == 2){
         begin = i;
         state = 2;
+        
+        if (c == token_delimiter){
+          delimiter_used = true; 
+        }
       }
     }
     else if (state == 1){
@@ -778,7 +807,7 @@ void CondNodeParser::tokenize(std::string str){
         this->tokens.push_back(t);
         state = 0;
       }
-      else if (c == ')' or c == '('){
+      else if (not delimiter_used and (c == ')' or c == '(')){
         // Parenthesis always end a token
         // It forces to tokenize then separately
         
@@ -804,7 +833,14 @@ void CondNodeParser::tokenize(std::string str){
         this->tokens.push_back(t);
         state = 0;
       }
-      else if (char_type == 1){
+      else if (delimiter_used and c == token_delimiter){
+        CondNodeToken t = CondNodeToken();
+        t.type = "W";
+        t.value = str.substr(begin+1, i-begin-1);
+        this->tokens.push_back(t);
+        state = 0;
+      }
+      else if (not delimiter_used and char_type == 1){
         CondNodeToken t = CondNodeToken(str.substr(begin, i-begin));
         this->tokens.push_back(t);
         begin = i;
@@ -827,7 +863,7 @@ std::string CondNodeParser::tokens_to_string(){
   std::list<CondNodeToken>::iterator it = this->tokens.begin();
   while (it != this->tokens.end()){
     CondNodeToken t = *it;
-    r += t.type; + " - " + t.value + "\n";
+    r += t.type + " - " + t.value + "\n";
     it++;
   }
   

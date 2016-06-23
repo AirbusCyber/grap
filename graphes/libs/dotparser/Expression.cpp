@@ -320,8 +320,12 @@ Option *createOption(char *I, char *V) {
   o->id = key;
   o->value = value;
   
-  free(I);
-  free(V);
+  if (strlen(I) > 0){
+    free(I);
+  }
+  if (strlen(V) > 0){
+    free(V);
+  }
   
   return o;
 }

@@ -9,6 +9,8 @@
 #include <boost/concept_check.hpp>
 #include "ga_types.hpp"
 #include <iso646.h> // defines "or", "and" as alternatives to ||, &&
+// #include <regex>
+#include <boost/regex.hpp>
 
 class NodeInfo {
 public:
@@ -55,6 +57,7 @@ enum ComparisonFunEnum {
   str_equals,
   str_contains,
   str_beginswith,
+  str_regex,
   bool_true,
   bool_false,
   bool_test_true,
@@ -78,6 +81,8 @@ static const std::string desc_ComparisonFunEnum[] = {
   "str_contains",
 // str_beginswith:
   "str_beginswith",
+// str_regex:
+  "str_regex",
 // bool_true:
   "true",
 // bool_false:
@@ -134,6 +139,7 @@ public:
   static bool str_equals(void*, void*);
   static bool str_contains(void*, void*);
   static bool str_beginswith(void*, void*);
+  static bool str_regex(void*, void*);
   
   static bool bool_true(void*, void*);
   static bool bool_false(void*, void*);
