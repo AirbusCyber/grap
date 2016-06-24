@@ -59,6 +59,5 @@ WS        [ \r\n\t]*
 
 void yyerror (char *msg) {
     fprintf(stderr, "Error while parsing dot file. Exiting. Error message: %s.\n", msg);
-    exit(1);
-    // return 0;
+    RELEASE_ASSERT(false);
 }
