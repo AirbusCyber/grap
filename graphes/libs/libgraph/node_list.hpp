@@ -88,7 +88,7 @@ vsize_t node_list_size(const node_list_t * list);
  @param node_id The unique index of the new node.
  @return Created node in the list.
  */
-node_t* node_list_append(node_list_t * list, uint64_t node_id);
+node_t* node_list_append(node_list_t * list, vsize_t node_id);
 
 /*!
  @brief Find the node with node_id inside node list
@@ -97,6 +97,6 @@ node_t* node_list_append(node_list_t * list, uint64_t node_id);
  @param node_id The unique id of the searched node.
  @return Pointer to found node or NULL
  */
-node_t* node_list_find(node_list_t * list, uint64_t node_id);
+node_t* node_list_find(node_list_t * list, vsize_t node_id);
 
 #endif

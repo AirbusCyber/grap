@@ -47,7 +47,7 @@ vsize_t node_list_size(const node_list_t * list) {
   return list->count;
 }
 
-node_t* node_list_append(node_list_t * list, uint64_t node_id) {
+node_t* node_list_append(node_list_t * list, vsize_t node_id) {
   node_t *new_node;
 
 //   MY_ASSERT_MSG(list->count < list->size, "Too small node_list");
@@ -62,7 +62,7 @@ node_t* node_list_append(node_list_t * list, uint64_t node_id) {
   return new_node;
 }
 
-node_t* node_list_find(node_list_t * list, uint64_t node_id) {
+node_t* node_list_find(node_list_t * list, vsize_t node_id) {
   node_t item;
   item.node_id = node_id;
   
