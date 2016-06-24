@@ -23,6 +23,7 @@
 %include "std_string.i"
 %include "std_vector.i"
 %include "std_list.i"
+%include "carrays.i"
 
 
 %include "graphIO.hpp"
@@ -65,8 +66,10 @@ graph_t* getGraphFromFile(const char *filename) {
 
 %}
 
-%template (ListNode) std::list<node_t *>;
+%template(ListNode) std::list<node_t *>;
 %template(MapStrNode) std::map<string,  std::list<node_t *>*>;
 %template(SetGotten) std::set<std::map<string, std::list<node_t *> *> *>;
 %template(PairRT) std::pair<vsize_t,
 	 std::set<std::map<string, std::list<node_t *> *> *> *>;
+%template(NodesMap) std::map< vsize_t, node_t * >;
+	   
