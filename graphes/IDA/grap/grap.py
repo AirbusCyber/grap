@@ -93,4 +93,4 @@ class IDAgrapPlugin(idaapi.plugin_t):
             freeMapGotten(found_nodes)
             parcours.freeParcours(True)
             graph_free(pattern_graph, True)
-            # graph_free(cfg.graph, True)
+            graph_free(cfg.graph, True)
