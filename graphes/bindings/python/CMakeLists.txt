@@ -1,6 +1,11 @@
 # Variables-----------------------------------------------------------------
 set(PYTHON_BINDING OFF CACHE BOOL "Python bindings")
 
+# Removes the use of 'pythonxx_d.lib'
+if(${MSVC})
+  add_definitions("-DSWIG_PYTHON_INTERPRETER_NO_DEBUG")
+endif(${MSVC})
+
 if(PYTHON_BINDING)  
 
   # Variables
