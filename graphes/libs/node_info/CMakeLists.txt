@@ -6,6 +6,7 @@ set(SRCS_NODEINFO
 
 # nodeinfo library
 add_library(nodeinfo ${SRCS_NODEINFO})
+target_link_libraries(nodeinfo ${Boost_REGEX_LIBRARY})
 
 # Bindings
 list_combinations(SRCS_NODEINFO_BINDING

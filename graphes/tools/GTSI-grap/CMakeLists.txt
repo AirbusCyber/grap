@@ -6,4 +6,4 @@ set(SRCS_GTSIGRAP
 
 # grap (GTSI-grap)
 add_executable(GTSI-grap ${SRCS_GTSIGRAP})
-target_link_libraries(GTSI-grap common GTSI graph nodeinfo boost_regex)
+target_link_libraries(GTSI-grap common GTSI graph nodeinfo)
