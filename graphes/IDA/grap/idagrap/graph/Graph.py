@@ -3,7 +3,7 @@
 from pygrap import (NodesMap, graph_t, node_alloc, node_copy, node_link,
                     node_list_add, node_list_find)
 
-from idaapi import is_noret
+from idaapi import get_root_filename, is_noret
 from idagrap.config.Instruction import *
 from idagrap.error.Exceptions import CodeException
 from idagrap.graph.Node import *
@@ -42,6 +42,10 @@ class CFG:
         for ea in Functions():
             self.dis(ea=ea, ifrom=None)
 
+        # Information
+        print "%s graph has %d nodes" % (get_root_filename(),
+                                         self.graph.nodes.size)
+
     def dis(self, ea, ifrom=None):
         """Disassemble the current address and fill the nodes list.
 
@@ -60,7 +64,6 @@ class CFG:
             return
 
         # If the node exists
-
         if node_list_find(node_list, n.getid()):
             if ifrom:
                 # Link the father and the child

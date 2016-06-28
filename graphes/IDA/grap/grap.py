@@ -66,7 +66,7 @@ class IDAgrapPlugin(idaapi.plugin_t):
         set_gotten = rt.second
 
         print "%d traversal(s) possible in %s." % (count, "cryptowall")
-        print "Pattern graph (%s) has %d nodes. Test graph (%s) has %d nodes." % ("pattern", n_pattern, "cryptowall", cfg.graph.nodes.size)
+        print "Pattern graph (%s) has %d nodes." % ("pattern", n_pattern)
 
         if not set_gotten.empty():
             print("\nExtracted nodes:")
