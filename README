@@ -103,6 +103,14 @@ cd swigwin-x.x.x
 make
 make install
 ```
+## Boost
+
+Pour compiler le projet `grap` il est nécessaire d'avoir les librairies
+Boost. Pour les obtenir, il faut télécharger les binaires 32-bit à l'adresse
+suivante
+https://sourceforge.net/projects/boost/files/boost-binaries/1.61.0/boost_1_61_0-msvc-14.0-32.exe/download
+. Une fois installé, il faut se rendre dans `C:\Program Files\boost_x_xx_x` et
+renommer le dossier `lib32-xxxxx` en `lib`.
 
 ## Grap
 
