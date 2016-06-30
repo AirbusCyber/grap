@@ -68,11 +68,11 @@ class Module:
 
     def __str__(self):
         """String representation of the class."""
-        res = ""
-        res += "Name: " + self._name + "\n"
+        res = "Name: " + self._name + "\n"
         res += "Author: " + self._author.__str__() + "\n"
         res += "Description: " + self._description + "\n"
         res += "Group: " + self.get_group_str() + "\n"
+
 
         return res
 
@@ -192,9 +192,11 @@ class ModuleCryptoStream(ModuleCrypto):
 
     def __str__(self):
         """String representation of the class."""
-        res = ModuleCrypto.__str__(self)
+        res = "{\n"
+        res += ModuleCrypto.__str__(self)
         for patterns in self._patterns:
             res += patterns.__str__()
+        res += "}\n"
 
         return res
 
