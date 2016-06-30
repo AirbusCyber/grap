@@ -15,6 +15,9 @@ class Node(node_t):
 
     Attributs:
         node (node_t): Pygrap structure for a node.
+
+    Raises:
+        CodeException: If the ``ea`` is not a code instruction.
     """
 
     def __init__(self, ea):
