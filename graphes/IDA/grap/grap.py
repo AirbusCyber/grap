@@ -8,6 +8,7 @@ from pygrap import freeMapGotten, getGraphFromFile, graph_free, parcoursLargeur
 
 import idaapi
 from idagrap.graph.Graph import CFG
+from idagrap.patterns.Modules import MODULES
 
 sys.setrecursionlimit(400000000)
 
@@ -55,42 +56,59 @@ class IDAgrapPlugin(idaapi.plugin_t):
         # Get the CFG of the binary
         cfg.extract()
 
-        pattern_graph = getGraphFromFile("E:\pattern1.dot")
-        n_pattern = pattern_graph.nodes.size
+        # Group
+        for grp_name, grp in MODULES.iteritems():
+            print "### Group: " + grp_name
 
-        parcours = parcoursLargeur(pattern_graph, pattern_graph.root.list_id,
-                                   n_pattern)
-        rt = parcours.parcourir(cfg.graph, n_pattern, True,
-                                True, True)
-        count = rt.first
-        set_gotten = rt.second
+            # Group->Type
+            for tp_name, tp in grp.iteritems():
+                print "#### Type: " + tp_name
+                print tp
 
-        print "%d traversal(s) possible in %s." % (count, "cryptowall")
-        print "Pattern graph (%s) has %d nodes." % ("pattern", n_pattern)
+                # List of Patterns
+                for patterns in tp.get_patterns():
 
-        if not set_gotten.empty():
-            print("\nExtracted nodes:")
+                    # List of Pattern
+                    for pattern in patterns.get_patterns():
+                        print "##### Search : " + pattern.get_file()
 
-            for f_index, found_nodes in enumerate(set_gotten, start=1):
-                print("Match %d" % f_index)
+                        pattern_graph = getGraphFromFile(pattern.get_file())
+                        n_pattern = pattern_graph.nodes.size
 
-                for getid, node_list in found_nodes.iteritems():
-                    if not node_list.empty():
-                        for n_index, node in enumerate(node_list):
+                        parcours = parcoursLargeur(pattern_graph,
+                                                   pattern_graph.root.list_id,
+                                                   n_pattern)
+                        rt = parcours.parcourir(cfg.graph, n_pattern,
+                                                True, True, True)
+                        count = rt.first
+                        set_gotten = rt.second
 
-                            print "%s" % getid,
+                        print "%d traversal(s) possible in %s." % (count, "cryptowall")
+                        print "Pattern graph (%s) has %d nodes." % ("pattern", n_pattern)
 
-                            if node_list.size() > 1:
-                                print "%d" % n_index,
+                        if not set_gotten.empty():
+                            print("\nExtracted nodes:")
 
-                            print ": ",
+                            for f_index, found_nodes in enumerate(set_gotten, start=1):
+                                print("Match %d" % f_index)
 
-                            if node.info.has_address:
-                                print "0x%X, " % node.info.address,
+                                for getid, node_list in found_nodes.iteritems():
+                                    if not node_list.empty():
+                                        for n_index, node in enumerate(node_list):
 
-                            print "%s" % node.info.inst_str
+                                            print "%s" % getid,
 
-            freeMapGotten(found_nodes)
-            parcours.freeParcours(True)
-            graph_free(pattern_graph, True)
-            graph_free(cfg.graph, True)
+                                            if node_list.size() > 1:
+                                                print "%d" % n_index,
+
+                                            print ": ",
+
+                                            if node.info.has_address:
+                                                print "0x%X, " % node.info.address,
+
+                                            print "%s" % node.info.inst_str
+
+                        freeMapGotten(found_nodes)
+                        parcours.freeParcours(True)
+                        graph_free(pattern_graph, True)
+        graph_free(cfg.graph, True)
