@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from pygrap import freeMapGotten, getGraphFromFile, graph_free, parcoursLargeur
+
 from idagrap.config.General import MAX_THRESHOLD
 
 
@@ -13,6 +15,7 @@ class Pattern:
         _name (str): Name of the pattern (eg. "First loop")
         _description (str): Description of the Pattern (eg.
                             "First Initialization loop of RC4 set_key.").
+        _matches (RetourParcours): Matches of the pattern in a graph.
 
     Args:
         f (str): File path (default value: "").
@@ -22,6 +25,7 @@ class Pattern:
 
     _file = ""
     _name = ""
+    _matches = None
 
     def __init__(self, f="", name="", description=""):
         """Initialization of the class."""
@@ -61,6 +65,69 @@ class Pattern:
             The return value is the `_description` attribute.
         """
         return self._description
+
+    def parcourir(self, graph, checklabels=True, countallmatches=True, getid=True):
+        """Search pattern.
+
+        This method allows the search of the pattern in a graph.
+
+        Arguments:
+            graph (graph_t*): Graph in which we will look for the pattern.
+            checklabels (bool): Check or not the labels of the pattern
+                                                    (default value: True).
+            countallmatches (bool): Count or not all the matches
+                                                (default value: True).
+            getid (bool): Get or not the ID (default value: True).
+        """
+        pattern_graph = getGraphFromFile(self._file)
+        pattern_size = pattern_graph.nodes.size
+
+        parcours = parcoursLargeur(pattern_graph,
+                                   pattern_graph.root.list_id,
+                                   pattern_size)
+
+        self._matches = parcours.parcourir(graph, pattern_size,
+                                           checklabels, countallmatches, getid)
+
+        parcours.freeParcours(True)
+        graph_free(pattern_graph, True)
+
+    def print_parcours(self):
+        """Displays the matches."""
+
+        if self._matches:
+            count = self._matches.first
+            set_gotten = self._matches.second
+
+            print "%d traversal(s) possible." % (count)
+            print "Pattern graph (%s)" % (self._name)
+
+            if not set_gotten.empty():
+                print("\nExtracted nodes:")
+
+                for f_index, found_nodes in enumerate(set_gotten, start=1):
+                    print("Match %d" % f_index)
+
+                    for getid, node_list in found_nodes.iteritems():
+                        if not node_list.empty():
+                            for n_index, node in enumerate(node_list):
+
+                                print "%s" % getid,
+
+                                if node_list.size() > 1:
+                                    print "%d" % n_index,
+
+                                print ": ",
+
+                                if node.info.has_address:
+                                    print "0x%X, " % node.info.address,
+
+                                print "%s" % node.info.inst_str
+
+                freeMapGotten(found_nodes)
+
+        else:
+            print "[E] Matches haven't been initialized"
 
 
 class Patterns():

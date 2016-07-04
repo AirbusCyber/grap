@@ -72,43 +72,8 @@ class IDAgrapPlugin(idaapi.plugin_t):
                     for pattern in patterns.get_patterns():
                         print "##### Search : " + pattern.get_file()
 
-                        pattern_graph = getGraphFromFile(pattern.get_file())
-                        n_pattern = pattern_graph.nodes.size
+                        pattern.parcourir(cfg.graph)
 
-                        parcours = parcoursLargeur(pattern_graph,
-                                                   pattern_graph.root.list_id,
-                                                   n_pattern)
-                        rt = parcours.parcourir(cfg.graph, n_pattern,
-                                                True, True, True)
-                        count = rt.first
-                        set_gotten = rt.second
+                        pattern.print_parcours()
 
-                        print "%d traversal(s) possible in %s." % (count, "cryptowall")
-                        print "Pattern graph (%s) has %d nodes." % ("pattern", n_pattern)
-
-                        if not set_gotten.empty():
-                            print("\nExtracted nodes:")
-
-                            for f_index, found_nodes in enumerate(set_gotten, start=1):
-                                print("Match %d" % f_index)
-
-                                for getid, node_list in found_nodes.iteritems():
-                                    if not node_list.empty():
-                                        for n_index, node in enumerate(node_list):
-
-                                            print "%s" % getid,
-
-                                            if node_list.size() > 1:
-                                                print "%d" % n_index,
-
-                                            print ": ",
-
-                                            if node.info.has_address:
-                                                print "0x%X, " % node.info.address,
-
-                                            print "%s" % node.info.inst_str
-
-                        freeMapGotten(found_nodes)
-                        parcours.freeParcours(True)
-                        graph_free(pattern_graph, True)
         graph_free(cfg.graph, True)
