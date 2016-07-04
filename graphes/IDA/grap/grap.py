@@ -4,7 +4,7 @@
 import sys
 import threading
 
-from pygrap import freeMapGotten, getGraphFromFile, graph_free, parcoursLargeur
+from pygrap import graph_free
 
 import idaapi
 from idagrap.graph.Graph import CFG

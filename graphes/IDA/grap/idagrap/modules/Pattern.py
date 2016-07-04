@@ -5,6 +5,33 @@ from pygrap import freeMapGotten, getGraphFromFile, graph_free, parcoursLargeur
 from idagrap.config.General import MAX_THRESHOLD
 
 
+class Match:
+    """Match class.
+
+    This class is a representation of a match.
+
+    Attributes:
+        _links (Match list): List of Match in the same function ares.
+        _match (node_t* list): List of match instructions.
+
+    Arguments:
+        match (node_t* list): List of matched instructions.
+    """
+
+    def __init__(self, match):
+        """Initialization of the class."""
+        self._links = []
+        self._match = match
+
+    def get_match(self):
+        """Match getter.
+
+        Returns:
+            The return value is the `_match` attribute.
+        """
+        return self._match
+
+
 class Pattern:
     r"""Pattern class.
 
@@ -15,7 +42,7 @@ class Pattern:
         _name (str): Name of the pattern (eg. "First loop")
         _description (str): Description of the Pattern (eg.
                             "First Initialization loop of RC4 set_key.").
-        _matches (RetourParcours): Matches of the pattern in a graph.
+        _matches (Match list): Matches of the pattern in a graph.
 
     Args:
         f (str): File path (default value: "").
@@ -25,13 +52,13 @@ class Pattern:
 
     _file = ""
     _name = ""
-    _matches = None
 
     def __init__(self, f="", name="", description=""):
         """Initialization of the class."""
         self._file = f
         self._name = name
         self._description = description
+        self._matches = []
 
     def __str__(self):
         """String representation of the class."""
@@ -74,7 +101,7 @@ class Pattern:
         Arguments:
             graph (graph_t*): Graph in which we will look for the pattern.
             checklabels (bool): Check or not the labels of the pattern
-                                                    (default value: True).
+                                                (default value: True).
             countallmatches (bool): Count or not all the matches
                                                 (default value: True).
             getid (bool): Get or not the ID (default value: True).
@@ -86,9 +113,17 @@ class Pattern:
                                    pattern_graph.root.list_id,
                                    pattern_size)
 
-        self._matches = parcours.parcourir(graph, pattern_size,
-                                           checklabels, countallmatches, getid)
+        rt = parcours.parcourir(graph, pattern_size,
+                                checklabels, countallmatches, getid)
 
+        set_gotten = rt.second
+
+        # Fill the matches list
+        if not set_gotten.empty():
+            for found_nodes in set_gotten:
+                self._matches.append(Match(found_nodes))
+
+        # Free object
         parcours.freeParcours(True)
         graph_free(pattern_graph, True)
 
@@ -96,19 +131,18 @@ class Pattern:
         """Displays the matches."""
 
         if self._matches:
-            count = self._matches.first
-            set_gotten = self._matches.second
+            count = len(self._matches)
 
             print "%d traversal(s) possible." % (count)
             print "Pattern graph (%s)" % (self._name)
 
-            if not set_gotten.empty():
+            if count > 0:
                 print("\nExtracted nodes:")
 
-                for f_index, found_nodes in enumerate(set_gotten, start=1):
+                for f_index, found_nodes in enumerate(self._matches, start=1):
                     print("Match %d" % f_index)
 
-                    for getid, node_list in found_nodes.iteritems():
+                    for getid, node_list in found_nodes.get_match().iteritems():
                         if not node_list.empty():
                             for n_index, node in enumerate(node_list):
 
@@ -123,11 +157,14 @@ class Pattern:
                                     print "0x%X, " % node.info.address,
 
                                 print "%s" % node.info.inst_str
-
-                freeMapGotten(found_nodes)
-
         else:
             print "[E] Matches haven't been initialized"
+
+    def __del__(self):
+        """Exit function."""
+        # free matches
+        for found_nodes in self._matches:
+            freeMapGotten(found_nodes)
 
 
 class Patterns():
