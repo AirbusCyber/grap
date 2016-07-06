@@ -78,7 +78,23 @@ class PatternsAnalysis:
                 if patterns.sup_threshold(match.get_rate(patterns)):
 
                     if match.get_links() not in self._found_patterns:
-                        self._found_patterns.append(match.get_links())
+                        links = match.get_links()
+
+                        ok = True
+
+                        # Check the Min and Max rules.
+                        for pattern_id, match_dict in links.iteritems():
+                            p = patterns.get_pattern(pattern_id)
+
+                            if len(match_dict) < p.get_min_pattern():
+                                ok = False
+                                break
+
+                            if len(match_dict) > p.get_max_pattern():
+                                ok = False
+                                break
+                        if ok:
+                            self._found_patterns.append(links)
 
     def print_patterns(self):
         """Print the patterns.
