@@ -132,13 +132,16 @@ class Pattern:
     _file = ""
     _name = ""
 
-    def __init__(self, f="", name="", description=""):
+    def __init__(self, f="", name="", description="",
+                 min_pattern=1, max_pattern=1):
         """Initialization of the class."""
         self._file = f
         self._name = name
         self._description = description
         self._matches = []
         self._id = uuid4()
+        self._min_pattern = min_pattern
+        self._max_pattern = max_pattern
 
     def __str__(self):
         """String representation of the class."""
@@ -146,6 +149,8 @@ class Pattern:
         res += "Name: " + self._name + "\n"
         res += "Description: " + self._description + "\n"
         res += "File: " + self._file + "\n"
+        res += "Min pattern per area : " + self._min_pattern.__str__()
+        res += "Max pattern per area : " + self._max_pattern.__str__()
         res += ")\n"
         return res
 
@@ -195,6 +200,22 @@ class Pattern:
             The return value is the `_matches` attribute.
         """
         return self._matches
+
+    def get_min_pattern(self):
+        """Min Pattern getter.
+
+        Returns:
+            The return value is the `_min_pattern` attribute.
+        """
+        return self._min_pattern
+
+    def get_max_pattern(self):
+        """Max Pattern getter.
+
+        Returns:
+            The return value is the `_max_pattern` attribute.
+        """
+        return self._max_pattern
 
     def parcourir(self, graph, checklabels=True, countallmatches=True, getid=True):
         """Search a pattern.
@@ -356,6 +377,20 @@ class Patterns():
                 return pattern.get_name()
         return "None"
 
+    def get_pattern(self, pattern_id):
+        """Get the pattern linked to the id.
+
+        Arguments:
+            pattern_id (UUID): Pattern id to search.
+
+        Returns:
+            (Pattern): The return value is the pattern.
+                     If it fails, the return value will be NoneType.
+        """
+        for pattern in self._patterns:
+            if pattern_id == pattern.get_id():
+                return pattern
+        return None
     def get_description(self):
         """Description getter.
 
