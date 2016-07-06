@@ -122,11 +122,17 @@ class Pattern:
                             "First Initialization loop of RC4 set_key.").
         _matches (Match list): Matches of the pattern in a graph.
         _id (UUID): Pattern id.
-
+        _min_pattern (int): Minimum of patterns authorized in the same area.
+        _max_pattern (int): Maximum of patterns authorized in the same area.
     Args:
         f (str): File path (default value: "").
         name (str): Name of the pattern (default value: "")
         description (str): Description of the Pattern (default value: "").
+        _min_pattern (int): Minimum of patterns authorized in the same area.
+                            (default value: 1)
+        _max_pattern (int): Maximum of patterns authorized in the same area.
+                            (default value: 1)
+
     """
 
     _file = ""
@@ -149,8 +155,8 @@ class Pattern:
         res += "Name: " + self._name + "\n"
         res += "Description: " + self._description + "\n"
         res += "File: " + self._file + "\n"
-        res += "Min pattern per area : " + self._min_pattern.__str__()
-        res += "Max pattern per area : " + self._max_pattern.__str__()
+        res += "Min pattern per area : " + self._min_pattern.__str__() + "\n"
+        res += "Max pattern per area : " + self._max_pattern.__str__() + "\n"
         res += ")\n"
         return res
 
