@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from uuid import uuid4
+
 from pygrap import freeMapGotten, getGraphFromFile, graph_free, parcoursLargeur
 
 from idagrap.config.General import MAX_THRESHOLD
@@ -11,17 +13,26 @@ class Match:
     This class is a representation of a match.
 
     Attributes:
-        _links (Match list): List of Match in the same function ares.
-        _match (node_t* list): List of match instructions.
+        _links (Match dict): dictionary of Match in the same function ares.
+                            Structure {"pattern_id": {
+                                                        "match_id": Match,
+                                                     },
+                                      }.
+        _match (std::map< std::string,std::list< node_t * > * > * list): List of match instructions.
+        _pattern_id (UUID): Id of the match Pattern.
+        _match_id (UUID): Id of this Match.
 
     Arguments:
-        match (node_t* list): List of matched instructions.
+        match (std::map< std::string,std::list< node_t * > * > * list): List of matched instructions.
+        pattern_id (UUID): Id of the match Pattern.
     """
 
-    def __init__(self, match):
+    def __init__(self, match, pattern_id):
         """Initialization of the class."""
-        self._links = []
+        self._links = {}
         self._match = match
+        self._pattern_id = pattern_id
+        self._match_id = uuid4()
 
     def get_match(self):
         """Match getter.
@@ -30,6 +41,73 @@ class Match:
             The return value is the `_match` attribute.
         """
         return self._match
+
+    def get_links(self):
+        """Links getter.
+
+        Returns:
+            The return value is the `_links` attribute.
+        """
+        return self._links
+
+    def add_link(self, match):
+        """Add links between two `Match`.
+
+        Add the `match` argument to the `_links` attribute.
+
+        Arguments:
+            match (Match): Match to add.
+        """
+        pattern_id = match.get_pattern_id()
+        match_id = match.get_match_id()
+
+        if pattern_id in self._links:
+            if match_id not in self._links[pattern_id]:
+                self._links[pattern_id][match_id] = match
+        else:
+            self._links[pattern_id] = {match_id: match}
+
+    def get_match_id(self):
+        """Match ID getter.
+
+        Returns:
+            The return value is the `_match_id` attribute.
+        """
+        return self._match_id
+
+    def get_pattern_id(self):
+        """Pattern ID getter.
+
+        Returns:
+            The return value is the `_pattern_id` attribute.
+        """
+        return self._pattern_id
+
+    def print_parcours(self):
+        """Print the "parcours"."""
+        for getid, node_list in self._match.iteritems():
+            if not node_list.empty():
+                for n_index, node in enumerate(node_list):
+
+                    print "%s" % getid,
+
+                    if node_list.size() > 1:
+                        print "%d" % n_index,
+
+                    print ": ",
+
+                    if node.info.has_address:
+                        print "0x%X, " % node.info.address,
+
+                    print "%s" % node.info.inst_str
+
+    def get_rate(self, patterns):
+        """Calculate the rate.
+
+        Arguments:
+            patterns (Patterns): Patterns of the matches.
+        """
+        return (len(self._links) / patterns.get_size())
 
 
 class Pattern:
@@ -43,6 +121,7 @@ class Pattern:
         _description (str): Description of the Pattern (eg.
                             "First Initialization loop of RC4 set_key.").
         _matches (Match list): Matches of the pattern in a graph.
+        _id (UUID): Pattern id.
 
     Args:
         f (str): File path (default value: "").
@@ -59,6 +138,7 @@ class Pattern:
         self._name = name
         self._description = description
         self._matches = []
+        self._id = uuid4()
 
     def __str__(self):
         """String representation of the class."""
@@ -68,6 +148,13 @@ class Pattern:
         res += "File: " + self._file + "\n"
         res += ")\n"
         return res
+
+    def __del__(self):
+        """Exit function."""
+        # free matches
+        for found_nodes in self._matches:
+            if found_nodes:
+                freeMapGotten(found_nodes)
 
     def get_file(self):
         """File getter.
@@ -93,10 +180,26 @@ class Pattern:
         """
         return self._description
 
-    def parcourir(self, graph, checklabels=True, countallmatches=True, getid=True):
-        """Search pattern.
+    def get_id(self):
+        """Id getter.
 
-        This method allows the search of the pattern in a graph.
+        Returns:
+            The return value is the `_id` attribute.
+        """
+        return self._id
+
+    def get_matches(self):
+        """Matches getter.
+
+        Returns:
+            The return value is the `_matches` attribute.
+        """
+        return self._matches
+
+    def parcourir(self, graph, checklabels=True, countallmatches=True, getid=True):
+        """Search a pattern.
+
+        This method allows the search of an pattern in a graph.
 
         Arguments:
             graph (graph_t*): Graph in which we will look for the pattern.
@@ -121,15 +224,14 @@ class Pattern:
         # Fill the matches list
         if not set_gotten.empty():
             for found_nodes in set_gotten:
-                self._matches.append(Match(found_nodes))
+                self._matches.append(Match(found_nodes, self.get_id()))
 
         # Free object
         parcours.freeParcours(True)
         graph_free(pattern_graph, True)
 
     def print_parcours(self):
-        """Displays the matches."""
-
+        """Print the matches."""
         if self._matches:
             count = len(self._matches)
 
@@ -140,31 +242,14 @@ class Pattern:
                 print("\nExtracted nodes:")
 
                 for f_index, found_nodes in enumerate(self._matches, start=1):
-                    print("Match %d" % f_index)
+                    print("Match %d, UUID : %s\n" %
+                          (f_index, found_nodes.get_match_id()))
 
-                    for getid, node_list in found_nodes.get_match().iteritems():
-                        if not node_list.empty():
-                            for n_index, node in enumerate(node_list):
+                    found_nodes.print_parcours()
 
-                                print "%s" % getid,
-
-                                if node_list.size() > 1:
-                                    print "%d" % n_index,
-
-                                print ": ",
-
-                                if node.info.has_address:
-                                    print "0x%X, " % node.info.address,
-
-                                print "%s" % node.info.inst_str
+                    print ""
         else:
             print "[E] Matches haven't been initialized"
-
-    def __del__(self):
-        """Exit function."""
-        # free matches
-        for found_nodes in self._matches:
-            freeMapGotten(found_nodes)
 
 
 class Patterns():
@@ -256,6 +341,21 @@ class Patterns():
         """
         return self._name
 
+    def get_pattern_name(self, pattern_id):
+        """Get the pattern name linked to the id.
+
+        Arguments:
+            pattern_id (UUID): Pattern id to search.
+
+        Returns:
+            (str): The return value is the name of the pattern.
+                     If it fails, the return value will be "None"
+        """
+        for pattern in self._patterns:
+            if pattern_id == pattern.get_id():
+                return pattern.get_name()
+        return "None"
+
     def get_description(self):
         """Description getter.
 
@@ -263,3 +363,17 @@ class Patterns():
             The return value is the `_description` attribute.
         """
         return self._description
+
+    def sup_threshold(self, value):
+        """Check if the value is superior at the threshold.
+
+        Arguments:
+            value (float): Value to be checked.
+
+        Returns:
+            (bool): True if the value is superior at the threshold,
+                     otherwise False.
+        """
+        if value >= self._threshold:
+            return True
+        return False
