@@ -7,6 +7,7 @@ import threading
 from pygrap import graph_free
 
 import idaapi
+from idagrap.analysis.Analysis import PatternsAnalysis
 from idagrap.graph.Graph import CFG
 from idagrap.patterns.Modules import MODULES
 
@@ -74,6 +75,12 @@ class IDAgrapPlugin(idaapi.plugin_t):
 
                         pattern.parcourir(cfg.graph)
 
-                        pattern.print_parcours()
+                    #
+                    # Analysing
+                    #
+                    ana = PatternsAnalysis(patterns)
+
+                    ana.search_patterns()
+                    ana.print_patterns()
 
         graph_free(cfg.graph, True)
