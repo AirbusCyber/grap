@@ -64,23 +64,26 @@ class IDAgrapPlugin(idaapi.plugin_t):
             # Group->Type
             for tp_name, tp in grp.iteritems():
                 print "#### Type: " + tp_name
-                print tp
 
-                # List of Patterns
-                for patterns in tp.get_patterns():
+                for algo in tp:
 
-                    # List of Pattern
-                    for pattern in patterns.get_patterns():
-                        print "##### Search : " + pattern.get_file()
+                    print algo
 
-                        pattern.parcourir(cfg.graph)
+                    # List of Patterns
+                    for patterns in algo.get_patterns():
 
-                    #
-                    # Analysing
-                    #
-                    ana = PatternsAnalysis(patterns)
+                        # List of Pattern
+                        for pattern in patterns.get_patterns():
+                            print "##### Search : " + pattern.get_file()
 
-                    ana.search_patterns()
-                    ana.print_patterns()
+                            pattern.parcourir(cfg.graph)
+
+                        #
+                        # Analysing
+                        #
+                        ana = PatternsAnalysis(patterns)
+
+                        ana.search_patterns()
+                        ana.print_patterns()
 
         graph_free(cfg.graph, True)
