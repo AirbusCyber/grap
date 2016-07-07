@@ -54,35 +54,46 @@ class IDAgrapPlugin(idaapi.plugin_t):
         """
         cfg = CFG()
 
+        print "[I] Creation of the Control Flow Graph (can take few seconds)"
         # Get the CFG of the binary
         cfg.extract()
 
+        print "[I] Searching for patterns."
         # Group
         for grp_name, grp in MODULES.iteritems():
-            print "### Group: " + grp_name
+            print "Group: " + grp_name
 
             # Group->Type
             for tp_name, tp in grp.iteritems():
-                print "#### Type: " + tp_name
+                print "\tType: " + tp_name
 
                 for algo in tp:
 
-                    print algo
+                    # print algo
+                    print "\t\tAlgorithm: %s" % algo.get_name()
 
                     # List of Patterns
                     for patterns in algo.get_patterns():
 
+                        print "\t\t\tFunction: %s" % patterns.get_name()
+
                         # List of Pattern
                         for pattern in patterns.get_patterns():
-                            print "##### Search : " + pattern.get_file()
+                            print "\t\t\t\t[I] Searching for " + pattern.get_name()
 
                             pattern.parcourir(cfg.graph)
+                            print "\t\t\t\t[I] %d %s pattern found" % (
+                                len(pattern.get_matches()),
+                                pattern.get_name()
+                            )
 
                         #
                         # Analysing
                         #
+                        print "\t\t\t\t[I] Linking the patterns matches which are in the same area"
                         ana = PatternsAnalysis(patterns)
 
+                        print "\t\t\t\t[I] Filtering those patterns"
                         ana.search_patterns()
                         ana.print_patterns()
 
