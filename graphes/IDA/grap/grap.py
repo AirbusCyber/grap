@@ -94,7 +94,7 @@ class IDAgrapPlugin(idaapi.plugin_t):
                         ana = PatternsAnalysis(patterns)
 
                         print "\t\t\t\t[I] Filtering those patterns"
-                        ana.search_patterns()
+                        ana.filter_patterns()
                         ana.print_patterns()
 
         graph_free(cfg.graph, True)

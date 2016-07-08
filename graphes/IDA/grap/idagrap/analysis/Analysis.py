@@ -60,10 +60,10 @@ class PatternsAnalysis:
                         if GetFunctionName(n1.info.address) == GetFunctionName(n2.info.address):
                             m1.add_link(m2)
 
-    def search_patterns(self):
+    def filter_patterns(self):
         """Search good patterns.
 
-        This method search patterns matches that respect our rules. It fills
+        This method filter patterns matches that respect our rules. It fills
         the `_found_patterns` attributes of this class.
         """
         patterns = self._patterns
