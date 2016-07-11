@@ -248,6 +248,10 @@ class Pattern:
 
         set_gotten = rt.second
 
+        # Check if the list is empty
+        if len(self._matches) != 0:
+            del self._matches[:]
+
         # Fill the matches list
         if not set_gotten.empty():
             for found_nodes in set_gotten:

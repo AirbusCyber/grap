@@ -1,7 +1,7 @@
 #/usr/bin/env python
 
-from pygrap import (NodesMap, graph_t, node_alloc, node_copy, node_link,
-                    node_list_add, node_list_find)
+from pygrap import (NodesMap, graph_alloc, graph_t, node_alloc, node_copy,
+                    node_link, node_list_add, node_list_find)
 
 from idaapi import get_root_filename, is_noret
 from idagrap.config.Instruction import *
@@ -21,13 +21,16 @@ class CFG:
         graph (graph_t): The control flow graph of the binary
     """
 
-    def __init__(self, graph=graph_t()):
+    def __init__(self, graph=None):
         """Initialization of CFG.
 
         Args:
             graph (graph_t) = The graph graph.
         """
         # Set attributes
+        if not graph:
+            graph = graph_alloc(0)
+
         self.graph = graph
         self.graph.nodes.nodes_map = NodesMap()
 
