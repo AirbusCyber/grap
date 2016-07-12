@@ -180,7 +180,7 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     else if (strcmp(id, "symb") == 0) {
       hasSymb = 1;
       
-      std::cout << "TODO: symb option deprecated\n";
+      std::cerr << "symb option deprecated\n";
     }
     else if (strcmp(id, "inst") == 0 || strcmp(id, "instruction") == 0 || strcmp(id, "csymb") == 0) {
       hasCSymb = 1;

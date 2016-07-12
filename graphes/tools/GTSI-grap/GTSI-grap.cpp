@@ -153,6 +153,7 @@ int main(int argc, char *argv[]) {
 
     vsize_t i = 1;
     for (it = set_gotten->begin(); it != set_gotten->end(); it++) {
+      if (it != set_gotten->begin()) std::cout << std::endl;
       std::cout << "Match " << std::dec << i << "\n";
 
       std::map < string, std::list < node_t * >*>*p_found_nodes = *it;
