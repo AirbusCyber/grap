@@ -10,6 +10,7 @@ import idaapi
 from idagrap.analysis.Analysis import PatternsAnalysis
 from idagrap.graph.Graph import CFG
 from idagrap.patterns.Modules import MODULES
+from idc import Wait
 
 sys.setrecursionlimit(400000000)
 
@@ -41,6 +42,9 @@ class IDAgrapPlugin(idaapi.plugin_t):
         Args:
             arg: Plugin argument.
         """
+        # Wait for the end of autoanalysis
+        Wait()
+
         thread = threading.Thread(target=self.main, args=(arg,))
         # Fixed the stack size to 10M
         threading.stack_size(0x100000 * 10)
