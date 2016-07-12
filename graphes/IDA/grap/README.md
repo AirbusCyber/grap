@@ -20,7 +20,7 @@ différents types de cette catégorie. Par exemple, pour le groupe
 cipher*). L'implémentation dans le plug-in fait qu'il est possible de rajouter
 d'autres types.
    
-- Dans chaque type, il y a des dossiers qui représentes les modules
+- Dans chaque type, il y a des dossiers qui représentent les modules
 (algorithmes). Par exemple, dans le cas des *stream cipher*, il y a le module
 **RC4**.
 
@@ -31,7 +31,7 @@ d'autres types.
   deuxième *patterns* qui permettrait de détecter la fonction de chiffrement
   (ex. `RC4_encrypt`).
 
-- Chaque *patterns* possède une liste de *pattern*. Ces motifs, sont les motifs
+- Chaque *patterns* possède une liste de *pattern*. Ces motifs sont les motifs
   au format *DOT* qui peuvent être détectés dans le binaire à l'aide de la
   librairie **grap**. 
 
@@ -40,31 +40,31 @@ Ci-dessous l'arborescence du dossier `patterns`:
 ```
 .
 ├── compression
-│   ├── __init__.py
-│   └── ModulesCompression.py
+│   ├── __init__.py
+│   └── ModulesCompression.py
 ├── cryptography
-│   ├── block
-│   │   ├── __init__.py
-│   │   └── ModulesCryptoBlock.py
-│   ├── hash
-│   │   ├── __init__.py
-│   │   └── ModulesCryptoHash.py
-│   ├── __init__.py
-│   ├── mode
-│   │   ├── __init__.py
-│   │   └── ModulesCryptoMode.py
-│   ├── ModulesCrypto.py
-│   └── stream
-│       ├── __init__.py
-│       ├── ModulesCryptoStream.py
-│       └── rc4
-│           ├── __init__.py
-│           ├── RC4.py
-│           └── set_key
-│               ├── __init__.py
-│               ├── loop1.dot
-│               ├── loop2.dot
-│               └── RC4SetKey.py
+│   ├── block
+│   │   ├── __init__.py
+│   │   └── ModulesCryptoBlock.py
+│   ├── hash
+│   │   ├── __init__.py
+│   │   └── ModulesCryptoHash.py
+│   ├── __init__.py
+│   ├── mode
+│   │   ├── __init__.py
+│   │   └── ModulesCryptoMode.py
+│   ├── ModulesCrypto.py
+│   └── stream
+│       ├── __init__.py
+│       ├── ModulesCryptoStream.py
+│       └── rc4
+│           ├── __init__.py
+│           ├── RC4.py
+│           └── set_key
+│               ├── __init__.py
+│               ├── loop1.dot
+│               ├── loop2.dot
+│               └── RC4SetKey.py
 ├── __init__.py
 └── Modules.py
 
@@ -75,24 +75,24 @@ Ci-dessous l'arborescence du dossier `patterns`:
 
 ### Questions
 
-Maintenant que hiérarchie a été présentée, il va être possible d'attaquer
+Maintenant que la hiérarchie a été présentée, il va être possible d'attaquer
 l'intégration d'un algorithme. Pour créer un bon module de détection, il faut
 répondre aux questions suivantes:
 
-- Dans quelle groupe et type se trouve mon algorithme ? Par exemple pour **RC4**
-  ce sera le groupe de cryptographie (**cryptography**) et sont type est un
-  chiffrement par flot (**stream**). Une fois que le groupe et le type a été
-  identifié, il faut se rendre dans le dossier correspondant, c-à-d
+- Dans quel groupe/type se trouve mon algorithme ? Par exemple pour **RC4**
+  ce sera le groupe de cryptographie (**cryptography**) et son type est un
+  chiffrement par flot (**stream**). Une fois que le groupe et le type ont été
+  identifiés, il faut se rendre dans le dossier correspondant, c-à-d
   `./cryptography/stream`.
 
-- Quelle est le nom de mon algorithme ? Pour notre chiffrement par flot c'est
+- Quel est le nom de mon algorithme ? Pour notre chiffrement par flot c'est
   **RC4**. Dans ce cas, il faut créer un dossier au nom du chiffrement
   (ex. `rc4`) et s'y rendre.
 
 - Puis, il faut déterminer les fonctions que l'on veut détecter. Par exemple,
   pour **RC4** ça peut-être la fonction d'initialisation et de
   chiffrement/déchiffrement. Dans ce cas, il faudra créer des dossiers
-  représentant la fonction (ex. `RC4_set_key`, `RC4_encrypt`, etc).
+  représentant la fonction (ex. `rc4_set_key` ou `set_key`, `RC4_encrypt`, ...).
   
 Une fois la hiérarchie du module créée à l'aide des questions précédentes, il
 est possible de passer à l'intégration.
@@ -101,7 +101,7 @@ est possible de passer à l'intégration.
 
 Les modules de IDAgrap sont très simples et reposent sur un système de
 listes/dictionnaires et d'objets à renseigner. La liste principale porte le nom de
-`MODULES` et elle est déclaré dans le fichier `patterns/Modules.py`. Son objectif
+`MODULES` et elle est déclarée dans le fichier `patterns/Modules.py`. Son objectif
 est de déclarer tous les groupes, voir ci-dessous:
 
 ```python
@@ -135,11 +135,11 @@ CRYPTO = {
 }
 ```
 
-Comme pour les groupes, le dictionnaire des types est représentés par des clés
+Comme pour les groupes, le dictionnaire des types est représenté par des clés
 qui sont les noms des types (déclarés dans `idagrap/modules/Module.py`) et les
-valeurs qui sont des *tuples* contenants la liste des différents algorithmes. Ces
+valeurs qui sont des *tuples* contenant la liste des différents algorithmes. Ces
 listes sont déclarées dans les sous-dossiers dédiés au type de chiffrement. Dans
-le cas des chiffrement par flot, `CRYPTO_STREAM` se trouve dans
+le cas des chiffrements par flot, `CRYPTO_STREAM` se trouve dans
 `patterns/cryptography/stream/ModulesCryptoStream.py`. Ci-dessous le contenu de
 ce fichier.
 
@@ -156,9 +156,9 @@ Les fichiers des types sont extrêmement importants, car c'est dans ces document
 qu'il faudra ajouter le nouvel algorithme. Comme il est possible de le constater
 plus haut, l'algorithme *RC4* a été ajouté à la liste des chiffrements par
 flot. Si vous décidez d'ajouter votre algorithme de chiffrement par flot c'est
-dans le *tuple* `CRYPTO_STREAM` qu'il faudra l'ajouter. Les objets ajoutés dans
-les listes de types dépendent de ceci. Par exemple, pour le type **stream** la
-classe utilisé sera `ModuleCryptoStream`, pour les **block** ce sera
+dans le *tuple* `CRYPTO_STREAM` qu'il faudra l'ajouter. Le types des objets ajoutés dans
+les listes de types dépendent de ceux-ci. Par exemple, pour le type **stream** la
+classe utilisée sera `ModuleCryptoStream`, pour les **block** ce sera
 `ModuleCryptoBlock`, etc. Tous les modules descendent de la même classe
 `Module`. 
 
@@ -193,7 +193,7 @@ leur nom. Par exemple, si les motifs vont chercher l'initialisation de la clé d
 l'algorithme **RC4**, alors il serait judicieux de créer un dossier ayant un nom
 tel que `rc4_set_key` ou `set_key`. Dans la mesure du possible, il est conseillé
 de mettre un nom de fonction connu. Pour l'algorithme **RC4** le nom de
-l'initialisation de la clé a été inspiré de la librairie cryptographique
+l'initialisation de la clé a été inspirée de la librairie cryptographique
 **libressl**.
 
 
@@ -243,10 +243,10 @@ RC4_SET_KEY = Patterns(
 
 Ce fichier renseigne plusieurs choses. Tout d'abord, il y a l'objet `Patterns`. 
 Cet élément permet d'apporter des informations sur les motifs à rechercher. Tous
-les `Patterns` possède les arguments suivants:
+les `Patterns` possèdent les arguments suivants:
 
 - **patterns**: Liste de `Pattern` à détecter dans la fonction.
-- **threshold**: Seuil limite au-dessus du quel la fonction est considérée comme
+- **threshold**: Seuil limite au-dessus duquel la fonction est considérée comme
   détectée. Par exemple, si une fonction possède 4 motifs et qu'elle a mis un
   seuil de 0.75 alors si le plug-in détecte 3 motifs sur 4 elle considérera
   que ces trois motifs sont suffisants pour considérer la fonction comme
