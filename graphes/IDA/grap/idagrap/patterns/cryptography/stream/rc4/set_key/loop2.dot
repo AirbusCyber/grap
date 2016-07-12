@@ -1,0 +1,19 @@
+Digraph G {
+A [label = "mov", csymbtype="substring", csymb="mov", getid="A"]
+B [label = "mov", csymbtype="substring", csymb="mov", getid="B"]
+C [label = "mov", csymbtype="substring", csymb="mov", getid="C"]
+D [label = "*", csymbtype="*", getid="D", minrepeat="1", maxrepeat="6"]
+E [label = "mov", csymbtype="substring", csymb="mov", getid="E"]
+F [label = "add", csymbtype="substring", csymb="add", getid="F"]
+G [label = "*", csymbtype="*", getid="G", minrepeat="0", maxrepeat="4", lazyrepeat=true]
+H [label = "cmp", csymbtype="substring", csymb="cmp", getid="H"]
+
+A -> B
+B -> C
+C -> D
+D -> E
+E -> F
+F -> G
+G -> H
+}
+

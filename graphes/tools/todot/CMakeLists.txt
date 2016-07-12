@@ -6,4 +6,4 @@ set(SRCS_TODOT
 
 # todot
 add_executable(todot ${SRCS_TODOT})
-target_link_libraries(todot common graph nodeinfo boost_regex)
+target_link_libraries(todot common graph nodeinfo)

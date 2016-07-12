@@ -45,6 +45,11 @@ else()
 
 endif()
 
+
+# Boost package
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost REQUIRED COMPONENTS regex)
+
 include_directories(
   ./
   libs/common/
@@ -54,7 +59,8 @@ include_directories(
   libsGTSI/Traversal/
   libs/node_info/
   ${CMAKE_BINARY_DIR}/libs/dotparser/
-)
+  ${Boost_INCLUDE_DIR}
+  )
 
 # Libraries-----------------------------------------------------------------
 # Libs

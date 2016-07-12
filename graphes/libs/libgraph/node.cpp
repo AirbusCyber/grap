@@ -45,7 +45,7 @@ void node_free (node_t * node, bool free_info) {
     // be careful, node info and node conditions are also used in Parcours and ParcoursNode
     delete(node->info);
     node->info = NULL;
-    if (*(node->condition) != NULL){
+    if (node->condition != NULL && *(node->condition) != NULL){
       CondNode::freeCondition(node->condition, true, true);
 //       node->condition = NULL;
     }

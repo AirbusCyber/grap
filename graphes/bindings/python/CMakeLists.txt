@@ -1,6 +1,11 @@
 # Variables-----------------------------------------------------------------
 set(PYTHON_BINDING OFF CACHE BOOL "Python bindings")
 
+# Removes the use of 'pythonxx_d.lib'
+if(${MSVC})
+  add_definitions("-DSWIG_PYTHON_INTERPRETER_NO_DEBUG")
+endif(${MSVC})
+
 if(PYTHON_BINDING)  
 
   # Variables
@@ -10,7 +15,7 @@ if(PYTHON_BINDING)
   # SWIG
   FIND_PACKAGE(SWIG REQUIRED)
 
-  if(SWIG_FOUND)
+  if(SWIG_FOUND AND Boost_FOUND)
     INCLUDE(${SWIG_USE_FILE})
 
     # Python
@@ -53,13 +58,13 @@ if(PYTHON_BINDING)
 	COMPILE_FLAGS "-w"
 	GENERATED TRUE)
       
-      SWIG_LINK_LIBRARIES(pygrap ${PYTHON_LIBRARIES})
+      SWIG_LINK_LIBRARIES(pygrap ${PYTHON_LIBRARIES} ${Boost_REGEX_LIBRARY})
 
       # Install
       install(TARGETS ${SWIG_MODULE_pygrap_REAL_NAME} LIBRARY DESTINATION ${PYTHON_SITE_DIR})
       install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pygrap.py DESTINATION ${PYTHON_SITE_DIR})
       
     endif(PYTHONLIBS_FOUND AND PYTHONINTERP_FOUND)
-  endif(SWIG_FOUND)
+  endif(SWIG_FOUND AND Boost_FOUND)
   
 endif(PYTHON_BINDING)
