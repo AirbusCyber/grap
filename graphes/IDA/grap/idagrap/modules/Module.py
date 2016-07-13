@@ -7,6 +7,7 @@ module_groups = {
     "None": 0,                  # None
     "Crypto": 1,                # Cryptographic patterns
     "Compression": 2,           # Compression patterns
+    "Test": 3,                  # Test patterns
 }
 
 crypto_types = {
@@ -23,6 +24,10 @@ compression_types = {
     "Lossy": 2,                 # Lossy compression patterns
 }
 
+test_types = {
+    "None": 0,                  # None
+    "Misc": 1,                  # Misc patterns
+}
 #
 # Base
 #
@@ -240,3 +245,101 @@ class ModuleCompression(Module):
         Module.__init__(self, name, author,
                         description, module_groups["Compression"])
         self._type = c_type
+
+#
+# Test
+#
+
+
+class ModuleTest(Module):
+    """Test pattern module.
+
+    This class handle all test patterns.
+
+    Attributes:
+        _type (int): Type of the Test group (eg. 'Misc').
+                     All types are defined in the `test_types`
+                     dictionary.
+
+    Args:
+        name (str): Module name (default value: "")
+        author (list): List of module authors (default value: [])
+        description (str): Description of the module (default value: "")
+        c_type (int): Test type of the group (default value:
+                      test_types["None"])
+    """
+
+    _type = test_types["None"]
+
+    def __init__(self, name="", author=None, description="", c_type=test_types["None"]):
+        """Initialization of the class."""
+        # Attributes initialization
+        Module.__init__(self, name, author,
+                        description, module_groups["Test"])
+        self._type = c_type
+
+    def __str__(self):
+        """String representation of the class."""
+        res = Module.__str__(self)
+        res += "Type: " + self.get_type_str() + "\n"
+
+        return res
+
+    def get_type_str(self):
+        """Get the group name.
+
+        Returns:
+            The return value is the string representation of the
+            `_type` attribute.
+        """
+        for key, value in crypto_types.iteritems():
+            if self._type == value:
+                return key
+
+        return ""
+
+
+class ModuleTestMisc(ModuleTest):
+    """Misc test pattern module.
+
+    This class handle all misc patterns.
+
+    Attributes:
+        _patterns (Patterns list): List of Patterns
+
+    Args:
+        patterns (Patterns list): List of Patterns (default value: None).
+        name (str): Module name (default value: "").
+        author (list): List of module authors (default value: None).
+        description (str): Description of the module (default value: "").
+    """
+
+    _patterns = []
+
+    def __init__(self, patterns=None, name="", author=None, description=""):
+        """Initialization of the class."""
+        if not patterns:
+            patterns = []
+
+        # Attributes initialization
+        ModuleTest.__init__(self, name, author, description, test_types["Misc"])
+        self._patterns = patterns
+
+    def __str__(self):
+        """String representation of the class."""
+        res = "{\n"
+        res += ModuleTest.__str__(self)
+        for patterns in self._patterns:
+            res += patterns.__str__()
+        res += "}\n"
+
+        return res
+
+    def get_patterns(self):
+        """Patterns getter.
+
+        Returns:
+            The return value is the `_patterns` attribute which is a list
+            of Patterns.
+        """
+        return self._patterns
