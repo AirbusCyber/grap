@@ -22,6 +22,11 @@ public:
   std::string inst_str;
   std::string opcode;
   
+  uint8_t nargs;
+  std::string arg1;
+  std::string arg2;
+  std::string arg3;
+  
   bool is_root;
   
   bool has_address;

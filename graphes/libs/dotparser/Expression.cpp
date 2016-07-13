@@ -152,6 +152,10 @@ node_t *updateNode(OptionList * ol, node_t * n) {
   char hasMinRepeat = 0;
   char hasMaxRepeat = 0;
   
+  bool has_arg1 = false;
+  bool has_arg2 = false;
+  bool has_arg3 = false;
+  
   CondNode* cn = new CondNode();
   CondNode** cn_ptr = (CondNode**) malloc(sizeof(CondNode*));
   *cn_ptr = cn;
@@ -256,6 +260,21 @@ node_t *updateNode(OptionList * ol, node_t * n) {
       n->info->has_address = true;
       n->info->address = (vsize_t) strtol(v, NULL, 16);
     }
+    else if (not has_arg1 and strcmp(id, "arg1") == 0) {
+      n->info->arg1 = v;
+      has_arg1 = true;
+      n->info->nargs++;
+    }
+    else if (not has_arg2 and strcmp(id, "arg2") == 0) {
+      n->info->arg2 = v;
+      has_arg2 = true;
+      n->info->nargs++;
+    }
+    else if (not has_arg3 and strcmp(id, "arg3") == 0) {
+      n->info->arg3 = v;
+      has_arg3 = true;
+      n->info->nargs++;
+    }
     
     free(v);
   }
@@ -274,13 +293,64 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     n->info->address = 0; 
   }
   
-  if (n->info->opcode == "" and n->info->inst_str != ""){
+  if (n->info->inst_str != "" and (n->info->opcode == "" or n->info->nargs == 0)){
     std::size_t found = n->info->inst_str.find_first_of(" ");
-    if (found!=std::string::npos){
-      n->info->opcode = n->info->inst_str.substr(0, found);
+    
+    if (n->info->opcode == ""){
+      if (found != std::string::npos){
+        n->info->opcode = n->info->inst_str.substr(0, found);
+      }
+      else {
+        n->info->opcode = n->info->inst_str;
+      }
     }
-    else {
-      n->info->opcode = n->info->inst_str;
+    
+    if (n->info->nargs == 0){
+      std::size_t begin = n->info->inst_str.find_first_not_of(" ", found);
+          
+      if (found != std::string::npos and begin != std::string::npos){
+        uint8_t arg_counter;
+        bool brk = false;
+        std::size_t virg_pos, first_pos;
+        for (arg_counter = 1; arg_counter <= 3; arg_counter++){
+          std::string v;
+          
+          virg_pos = n->info->inst_str.find_first_of(",", begin);
+        
+          if (virg_pos != std::string::npos){
+            v = n->info->inst_str.substr(begin, virg_pos - begin);
+            n->info->nargs++;
+          }
+          else {
+            v = n->info->inst_str.substr(begin);
+            n->info->nargs++;
+            brk = true;
+          }
+          
+          switch (arg_counter){
+            case 1:
+              n->info->arg1 = v;
+              break;
+            case 2:
+              n->info->arg2 = v;
+              break;
+            case 3:
+            default:
+              n->info->arg3 = v;
+              break;
+          }
+          
+          if (not brk){
+            begin = n->info->inst_str.find_first_not_of(" ", virg_pos + 1);
+            
+            if (begin == std::string::npos){
+              brk = true; 
+            }
+          }
+          
+          if (brk) break;
+        }
+      }
     }
   }
 

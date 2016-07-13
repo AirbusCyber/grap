@@ -3,6 +3,10 @@
 NodeInfo::NodeInfo(){
   this->inst_str = "";
   this->opcode = "";
+  this->nargs = 0;
+  this->arg1 = "";
+  this->arg2 = "";
+  this->arg3 = "";
   this->is_root = false;
   this->has_address = false;
   this->address = 0;
@@ -143,9 +147,19 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
   this->has_fixed_pattern_info = false;
   this->has_fixed_field = true;
   
-  if (key == "inst" or key == "instruction" or key == "op" or key == "opcode"){
+  if (key == "inst" or key == "instruction" or key == "op" or key == "opcode"
+    or key == "arg1" or key == "arg2" or key == "arg3"){
     if (key == "op" or key == "opcode"){
       this->test_field = (void* NodeInfo::*) &NodeInfo::opcode;
+    }
+    else if (key == "arg1"){
+      this->test_field = (void* NodeInfo::*) &NodeInfo::arg1;
+    }
+    else if (key == "arg2"){
+      this->test_field = (void* NodeInfo::*) &NodeInfo::arg2;
+    }
+    else if (key == "arg3"){
+      this->test_field = (void* NodeInfo::*) &NodeInfo::arg3;
     }
     else{
       // Case: inst or instruction
@@ -175,42 +189,68 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
   else if (key == "addr" or key == "address" 
     or key == "nf" or key == "nfathers" 
     or key == "nc" or key == "nchildren"){
-    
-    if (key == "addr" or key == "address"){
-      this->test_field = (void* NodeInfo::*) &NodeInfo::address;
-    }
-    else if (key == "nf" or key == "nfathers"){
-      this->test_field = (void* NodeInfo::*) &NodeInfo::fathersNumber;
-    }
-    else{
-      // Case: key == "nc" or key == "nchildren"
-      this->test_field = (void* NodeInfo::*) &NodeInfo::childrenNumber;
-    }
-    
-    vsize_t* addr_ptr = (vsize_t*) malloc_or_quit(sizeof(vsize_t));
-    *addr_ptr = (vsize_t) strtol(value.c_str(), NULL, 16);
-    this->fixed_field = (void*) addr_ptr;
-    
-    if (op == "==" or op == "is"){
-      this->comparison = ComparisonFunEnum::vsizet_equals; 
-    }
-    else if (op == ">"){
-      // addr > 12 means test > pattern, so we have to use less than operator
-      this->comparison = ComparisonFunEnum::vsizet_lt;
-    }
-    else if (op == ">="){
-      this->comparison = ComparisonFunEnum::vsizet_leq;
-    }    
-    else if (op == "<"){
-      this->comparison = ComparisonFunEnum::vsizet_gt;
-    }
-    else if (op == "<="){
-      this->comparison = ComparisonFunEnum::vsizet_geq;
-    }
-    else {
-      std::cerr << "Unknown integer operator: " << op << std::endl;
-      RELEASE_ASSERT(false);
-    }
+      if (key == "addr" or key == "address"){
+        this->test_field = (void* NodeInfo::*) &NodeInfo::address;
+      }
+      else if (key == "nf" or key == "nfathers"){
+        this->test_field = (void* NodeInfo::*) &NodeInfo::fathersNumber;
+      }
+      else{
+        // Case: key == "nc" or key == "nchildren"
+        this->test_field = (void* NodeInfo::*) &NodeInfo::childrenNumber;
+      }
+      
+      vsize_t* addr_ptr = (vsize_t*) malloc_or_quit(sizeof(vsize_t));
+      *addr_ptr = (vsize_t) strtol(value.c_str(), NULL, 16);
+      this->fixed_field = (void*) addr_ptr;
+      
+      if (op == "==" or op == "is"){
+        this->comparison = ComparisonFunEnum::vsizet_equals; 
+      }
+      else if (op == ">"){
+        // addr > 12 means test > pattern, so we have to use less than operator
+        this->comparison = ComparisonFunEnum::vsizet_lt;
+      }
+      else if (op == ">="){
+        this->comparison = ComparisonFunEnum::vsizet_leq;
+      }    
+      else if (op == "<"){
+        this->comparison = ComparisonFunEnum::vsizet_gt;
+      }
+      else if (op == "<="){
+        this->comparison = ComparisonFunEnum::vsizet_geq;
+      }
+      else {
+        std::cerr << "Unknown integer operator: " << op << std::endl;
+        RELEASE_ASSERT(false);
+      }
+  }  
+  else if (key == "nargs"){
+      this->test_field = (void* NodeInfo::*) &NodeInfo::nargs;
+
+      uint8_t* addr_ptr = (uint8_t*) malloc_or_quit(sizeof(uint8_t));
+      *addr_ptr = (uint8_t) strtol(value.c_str(), NULL, 10);
+      this->fixed_field = (void*) addr_ptr;
+      
+      if (op == "==" or op == "is"){
+        this->comparison = ComparisonFunEnum::uint8t_equals; 
+      }
+      else if (op == ">"){
+        this->comparison = ComparisonFunEnum::uint8t_lt;
+      }
+      else if (op == ">="){
+        this->comparison = ComparisonFunEnum::uint8t_leq;
+      }    
+      else if (op == "<"){
+        this->comparison = ComparisonFunEnum::uint8t_gt;
+      }
+      else if (op == "<="){
+        this->comparison = ComparisonFunEnum::uint8t_geq;
+      }
+      else {
+        std::cerr << "Unknown integer operator: " << op << std::endl;
+        RELEASE_ASSERT(false);
+      }
   }
   else {
     std::cerr << "Unknown key in condition: " << key << std::endl;

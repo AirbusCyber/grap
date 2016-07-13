@@ -74,6 +74,8 @@ void printDescription()
                "the not operator\n";
   std::cout << "Test 23: [manual] tests regex "
                "(cond = \"inst regex '.*(x)?or.*|.*[cmp]+.*'\")\n";
+  std::cout << "Test 24: [manual] arg1, arg2 test (automatically parsed)\n";
+  std::cout << "Test 25: [manual] nargs, arg1, arg2 test (explicitly set)\n";
 }
 
 #ifdef _WIN32
