@@ -1,7 +1,7 @@
 #/usr/bin/env python
 
 from pygrap import (NodesMap, graph_alloc, graph_t, node_alloc, node_copy,
-                    node_link, node_list_add, node_list_find)
+                    node_link, node_list_add, node_list_find, update_children_fathers_number)
 
 from idaapi import get_root_filename, is_noret
 from idagrap.config.Instruction import *
@@ -44,6 +44,8 @@ class CFG:
         # Scan all the functions
         for ea in Functions():
             self.dis(ea=ea, ifrom=None)
+
+        update_children_fathers_number(self)
 
         # Information
         print "%s graph has %d nodes" % (get_root_filename(),

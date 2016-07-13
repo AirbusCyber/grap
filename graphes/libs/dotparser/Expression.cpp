@@ -80,11 +80,7 @@ graph_t *addEdgesToGraph(CoupleList * cl, graph_t * g) {
 
   freeEdgeList(cl);
   
-  vsize_t k;
-  for (k = 0; k < g->nodes.size; k++){
-    g->nodes.storage[k]->info->childrenNumber = g->nodes.storage[k]->children_nb;
-    g->nodes.storage[k]->info->fathersNumber = g->nodes.storage[k]->fathers_nb;
-  }
+  update_children_fathers_number(g);
   
   return g;
 }

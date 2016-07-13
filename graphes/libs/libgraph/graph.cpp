@@ -15,3 +15,11 @@ void graph_free(graph_t* graph, bool free_info) {
     free(graph);
   }
 }
+
+void update_children_fathers_number(graph_t* graph){
+  vsize_t k;
+  for (k = 0; k < graph->nodes.size; k++){
+    graph->nodes.storage[k]->info->childrenNumber = graph->nodes.storage[k]->children_nb;
+    graph->nodes.storage[k]->info->fathersNumber = graph->nodes.storage[k]->fathers_nb;
+  }
+}

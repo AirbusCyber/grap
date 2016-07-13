@@ -40,4 +40,10 @@ graph_t* graph_alloc(vsize_t max_size);
  */
 void graph_free(graph_t* graph, bool free_info);
 
+/*!
+ @brief Updates children and fathers numbers in nodes' nodeinfo struct from the node fields
+ @param graph The graph to update.
+ */
+void update_children_fathers_number(graph_t* graph);
+
 #endif
