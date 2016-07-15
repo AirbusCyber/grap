@@ -1,4 +1,5 @@
 #include "grap-match.hpp"
+#include <boost/concept_check.hpp>
 
 char optionFuncs;
 char optionLabels;
@@ -23,9 +24,9 @@ int main(int argc, char *argv[]) {
   }
 
   FILE *fpPattern = NULL;
-  char *pathPattern;
+  string pathPattern;
   FILE *fpTest = NULL;
-  char *pathTest;
+  std::list<string> pathTests = std::list<string>();
   bool learnOk = false;
   bool scanOk = false;
   bool checkLabels = true;
@@ -54,23 +55,17 @@ int main(int argc, char *argv[]) {
     }
     else {
       if (!learnOk) {
-        fpPattern = fopen(argv[a], "r");
+        pathPattern = std::string(argv[a]);
+        fpPattern = fopen(pathPattern.c_str(), "r");
 
         if (fpPattern == NULL) {
-          printf("Can't open pattern graph %s\n", argv[a]);
+          std::cout << "Can't open pattern graph " << pathPattern << std::endl;
           return 1;
         }
-        pathPattern = argv[a];
         learnOk = true;
       }
-      else if (!scanOk) {
-        fpTest = fopen(argv[a], "r");
-
-        if (fpTest == NULL) {
-          printf("Can't open test graph %s\n", argv[a]);
-          return 1;
-        }
-        pathTest = argv[a];
+      else {
+        pathTests.push_back(std::string(argv[a]));
         scanOk = true;
       }
     }
@@ -100,48 +95,63 @@ int main(int argc, char *argv[]) {
   }
 
   // Generate Parcours from a breadth-first-search of the pattern graph
-  Parcours *parcours = parcoursLargeur(pattern_graph, pattern_graph->root->list_id, pattern_graph->nodes.size);
+  Parcours *pattern_parcours = parcoursLargeur(pattern_graph, pattern_graph->root->list_id, pattern_graph->nodes.size);
   
   if (optionDebug){
-    cout << "Pattern Parcours is:\n" << parcours->toString() << "\n";
+    cout << "Pattern Parcours is:\n" << pattern_parcours->toString() << "\n";
   }
 
-  if (not parcours->complete) {
+  if (not pattern_parcours->complete) {
     printf("Warning: Pattern graph is not connected.\n");
   }
   
-  // Free test graph but not nodes' info: they are referenced by parcours
-//   graph_free(gr, false);
+  if (not optionQuiet){
+    std::cout << "Pattern graph (" << pathPattern << ") has " << (int) n_pattern <<   " nodes." << std::endl;
+  }
   
+  std::list<string>::iterator test_iterator;
+  for (test_iterator = pathTests.begin();  test_iterator != pathTests.end(); test_iterator++){    
+    if (not optionQuiet){
+      std::cout << std::endl; 
+    }
+    
+    string pathTest = (std::string) *test_iterator;
+    matchPatternToTest(optionVerbose, optionQuiet, checkLabels, n_pattern, pathPattern, pattern_graph, pattern_parcours, pathTest);
+  }
+  
+  pattern_parcours->freeParcours(true);
+  graph_free(pattern_graph, true);
+}
+
+void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, vsize_t n_pattern, string pathPattern, graph_t* pattern_graph, Parcours* pattern_parcours, string pathTest){
   if (optionVerbose){
     cout << "Parsing test file." << endl; 
   }
-
-  graph_t *test_graph = getGraphFromFile(fpTest);
+  
+  graph_t *test_graph = getGraphFromPath(pathTest.c_str());
   if (test_graph == NULL){
-    std::cerr <<  "Test graph could not be opened, existing.\n";
-    return 1;
+    std::cerr <<  "Test graph " << pathTest << " could not be opened, aborting.\n";
+    return;
   }
   
   vsize_t n_test;
   n_test = test_graph->nodes.size;
-  fclose(fpTest);
   
   if (optionVerbose){
     cout << "Done." << endl; 
   }
-
+  
   // Find possible traversals of parcours in test graph
-  Parcours::RetourParcours rt = parcours->parcourir(test_graph, pattern_graph->nodes.size, checkLabels, true, not optionQuiet);
+  Parcours::RetourParcours rt = pattern_parcours->parcourir(test_graph, pattern_graph->nodes.size, checkLabels, true, not optionQuiet);
   vsize_t count = rt.first;
 
   if (not optionQuiet) {
-    printf("%d traversal(s) possible in %s.\n", (int) count, pathTest);
-    printf("Pattern graph (%s) has %d nodes.\nTest graph (%s) has %d nodes.\n", pathPattern, (int) n_pattern, pathTest, (int) test_graph->nodes.size);
+    std::cout << "Test graph (" << pathTest << ") has " << (int) test_graph->nodes.size <<  " nodes." << std::endl;
+    std::cout << (int) count << " traversal(s) possible in " << pathTest << "." << std::endl;
   }
   else{
     if (count > 0){
-     printf("%s %d\n", pathTest, (int) count); 
+     std::cout << pathTest << " " << count << std::endl;
     }
   }
 
@@ -183,7 +193,5 @@ int main(int argc, char *argv[]) {
   }
   
   delete(set_gotten);
-  parcours->freeParcours(true);
-  graph_free(pattern_graph, true);
   graph_free(test_graph, true);
 }
