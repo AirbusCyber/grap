@@ -4,8 +4,11 @@ set (TOOLS OFF CACHE BOOL "Tools")
 
 if(${TOOLS})
 
-  # grap (GTSI-grap)
-  add_subdirectory(GTSI-grap)
+  # grap-match
+  add_subdirectory(grap-match)
+
+  # grap
+  add_subdirectory(grap)
 
   # tests
   add_subdirectory(tests)

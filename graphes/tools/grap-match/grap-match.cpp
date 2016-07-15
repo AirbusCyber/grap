@@ -1,11 +1,11 @@
-#include "GTSI-grap.hpp"
+#include "grap-match.hpp"
 
 char optionFuncs;
 char optionLabels;
 
 void printUsage() {
-  printf("Use GTSI-grap to learn and scan sites.\n");
-  printf("Usage : ./GTSI-grap [options] patternFile testFile\n");
+  printf("Use grap-match to look for a pattern in a .dot test file.\n");
+  printf("Usage : ./grap-match [options] patternFile testFile\n");
   printf("Options are :\n");
   printf("        -h or --help: print this message\n");
   printf("        -v or --verbose\n");
