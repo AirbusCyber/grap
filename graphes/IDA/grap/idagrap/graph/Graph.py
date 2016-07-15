@@ -45,7 +45,7 @@ class CFG:
         for ea in Functions():
             self.dis(ea=ea, ifrom=None)
 
-        update_children_fathers_number(self)
+        update_children_fathers_number(self.graph)
 
         # Information
         print "%s graph has %d nodes" % (get_root_filename(),
