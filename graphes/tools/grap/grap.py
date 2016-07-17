@@ -1,15 +1,6 @@
 #!/usr/bin/python2
 # -*- coding: utf-8 -*-
 
-import re
-import sys
-from core.pe import PE
-from capstone import Cs
-from capstone import CS_ARCH_X86
-from capstone import CS_MODE_32
-from capstone import CS_MODE_64
-from cStringIO import StringIO
-from pandape.tools.config import *
 from pandape.tools.disassembler import *
 import subprocess
 import os
@@ -59,7 +50,7 @@ if __name__ == '__main__':
                 dot_test_files.append(dotpath)
             else:
                 if data[0:2] == "MZ":
-                    pe = PE(raw_data=data)
+                    pe = PE(data=data)
 
                     arch = CS_ARCH_X86
                     mode = CS_MODE_32 if pe.is_32bits() else CS_MODE_64
@@ -73,14 +64,14 @@ if __name__ == '__main__':
                         dot = disass.export_to_dot(insts=insts, oep_offset=oep, displayable=args.readable)
                         open(dotpath, "w").write(dot)
                     except:
-                        print("Error processing " + test_path)
+                        print("Error while disassembling " + test_path)
                         continue
 
                     dot_test_files.append(dotpath)
                     parsed_binary = True
                 elif data[0:4] == "\x7fELF":
                     from elftools.elf.elffile import ELFFile
-                    elf = ELFFile(open(args.lexe, "r"))
+                    elf = ELFFile(open(test_path, "r"))
 
                     arch = CS_ARCH_X86
                     mode = CS_MODE_64 if elf.elfclass == 64 else CS_MODE_32
