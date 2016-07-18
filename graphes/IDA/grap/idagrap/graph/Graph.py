@@ -1,7 +1,8 @@
 #/usr/bin/env python
 
-from pygrap import (NodesMap, graph_alloc, graph_t, node_alloc, node_copy,
-                    node_link, node_list_add, node_list_find, update_children_fathers_number)
+from pygrap import (NodesMap, graph_alloc, graph_free, graph_t, node_alloc,
+                    node_copy, node_link, node_list_add, node_list_find,
+                    update_children_fathers_number)
 
 from idaapi import get_root_filename, is_noret
 from idagrap.config.Instruction import *
