@@ -101,6 +101,28 @@ class Match:
 
                     print "%s" % node.info.inst_str
 
+    def get_start_address(self):
+        """Get the start address of this Match.
+
+        Returns:
+            (ea_t): The return value is the start address of this Match.
+        """
+        node = self._match.values()[0][0]
+
+        return node.info.address
+
+    def get_num_insts(self):
+        """Get the number of instructions of this Match.
+
+        Returns:
+            (int): The return value is the number of instructions in the Match.
+        """
+        size = 0
+        for node_list in self._match.values():
+            size += len(node_list)
+
+        return size
+
     def get_rate(self, patterns):
         """Calculate the rate.
 
