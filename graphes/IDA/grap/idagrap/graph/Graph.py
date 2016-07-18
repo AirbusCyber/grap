@@ -52,6 +52,15 @@ class CFG:
         print "%s graph has %d nodes" % (get_root_filename(),
                                          self.graph.nodes.size)
 
+    def clear_graph(self):
+        """Clear the graph."""
+        # Remove the old graph.
+        if self.graph:
+            graph_free(self.graph, True)
+
+        # Allocate a new graph
+        self.graph = graph_alloc(0)
+
     def dis(self, ea, ifrom=None):
         """Disassemble the current address and fill the nodes list.
 
