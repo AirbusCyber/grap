@@ -29,6 +29,7 @@
 
 # helpers
 import QtShim as QtShim
+from idagrap.core.CryptoIdentifier import CryptoIdentifier
 
 
 class ClassCollection():
@@ -81,3 +82,6 @@ class ClassCollection():
         self.QStyleOptionSlider = self.QtShim.get_QStyleOptionSlider()
         self.QTabWidget = self.QtShim.get_QTabWidget()
         self.DescendingOrder = self.QtShim.get_DescendingOrder()
+
+        # IDAgrap
+        self.CryptoIdentifier = CryptoIdentifier()
