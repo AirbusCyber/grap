@@ -180,7 +180,7 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     else if (strcmp(id, "symb") == 0) {
       hasSymb = 1;
       
-      std::cerr << "symb option deprecated\n";
+      std::cerr << "ERR: symb option deprecated\n";
     }
     else if (strcmp(id, "inst") == 0 || strcmp(id, "instruction") == 0 || strcmp(id, "csymb") == 0) {
       hasCSymb = 1;
@@ -226,9 +226,11 @@ node_t *updateNode(OptionList * ol, node_t * n) {
       n->info->minRepeat = (vsize_t) atoi(v);
     }
     else if (strcmp(id, "maxrepeat") == 0) {
-      hasMaxRepeat = 1;
-      n->info->has_maxRepeat = true;
-      n->info->maxRepeat = (vsize_t) atoi(v);
+      if ((strcmp(v, "none") != 0)){
+        hasMaxRepeat = 1;
+        n->info->has_maxRepeat = true;
+        n->info->maxRepeat = (vsize_t) atoi(v);
+      }
     }
     else if (strcmp(id, "lazyrepeat") == 0){
       if (strcmp(v, "true") == 0){
