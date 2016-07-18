@@ -20,7 +20,7 @@ if __name__ == '__main__':
     parser.add_argument('-q', '--quiet', dest='quiet', action="store_true", help='Quiet output')
     args = parser.parse_args()
 
-    parsed_binary = False
+    printed_something = False
 
     if args.pattern is None or args.test is None:
         sys.exit(0)
@@ -47,6 +47,7 @@ if __name__ == '__main__':
             if os.path.exists(dotpath) and not args.force:
                 if args.verbose:
                     print("Skipping generation of existing " + dotpath)
+                    printed_something = True
                 dot_test_files.append(dotpath)
             else:
                 if data[0:2] == "MZ":
@@ -59,12 +60,13 @@ if __name__ == '__main__':
                     try:
                         iat_dict = pe.get_iat_api()
                         disass = PEDisassembler(arch=arch, mode=mode)
-                        insts = disass.dis(data=data, offset=oep, iat_api=iat_dict, pe=pe)
+                        insts = disass.dis(data=data, offset=oep, iat_api=iat_dict, pe=pe, verbose=args.verbose)
 
                         dot = disass.export_to_dot(insts=insts, oep_offset=oep, displayable=args.readable)
                         open(dotpath, "w").write(dot)
                     except:
                         print("Error while disassembling " + test_path)
+                        printed_something = True
                         continue
 
                     dot_test_files.append(dotpath)
@@ -96,7 +98,7 @@ if __name__ == '__main__':
                         sys.exit(0)
 
                     disass = ELFDisassembler(arch=arch, mode=mode)
-                    insts = disass.dis(data=data, offset=oep_offset, iat_api={}, elf=elf)
+                    insts = disass.dis(data=data, offset=oep_offset, iat_api={}, elf=elf, verbose=args.verbose)
 
                     dot = disass.export_to_dot(insts=insts, oep_offset=oep_offset, displayable=args.readable)
                     open(dotpath, "w").write(dot)
@@ -106,9 +108,10 @@ if __name__ == '__main__':
                 else:
                     if args.verbose:
                         print("Test file " + test_path + " does not seem to be a PE/ELF or dot file.")
+                        printed_something = True
 
     if args.pattern is not None and len(dot_test_files) >= 1:
-        if parsed_binary:
+        if printed_something or args.verbose:
             print("")
         command = ["/usr/local/bin/grap-match"]
 
@@ -126,7 +129,7 @@ if __name__ == '__main__':
         for test_path in dot_test_files:
             command.append(test_path)
 
-        if args.verbose:
+        if args.verbose or args.debug:
             print(" ".join(command))
 
         popen = subprocess.Popen(tuple(command))
