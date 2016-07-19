@@ -1,0 +1,13 @@
+digraph G{
+A [label="A: *", shape="box", cond=true, getid="A"]
+B [label="B: (^xor)*", shape="box", cond="not opcode is xor", repeat="*", getid="B"]
+C [label="C: (xor)+", shape="box", cond="opcode is xor", repeat="+", getid="C"]
+D [label="D: (*)*", shape="box", cond="true", repeat="*", getid="D"]
+E [label="E: *", shape="box", cond=true, getid="E"]
+
+A -> B
+B -> C
+C -> D
+D -> E
+D -> B
+}
