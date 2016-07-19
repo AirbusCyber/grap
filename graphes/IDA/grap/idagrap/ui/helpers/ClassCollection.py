@@ -29,7 +29,7 @@
 
 # helpers
 import QtShim as QtShim
-from idagrap.core.CryptoIdentifier import CryptoIdentifier
+from idagrap.core.CryptoIdentifier import CryptoColor, CryptoIdentifier
 
 
 class ClassCollection():
@@ -85,3 +85,4 @@ class ClassCollection():
 
         # IDAgrap
         self.CryptoIdentifier = CryptoIdentifier()
+        self.CryptoColor = CryptoColor()
