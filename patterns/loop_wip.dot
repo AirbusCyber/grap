@@ -1,0 +1,7 @@
+digraph G{
+A [label="A: (*)+", shape="box", cond=true, minrepeat=1, maxrepeat=none, getid="A"]
+B [label="B: *", shape="box", cond=true, getid="B"]
+
+A -> B
+A -> A
+}
