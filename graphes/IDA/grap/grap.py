@@ -10,9 +10,16 @@ import idaapi
 from idagrap.analysis.Analysis import PatternsAnalysis
 from idagrap.graph.Graph import CFG
 from idagrap.patterns.Modules import MODULES
+from idagrap.ui.helpers import QtShim
 from idagrap.ui.IDAgrapForm import IDAgrapForm
 from idc import Wait
 
+# Initialization of useful objects for PySide/PyQt
+QtGui = QtShim.get_QtGui()
+QtCore = QtShim.get_QtCore()
+QtWidgets = QtShim.get_QtWidgets()
+
+# Recursion limit
 sys.setrecursionlimit(400000000)
 
 def PLUGIN_ENTRY():
