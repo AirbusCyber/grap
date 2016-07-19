@@ -218,9 +218,9 @@ class CryptoColor:
         Returns:
             (int): The return value is an rgb color.
         """
-        r = int(rgb[0] * 256) << 16
-        g = int(rgb[1] * 256) << 8
-        b = int(rgb[2] * 256)
+        r = int(rgb[0] * 255) << 16
+        g = int(rgb[1] * 255) << 8
+        b = int(rgb[2] * 255)
 
         return (r | g | b)
 
