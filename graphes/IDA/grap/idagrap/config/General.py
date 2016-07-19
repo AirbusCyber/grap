@@ -1,13 +1,17 @@
 #!/usr/bin/env python
 
-import os
+from os.path import abspath, dirname
 
 # Project root
-ROOT = os.getcwd() + "/../"
+ROOT = dirname(abspath(__file__))
+
 
 # Config
 config = {
-    "patterns": ROOT + "patterns"
+    "patterns_path": ROOT + "/../patterns/",
+    "icons_path": ROOT + "/../ui/icons/",
+    "version": "1.0.0",
+    "name": "IDAgrap"
 }
 
 # Patterns Definitions

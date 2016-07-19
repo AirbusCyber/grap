@@ -1,7 +1,8 @@
 #/usr/bin/env python
 
-from pygrap import (NodesMap, graph_alloc, graph_t, node_alloc, node_copy,
-                    node_link, node_list_add, node_list_find, update_children_fathers_number)
+from pygrap import (NodesMap, graph_alloc, graph_free, graph_t, node_alloc,
+                    node_copy, node_link, node_list_add, node_list_find,
+                    update_children_fathers_number)
 
 from idaapi import get_root_filename, is_noret
 from idagrap.config.Instruction import *
@@ -50,6 +51,15 @@ class CFG:
         # Information
         print "%s graph has %d nodes" % (get_root_filename(),
                                          self.graph.nodes.size)
+
+    def clear_graph(self):
+        """Clear the graph."""
+        # Remove the old graph.
+        if self.graph:
+            graph_free(self.graph, True)
+
+        # Allocate a new graph
+        self.graph = graph_alloc(0)
 
     def dis(self, ea, ifrom=None):
         """Disassemble the current address and fill the nodes list.

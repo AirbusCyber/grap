@@ -12,6 +12,7 @@ class PatternsAnalysis:
 
     Attributes:
         _patterns (Patterns): Patterns to analyze.
+        _algo (Module): Module of the patterns.
         _found_patterns (Match list): List of found patterns that respect our
                                       rules.
                                      Structure : [
@@ -25,12 +26,14 @@ class PatternsAnalysis:
                                      ]
     Arguments:
         patterns (Patterns): Patterns to analyze.
+        algo (Module): Module of the patterns.
     """
 
-    def __init__(self, patterns):
+    def __init__(self, patterns, algo):
         """Initialization of the class."""
         # Init
         self._patterns = patterns
+        self._algo = algo
         self._found_patterns = []
 
         self.search_relationships()
@@ -118,3 +121,15 @@ class PatternsAnalysis:
                 for match in match_dicts.itervalues():
                     print "------------------------"
                     match.print_parcours()
+
+    def get_found_patterns(self):
+        """Found patterns getter."""
+        return self._found_patterns
+
+    def get_algo(self):
+        """Algorithm getter."""
+        return self._algo
+
+    def get_patterns(self):
+        """Patterns getter."""
+        return self._patterns
