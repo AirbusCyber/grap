@@ -344,7 +344,7 @@ bool MotParcours::matchesCF(node_t *n)
 std::pair <bool, node_t*> Parcours::parcoursUnmatchedNode(bool checkLabels, bool returnFound, MotParcours* m, node_t* node, node_t* current_node, set < node_t * >* matched_nodes, std::pair < node_t *, node_t * >*numbers, vsize_t max_numbered, std::map < string, std::list < node_t * >*>*found_nodes){  
     // cond_m: conditions match and there is no node already numbered m->i
   bool cond_m = m->matchesSymbol(node, checkLabels)
-                and m->matchesCF(node) and max_numbered < m->i;
+                and m->matchesCF(node) and (m->type == TYPE_M1 or max_numbered < m->i);
 
   // cond_lazy: lazyrepeat is on, minrepeat is 0 and we don't check
   // labels ; this is a corner case where 0 nodes should always be
@@ -456,15 +456,17 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
 
 //   Match first word (mot): it has to number a matching first node
 //   TODO: handle case where first matched node should be repeated
-  if (this->size >= 1 and this->mots[0]->type == TYPE_M1 and this->mots[0]->matchesSymbol(current_node, checkLabels) and(this->mots[0]->matchesCF(current_node))) {
-    numbers[max_numbered] = std::pair < node_t *, node_t * >(current_node, NULL);
-    max_numbered++;
-    matched_nodes->insert(current_node);
-
-    if (returnFound and this->mots[0]->info->get) {
-      std::list < node_t * >*list_nodes = new std::list < node_t * >();
-      list_nodes->push_back(current_node);
-      found_nodes->insert(std::pair < string, std::list < node_t * >*>(this->mots[0]->info->getid, list_nodes));
+  if (this->size >= 1 and this->mots[0]->type == TYPE_M1) {
+    std::pair <bool, node_t*> added = this->parcoursUnmatchedNode(checkLabels, returnFound, this->mots[0], current_node, current_node, matched_nodes, numbers, max_numbered, found_nodes);
+    
+    if (added.first){
+      max_numbered++; 
+      current_node = added.second;
+    }
+    else if (this->mots[0]->info->minRepeat != 0){
+      free(numbers);
+      delete matched_nodes;
+      return RetourParcoursDepuisSommet(false, found_nodes);
     }
   }
   else {
