@@ -59,6 +59,7 @@ public:
   typedef std::pair < bool, std::map < string, std::list < node_t * >*>*>RetourParcoursDepuisSommet;
   RetourParcoursDepuisSommet parcourirDepuisSommet(graph_t *, vsize_t root, vsize_t W, bool checkLabels, bool printFound);
   typedef std::pair < vsize_t, std::set < std::map < string, std::list < node_t * >*>*>*>RetourParcours;
+  std::pair <bool, node_t*> parcoursUnmatchedNode(bool checkLabels, bool returnFound, MotParcours* m, node_t* node, node_t* current_node, set < node_t * >* matched_nodes, std::pair < node_t *, node_t * >*numbers, vsize_t max_numbered, std::map < string, std::list < node_t * >*>*found_nodes);
   RetourParcours parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool countAllMatches, bool getId);
   bool equals(Parcours *, bool checkLabels);
   void freeParcours(bool free_mots);
