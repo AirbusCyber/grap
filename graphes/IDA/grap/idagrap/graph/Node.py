@@ -37,6 +37,24 @@ class Node(node_t):
         self.info = NodeInfo()
         self.info.inst_str = GetDisasm(ea)
 
+        # Parse opcode and arguments
+        split_space = self.info.inst_str.split(" ")
+        if len(split_space) >= 1:
+            self.info.opcode = split_space[0]
+            
+        if len(split_space) >= 2:
+            rest = " ".join([s for s in split_space[1:]])
+            split_comma = rest.split(",")
+            
+            self.info.nargs = min(len(split_comma), 3)
+            
+            if len(split_comma) >= 1:
+                self.info.arg1 = split_comma[0].strip()
+            if len(split_comma) >= 2:
+                self.info.arg2 = split_comma[1].strip()
+            if len(split_comma) >= 3:
+                self.info.arg3 = split_comma[2].strip()
+
         if ea == BeginEA():
             self.info.is_root = True
         else:

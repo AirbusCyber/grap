@@ -24,6 +24,7 @@
 %include "std_vector.i"
 %include "std_list.i"
 %include "carrays.i"
+%include "stdint.i"
 
 
 %include "graphIO.hpp"
