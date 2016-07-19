@@ -9,6 +9,7 @@ from pygrap import graph_free
 import idagrap.ui.helpers.QtShim as QtShim
 import idc
 from idagrap.config.General import config
+from idagrap.patterns.Modules import MODULES
 
 QMainWindow = QtShim.get_QMainWindow()
 
@@ -78,8 +79,12 @@ class CryptoIdentificationWidget(QMainWindow):
         Creates the toolbar, containing buttons to control the widget.
         """
         self._createScanGraphAction()
+        self._createColoringAction()
+
         self.toolbar = self.addToolBar('Crypto Identification Toolbar')
+
         self.toolbar.addAction(self.scanGraphAction)
+        self.toolbar.addAction(self.coloringAction)
 
     def _createScanGraphAction(self):
         """
@@ -94,8 +99,65 @@ class CryptoIdentificationWidget(QMainWindow):
 
         self.scanGraphAction.triggered.connect(self._onScanGraphBouttonClickedThread)
 
-    def _onScanGraphBouttonClickedThread(self):
+    def _createColoringAction(self):
+        """
+        Create an action for the coloring button of the toolbar and connect it.
+        """
+        # Action
+        self.coloringAction = self.cc.QAction(
+            self.cc.QIcon(config['icons_path'] + "coloring.png"),
+            "Coloring matches",
+            self
+        )
 
+        self.coloringAction.setCheckable(True)
+        self.coloringAction.toggled.connect(self._coloringBouttonToggled)
+
+    def _coloringBouttonToggled(self, boolean):
+        """Handle the different states of the coloring button.
+
+        Arguments:
+            boolean (bool): State of the button.
+        """
+        if boolean:
+            self._activateColoringBoutton()
+        else:
+            self._deactivateColoringBoutton()
+
+    def _activateColoringBoutton(self):
+        """Action to execute when the coloring button is activated."""
+        # Colors generation
+        for ana in self.cc.CryptoIdentifier.get_analyzed_patterns():
+            found_patterns = ana.get_found_patterns()
+            pcolors = self.cc.CryptoColor.get_patterns_colors()
+
+            # If there is 1 or more matches
+            if len(found_patterns) > 0:
+                for match_dict_list in found_patterns:
+                    for pattern_id, match_dicts in match_dict_list.iteritems():
+
+                        if pattern_id not in pcolors:
+                            self.cc.CryptoColor.add_pattern(pattern_id)
+
+                        for match in match_dicts.itervalues():
+                            self.cc.CryptoColor.add_match(match)
+
+        # Highlight matches
+        self.cc.CryptoColor.highlight_matches()
+
+        # Update the UI
+        self.populateSignatureTree()
+
+    def _deactivateColoringBoutton(self):
+        """Action to execute when the coloring button is deactivated."""
+        # Remove all patterns colors
+        self.cc.CryptoColor.clear()
+
+        # Update the UI
+        self.populateSignatureTree()
+
+    def _onScanGraphBouttonClickedThread(self):
+        """Execute _onScanGraphBouttonClicked in a thread."""
         thread = threading.Thread(target=self._onScanGraphBouttonClicked)
         thread.start()
 
@@ -147,6 +209,7 @@ class CryptoIdentificationWidget(QMainWindow):
             found_patterns = ana.get_found_patterns()
             algo = ana.get_algo()
             patterns = ana.get_patterns()
+            colors = self.cc.CryptoColor.get_patterns_colors()
 
             # If there is 1 or more matches
             if len(found_patterns) > 0:
@@ -170,6 +233,9 @@ class CryptoIdentificationWidget(QMainWindow):
                             len(match_dicts.values())
                         ))
 
+                        if pattern_id in colors:
+                            pattern_info.setForeground(0, self.cc.QBrush(self.cc.QColor(colors[pattern_id])))
+
                         for match in match_dicts.itervalues():
                             match_info = self.cc.QTreeWidgetItem(pattern_info)
                             match_info.setText(0, "0x%x (%d instructions)" % (
@@ -177,9 +243,10 @@ class CryptoIdentificationWidget(QMainWindow):
                                 match.get_num_insts()
                             ))
 
+
                             matches_info.setText(0, "%s" % idc.GetFunctionName(match.get_start_address()))
 
-                            # Add the start address for user friendly jump
+                            # Add the start address of the match
                             self.qtreewidgetitems_to_addresses[match_info] = match.get_start_address()
 
         self.signature_tree.setSortingEnabled(True)
