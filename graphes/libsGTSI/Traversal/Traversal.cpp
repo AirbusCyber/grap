@@ -20,15 +20,19 @@ string MotParcours::toString() {
     s += "-";
     if (this->alpha_is_R) {
       s += "R> ";
+      s += std::to_string((int) this->i);
     }
     else {
       s += std::to_string((int) this->k);
       s += "> ";
     }
-    
-    s += std::to_string((int) this->i);
+
     if (this->has_symbol){
+//       s += "(";
+      s += std::to_string((int) this->i);
       s += ":";
+//       s += this->info->inst_str;
+//       s += ")";
     }
   }
   else {
@@ -354,9 +358,7 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
   std::map < string, std::list < node_t * >*>*found_nodes = new std::map < string, std::list < node_t * >*>();
   
   // array of pairs: each numbered node has a first matching node and may have (when repeat) a (different) last matching node
-  RELEASE_ASSERT(W != 0);
   std::pair < node_t *, node_t * >*numbers = (std::pair < node_t *, node_t * >*)calloc_or_quit(W, sizeof(std::pair < node_t *, node_t * >));
-//   printf("numbers: %p\n", (void*)numbers);
   // nodes will be numbered 1, 2, 3.. ; max_numbered keeps track of the latest numbered given
   vsize_t max_numbered = 0;
 
@@ -378,11 +380,9 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
   }
 
   for (size_t w = 1; w < this->size; w++) {
-    std::cout << std::hex << current_node->info->address << " " << current_node->info->inst_str << std::endl;
     MotParcours *m = this->mots[w];
-    std::cout << w << " " << m->toString() << "\n" << std::endl;
     if (m->alpha_is_R) {
-      if (m->i <= max_numbered) {
+      if (max_numbered >= m->i) {
         std::pair < node_t *, node_t * >p = numbers[m->i - 1];
         if (p.second == NULL) {
           current_node = p.first;
@@ -401,18 +401,9 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
       // Case: m is not of return type but defines an edge to a child number (m->k)
       if (m->k < current_node->children_nb) {
         node_t *child_node = current_node->children[m->k];
-        std::cout << "child :" << std::hex << child_node->info->address << " " << child_node->info->inst_str << std::endl;
         set < node_t * >::iterator it = numbered.find(child_node);
         if (it == numbered.end()) {
           // Case: child_node is not yet numbered
-          
-          if (m->i <= max_numbered){
-            std::cout << "a:" << w << " " << m->i << " " << W << std::endl;
-            
-            // Case: child_node should be numbered
-            free(numbers);
-            return RetourParcoursDepuisSommet(false, found_nodes);
-          }
           
           // cond_m: conditions match and there is no node already numbered m->i
           bool cond_m = m->matchesSymbol(child_node, checkLabels)
@@ -495,11 +486,9 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
             // but it is not really matched
             // Thus it can still be numbered and referenced by another
             // MotParcours
-            std::cout << max_numbered << " " << W << " " << w << std::endl;
             numbers[max_numbered] =
                 std::pair<node_t *, node_t *>(child_node, NULL);
             max_numbered++;
-            numbered.insert(child_node);
             
             continue; 
           }
@@ -549,8 +538,6 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
   }
 
   // The whole Parcours has successfully been traversed within the test graph
-  printf("numbers2: %p\n", (void*) numbers);
-  numbers[0].first = graph->root;
   free(numbers);
   return RetourParcoursDepuisSommet(true, found_nodes);
 }
