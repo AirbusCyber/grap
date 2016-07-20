@@ -224,6 +224,21 @@ class CryptoColor:
 
         return (r | g | b)
 
+    def rgb_to_bgr(self, rgb):
+        """Convert a RGB -> BGR.
+
+        Arguments:
+            rgb (int): RGB color.
+
+        Returns:
+            (int): The return value is an BGR color.
+        """
+        r = (rgb & 0xFF0000) >> 16
+        g = (rgb & 0xFF00)
+        b = (rgb & 0xFF) << 16
+
+        return (b | g | r)
+
     def get_patterns_colors(self):
         """patterns_colors getter.
 
@@ -244,4 +259,4 @@ class CryptoColor:
         """Highlight all the matches."""
         for insts in self._matches_colors.itervalues():
             for ea, color in insts.iteritems():
-                SetColor(ea, CIC_ITEM, color['new'])
+                SetColor(ea, CIC_ITEM, self.rgb_to_bgr(color['new']))
