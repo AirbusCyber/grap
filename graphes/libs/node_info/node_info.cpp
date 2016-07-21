@@ -514,12 +514,16 @@ bool CondNode::evaluate(NodeInfo* pattern, NodeInfo* test)
   vsize_t nc = this->children->size();
   
   if (nc == 0){
+   void* pattern_comparison_field;
+    
    if (this->has_fixed_field){
-    return this->comparison_fun(this->fixed_field, &((*test).*(this->test_field)));
+     pattern_comparison_field = this->fixed_field;
    }
    else{
-     return this->comparison_fun(&((*pattern).*(this->pattern_field)), &((*test).*(this->test_field)));
+     pattern_comparison_field = &((*pattern).*(this->pattern_field));
    }
+
+   return this->comparison_fun(pattern_comparison_field, &((*test).*(this->test_field)));
   }
   else if (nc == 1){
    return this->unary_fun((*(this->children->front()))->evaluate(pattern, test)); 

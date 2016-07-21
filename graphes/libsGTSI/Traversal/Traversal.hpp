@@ -38,6 +38,8 @@ public:
   string toString();
   bool matchesSymbol(node_t * n, bool);
   bool matchesCF(node_t * n);
+  bool matchesC(node_t * n);
+  bool matchesF(node_t * n);
   bool equals(MotParcours * m, bool checkLabels);
   bool sameSymbol(MotParcours * m, bool);
   bool sameRepeatAndCF(MotParcours * m);
@@ -90,9 +92,10 @@ public:
   string toString();
   vsize_t parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool countAllMatches);
   typedef std::tuple < bool, vsize_t > RetourParcourir;
-  list < vsize_t > parcourirDepuisSommetRec(bool racine, graph_t * gr, node_t * r, vsize_t W, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, std::set < node_t * >numerotes, bool checkLabels);
+  list < vsize_t > parcourirDepuisSommetRec(bool racine, graph_t * gr, node_t * r, vsize_t W, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, std::set < node_t * > matched_nodes, bool checkLabels);
   list < vsize_t > parcourirDepuisSommet(graph_t *, vsize_t r, vsize_t W, bool checkLabels);
   typedef std::tuple < bool, node_t *, std::pair < node_t *, node_t * >*, vsize_t, set < node_t * >>RetourEtape;
+  std::tuple <bool, node_t*, set < node_t * >> etapeUnmatchedNode(bool checkLabels, MotParcours* m, node_t* node, node_t* current_node, set < node_t * > matched_nodes, std::pair < node_t *, node_t * >*numbers, vsize_t max_numbered);
   RetourEtape etape(MotParcours * m, node_t *, graph_t *, std::pair < node_t *, node_t * >*, vsize_t, set < node_t * >, bool);
   vsize_t countLeaves();
   vsize_t countFinal();

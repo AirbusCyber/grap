@@ -1,7 +1,7 @@
 digraph G{
 A [label="A: *", shape="box", cond=true, getid="A"]
-B [label="B: (^xor)*", shape="box", cond="not opcode is xor", repeat="*", getid="B"]
-C [label="C: (xor)+", shape="box", cond="opcode is xor", repeat="+", getid="C"]
+B [label="B: (^xor)*", shape="box", cond=true, repeat="*", lazyrepeat=true, maxchildren=1, getid="B"]
+C [label="C: (xor)+", shape="box", cond="opcode is xor", repeat="+", maxchildren=1, getid="C"]
 D [label="D: (*)*", shape="box", cond="true", repeat="*", getid="D"]
 E [label="E: *", shape="box", cond=true, getid="E"]
 
