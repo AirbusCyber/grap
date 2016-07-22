@@ -5,10 +5,14 @@ from pandape.tools.disassembler import *
 import subprocess
 import os
 
+GRAP_VERSION="1.0.0"
+
 if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser(description='grap: look for pattern in a PE/ELF binary or a .dot graph file')
+    parser.add_argument('--version', action='version', version=GRAP_VERSION)
+
     parser.add_argument(dest='pattern', help='Pattern file (.dot) to look for')
     parser.add_argument(dest='test', nargs="+", help='Test file(s) to analyse')
 
@@ -21,6 +25,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     printed_something = False
+
+    if args.version:
+        print(GRAP_VERSION)
+        sys.exit(0)
 
     if args.pattern is None or args.test is None:
         sys.exit(0)
