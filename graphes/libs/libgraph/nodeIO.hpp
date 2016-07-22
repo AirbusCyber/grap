@@ -1,5 +1,5 @@
-#ifndef MK_NODEIO_H
-#define MK_NODEIO_H
+#ifndef NODEIO_H
+#define NODEIO_H
 
 /*!
  @file nodeIO.h
@@ -8,17 +8,6 @@
 
 #include <stdio.h>
 #include "node.hpp"
-
-// char *symbToString(vsize_t symb);
-// char *csymbtypeToString(enum label_t cst);
-
-/*!
- @brief Write an 8 byte id from a pointer, independent of machine word size.
- @param ptr Value to write (32 or 64 bits depending on the system.
- @param fp Destination file.
- @return Number of written bytes, 8.
- */
-// size_t pointer_id_to_file(const void * ptr, FILE* fp);
 
 /*!
  @brief Print a node in format .dot.
@@ -40,4 +29,4 @@ size_t node_edges_to_dot(const node_t* node, FILE* fp);
 int printVK(FILE * fp, char *key, char *value, char virg);
 int printVKint(FILE * fp, char *key, int value, char virg);
 
-#endif /* MK_NODEIO_H */
+#endif

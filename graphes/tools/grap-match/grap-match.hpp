@@ -1,5 +1,5 @@
-#ifndef GTSIGRAP_H
-#define GTSIGRAP_H
+#ifndef GRAP_MATCH_HPP
+#define GRAP_MATCH_HPP
 
 #include "Traversal.hpp"
 #include "graphParser.hpp"

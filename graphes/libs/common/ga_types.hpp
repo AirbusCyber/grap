@@ -1,5 +1,5 @@
-#ifndef MK_GA_TYPES_HPP
-#define MK_GA_TYPES_HPP
+#ifndef GA_TYPES_HPP
+#define GA_TYPES_HPP
 
 /*!
  @file ga_types.hpp

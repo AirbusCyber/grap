@@ -1,5 +1,3 @@
-
-
 /*
  * Expression.h
  * Definition of the structure used to build the syntax tree.
@@ -9,7 +7,7 @@
 
 #include "graph.hpp"
 #include "graphIO.hpp"
-// #include <cstddef>
+#include "node_info.hpp"
 #include <stddef.h>
 #include <string.h>
 
@@ -17,10 +15,6 @@
 #include <stdio.h>
 #include <iostream>
 
-#include "node_info.hpp"
-
-// graph_t* graph_alloc(vsize_t max_size);
-// void graph_free(graph_t* graph);
 
 typedef struct Couple
 {

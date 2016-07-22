@@ -930,9 +930,7 @@ void CondNodeParser::advance(){
 }
 
 bool CondNodeParser::accept(std::string expected_type){
-  if (this->has_next_token and this->next_token.type == expected_type){
-//     std::cout << "accepted " << this->next_token.type << " (" << this->next_token.value << ")" << std::endl;
-    
+  if (this->has_next_token and this->next_token.type == expected_type){    
     this->advance();
     return true;
   }

@@ -9,8 +9,6 @@
 #include "Parser.hpp"
 #include "Lexer.hpp"
 
-// #include "graph2.h"
-
 #define YYINITDEPTH 200000
 #define YYMAXDEPTH 1000000
 
@@ -62,7 +60,6 @@ typedef void* yyscan_t;
 %token TOKEN_ARROW
 %token <value> TOKEN_NUMBER
 
-/* %type <graph_B> graph */
 %type <Sgraph> graph
 %type <Sgraph> node_list
 %type <Snode> node

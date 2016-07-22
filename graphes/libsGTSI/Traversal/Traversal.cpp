@@ -11,10 +11,7 @@ string MotParcours::toString() {
   string s = "";
 
   if (this->type == TYPE_M1) {
-//     s += "(";
     s += "1:";
-//     s += this->info->inst_str;
-//     s += ")";
   }
   else if (this->type == TYPE_M2) {
     s += "-";
@@ -832,7 +829,6 @@ vsize_t ParcoursNode::parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool 
       vsize_t _id = *it;
       if (get < 1 > (leaves.insert(_id)) or countAllMatches) {
         node_t *r = node_list_item(&gr->nodes, n);
-//         printf("possible from node: %s ; leaf: 0x%x\n", r->info->inst_str.c_str(), (int) _id);
         count++;
       }
     }

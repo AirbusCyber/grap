@@ -50,8 +50,6 @@ vsize_t node_list_size(const node_list_t * list) {
 node_t* node_list_append(node_list_t * list, vsize_t node_id) {
   node_t *new_node;
 
-//   MY_ASSERT_MSG(list->count < list->size, "Too small node_list");
-
   new_node = list->storage[list->count];
   new_node->node_id = node_id;
   new_node->list_id = list->count;
