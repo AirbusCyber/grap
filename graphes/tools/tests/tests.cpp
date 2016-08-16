@@ -5,7 +5,7 @@
 
 void printDescription()
 {
-  std::cout << "Usage: ./tests -help\n";
+  std::cout << "Usage: ./tests --help\n";
   std::cout << "               -h   : print this message\n";
   std::cout << "       ./tests [dir]: processes tests in target directory "
                "(default: tests_graphs or ../tests_graphs)\n\n";
@@ -76,8 +76,11 @@ void printDescription()
                "(cond = \"inst regex '.*(x)?or.*|.*[cmp]+.*'\")\n";
   std::cout << "Test 24: [manual] arg1, arg2 test (automatically parsed)\n";
   std::cout << "Test 25: [manual] nargs, arg1, arg2 test (explicitly set)\n";
-  std::cout << "Test 25: [first run] looking for xor loops in Backspace sample "
+  std::cout << "Test 26: [first run] looking for xor loops in Backspace sample "
                "(md5=4ee00c46da143ba70f7e6270960823be)\n";
+  std::cout << "Test 27: [reference to 26] looking for xor loops in Backspace "
+                "sample using a simplified pattern with repetion on first node"
+                "\n";
 }
 
 #ifdef _WIN32
