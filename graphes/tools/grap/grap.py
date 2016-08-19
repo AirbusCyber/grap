@@ -24,11 +24,8 @@ if __name__ == '__main__':
     parser.add_argument('-q', '--quiet', dest='quiet', action="store_true", help='Quiet output')
     args = parser.parse_args()
 
-    printed_something = False
 
-    if args.version:
-        print(GRAP_VERSION)
-        sys.exit(0)
+    printed_something = False
 
     if args.pattern is None or args.test is None:
         sys.exit(0)
