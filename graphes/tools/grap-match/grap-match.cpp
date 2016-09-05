@@ -12,6 +12,8 @@ void printUsage() {
   printf("        -v or --verbose\n");
   printf("        -d or --debug\n");
   printf("        -q or --quiet\n");
+  printf("        -m or --print-all-matches         : always print matched nodes (overrides getid fields)\n");
+  printf("        -nm or --print-no-matches         : never print matched nodes (overrides getid fields)\n");
   printf("        -ncl or -ncs or --no-check-labels : do not check the symbols (labels) of sites\n");
 }
 
@@ -33,6 +35,8 @@ int main(int argc, char *argv[]) {
   bool optionVerbose = false;
   bool optionDebug = false;
   bool optionQuiet = false;
+  bool printAllMatches = false;
+  bool printNoMatches = false;
 
   // Parsing options
   int a;
@@ -49,6 +53,17 @@ int main(int argc, char *argv[]) {
     }
     else if (strcmp(argv[a], "-d") == 0 || strcmp(argv[a], "--debug") == 0) {
       optionDebug = true;
+    }
+    else if (strcmp(argv[a], "-ncl") == 0 || strcmp(argv[a], "-ncs") == 0 || strcmp(argv[a], "--no-check-labels") == 0) {
+      checkLabels = false;
+    }
+    else if (strcmp(argv[a], "-m") == 0 || strcmp(argv[a], "--print-all-matches") == 0) {
+      if (not printNoMatches) printAllMatches = true;
+      else std::cerr << "WARNING: --print-all-matches conflicts with --print-no-matches, ignored." << std::endl;
+    }
+    else if (strcmp(argv[a], "-nm") == 0 || strcmp(argv[a], "--print-no-matches") == 0) {
+      if (not printAllMatches) printNoMatches = true;
+      else std::cerr << "WARNING: --print-no-matches conflicts with --print-all-matches, ignored." << std::endl;
     }
     else if (strcmp(argv[a], "-ncl") == 0 || strcmp(argv[a], "-ncs") == 0 || strcmp(argv[a], "--no-check-labels") == 0) {
       checkLabels = false;
@@ -116,14 +131,14 @@ int main(int argc, char *argv[]) {
     }
     
     string pathTest = (std::string) *test_iterator;
-    matchPatternToTest(optionVerbose, optionQuiet, checkLabels, n_pattern, pathPattern, pattern_graph, pattern_parcours, pathTest);
+    matchPatternToTest(optionVerbose, optionQuiet, checkLabels, n_pattern, pathPattern, pattern_graph, pattern_parcours, pathTest, printAllMatches, printNoMatches);
   }
   
   pattern_parcours->freeParcours(true);
   graph_free(pattern_graph, true);
 }
 
-void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, vsize_t n_pattern, string pathPattern, graph_t* pattern_graph, Parcours* pattern_parcours, string pathTest){
+void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, vsize_t n_pattern, string pathPattern, graph_t* pattern_graph, Parcours* pattern_parcours, string pathTest, bool printNoMatches, bool printAllMatches){
   if (optionVerbose){
     cout << "Parsing test file." << endl; 
   }
@@ -142,7 +157,7 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, 
   }
   
   // Find possible traversals of parcours in test graph
-  Parcours::RetourParcours rt = pattern_parcours->parcourir(test_graph, pattern_graph->nodes.size, checkLabels, true, not optionQuiet);
+  Parcours::RetourParcours rt = pattern_parcours->parcourir(test_graph, pattern_graph->nodes.size, checkLabels, true, (not optionQuiet and not printNoMatches) or printAllMatches, printAllMatches);
   vsize_t count = rt.first;
 
   if (not optionQuiet) {

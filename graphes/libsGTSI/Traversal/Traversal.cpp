@@ -350,7 +350,7 @@ bool MotParcours::matchesF(node_t *n)
   return this->info->minFathersNumber <= n->fathers_nb and((not this->info->has_maxFathersNumber) or n->fathers_nb <= this->info->maxFathersNumber);
 }
 
-std::pair <bool, node_t*> Parcours::parcoursUnmatchedNode(bool checkLabels, bool returnFound, MotParcours* m, node_t* node, node_t* current_node, set < node_t * >* matched_nodes, std::pair < node_t *, node_t * >*numbers, vsize_t max_numbered, std::map < string, std::list < node_t * >*>*found_nodes){    
+std::pair <bool, node_t*> Parcours::parcoursUnmatchedNode(bool checkLabels, bool returnFound, MotParcours* m, node_t* node, node_t* current_node, set < node_t * >* matched_nodes, std::pair < node_t *, node_t * >*numbers, vsize_t max_numbered, std::map < string, std::list < node_t * >*>*found_nodes, bool printAllMatches){    
     // cond_m: conditions match and there is no node already numbered m->i
   bool cond_m = m->matchesSymbol(node, checkLabels)
                 and m->matchesF(node) and (m->type == TYPE_M1 or max_numbered < m->i);
@@ -416,7 +416,15 @@ std::pair <bool, node_t*> Parcours::parcoursUnmatchedNode(bool checkLabels, bool
       numbers[max_numbered - 1].second = current_node;
     }
 
-    if (returnFound and m->info->get) {
+    if (returnFound and (m->info->get or printAllMatches)) {
+      string str_gotten;
+      
+      if (m->info->get){
+        str_gotten = m->info->getid;
+      }
+      else {
+        str_gotten = m->info->inst_str; 
+      }
       found_nodes->insert(std::pair < string, std::list < node_t * >*>(m->info->getid, list_nodes));
     }
     
@@ -445,7 +453,7 @@ std::pair <bool, node_t*> Parcours::parcoursUnmatchedNode(bool checkLabels, bool
   return std::pair<bool, node_t*>(true, current_node);
 }
 
-Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * graph, vsize_t vroot, vsize_t W, bool checkLabels, bool returnFound) {
+Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * graph, vsize_t vroot, vsize_t W, bool checkLabels, bool returnFound, bool printAllMatches) {
 // TODO: Should we try to match as regular expressions (by trying all repeat numbers for instance) ?
   
   node_t *current_node;
@@ -468,7 +476,7 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
 //   Match first word (mot): it has to number a matching first node
 //   TODO: handle case where first matched node should be repeated
   if (this->size >= 1 and this->mots[0]->type == TYPE_M1) { 
-    std::pair <bool, node_t*> added = this->parcoursUnmatchedNode(checkLabels, returnFound, this->mots[0], current_node, current_node, matched_nodes, numbers, max_numbered, found_nodes);
+    std::pair <bool, node_t*> added = this->parcoursUnmatchedNode(checkLabels, returnFound, this->mots[0], current_node, current_node, matched_nodes, numbers, max_numbered, found_nodes, printAllMatches);
     
     if (added.first){
       max_numbered++; 
@@ -531,7 +539,7 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
             return RetourParcoursDepuisSommet(false, found_nodes);
           }
           
-          std::pair <bool, node_t*> added = this->parcoursUnmatchedNode(checkLabels, returnFound, m, child_node, current_node, matched_nodes, numbers, max_numbered, found_nodes);
+          std::pair <bool, node_t*> added = this->parcoursUnmatchedNode(checkLabels, returnFound, m, child_node, current_node, matched_nodes, numbers, max_numbered, found_nodes, printAllMatches);
           
           if (added.first){
             max_numbered++; 
@@ -623,12 +631,12 @@ void freeRetourParcoursDepuisSommet(Parcours::RetourParcoursDepuisSommet rt){
     delete rt.second;
 }
 
-Parcours::RetourParcours Parcours::parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool countAllMatches, bool getId) {
+Parcours::RetourParcours Parcours::parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool countAllMatches, bool getId, bool printAllMatches) {
   vsize_t n;
   vsize_t count = 0;
   std::set < std::map < string, std::list < node_t * >*>*>* set_gotten = new std::set < std::map < string, std::list < node_t * >*>*>();
   for (n = 0; n < gr->nodes.size; n++) {
-    RetourParcoursDepuisSommet rt = this->parcourirDepuisSommet(gr, n, W, checkLabels, getId);
+    RetourParcoursDepuisSommet rt = this->parcourirDepuisSommet(gr, n, W, checkLabels, getId, printAllMatches);
     if (rt.first) {
       if (getId and not rt.second->empty()){
         set_gotten->insert(rt.second);
