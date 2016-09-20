@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
     }
     
     string pathTest = (std::string) *test_iterator;
-    matchPatternToTest(optionVerbose, optionQuiet, checkLabels, n_pattern, pathPattern, pattern_graph, pattern_parcours, pathTest, printAllMatches, printNoMatches);
+    matchPatternToTest(optionVerbose, optionQuiet, checkLabels, n_pattern, pathPattern, pattern_graph, pattern_parcours, pathTest, printNoMatches, printAllMatches);
   }
   
   pattern_parcours->freeParcours(true);
@@ -157,7 +157,8 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, 
   }
   
   // Find possible traversals of parcours in test graph
-  Parcours::RetourParcours rt = pattern_parcours->parcourir(test_graph, pattern_graph->nodes.size, checkLabels, true, (not optionQuiet and not printNoMatches) or printAllMatches, printAllMatches);
+  bool getids = (not optionQuiet and not printNoMatches) or printAllMatches;
+  Parcours::RetourParcours rt = pattern_parcours->parcourir(test_graph, pattern_graph->nodes.size, checkLabels, true, getids, printAllMatches);
   vsize_t count = rt.first;
 
   if (not optionQuiet) {

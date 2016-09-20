@@ -68,7 +68,7 @@ public:
 };
 
 void freeMapGotten(std::map < string, std::list < node_t * >*>*);
-void freeRetourParcoursDepuisSommet(Parcours::RetourParcoursDepuisSommet rt);
+void freeRetourParcoursDepuisSommet(Parcours::RetourParcoursDepuisSommet rt, bool getid);
 
 typedef std::tuple < node_t *, uint8_t, node_t * >TupleQueue;
 Parcours *parcoursLargeur(graph_t * graph, vsize_t root, vsize_t W);

@@ -374,7 +374,7 @@ std::pair <bool, node_t*> Parcours::parcoursUnmatchedNode(bool checkLabels, bool
     vsize_t n_matched = 1;
 
     std::list < node_t * >*list_nodes;
-    if (returnFound and m->info->get) {
+    if (returnFound and (m->info->get or printAllMatches)) {
       list_nodes = new std::list < node_t * >();
       list_nodes->push_back((node_t *) current_node);
     }
@@ -425,7 +425,8 @@ std::pair <bool, node_t*> Parcours::parcoursUnmatchedNode(bool checkLabels, bool
       else {
         str_gotten = m->info->inst_str; 
       }
-      found_nodes->insert(std::pair < string, std::list < node_t * >*>(m->info->getid, list_nodes));
+      
+      found_nodes->insert(std::pair < string, std::list < node_t * >*>(str_gotten, list_nodes));
     }
     
     if (n_matched < m->info->minRepeat or not m->matchesC(current_node)) {
@@ -616,15 +617,17 @@ void freeMapGotten(std::map < string, std::list < node_t * >*>* map_gotten){
   delete(map_gotten);
 }
 
-void freeRetourParcoursDepuisSommet(Parcours::RetourParcoursDepuisSommet rt){
+void freeRetourParcoursDepuisSommet(Parcours::RetourParcoursDepuisSommet rt, bool getids){
     // freeing found nodes
     std::map < string, std::list < node_t * >*>* found_nodes = rt.second;
     if (not found_nodes->empty()) {
       std::map < string, std::list < node_t * >*>::iterator it;
 
-      for (it = found_nodes->begin(); it != found_nodes->end(); it++) {
-        std::list < node_t * >* p_found_nodes = (*it).second;
-        delete p_found_nodes;
+      if (getids){
+        for (it = found_nodes->begin(); it != found_nodes->end(); it++) {
+          std::list < node_t * >* p_found_nodes = (*it).second;
+          delete p_found_nodes;
+        }
       }
     }
     
@@ -653,7 +656,7 @@ Parcours::RetourParcours Parcours::parcourir(graph_t * gr, vsize_t W, bool check
       }
     }
     else{
-      freeRetourParcoursDepuisSommet(rt);
+      freeRetourParcoursDepuisSommet(rt, getId);
     }    
   }
   return RetourParcours(count, set_gotten);

@@ -185,10 +185,10 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     else if (strcmp(id, "inst") == 0 || strcmp(id, "instruction") == 0 || strcmp(id, "csymb") == 0) {
       hasCSymb = 1;
       
-      n->info->inst_str = v;
+      n->info->inst_str = std::string(v);
     }
     else if (strcmp(id, "op") == 0 || strcmp(id, "opcode") == 0) {
-      n->info->opcode = v;
+      n->info->opcode = std::string(v);
     }
     else if (not cond_filled and (strcmp(id, "symbtype") == 0 or strcmp(id, "csymbtype") == 0)) {
       if (strcmp(v, "none") == 0 or strcmp(v, "*") == 0) {        
@@ -256,24 +256,24 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     }
     else if (strcmp(id, "getid") == 0) {
       n->info->get = true;
-      n->info->getid = v;
+      n->info->getid = std::string(v);
     }
     else if (strcmp(id, "addr") == 0 or strcmp(id, "address") == 0) {
       n->info->has_address = true;
       n->info->address = (vsize_t) strtol(v, NULL, 16);
     }
     else if (not has_arg1 and strcmp(id, "arg1") == 0) {
-      n->info->arg1 = v;
+      n->info->arg1 = std::string(v);
       has_arg1 = true;
       n->info->nargs++;
     }
     else if (not has_arg2 and strcmp(id, "arg2") == 0) {
-      n->info->arg2 = v;
+      n->info->arg2 = std::string(v);
       has_arg2 = true;
       n->info->nargs++;
     }
     else if (not has_arg3 and strcmp(id, "arg3") == 0) {
-      n->info->arg3 = v;
+      n->info->arg3 = std::string(v);
       has_arg3 = true;
       n->info->nargs++;
     }
@@ -315,30 +315,30 @@ node_t *updateNode(OptionList * ol, node_t * n) {
         bool brk = false;
         std::size_t virg_pos, first_pos;
         for (arg_counter = 1; arg_counter <= 3; arg_counter++){
-          std::string v;
+          std::string arg_value;
           
           virg_pos = n->info->inst_str.find_first_of(",", begin);
         
           if (virg_pos != std::string::npos){
-            v = n->info->inst_str.substr(begin, virg_pos - begin);
+            arg_value = n->info->inst_str.substr(begin, virg_pos - begin);
             n->info->nargs++;
           }
           else {
-            v = n->info->inst_str.substr(begin);
+            arg_value = n->info->inst_str.substr(begin);
             n->info->nargs++;
             brk = true;
           }
           
           switch (arg_counter){
             case 1:
-              n->info->arg1 = v;
+              n->info->arg1 = arg_value;
               break;
             case 2:
-              n->info->arg2 = v;
+              n->info->arg2 = arg_value;
               break;
             case 3:
             default:
-              n->info->arg3 = v;
+              n->info->arg3 = arg_value;
               break;
           }
           

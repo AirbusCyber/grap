@@ -18,7 +18,10 @@ if __name__ == '__main__':
 
     parser.add_argument('-f', '--force', dest='force', action="store_true", help='Force re-generation of existing .dot file')
     parser.add_argument('-o', '--dot-output', dest='dot', help='Specify exported .dot file name')
-    parser.add_argument('-r', '--readable', dest='readable', action="store_true", help='DOT in human-readable format')
+    parser.add_argument('-r', '--readable', dest='readable', action="store_true", help='DOT in displayable format (with xdot)')
+    parser.add_argument('-od', '--only-disassemble', dest='only_disassemble', action="store_true", help='Disassemble files and exit (no matching)')
+    parser.add_argument('-m', '--print-all-matches', dest='print_all_matches', action="store_true", help='Print all matched nodes (overrides getid fields)')
+    parser.add_argument('-nm', '--print-no-matches', dest='print_no_matches', action="store_true", help='Don\'t print matched nodes (overrides getid fields)')
     parser.add_argument('-v', '--verbose', dest='verbose', action="store_true", help='Verbose output')
     parser.add_argument('-d', '--debug', dest='debug', action="store_true", help='Debug output')
     parser.add_argument('-q', '--quiet', dest='quiet', action="store_true", help='Quiet output')
@@ -115,31 +118,38 @@ if __name__ == '__main__':
                         print("Test file " + test_path + " does not seem to be a PE/ELF or dot file.")
                         printed_something = True
 
-    if args.pattern is not None and len(dot_test_files) >= 1:
-        if printed_something or args.verbose:
-            print("")
-        command = ["/usr/local/bin/grap-match"]
+    if not args.only_disassemble:
+        if args.pattern is not None and len(dot_test_files) >= 1:
+            if printed_something or args.verbose:
+                print("")
+            command = ["/usr/local/bin/grap-match"]
 
-        if args.verbose:
-            command.append("-v")
+            if args.print_all_matches:
+                command.append("-m")
 
-        if args.debug:
-            command.append("-d")
+            if args.print_no_matches:
+                command.append("-nm")
 
-        if args.quiet:
-            command.append("-q")
+            if args.verbose:
+                command.append("-v")
 
-        command.append(args.pattern)
+            if args.debug:
+                command.append("-d")
 
-        for test_path in dot_test_files:
-            command.append(test_path)
+            if args.quiet:
+                command.append("-q")
 
-        if args.verbose or args.debug:
-            print(" ".join(command))
+            command.append(args.pattern)
 
-        popen = subprocess.Popen(tuple(command))
-        popen.wait()
-    else:
-        if not args.quiet:
-            print("Missing pattern or test file.")
+            for test_path in dot_test_files:
+                command.append(test_path)
+
+            if args.verbose or args.debug:
+                print(" ".join(command))
+
+            popen = subprocess.Popen(tuple(command))
+            popen.wait()
+        else:
+            if not args.quiet:
+                print("Missing pattern or test file.")
 
