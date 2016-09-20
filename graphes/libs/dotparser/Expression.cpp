@@ -288,7 +288,7 @@ node_t *updateNode(OptionList * ol, node_t * n) {
   if ((not cond_filled) and n->info->inst_str != ""){
     (*(n->condition))->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
     (*(n->condition))->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-    (*(n->condition))->comparison = ComparisonFunEnum::str_equals;
+    (*(n->condition))->comparison = ComparisonFunEnum::str_beginswith;
   }
   
   if (not n->info->has_address){
