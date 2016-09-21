@@ -81,6 +81,8 @@ void printDescription()
   std::cout << "Test 27: [reference to 26] looking for xor loops in Backspace "
                 "sample using a simplified pattern with repetion on first node"
                 "\n";
+  std::cout << "Test 28: [manual] arg comparison within test grap (arg1 == "
+                "_arg2)\n";
 }
 
 #ifdef _WIN32
