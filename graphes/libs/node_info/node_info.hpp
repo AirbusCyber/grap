@@ -188,6 +188,8 @@ public:
   bool has_fixed_pattern_info;
   NodeInfo* fixed_pattern_info;
   
+  bool apply_pattern_condition_to_test;
+  
   bool has_fixed_field;
   void* fixed_field;
   

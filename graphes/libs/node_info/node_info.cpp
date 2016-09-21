@@ -114,6 +114,7 @@ CondNode::CondNode(){
   this->comparison = ComparisonFunEnum::bool_false;
   this->has_fixed_pattern_info = false;
   this->has_fixed_field = false;
+  this->apply_pattern_condition_to_test = false;
 }
 
 CondNode::CondNode(std::list<CondNode**>* cn){
@@ -121,6 +122,7 @@ CondNode::CondNode(std::list<CondNode**>* cn){
   this->comparison = ComparisonFunEnum::bool_false;
   this->has_fixed_pattern_info = false;
   this->has_fixed_field = false;
+  this->apply_pattern_condition_to_test = false;
 }
 
 CondNode::CondNode(std::list<CondNode**>* cn, UnOpEnum un_op){
@@ -130,6 +132,7 @@ CondNode::CondNode(std::list<CondNode**>* cn, UnOpEnum un_op){
   this->unary_operator = un_op;
   this->has_fixed_pattern_info = false;
   this->has_fixed_field = false;
+  this->apply_pattern_condition_to_test = false;
 }
 
 CondNode::CondNode(std::list<CondNode**>* cn, BinOpEnum bin_op){
@@ -139,13 +142,14 @@ CondNode::CondNode(std::list<CondNode**>* cn, BinOpEnum bin_op){
   this->binary_operator = bin_op;
   this->has_fixed_pattern_info = false;
   this->has_fixed_field = false;
+  this->apply_pattern_condition_to_test = false;
 }
 
 CondNode::CondNode(std::string key, std::string op, std::string value){  
   std::list<CondNode**>* cn = new std::list<CondNode**>();
   this->children = cn;
   this->has_fixed_pattern_info = false;
-  this->has_fixed_field = true;
+  this->apply_pattern_condition_to_test = false;
   
   if (key == "inst" or key == "instruction" or key == "op" or key == "opcode"
     or key == "arg1" or key == "arg2" or key == "arg3"){
@@ -165,9 +169,32 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
       // Case: inst or instruction
       this->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
     }
-    std::string* str_ptr = new std::string();
-    *str_ptr = value;
-    this->fixed_field = (void*) str_ptr;
+    
+    if (value.length() >= 1 and value.at(0) == '_'){
+      this->has_fixed_field = false;
+      this->apply_pattern_condition_to_test = true;
+      std::string field = value.substr(1);
+      
+      if (field == "arg1"){
+        this->pattern_field = (void* NodeInfo::*) &NodeInfo::arg1;
+      }
+      else if (field == "arg2"){
+        this->pattern_field = (void* NodeInfo::*) &NodeInfo::arg2;
+      }
+      else if (field == "arg3"){
+        this->pattern_field = (void* NodeInfo::*) &NodeInfo::arg3;
+      }
+      else {
+        std::cerr << "ERROR: Unknown field " << field << std::endl;
+        RELEASE_ASSERT(false);
+      }
+    }
+    else{
+      this->has_fixed_field = true;
+      std::string* str_ptr = new std::string();
+      *str_ptr = value;
+      this->fixed_field = (void*) str_ptr;
+    }
     
     if (op == "==" or op == "is"){
       this->comparison = ComparisonFunEnum::str_equals; 
@@ -189,6 +216,7 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
   else if (key == "addr" or key == "address" 
     or key == "nf" or key == "nfathers" 
     or key == "nc" or key == "nchildren"){
+      this->has_fixed_field = true;
       if (key == "addr" or key == "address"){
         this->test_field = (void* NodeInfo::*) &NodeInfo::address;
       }
@@ -226,6 +254,7 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
       }
   }  
   else if (key == "nargs"){
+      this->has_fixed_field = true;
       this->test_field = (void* NodeInfo::*) &NodeInfo::nargs;
 
       uint8_t* addr_ptr = (uint8_t*) malloc_or_quit(sizeof(uint8_t));
@@ -509,6 +538,9 @@ bool CondNode::evaluate(NodeInfo* pattern, NodeInfo* test)
 {
   if (this->has_fixed_pattern_info){
     pattern = this->fixed_pattern_info; 
+  }
+  else if (this->apply_pattern_condition_to_test){
+    pattern = test; 
   }
   
   vsize_t nc = this->children->size();
