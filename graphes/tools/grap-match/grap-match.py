@@ -52,7 +52,7 @@ def main():
         print("Done.")
 
     rt = parcours.parcourir(test_graph, n_pattern, args.nochecklabels,
-                            True, not args.quiet)
+                            True, not args.quiet, False)
     count = rt.first
 
     if not args.quiet:
@@ -74,18 +74,18 @@ def main():
             for getid, node_list in found_nodes.iteritems():
                 if not node_list.empty():
                     for n_index, node in enumerate(node_list):
-
-                        print("%s" % getid, end='')
+                        s = str(getid)
 
                         if node_list.size() > 1:
-                            print("%d" % n_index, end='')
+                            s += str(n_index)
 
-                        print(": ", end='')
+                        s += ": "
 
                         if node.info.has_address:
-                            print("0x%X, " % node.info.address, end='')
+                            s += "0x" + hex(node.info.address)
 
-                        print("%s" % node.info.inst_str)
+                        s += node.info.inst_str
+                        print s
 
         freeMapGotten(found_nodes)
 

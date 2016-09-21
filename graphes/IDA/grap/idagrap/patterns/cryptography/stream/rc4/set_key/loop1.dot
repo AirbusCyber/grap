@@ -1,6 +1,6 @@
 Digraph G {
 A [label = "mov+", csymbtype="substring", csymb="mov", getid="A", repeat="+"]
-B [label = "add", csymbtype="substring", csymb="add", getid="B"]
+B [label = "add", cond="opcode is add or opcode is inc", getid="B"]
 C [label = "*", csymbtype="*", getid="C", minrepeat="0", maxrepeat="3", lazyrepeat=true]
 D [label = "cmp", csymbtype="substring", csymb="cmp", getid="D"]
 E [label = "JCC", csymbtype="substring", csymb="j", getid="E", minchildren="2"]

@@ -245,7 +245,7 @@ class Pattern:
         """
         return self._max_pattern
 
-    def parcourir(self, graph, checklabels=True, countallmatches=True, getid=True):
+    def parcourir(self, graph, checklabels=True, countallmatches=True, getid=True, printallmatches=False):
         """Search a pattern.
 
         This method allows the search of an pattern in a graph.
@@ -266,7 +266,7 @@ class Pattern:
                                    pattern_size)
 
         rt = parcours.parcourir(graph, pattern_size,
-                                checklabels, countallmatches, getid)
+                                checklabels, countallmatches, getid, printallmatches)
 
         set_gotten = rt.second
 
