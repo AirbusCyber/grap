@@ -199,7 +199,7 @@ CondNode** computeCond(node_t* n){
       and_children->push_front(cn_not);
       CondNode *cn = new CondNode(and_children, BinOpEnum::logic_and);
       CondNode **cn_ret = (CondNode **)malloc_or_quit(sizeof(CondNode *));
-      cn_ret = &cn;
+      *cn_ret = cn;
       return cn_ret;
     }
   }

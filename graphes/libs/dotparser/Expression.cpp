@@ -289,6 +289,7 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     (*(n->condition))->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
     (*(n->condition))->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
     (*(n->condition))->comparison = ComparisonFunEnum::str_beginswith;
+    cond_filled = true;
   }
   
   if (not n->info->has_address){
@@ -356,6 +357,7 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     }
   }
 
+  assert(cond_filled);
   freeOptionList(ol);
   return n;
 }
