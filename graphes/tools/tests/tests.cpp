@@ -154,7 +154,8 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  test_NodeInfo();
+  vsize_t error_number = 0;
+  error_number += test_NodeInfo();
 
   string color;
   graph_t **grPattern = nullptr;
@@ -227,9 +228,9 @@ int main(int argc, char *argv[]) {
     }
 
     // GTSI with and without labels
-    test_GTSI(grPattern, nPattern, grTest, expected_gtsi_with_labels, true,
+    error_number += test_GTSI(grPattern, nPattern, grTest, expected_gtsi_with_labels, true,
               " (Check labels)", true, "gtsi-l-" + std::to_string(i) + ".dot");
-    test_GTSI(grPattern, nPattern, grTest, expected_gtsi_no_labels, false,
+    error_number += test_GTSI(grPattern, nPattern, grTest, expected_gtsi_no_labels, false,
               " (Don't check labels)", true,
               "gtsi-nl-" + std::to_string(i) + ".dot");
 
@@ -244,9 +245,26 @@ int main(int argc, char *argv[]) {
   }
   
   free(grPattern);
+  
+  if (error_number == 0){
+    cout << Green << "All tests passed." << Color_Off << std::endl;
+  }
+  else {
+    cout << Red << error_number << " test(s) failed." << Color_Off << std::endl;
+    
+  }
+  
+  if (error_number > 255){
+    return 255; 
+  }
+  else {
+    return (int) error_number;
+  }
 }
 
-void test_NodeInfo(){
+vsize_t test_NodeInfo(){
+  vsize_t error_number = 0;
+  
   std::cout << "Testing comparisons (NodeList)." << endl;
   NodeInfo* np = new NodeInfo();
   NodeInfo* nt = new NodeInfo();
@@ -261,12 +279,12 @@ void test_NodeInfo(){
   np->has_address = false;
   nt->has_address = false;
   bool r = cn->evaluate(np, nt);
-  print_leaf_result(r, "= ", false);
+  error_number += print_leaf_result(r, "= ", false);
   
   np->has_address = false;
   nt->has_address = true;
   r = cn->evaluate(np, nt);
-  print_leaf_result(not r, "!= ", true);
+  error_number += print_leaf_result(not r, "!= ", true);
   
   CondNode::freeCondition(&cn, true, false);
   
@@ -278,11 +296,11 @@ void test_NodeInfo(){
     
   nt->has_address = true;
   r = cn->evaluate(np, nt);
-  print_leaf_result(r, "= ", false);
+  error_number += print_leaf_result(r, "= ", false);
   
   nt->has_address = false;
   r = cn->evaluate(np, nt);
-  print_leaf_result(not r, "!= ", true);
+  error_number += print_leaf_result(not r, "!= ", true);
   
   CondNode::freeCondition(&cn, true, false);
   
@@ -296,11 +314,11 @@ void test_NodeInfo(){
   np->inst_str = "xor";
   nt->inst_str = "xor";
   r = cn->evaluate(np, nt);
-  print_leaf_result(r, "= ", false);
+  error_number += print_leaf_result(r, "= ", false);
   
   nt->inst_str = "mov";
   r = cn->evaluate(np, nt);
-  print_leaf_result(not r, "!= ", true);
+  error_number += print_leaf_result(not r, "!= ", true);
   
   CondNode::freeCondition(&cn, true, false);
   
@@ -314,11 +332,11 @@ void test_NodeInfo(){
   np->maxChildrenNumber = 2;
   nt->childrenNumber = 2;
   r = cn->evaluate(np, nt);
-  print_leaf_result(r, "= ", false);
+  error_number += print_leaf_result(r, "= ", false);
   
   np->maxChildrenNumber = 1;
   r = cn->evaluate(np, nt);
-  print_leaf_result(not r, "!= ", true);
+  error_number += print_leaf_result(not r, "!= ", true);
 
   CondNode::freeCondition(&cn, true, false);
   
@@ -333,15 +351,15 @@ void test_NodeInfo(){
   np->maxChildrenNumber = 2;
   nt->childrenNumber = 2;
   r = cn->evaluate(np, nt);
-  print_leaf_result(not r, "= ", false);
+  error_number += print_leaf_result(not r, "= ", false);
   
   np->maxChildrenNumber = 1;
   r = cn->evaluate(np, nt);
-  print_leaf_result(not r, "< ", false);
+  error_number += print_leaf_result(not r, "< ", false);
   
   np->maxChildrenNumber = 3;
   r = cn->evaluate(np, nt);
-  print_leaf_result(r, "> ", true);
+  error_number += print_leaf_result(r, "> ", true);
 
   CondNode::freeCondition(&cn, true, false);
   
@@ -355,11 +373,11 @@ void test_NodeInfo(){
   np->address = 2;
   nt->address = 2;
   r = cn->evaluate(np, nt);
-  print_leaf_result(r, "= ", false);
+  error_number += print_leaf_result(r, "= ", false);
   
   np->address = 1;
   r = cn->evaluate(np, nt);
-  print_leaf_result(not r, "!= ", true);
+  error_number += print_leaf_result(not r, "!= ", true);
   
   
   // cn evaluates to false
@@ -369,13 +387,13 @@ void test_NodeInfo(){
   CondNode* cn_not = new CondNode(children, UnOpEnum::logic_not);
   
   r = cn_not->evaluate(np, nt);
-  print_leaf_result(r, "! ", false);
+  error_number += print_leaf_result(r, "! ", false);
   
   CondNode* cn_not2 = new CondNode();
   cn_not2->children->push_front(&cn_not);
   cn_not2->unary_operator = UnOpEnum::logic_not;
   r = cn_not2->evaluate(np, nt);
-  print_leaf_result(not r, "!! ", true);
+  error_number += print_leaf_result(not r, "!! ", true);
   
   
   std::cout << "Testing or on multiple operands: ";
@@ -385,11 +403,11 @@ void test_NodeInfo(){
   
   CondNode* cn_or = new CondNode(children2, BinOpEnum::logic_or);
   r = cn_or->evaluate(np, nt);
-  print_leaf_result(r, "2 ", false);
+  error_number += print_leaf_result(r, "2 ", false);
   
   cn_or->children->push_front(&cn_not2);
   r = cn_or->evaluate(np, nt);
-  print_leaf_result(r, "3 ", true);
+  error_number += print_leaf_result(r, "3 ", true);
   
   
   std::cout << "Testing and on multiple operands: ";
@@ -398,11 +416,11 @@ void test_NodeInfo(){
   cn_and->children->push_front(&cn_not);
   cn_and->binary_operator =  BinOpEnum::logic_and;
   r = cn_and->evaluate(np, nt);
-  print_leaf_result(not r, "2 ", false);
+  error_number += print_leaf_result(not r, "2 ", false);
   
   cn_and->children->push_front(&cn_not2);
   r = cn_and->evaluate(np, nt);
-  print_leaf_result(not r, "3 ", true);
+  error_number += print_leaf_result(not r, "3 ", true);
 
   CondNode::freeCondition(&cn, true, false);
   cn = NULL;
@@ -427,12 +445,14 @@ void test_NodeInfo(){
   delete(nt);
   
   cout << endl;
+  return error_number;
 }
 
-void test_GTSI(graph_t **grPattern, size_t nPattern, graph_t *grTest,
+ vsize_t test_GTSI(graph_t **grPattern, size_t nPattern, graph_t *grTest,
                size_t expected, bool checkLabels, std::string desc,
                bool exportTree, string treePath)
 {
+  vsize_t error_number = 0;
   string color;
   std::cout << "GTSI" + desc + ":\n";
 
@@ -466,6 +486,7 @@ void test_GTSI(graph_t **grPattern, size_t nPattern, graph_t *grTest,
   vsize_t count = tree->parcourir(grTest, siteSize, checkLabels, true);
   if (count != expected) {
     color = Red;
+    error_number += 1;
   }
   else {
     color = Green;
@@ -484,6 +505,7 @@ void test_GTSI(graph_t **grPattern, size_t nPattern, graph_t *grTest,
 
     if (count2 != expected) {
       color = Red;
+      error_number += 1;
     }
     else {
       color = Green;
@@ -495,19 +517,21 @@ void test_GTSI(graph_t **grPattern, size_t nPattern, graph_t *grTest,
     delete (rt.second);
     p->freeParcours(true);
   }
-  
+  return error_number;
 }
 
-void print_leaf_result(bool r, string desc, bool end_bool)
+vsize_t print_leaf_result(bool r, string desc, bool end_bool)
 {
   string end_str = "";
   if (end_bool) end_str = "\n";
 
   if (r) {
     cout << Green << desc << Color_Off << end_str;
+    return 0;
   }
   else {
     cout << Red << desc << Color_Off << end_str;
+    return 1;
   }
 }
 
