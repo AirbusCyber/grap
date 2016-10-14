@@ -82,7 +82,7 @@ def main():
                         s += ": "
 
                         if node.info.has_address:
-                            s += "0x" + hex(node.info.address)
+                            s += hex(node.info.address) + ", "
 
                         s += node.info.inst_str
                         print s
