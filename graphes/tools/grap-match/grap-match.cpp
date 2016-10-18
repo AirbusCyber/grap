@@ -125,17 +125,57 @@ int main(int argc, char *argv[]) {
   }
   
   std::list<string>::iterator test_iterator;
-  for (test_iterator = pathTests.begin();  test_iterator != pathTests.end(); test_iterator++){    
+  std::list<ArgsMatchPatternToTest>* args_queue = new std::list<ArgsMatchPatternToTest>();
+  std::mutex* queue_mutex = new std::mutex();
+  for (test_iterator = pathTests.begin();  test_iterator != pathTests.end(); test_iterator++){
     if (not optionQuiet){
       std::cout << std::endl; 
     }
     
     string pathTest = (std::string) *test_iterator;
-    matchPatternToTest(optionVerbose, optionQuiet, checkLabels, n_pattern, pathPattern, pattern_graph, pattern_parcours, pathTest, printNoMatches, printAllMatches);
+    args_queue->push_back(std::make_tuple(optionVerbose, optionQuiet, checkLabels, n_pattern, pathPattern, pattern_graph, pattern_parcours, pathTest, printNoMatches, printAllMatches));
   }
+  
+  std::list<std::thread*> threads;
+  std::list<std::thread*>::iterator threads_iterator;
+  
+  vsize_t max_threads = 2;
+  vsize_t k_thread;
+  
+  for (k_thread = 0; k_thread < max_threads; k_thread++){
+    threads.push_back(new std::thread(worker_queue, args_queue, queue_mutex));
+  }
+  
+  for (threads_iterator = threads.begin(); threads_iterator != threads.end(); threads_iterator++){
+    std::thread* thread = (std::thread*) *threads_iterator;
+    thread->join();
+    delete(thread);
+  }  
   
   pattern_parcours->freeParcours(true);
   graph_free(pattern_graph, true);
+}
+
+void worker_queue(std::list<ArgsMatchPatternToTest>* args_queue, std::mutex* queue_mutex){
+
+  while(true){
+    ArgsMatchPatternToTest args;
+    queue_mutex->lock();
+    bool found_next = false;
+    if (not args_queue->empty()){
+      args = args_queue->front();
+      args_queue->pop_front();
+      found_next = true;
+    }
+    queue_mutex->unlock();
+    
+    if (found_next){
+      matchPatternToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<4>(args), std::get<5>(args), std::get<6>(args), std::get<7>(args), std::get<8>(args), std::get<9>(args));
+    }
+    else{
+      break; 
+    }
+  }
 }
 
 void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, vsize_t n_pattern, string pathPattern, graph_t* pattern_graph, Parcours* pattern_parcours, string pathTest, bool printNoMatches, bool printAllMatches){
