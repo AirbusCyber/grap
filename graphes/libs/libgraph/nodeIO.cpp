@@ -95,15 +95,7 @@ size_t node_edges_to_dot(const node_t *node, FILE *fp)
   size_t j;
   size_t ret;
 
-  ret = 0;
-//   for (j = 0; j < node->children_nb; ++j) {
-//     const node_t *child = node_child_const(node, j);
-//     ret += (size_t)fprintf(fp, "\"%" PRIx64 "\" -> \"%" PRIx64
-//                                "\" [label = \"%" PRIx64 "\"]",
-//                            node->node_id, child->node_id, j);
-//     ret += (size_t)fprintf(fp, "\n");
-//   }
-  
+  ret = 0;  
   if (node->has_child1){
     ret += (size_t)fprintf(fp, "\"%" PRIx64 "\" -> \"%" PRIx64
                                "\" [label = \"%" PRIx64 "\", childnumber=1]",

@@ -63,14 +63,6 @@ typedef struct node_t {
    */
   struct node_t** fathers;
 
-  /*!
-   @brief Table of pointers to the successors of the node.
-
-   To retrieve the i-th child use node_child().
-   @see node_child()
-   */
-//   struct node_t** children;
-  
   bool has_child1;
   node_t* child1;
   
@@ -130,24 +122,6 @@ void node_set_fathers_nb(node_t* node, vsize_t nb);
  @see node_new_child() node_child()
  */
 void node_link(node_t* node, node_t* child, bool is_child1);
-
-/*!
- @brief Get the i-th child of a node.
- @param node The node from which to get the child.
- @param index The index of the child to get.
- @return The i-th child of a node if i is valid, otherwise it returns a NULL
- pointer.
- */
-// node_t* node_child(node_t* node, size_t index);
-
-/*!
- @brief Get the i-th child of a node, for const pointers
- @param node The node from which to get the child.
- @param index The index of the child to get.
- @return The i-th child of a node if i is valid, otherwise it returns a NULL
- pointer.
- */
-// const node_t* node_child_const(const node_t* node, size_t index);
 
 /*!
  @brief Get the i-th father of a node.

@@ -131,7 +131,6 @@ node_t *createNode(char *value) {
   free(value);
 
   node_t *node = (node_t *) calloc_or_quit(1, sizeof(node_t));
-//   node->children = NULL;
   node->has_child1 = false;
   node->has_child2 = false;
   node->fathers = NULL;

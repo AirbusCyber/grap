@@ -294,11 +294,6 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
       i++;
       sc = ss;
 
-//       assert(ss->children_nb <= 2);
-//       for (k2 = 0; k2 < ss->children_nb; k2++) {
-//         f = ss->children[k2];
-//         queue3.push(std::make_tuple(ss, k2, f));
-//       }
       if (ss->has_child1){
         queue3.push(std::make_tuple(ss, 0, ss->child1));
       }
@@ -487,7 +482,6 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
   vsize_t max_numbered = 0;
 
 //   Match first word (mot): it has to number a matching first node
-//   TODO: handle case where first matched node should be repeated
   if (this->size >= 1 and this->mots[0]->type == TYPE_M1) { 
     std::pair <bool, node_t*> added = this->parcoursUnmatchedNode(checkLabels, returnFound, this->mots[0], current_node, current_node, matched_nodes, numbers, max_numbered, found_nodes, printAllMatches);
     

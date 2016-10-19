@@ -82,7 +82,9 @@ void printDescription()
                 "sample using a simplified pattern with repetion on first node"
                 "\n";
   std::cout << "Test 28: [manual] arg comparison within test grap (arg1 == "
-                "_arg2)\n";
+                "_arg2)\n";  
+  std::cout << "Test 29: [reference to 0] same as test 0 but numbered children "
+               "(childnumber=1, ...).\n";
 }
 
 #ifdef _WIN32
