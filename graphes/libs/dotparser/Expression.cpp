@@ -74,7 +74,8 @@ graph_t *addEdgesToGraph(CoupleList * cl, graph_t * g) {
       printf("WARNING: when adding a node, father or child was not found in graph.\n");
     }
     else {
-      node_link(f, c);
+      bool is_child1 = not f->has_child1;
+      node_link(f, c, is_child1);
     }
   }
 
@@ -102,7 +103,9 @@ node_t *createNode(char *value) {
   free(value);
 
   node_t *node = (node_t *) calloc_or_quit(1, sizeof(node_t));
-  node->children = NULL;
+//   node->children = NULL;
+  node->has_child1 = false;
+  node->has_child2 = false;
   node->fathers = NULL;
   node->children_nb = 0;
   node->fathers_nb = 0;

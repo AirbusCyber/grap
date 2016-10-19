@@ -175,7 +175,14 @@ CondNode** computeCond(node_t* n){
   else {
     // If lazy repeat, the condition of the first child should be excluded
     // TODO: there is no way to properly delete those "derived" conditions
-    node_t* child = n->children[0];
+    node_t* child;
+    if (n->has_child1){
+      child = n->child1;
+    }
+    else{
+      RELEASE_ASSERT(n->has_child2);
+      child = n->child2;
+    }
 
     std::list<CondNode**>* not_child = new std::list<CondNode**>();
     not_child->push_front(child->condition);
@@ -287,10 +294,16 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
       i++;
       sc = ss;
 
-      assert(ss->children_nb <= 2);
-      for (k2 = 0; k2 < ss->children_nb; k2++) {
-        f = ss->children[k2];
-        queue3.push(std::make_tuple(ss, k2, f));
+//       assert(ss->children_nb <= 2);
+//       for (k2 = 0; k2 < ss->children_nb; k2++) {
+//         f = ss->children[k2];
+//         queue3.push(std::make_tuple(ss, k2, f));
+//       }
+      if (ss->has_child1){
+        queue3.push(std::make_tuple(ss, k2, ss->child1));
+      }
+      if (ss->has_child2){
+        queue3.push(std::make_tuple(ss, k2, ss->child2));
       }
 
       explored.insert(ss);
@@ -385,9 +398,10 @@ std::pair <bool, node_t*> Parcours::parcoursUnmatchedNode(bool checkLabels, bool
       while (
           (not m->info->has_maxRepeat or n_matched < m->info->maxRepeat)
           and current_node->children_nb == 1
-          and current_node->children[0]->fathers_nb == 1
-          and m->matchesSymbol(current_node->children[0], checkLabels)
-          and m->matchesCF(current_node->children[0])) {
+          and current_node->has_child1
+          and current_node->child1->fathers_nb == 1
+          and m->matchesSymbol(current_node->child1, checkLabels)
+          and m->matchesCF(current_node->child1)) {
         if (n_matched >= m->info->minRepeat and m->info->lazyRepeat
             and not checkLabels) {
           // Case: lazyrepeat and labels are not checked ; this is a
@@ -397,14 +411,14 @@ std::pair <bool, node_t*> Parcours::parcoursUnmatchedNode(bool checkLabels, bool
           break;
         }
         
-        set < node_t * >::iterator it_find = matched_nodes->find(current_node->children[0]);
+        set < node_t * >::iterator it_find = matched_nodes->find(current_node->child1);
         if (it_find != matched_nodes->end()) {
           // Case: the reached node is already matched
           // We won't add it to a block since it has already been defined elsewhere
           break;
         }
         
-        current_node = current_node->children[0];
+        current_node = current_node->child1;
         n_matched++;
 
         if (returnFound and m->info->get){
@@ -517,7 +531,7 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
     }
     else {
       // Case: m is not of return type but defines an edge to a child number (m->k)
-      if (matched_nodes->size() == 0 or m->k < current_node->children_nb) {
+      if (matched_nodes->size() == 0 or ((m->k == 0 and current_node->has_child1) or (m->k == 1 and current_node->has_child2))){
         node_t *child_node;
         
         if (matched_nodes->size() == 0){
@@ -526,7 +540,12 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
         }
         else{
           // Case: first word matched and m defines an edge to a child
-          child_node = current_node->children[m->k];
+	  if (m->k == 0 and current_node->has_child1){
+	    child_node = current_node->child1;
+	  }
+	  else if (m->k == 1 and current_node->has_child2){
+	    child_node = current_node->child2;
+	  }
         }
         
         set < node_t * >::iterator it = matched_nodes->find(child_node);
@@ -909,14 +928,14 @@ std::tuple <bool, node_t*, set < node_t * >> ParcoursNode::etapeUnmatchedNode(bo
           break;
 
         if ((not m->info->has_maxRepeat or r < m->info->maxRepeat)
-            and current_node->children_nb == 1 and current_node->children[0]->fathers_nb == 1
-            and m->matchesSymbol(current_node->children[0], checkLabels)
-            and m->matchesCF(current_node->children[0])) {
-          set<node_t *>::iterator it_find = matched_nodes.find(current_node->children[0]);
+            and current_node->children_nb == 1 and current_node->has_child1 and current_node->child1->fathers_nb == 1
+            and m->matchesSymbol(current_node->child1, checkLabels)
+            and m->matchesCF(current_node->child1)) {
+          set<node_t *>::iterator it_find = matched_nodes.find(current_node->child1);
 
           if (it_find != matched_nodes.end()) break;
           
-          current_node = current_node->children[0];
+          current_node = current_node->child1;
           r++;
         }
         else {
@@ -980,7 +999,7 @@ ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph
     }
     else {
       // Case: m is not of return type but defines an edge to a child number (m->k)
-      if (matched_nodes.size() == 0 or m->k < s->children_nb) {
+      if (matched_nodes.size() == 0 or ((m->k == 0 and s->has_child1) or (m->k == 1 and s->has_child2))) {
         node_t *f;
         
         if (matched_nodes.size() == 0){
@@ -989,7 +1008,13 @@ ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph
         }
         else{
           // Case: first word matched and m defines an edge to a child
-          f = s->children[m->k];
+	  if (m->k == 0 and s->has_child1){
+	    f = s->child1;
+	  }
+	  
+	  if (m->k == 1 and s->has_child2){
+	    f = s->child2;
+	  }
         }
         
         set < node_t * >::iterator it = matched_nodes.find(f);

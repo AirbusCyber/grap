@@ -96,12 +96,26 @@ size_t node_edges_to_dot(const node_t *node, FILE *fp)
   size_t ret;
 
   ret = 0;
-  for (j = 0; j < node->children_nb; ++j) {
-    const node_t *child = node_child_const(node, j);
+//   for (j = 0; j < node->children_nb; ++j) {
+//     const node_t *child = node_child_const(node, j);
+//     ret += (size_t)fprintf(fp, "\"%" PRIx64 "\" -> \"%" PRIx64
+//                                "\" [label = \"%" PRIx64 "\"]",
+//                            node->node_id, child->node_id, j);
+//     ret += (size_t)fprintf(fp, "\n");
+//   }
+  
+  if (node->has_child1){
     ret += (size_t)fprintf(fp, "\"%" PRIx64 "\" -> \"%" PRIx64
-                               "\" [label = \"%" PRIx64 "\"]",
-                           node->node_id, child->node_id, j);
+                               "\" [label = \"%" PRIx64 "\", child_number=1]",
+                           node->node_id, node->child1->node_id, j);
     ret += (size_t)fprintf(fp, "\n");
   }
+  if (node->has_child2){
+    ret += (size_t)fprintf(fp, "\"%" PRIx64 "\" -> \"%" PRIx64
+                               "\" [label = \"%" PRIx64 "\", child_number=2]",
+                           node->node_id, node->child2->node_id, j);
+    ret += (size_t)fprintf(fp, "\n");
+  }
+  
   return ret;
 }

@@ -69,7 +69,13 @@ typedef struct node_t {
    To retrieve the i-th child use node_child().
    @see node_child()
    */
-  struct node_t** children;
+//   struct node_t** children;
+  
+  bool has_child1;
+  node_t* child1;
+  
+  bool has_child2;
+  node_t* child2;
 
   // id of the node in the nodelist
   vsize_t list_id;
@@ -123,7 +129,7 @@ void node_set_fathers_nb(node_t* node, vsize_t nb);
  @param child the child node.
  @see node_new_child() node_child()
  */
-void node_link(node_t* node, node_t* child);
+void node_link(node_t* node, node_t* child, bool is_child1);
 
 /*!
  @brief Get the i-th child of a node.
@@ -132,7 +138,7 @@ void node_link(node_t* node, node_t* child);
  @return The i-th child of a node if i is valid, otherwise it returns a NULL
  pointer.
  */
-node_t* node_child(node_t* node, size_t index);
+// node_t* node_child(node_t* node, size_t index);
 
 /*!
  @brief Get the i-th child of a node, for const pointers
@@ -141,7 +147,7 @@ node_t* node_child(node_t* node, size_t index);
  @return The i-th child of a node if i is valid, otherwise it returns a NULL
  pointer.
  */
-const node_t* node_child_const(const node_t* node, size_t index);
+// const node_t* node_child_const(const node_t* node, size_t index);
 
 /*!
  @brief Get the i-th father of a node.

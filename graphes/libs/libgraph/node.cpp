@@ -8,7 +8,7 @@ node_t *node_alloc () {
 
 void node_set_children_nb (node_t * node, vsize_t nb) {
   node->children_nb = nb;
-  node->children = (node_t**) realloc_or_quit(node->children, node->children_nb * sizeof(node_t*));
+//   node->children = (node_t**) realloc_or_quit(node->children, node->children_nb * sizeof(node_t*));
 }
 
 void node_set_fathers_nb (node_t * node, vsize_t nb) {
@@ -19,7 +19,7 @@ void node_set_fathers_nb (node_t * node, vsize_t nb) {
 node_t *node_copy (node_t * node1, const node_t * node2) {
   /* free tables of fathers/children */
   free(node1->fathers);
-  free(node1->children);
+//   free(node1->children);
 
   memcpy (node1, node2, sizeof (node_t));
 
@@ -30,15 +30,19 @@ node_t *node_copy (node_t * node1, const node_t * node2) {
   }
 
   /* copy children */
-  if (node2->fathers_nb > 0) {
-    node1->children = (node_t**) malloc_or_quit(node2->children_nb * sizeof(node_t*));
-    memcpy (node1->children, node2->children, node2->children_nb * sizeof (node_t *));
+  if (node1->children_nb > 0) {
+//     node1->children = (node_t**) malloc_or_quit(node2->children_nb * sizeof(node_t*));
+    node1->has_child1 = node2->has_child1;
+    node1->child1 = node2->child1;
+    node1->has_child2 = node2->has_child2;
+    node1->child2 = node2->child2;
+//     memcpy (node1->children, node2->children, node2->children_nb * sizeof (node_t *));
   }
   return node1;
 }
 
 void node_free (node_t * node, bool free_info) {
-  free(node->children);
+//   free(node->children);
   free(node->fathers);
   
   if (free_info){
@@ -53,24 +57,45 @@ void node_free (node_t * node, bool free_info) {
   free(node);
 }
 
-void node_link (node_t * node, node_t * child) {
-  node_set_children_nb (node, node->children_nb + 1);
-  node->children[node->children_nb - 1] = child;
+void node_link (node_t * node, node_t * child, bool is_child1) {
+  if (is_child1){
+    if (not node->has_child1) {
+      node_set_children_nb (node, node->children_nb + 1);
+      node->has_child1 = true;
+    }
+    else{
+      std::cerr << "WARNING: overwriting existing node child." << std::endl; 
+    }
+    node->child1 = child;
+  }
+  else {
+    if (not node->has_child2) {
+      node_set_children_nb (node, node->children_nb + 1);
+      node->has_child2 = true;
+    }
+    else{
+      std::cerr << "WARNING: overwriting existing node child." << std::endl; 
+    }
+    node->child2 = child;
+  }
+  
+//   node_set_children_nb (node, node->children_nb + 1);
+//   node->children[node->children_nb - 1] = child;
   node_set_fathers_nb (child, child->fathers_nb + 1);
   child->fathers[child->fathers_nb - 1] = node;
 }
 
-node_t *node_child (node_t * node, size_t index) {
-  if (index >= node->children_nb)
-    return NULL;
-  return node->children[index];
-}
+// node_t *node_child (node_t * node, size_t index) {
+//   if (index >= node->children_nb)
+//     return NULL;
+// //   return node->children[index];
+// }
 
-const node_t *node_child_const (const node_t * node, size_t index) {
-  if (index >= node->children_nb)
-    return NULL;
-  return node->children[index];
-}
+// const node_t *node_child_const (const node_t * node, size_t index) {
+//   if (index >= node->children_nb)
+//     return NULL;
+//   return node->children[index];
+// }
 
 node_t *node_father (node_t * node, size_t index) {
   if (index >= node->fathers_nb)
@@ -99,15 +124,30 @@ void node_remove_father (node_t * node, node_t * to_remove) {
 }
 
 void node_remove_child (node_t * node, node_t * to_remove) {
-  vsize_t i, shift;
+//   vsize_t i, shift;
 
-  shift = 0;
-  for (i = 0; i < node->children_nb; ++i) {
-    node_t *current = node_child (node, i);
-    if (current == to_remove)
-      ++shift;
-    else
-      node->children[i - shift] = current;
+//   shift = 0;
+//   for (i = 0; i < node->children_nb; ++i) {
+//     node_t *current = node_child (node, i);
+//     if (current == to_remove)
+//       ++shift;
+//     else
+//       node->children[i - shift] = current;
+//   }
+  
+  if (node->has_child1){
+    if (node->child1 == to_remove){
+      node->has_child1 = false;
+      node_set_children_nb (node, node->children_nb - 1);
+    }
   }
-  node_set_children_nb (node, i - shift);
+  
+  if (node->has_child2){
+    if (node->child1 == to_remove){
+      node->has_child2 = false;
+      node_set_children_nb (node, node->children_nb - 1);
+    }
+  }
+  
+//   node_set_children_nb (node, i - shift);
 }
