@@ -20,6 +20,8 @@ typedef struct Couple
 {
   vsize_t x;
   vsize_t y;
+  bool is_numbered;
+  bool is_child1;
 } Couple;
 
 typedef struct CoupleList

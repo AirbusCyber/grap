@@ -106,13 +106,13 @@ size_t node_edges_to_dot(const node_t *node, FILE *fp)
   
   if (node->has_child1){
     ret += (size_t)fprintf(fp, "\"%" PRIx64 "\" -> \"%" PRIx64
-                               "\" [label = \"%" PRIx64 "\", child_number=1]",
+                               "\" [label = \"%" PRIx64 "\", childnumber=1]",
                            node->node_id, node->child1->node_id, j);
     ret += (size_t)fprintf(fp, "\n");
   }
   if (node->has_child2){
     ret += (size_t)fprintf(fp, "\"%" PRIx64 "\" -> \"%" PRIx64
-                               "\" [label = \"%" PRIx64 "\", child_number=2]",
+                               "\" [label = \"%" PRIx64 "\", childnumber=2]",
                            node->node_id, node->child2->node_id, j);
     ret += (size_t)fprintf(fp, "\n");
   }

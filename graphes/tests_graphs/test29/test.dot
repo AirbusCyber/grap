@@ -1,0 +1,7 @@
+Digraph G {
+"A" [label = "jcc" , root=true]
+"B" [label = "mov"]
+"C" [label = "xor"]
+"A" -> "B" [label = "1"]
+"A" -> "C" [label = "2"]
+}

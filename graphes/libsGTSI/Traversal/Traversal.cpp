@@ -300,10 +300,10 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
 //         queue3.push(std::make_tuple(ss, k2, f));
 //       }
       if (ss->has_child1){
-        queue3.push(std::make_tuple(ss, k2, ss->child1));
+        queue3.push(std::make_tuple(ss, 0, ss->child1));
       }
       if (ss->has_child2){
-        queue3.push(std::make_tuple(ss, k2, ss->child2));
+        queue3.push(std::make_tuple(ss, 1, ss->child2));
       }
 
       explored.insert(ss);
@@ -485,8 +485,6 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
   std::pair < node_t *, node_t * >*numbers = (std::pair < node_t *, node_t * >*)calloc_or_quit(W, sizeof(std::pair < node_t *, node_t * >));
   // nodes will be numbered 1, 2, 3.. ; max_numbered keeps track of the latest numbered given
   vsize_t max_numbered = 0;
-  
-  bool gogo = false;
 
 //   Match first word (mot): it has to number a matching first node
 //   TODO: handle case where first matched node should be repeated
@@ -540,12 +538,12 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
         }
         else{
           // Case: first word matched and m defines an edge to a child
-	  if (m->k == 0 and current_node->has_child1){
-	    child_node = current_node->child1;
-	  }
-	  else if (m->k == 1 and current_node->has_child2){
-	    child_node = current_node->child2;
-	  }
+          if (m->k == 0 and current_node->has_child1){
+            child_node = current_node->child1;
+          }
+          else if (m->k == 1 and current_node->has_child2){
+            child_node = current_node->child2;
+          }
         }
         
         set < node_t * >::iterator it = matched_nodes->find(child_node);

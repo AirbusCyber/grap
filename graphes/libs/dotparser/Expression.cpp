@@ -40,6 +40,30 @@ Couple *createEdge(char *f, char *c, OptionList* ol) {
   Couple *e = (Couple *) malloc_or_quit(sizeof(Couple));
   e->x = hash_func(f);
   e->y = hash_func(c);
+  e->is_numbered = false;
+  e->is_child1 = false;
+  
+  if (ol != NULL){
+    vsize_t i;
+    for (i = 0; i < ol->size; i++) {
+      char *v = removeQuotes(ol->options[i]->value);
+      char *id = ol->options[i]->id;
+    
+      if (strcmp(id, "childnumber") == 0){
+        vsize_t k = (vsize_t) atoi(v);
+        if (k == 1){
+          e->is_numbered = true;
+          e->is_child1 = true;
+        }
+        else if (k == 2){
+          e->is_numbered = true;
+          e->is_child1 = false;
+        }
+      }
+      free(v);
+    }
+  }
+
   
   free(f);
   free(c);
@@ -74,8 +98,12 @@ graph_t *addEdgesToGraph(CoupleList * cl, graph_t * g) {
       printf("WARNING: when adding a node, father or child was not found in graph.\n");
     }
     else {
-      bool is_child1 = not f->has_child1;
-      node_link(f, c, is_child1);
+      if (cl->couples[i]->is_numbered){
+        node_link(f, c, cl->couples[i]->is_child1);
+      }
+      else{
+        node_link(f, c, not f->has_child1);
+      }
     }
   }
 

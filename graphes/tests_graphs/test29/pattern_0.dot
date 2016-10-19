@@ -1,0 +1,7 @@
+Digraph G {
+"A" [label = "jcc" , root=true, getid=A]
+"B" [label = "xor", getid=B]
+"C" [label = "mov", getid=C]
+"A" -> "B" [label = "2", childnumber=2]
+"A" -> "C" [label = "1", childnumber=1]
+}
