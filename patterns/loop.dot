@@ -1,9 +1,0 @@
-digraph G{
-A [label="A: *", shape="box", cond=true, getid="A"]
-B [label="B: (*)+", shape="box", cond=true, minrepeat=1, maxrepeat=none, getid="B"]
-C [label="C: *", shape="box", cond=true, getid="C"]
-
-A -> B
-B -> C
-B -> B
-}
