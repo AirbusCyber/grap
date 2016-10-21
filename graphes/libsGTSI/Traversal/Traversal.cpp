@@ -864,14 +864,13 @@ list < vsize_t > ParcoursNode::parcourirDepuisSommet(graph_t * gr, vsize_t v, vs
 
   std::pair < node_t *, node_t * >*numeros = (std::pair < node_t *, node_t * >*)calloc_or_quit(W, sizeof(std::pair < node_t *, node_t * >));
   vsize_t max_numeros = 0;
-  list < vsize_t > l = this->parcourirDepuisSommetRec(true, gr, r, W, numeros, max_numeros, matched_nodes, checkLabels);
-//   delete matched_nodes;
+  list < vsize_t > l = this->parcourirDepuisSommetRec(true, gr, r, numeros, max_numeros, matched_nodes, checkLabels);
   free(numeros);
   return l;
 }
 
 
-list < vsize_t > ParcoursNode::parcourirDepuisSommetRec(bool racine, graph_t * gr, node_t * r, vsize_t W, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, set < node_t * > matched_nodes, bool checkLabels) {
+list < vsize_t > ParcoursNode::parcourirDepuisSommetRec(bool racine, graph_t * gr, node_t * r, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, set < node_t * > matched_nodes, bool checkLabels) {
   list < vsize_t > l;
 
   if (this->feuille) {
@@ -892,7 +891,7 @@ list < vsize_t > ParcoursNode::parcourirDepuisSommetRec(bool racine, graph_t * g
     set<node_t *> matched_nodes_r = get<4>(ret);
 
     if (possible) {
-      list < vsize_t > l2 = f->parcourirDepuisSommetRec(false, gr, node, W, numeros, max_numeros_r, matched_nodes_r, checkLabels);
+      list < vsize_t > l2 = f->parcourirDepuisSommetRec(false, gr, node, numeros, max_numeros_r, matched_nodes_r, checkLabels);
       l.splice(l.begin(), l2);
     }
   }

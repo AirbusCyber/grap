@@ -85,6 +85,8 @@ void printDescription()
                 "_arg2)\n";  
   std::cout << "Test 29: [reference to 0] same as test 0 but numbered children "
                "(childnumber=1, ...).\n";
+  std::cout << "Test 30: [manual] patterns with different size (tree), the "
+               "second (matching) pattern is a subgraph of the first.\n";
 }
 
 #ifdef _WIN32
@@ -458,19 +460,18 @@ vsize_t test_NodeInfo(){
   string color;
   std::cout << "GTSI" + desc + ":\n";
 
-  // TODO: why do patterns need to have the same size ?
   vsize_t i;
-  vsize_t siteSize = grPattern[0]->nodes.count;
+  vsize_t maxSiteSize = grPattern[0]->nodes.count;
   for (i = 1; i < nPattern; i++) {
-    if (grPattern[i]->nodes.count < siteSize)
-      siteSize = grPattern[i]->nodes.count;
+    if (grPattern[i]->nodes.count > maxSiteSize)
+      maxSiteSize = grPattern[i]->nodes.count;
   }
 
   ParcoursNode* tree = new ParcoursNode();
 
   for (i = 0; i < nPattern; i++) {
     bool added = tree->addGraphFromNode(grPattern[i], grPattern[i]->root,
-                                        siteSize, checkLabels);
+                                        grPattern[i]->nodes.count, checkLabels);
     
     if (not added) {
       printf("WARNING: pattern graph %d was not added to traversal tree "
@@ -485,7 +486,7 @@ vsize_t test_NodeInfo(){
   
   printf("%d traversals reconstructed from pattern graph.\n", (int) tree->countLeaves());
 
-  vsize_t count = tree->parcourir(grTest, siteSize, checkLabels, true);
+  vsize_t count = tree->parcourir(grTest, maxSiteSize, checkLabels, true);
   if (count != expected) {
     color = Red;
     error_number += 1;
@@ -500,9 +501,9 @@ vsize_t test_NodeInfo(){
   
   if (nPattern == 1) {
     Parcours *p =
-        parcoursLargeur(grPattern[0], grPattern[0]->root->list_id, siteSize);
+        parcoursLargeur(grPattern[0], grPattern[0]->root->list_id, maxSiteSize);
     Parcours::RetourParcours rt =
-        p->parcourir(grTest, siteSize, checkLabels, true, false, false);
+        p->parcourir(grTest, maxSiteSize, checkLabels, true, false, false);
     vsize_t count2 = rt.first;
 
     if (count2 != expected) {

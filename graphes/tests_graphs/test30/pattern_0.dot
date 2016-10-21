@@ -1,0 +1,9 @@
+Digraph G {
+"A" [label = "xor eax, eax" , root=true, getid=A]
+"B" [label = "add eax, 1", getid=B]
+"C" [label = "sub eax, 3", getid=C]
+"D" [label = "ret", getid=D]
+A -> B
+B -> C
+C -> D
+}

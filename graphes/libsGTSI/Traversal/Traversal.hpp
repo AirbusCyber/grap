@@ -92,7 +92,7 @@ public:
   string toString();
   vsize_t parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool countAllMatches);
   typedef std::tuple < bool, vsize_t > RetourParcourir;
-  list < vsize_t > parcourirDepuisSommetRec(bool racine, graph_t * gr, node_t * r, vsize_t W, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, std::set < node_t * > matched_nodes, bool checkLabels);
+  list < vsize_t > parcourirDepuisSommetRec(bool racine, graph_t * gr, node_t * r, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, std::set < node_t * > matched_nodes, bool checkLabels);
   list < vsize_t > parcourirDepuisSommet(graph_t *, vsize_t r, vsize_t W, bool checkLabels);
   typedef std::tuple < bool, node_t *, std::pair < node_t *, node_t * >*, vsize_t, set < node_t * >>RetourEtape;
   std::tuple <bool, node_t*, set < node_t * >> etapeUnmatchedNode(bool checkLabels, MotParcours* m, node_t* node, node_t* current_node, set < node_t * > matched_nodes, std::pair < node_t *, node_t * >*numbers, vsize_t max_numbered);
