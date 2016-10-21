@@ -10,6 +10,10 @@ void graph_fprint(FILE* fp, graph_t* graph) {
   for (i=0; i<graph->nodes.count; i++){
     node_t* node = graph->nodes.storage[i];
     node_to_dot(node,(node_t*)&graph->root->node_id, i, fp);
+  }
+  
+  for (i=0; i<graph->nodes.count; i++){
+    node_t* node = graph->nodes.storage[i];
     node_edges_to_dot(node, fp);
   }
 

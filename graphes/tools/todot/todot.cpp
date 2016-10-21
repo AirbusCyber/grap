@@ -5,6 +5,8 @@ int main(int argc, char* argv[]){
     std::cout << "Usage: ./todot (in.dot) (out.dot)\n";
   }
 
+  std::cerr << "WARNING: ./todot is deprecated, conditions are not exported." << std::endl;
+  
   char* pathIn = argv[1];
   char* pathOut = argv[2];
 

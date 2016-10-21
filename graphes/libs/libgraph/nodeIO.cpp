@@ -24,7 +24,7 @@ size_t node_to_dot(const node_t *node, const node_t *root, size_t node_number,
   ret = (size_t)fprintf(fp, "\"%" PRIx64 "\" [", node->node_id);
   const char *s = node->info->inst_str.c_str();
 
-  ret += (size_t)fprintf(fp, "symb = ");
+  ret += (size_t)fprintf(fp, "csymb = ");
   ret += (size_t)fprintf(fp, "%s", s);
 
   // printing label
