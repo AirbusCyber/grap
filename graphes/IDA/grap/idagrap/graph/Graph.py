@@ -40,11 +40,11 @@ class CFG:
         # Get the Entry Point
         entry = BeginEA()
 
-        self.dis(ea=entry, ifrom=None)
+        self.dis(ea=entry, is_child1=None, ifrom=None)
 
         # Scan all the functions
         for ea in Functions():
-            self.dis(ea=ea, ifrom=None)
+            self.dis(ea=ea, is_child1=None, ifrom=None)
 
         update_children_fathers_number(self.graph)
 
@@ -61,12 +61,13 @@ class CFG:
         # Allocate a new graph
         self.graph = graph_alloc(0)
 
-    def dis(self, ea, ifrom=None):
+    def dis(self, ea, is_child1, ifrom=None):
         """Disassemble the current address and fill the nodes list.
 
         Args:
             ea (ea_t): Effective address.
             ifrom (node_t*): Predecessor node.
+            is_child1 (bool)
         """
 
         node_list = self.graph.nodes
@@ -80,10 +81,11 @@ class CFG:
 
         # If the node exists
         if node_list_find(node_list, n.getid()):
-            if ifrom:
+            if ifrom and is_child1 is not None:
                 # Link the father and the child
                 node_link(node_list_find(node_list, ifrom.getid()),
-                          node_list_find(node_list, n.getid()))
+                          node_list_find(node_list, n.getid()),
+                          is_child1)
             return
 
         # Get the instruction
@@ -98,9 +100,10 @@ class CFG:
         # Add the node
         node_list_add(node_list, node_copy(node_alloc(), n))
 
-        if ifrom:
+        if ifrom and is_child1 is not None:
             node_link(node_list_find(node_list, ifrom.getid()),
-                      node_list_find(node_list, n.getid()))
+                      node_list_find(node_list, n.getid()),
+                      is_child1)
 
         # No child
         if inst.itype in RETS:
@@ -109,7 +112,7 @@ class CFG:
         # 1 remote child
         elif inst.itype in JMPS:
             try:
-                self.dis(inst.Operands[0].addr, n)
+                self.dis(inst.Operands[0].addr, True, n)
             except:
                 pass
 
@@ -117,10 +120,10 @@ class CFG:
         elif inst.itype in CJMPS:
 
             # Next
-            self.dis(inst.ea + inst.size, n)
+            self.dis(inst.ea + inst.size, True, n)
 
             # Remote
-            self.dis(inst.Operands[0].addr, n)
+            self.dis(inst.Operands[0].addr, False, n)
 
         # 2 children (next, then remote) - call
         elif inst.itype in CALLS:
@@ -128,14 +131,14 @@ class CFG:
             # Next
             # Catch the end of a noret function
             if not is_noret(inst.ea):
-                self.dis(inst.ea + inst.size, n)
+                self.dis(inst.ea + inst.size, True, n)
 
             # Remote
             if inst.Operands[0].type in OP_MEM:
-                self.dis(inst.Operands[0].addr, n)
+                self.dis(inst.Operands[0].addr, False, n)
 
         # 1 child (next) - basic instruction
         else:
-            self.dis(inst.ea + inst.size, n)
+            self.dis(inst.ea + inst.size, True, n)
 
         return
