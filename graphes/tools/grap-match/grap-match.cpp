@@ -177,7 +177,7 @@ void worker_queue(std::list<ArgsMatchPatternToTest>* args_queue, std::mutex* que
     queue_mutex->unlock();
     
     if (found_next){
-      matchPatternToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<4>(args), std::get<5>(args), std::get<6>(args), std::get<7>(args), std::get<8>(args), std::get<9>(args), cout_mutex);
+      matchPatternToTest_tree(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<4>(args), std::get<5>(args), std::get<6>(args), std::get<7>(args), std::get<8>(args), std::get<9>(args), cout_mutex);
     }
     else{
       break; 
@@ -226,14 +226,14 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, 
   }
 
   // Parse matches and print the extracted nodes
-  std::set < std::map < string, std::list < node_t * >*>*>* set_gotten = rt.second;
-  if (not set_gotten->empty()) {
+  std::list < std::map < string, std::list < node_t * >*>*>* list_gotten = rt.second;
+  if (not list_gotten->empty()) {
 //     std::cout << "\nExtracted nodes:\n";
-    std::set < std::map < string, std::list < node_t * >*>*>::iterator it;
+    std::list < std::map < string, std::list < node_t * >*>*>::iterator it;
 
     vsize_t i = 1;
-    for (it = set_gotten->begin(); it != set_gotten->end(); it++) {
-      if (it != set_gotten->begin()) out_stream << std::endl;
+    for (it = list_gotten->begin(); it != list_gotten->end(); it++) {
+      if (it != list_gotten->begin()) out_stream << std::endl;
       out_stream << "Match " << std::dec << i << "\n";
 
       std::map < string, std::list < node_t * >*>*p_found_nodes = *it;
@@ -261,7 +261,98 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, 
     }
   }
   
-  delete(set_gotten);
+  delete(list_gotten);
+  graph_free(test_graph, true);
+  
+  cout_mutex->lock();
+  std::cout << out_stream.str();
+  std::cerr << err_stream.str();
+  cout_mutex->unlock();
+}
+
+void matchPatternToTest_tree(bool optionVerbose, bool optionQuiet, bool checkLabels, vsize_t n_pattern, string pathPattern, graph_t* pattern_graph, Parcours* pattern_parcours, string pathTest, bool printNoMatches, bool printAllMatches, std::mutex* cout_mutex){
+  ostringstream out_stream;
+  ostringstream err_stream;
+  
+  if (not optionQuiet){
+    out_stream << std::endl; 
+  }
+  
+  if (optionVerbose){
+    out_stream << "Parsing test file." << endl; 
+  }
+  
+  graph_t *test_graph = getGraphFromPath(pathTest.c_str());
+  if (test_graph == NULL){
+    err_stream <<  "Test graph " << pathTest << " could not be opened, aborting.\n";
+    return;
+  }
+  
+  vsize_t n_test;
+  n_test = test_graph->nodes.size;
+  
+  if (optionVerbose){
+    out_stream << "Done." << endl; 
+  }
+  
+  vsize_t i;
+  vsize_t maxSiteSize = pattern_graph->nodes.count;
+
+  ParcoursNode* tree = new ParcoursNode();
+
+  bool added = tree->addGraphFromNode(pattern_graph, pattern_graph->root,
+                                      pattern_graph->nodes.count, checkLabels);
+    
+  if (not added) {
+    printf("WARNING: pattern graph was not added to traversal tree "
+            "because it already exists there.\n");
+  }
+  
+  out_stream << (int) tree->countLeaves() << " traversals reconstructed from pattern graph.\n";
+
+  ParcoursNode::RetourParcourir rt = tree->parcourir(test_graph, maxSiteSize, checkLabels, true);
+  vsize_t count = std::get<0>(rt);
+  out_stream << (int) count << " traversals possible in test graph with tree.\n";
+  
+  tree->freeParcoursNode(); 
+  
+  // Parse matches and print the extracted nodes
+//   std::set < std::map < string, std::list < node_t * >*>*>* set_gotten = rt.second;
+//   if (not set_gotten->empty()) {
+// //     std::cout << "\nExtracted nodes:\n";
+//     std::set < std::map < string, std::list < node_t * >*>*>::iterator it;
+// 
+//     vsize_t i = 1;
+//     for (it = set_gotten->begin(); it != set_gotten->end(); it++) {
+//       if (it != set_gotten->begin()) out_stream << std::endl;
+//       out_stream << "Match " << std::dec << i << "\n";
+// 
+//       std::map < string, std::list < node_t * >*>*p_found_nodes = *it;
+//       std::map < string, std::list < node_t * >*>::iterator it2;
+//       for (it2 = p_found_nodes->begin(); it2 != p_found_nodes->end(); it2++) {
+//         std::list < node_t * >*node_list = (*it2).second;
+// 
+//         if (not node_list->empty()) {
+//           vsize_t k = 0;
+//           for (std::list < node_t * >::iterator itn = node_list->begin(); itn != node_list->end(); ++itn) {
+//             node_t *n = *itn;
+//             out_stream << (*it2).first;
+//             if (node_list->size() > 1) out_stream << k;
+//             out_stream << ": ";
+//             if (n->info->has_address) out_stream << "0x" << std::hex << n->info->address << std::dec << ", ";
+//             out_stream << n->info->inst_str;
+//             out_stream << endl;
+//             k++;
+//           }
+//         }
+//       }
+//       i++;
+//       
+//       freeMapGotten(p_found_nodes);
+//     }
+//   }
+  
+//   delete(set_gotten);
   graph_free(test_graph, true);
   
   cout_mutex->lock();
