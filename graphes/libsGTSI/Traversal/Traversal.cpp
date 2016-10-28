@@ -614,35 +614,23 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
   return RetourParcoursDepuisSommet(true, found_nodes);
 }
 
-void freeMapGotten(std::map < string, std::list < node_t * >*>* map_gotten){
-  // Map: associates a string with a list of nodes
+void freeMatch(Match* match){
+  // Match: associates a string with a list of nodes
   // Frees each list associated with a string, then free the map ; does not free the nodes
   
   Match::iterator it;
-  for (it = map_gotten->begin(); it != map_gotten->end(); it++) {
-    std::list < node_t * >*node_list = (*it).second;
-    
+  for (it = match->begin(); it != match->end(); it++) {
+    std::list < node_t * >*node_list = (*it).second;    
     delete(node_list);
   }
 
-  delete(map_gotten);
+  delete(match);
 }
 
 void freeRetourParcoursDepuisSommet(Parcours::RetourParcoursDepuisSommet rt, bool getids){
-    // freeing found nodes
-    Match* found_nodes = rt.second;
-    if (not found_nodes->empty()) {
-      Match::iterator it;
-
-      if (getids){
-        for (it = found_nodes->begin(); it != found_nodes->end(); it++) {
-          std::list < node_t * >* p_found_nodes = (*it).second;
-          delete p_found_nodes;
-        }
-      }
-    }
-    
-    delete rt.second;
+    // freeing match
+    Match* match = rt.second;
+    freeMatch(match);
 }
 
 Parcours::RetourParcours Parcours::parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool countAllMatches, bool getId, bool printAllMatches) {
@@ -656,7 +644,7 @@ Parcours::RetourParcours Parcours::parcourir(graph_t * gr, vsize_t W, bool check
         list_gotten->push_back(rt.second);
       }
       else {
-        freeMapGotten(rt.second);
+        freeMatch(rt.second);
       }
       
       if (not countAllMatches){
@@ -843,21 +831,22 @@ ParcoursNode::RetourParcourir ParcoursNode::parcourir(graph_t* gr, vsize_t W, bo
   vsize_t count = 0;
   vsize_t n;
   std::set < vsize_t > leaves;
-  PatternsMatches* leaves_to_matches = new PatternsMatches();
+  PatternsMatches* patterns_matches = new PatternsMatches();
   for (n = 0; n < gr->nodes.size; n++) {    
-    ParcoursNode::PatternsMatches* ret = this->parcourirDepuisSommet(gr, n, W, checkLabels, returnFound, printAllMatches);
-    merge_patternsmatches(leaves_to_matches, ret);
+    PatternsMatches* ret = this->parcourirDepuisSommet(gr, n, W, checkLabels, returnFound, printAllMatches);
+    merge_patternsmatches(patterns_matches, ret);
+    freePatternsMatches(ret, false);
   }
   
   PatternsMatches::iterator it_pattersmatches;
-  for (it_pattersmatches = leaves_to_matches->begin(); it_pattersmatches != leaves_to_matches->end(); it_pattersmatches++){
+  for (it_pattersmatches = patterns_matches->begin(); it_pattersmatches != patterns_matches->end(); it_pattersmatches++){
     vsize_t leaf_id = it_pattersmatches->first;
     MatchList* match_list = it_pattersmatches->second;
     
     count += match_list->size();
   }
   
-  return std::make_tuple(count, leaves_to_matches);
+  return std::make_tuple(count, patterns_matches);
 }
 
 void ParcoursNode::merge_patternsmatches(PatternsMatches* leaves_to_matches, PatternsMatches* leaves_to_matches_rec){
@@ -875,7 +864,7 @@ void ParcoursNode::merge_patternsmatches(PatternsMatches* leaves_to_matches, Pat
       match_list->insert(match_list->end(), match_list_rec->begin(), match_list_rec->end());
     }
     else {
-      // Case: clone MatchList
+      // Case: add MatchList
       leaves_to_matches->insert(std::pair<vsize_t, MatchList*>(leaf_id, match_list_rec));
     }
   }
@@ -883,31 +872,24 @@ void ParcoursNode::merge_patternsmatches(PatternsMatches* leaves_to_matches, Pat
   return;
 }
 
-ParcoursNode::PatternsMatches* ParcoursNode::parcourirDepuisSommet(graph_t* gr, vsize_t v, vsize_t W, bool checkLabels, bool returnFound, bool printAllMatches) {
+PatternsMatches* ParcoursNode::parcourirDepuisSommet(graph_t* gr, vsize_t v, vsize_t W, bool checkLabels, bool returnFound, bool printAllMatches) {
   set < node_t * > matched_nodes;
   node_t *r = node_list_item(&gr->nodes, v);
   std::pair < node_t *, node_t * >*numeros = (std::pair < node_t *, node_t * >*)calloc_or_quit(W, sizeof(std::pair < node_t *, node_t * >));
   vsize_t max_numeros = 0;
   Match* empty_match = new Match();
-  ParcoursNode::PatternsMatches* found_leaves = this->parcourirDepuisSommetRec(true, gr, r, numeros, max_numeros, matched_nodes, checkLabels, empty_match, returnFound, printAllMatches);
+  PatternsMatches* found_leaves = this->parcourirDepuisSommetRec(true, gr, r, numeros, max_numeros, matched_nodes, checkLabels, empty_match, returnFound, printAllMatches);
   free(numeros);
   return found_leaves;
 }
 
 Match* clone_match(Match* m){
-  Match* new_match = new Match();
+  Match* new_match =  new Match();
   
   Match::iterator it;
   for (it = m->begin(); it != m->end(); it++){   
     std::string s = (*it).first;
     std::list < node_t * >* list_nodes = (*it).second;
-    
-    if (list_nodes == NULL){
-      std::cout << "null" << std::endl; 
-    }
-    if (list_nodes->empty()){
-      std::cout << "empty" << std::endl; 
-    }
     
     std::list < node_t * >* new_list_nodes = new std::list < node_t * >();
     new_list_nodes->insert(new_list_nodes->end(), list_nodes->begin(), list_nodes->end());
@@ -917,8 +899,26 @@ Match* clone_match(Match* m){
   return new_match;
 }
 
+void freePatternsMatches(PatternsMatches* pattern_matches, bool freeMatches){
+  PatternsMatches::iterator it_patternsmatches;
 
-ParcoursNode::PatternsMatches* ParcoursNode::parcourirDepuisSommetRec(bool racine, graph_t * gr, node_t * r, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, set < node_t * > matched_nodes, bool checkLabels, Match* current_match, bool returnFound, bool printAllMatches) {
+  if (freeMatches){
+    for (it_patternsmatches = pattern_matches->begin(); it_patternsmatches != pattern_matches->end(); it_patternsmatches++){
+      vsize_t leaf_id = it_patternsmatches->first;
+      MatchList* match_list = it_patternsmatches->second;
+      MatchList::iterator it_match_list;
+        for (it_match_list = match_list->begin(); it_match_list != match_list->end(); it_match_list++) {
+          Match* match = *it_match_list;    
+          freeMatch(match);
+        }
+        
+        delete match_list;
+      }
+  }
+  delete pattern_matches;
+}
+
+PatternsMatches* ParcoursNode::parcourirDepuisSommetRec(bool racine, graph_t * gr, node_t * r, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, set < node_t * > matched_nodes, bool checkLabels, Match* current_match, bool returnFound, bool printAllMatches) {
   PatternsMatches* leaves_to_matches = new PatternsMatches();
 
   if (this->feuille) {
@@ -930,23 +930,18 @@ ParcoursNode::PatternsMatches* ParcoursNode::parcourirDepuisSommetRec(bool racin
       leaves_to_matches->insert(std::pair<vsize_t, MatchList*>(this->id, ml));
     }
     else{
-      pattern_match_list->second->push_front(current_match);
+      pattern_match_list->second->push_front(clone_match(current_match));
     }
   }
 
   assert(this->feuille or racine or not this->fils.empty());
-
+  
   list < ParcoursNode * >::iterator it;
   for (it = this->fils.begin(); it != this->fils.end(); it++) {       
     ParcoursNode *f = (*it);
     
     Match* current_match_copy;
-    if (this->fils.size() > 1){
-      current_match_copy = clone_match(current_match);
-    }
-    else {
-      current_match_copy = current_match; 
-    }
+    current_match_copy = clone_match(current_match);
     
     RetourEtape ret = etape(f->mot, r, gr, numeros, max_numeros, matched_nodes, checkLabels, current_match_copy, returnFound, printAllMatches);
     bool possible = get<0>(ret);
@@ -956,10 +951,16 @@ ParcoursNode::PatternsMatches* ParcoursNode::parcourirDepuisSommetRec(bool racin
     set<node_t *> matched_nodes_r = get<4>(ret);
 
     if (possible) {    
-      ParcoursNode::PatternsMatches* leaves_to_matches_rec = f->parcourirDepuisSommetRec(false, gr, node, numeros, max_numeros_r, matched_nodes_r, checkLabels, current_match_copy, returnFound, printAllMatches);
+      PatternsMatches* leaves_to_matches_rec = f->parcourirDepuisSommetRec(false, gr, node, numeros, max_numeros_r, matched_nodes_r, checkLabels, current_match_copy, returnFound, printAllMatches);
       merge_patternsmatches(leaves_to_matches, leaves_to_matches_rec);
+      freePatternsMatches(leaves_to_matches_rec, false);
+    }
+    else {
+      freeMatch(current_match_copy);
     }
   }
+  
+  freeMatch(current_match);
   return leaves_to_matches;
 }
 

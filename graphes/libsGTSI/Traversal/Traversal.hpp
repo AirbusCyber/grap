@@ -52,6 +52,8 @@ CondNode** computeCond(node_t* n);
 
 typedef std::map < string, std::list < node_t * >*> Match;
 typedef std::list <Match*> MatchList;
+typedef std::map < vsize_t, MatchList*> PatternsMatches;
+
 
 Match* clone_match(Match* m);
 
@@ -72,8 +74,9 @@ public:
   void freeParcours(bool free_mots);
 };
 
-void freeMapGotten(std::map < string, std::list < node_t * >*>*);
+void freeMatch(std::map < string, std::list < node_t * >*>*);
 void freeRetourParcoursDepuisSommet(Parcours::RetourParcoursDepuisSommet rt, bool getid);
+void freePatternsMatches(PatternsMatches* patterns_matches, bool freeMatches);
 
 typedef std::tuple < node_t *, uint8_t, node_t * >TupleQueue;
 Parcours *parcoursLargeur(graph_t * graph, vsize_t root, vsize_t W);
@@ -95,11 +98,10 @@ public:
   string toDot();
   string toString();
 
-  typedef std::map < vsize_t, MatchList*> PatternsMatches;
   typedef std::tuple < vsize_t, PatternsMatches*> RetourParcourir;
   RetourParcourir parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool returnFound, bool printAllMatches);
-  ParcoursNode::PatternsMatches* parcourirDepuisSommetRec(bool racine, graph_t * gr, node_t * r, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, std::set < node_t * > matched_nodes, bool checkLabels, Match* current_match, bool returnFound, bool printAllMatches);
-  ParcoursNode::PatternsMatches* parcourirDepuisSommet(graph_t *, vsize_t r, vsize_t W, bool checkLabels, bool printFound, bool printAllMatches);
+  PatternsMatches* parcourirDepuisSommetRec(bool racine, graph_t * gr, node_t * r, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, std::set < node_t * > matched_nodes, bool checkLabels, Match* current_match, bool returnFound, bool printAllMatches);
+  PatternsMatches* parcourirDepuisSommet(graph_t *, vsize_t r, vsize_t W, bool checkLabels, bool printFound, bool printAllMatches);
   typedef std::tuple < bool, node_t *, std::pair < node_t *, node_t * >*, vsize_t, set < node_t * >>RetourEtape;
   std::tuple <bool, node_t*, set < node_t * >> etapeUnmatchedNode(bool checkLabels, bool returnFound, MotParcours* m, node_t* node, node_t* current_node, set < node_t * > matched_nodes, std::pair < node_t *, node_t * >*numbers, vsize_t max_numbered, Match*, bool printAllMatches);
   RetourEtape etape(MotParcours* m, node_t* s, graph_t* gr, std::pair< node_t*, node_t* >* numbers, vsize_t max_numbered, std::set< node_t* > matched_nodes, bool checkLabels, Match* current_match, bool returnFound, bool printAllMatches);

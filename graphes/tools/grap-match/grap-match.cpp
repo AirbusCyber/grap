@@ -209,6 +209,7 @@ int main(int argc, char *argv[]) {
     tree->freeParcoursNode(); 
   }
   
+  delete(args_queue);
   delete(queue_mutex);
   delete(cout_mutex);
   pattern_parcours->freeParcours(true);
@@ -298,9 +299,9 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, 
       if (it != list_gotten->begin()) out_stream << std::endl;
       out_stream << "Match " << std::dec << i << "\n";
 
-      std::map < string, std::list < node_t * >*>*p_found_nodes = *it;
+      Match* match = *it;
       std::map < string, std::list < node_t * >*>::iterator it2;
-      for (it2 = p_found_nodes->begin(); it2 != p_found_nodes->end(); it2++) {
+      for (it2 = match->begin(); it2 != match->end(); it2++) {
         std::list < node_t * >*node_list = (*it2).second;
 
         if (not node_list->empty()) {
@@ -319,7 +320,7 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, 
       }
       i++;
       
-      freeMapGotten(p_found_nodes);
+      freeMatch(match);
     }
   }
   
@@ -381,10 +382,10 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, Par
   }
   
   // Parse matches and print the extracted nodes
-  ParcoursNode::PatternsMatches* pattern_matches = std::get<1>(rt);
+  PatternsMatches* pattern_matches = std::get<1>(rt);
   
   if (getids and not pattern_matches->empty()) {
-    ParcoursNode::PatternsMatches::iterator it_patternsmatches;
+    PatternsMatches::iterator it_patternsmatches;
     for (it_patternsmatches = pattern_matches->begin(); it_patternsmatches != pattern_matches->end(); it_patternsmatches++){
       vsize_t leaf_id = it_patternsmatches->first;
       MatchList* match_list = it_patternsmatches->second;
@@ -394,13 +395,13 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, Par
       vsize_t i = 1;
       for (it_match_list = match_list->begin(); it_match_list != match_list->end(); it_match_list++) {
         if (it_match_list != match_list->begin()) out_stream << std::endl;
-        Match* p_found_nodes = *it_match_list;
+        Match* match = *it_match_list;
         
-        if (not p_found_nodes->empty()){
+        if (not match->empty()){
           out_stream << "Match " << std::dec << i << "\n";
 
           Match::iterator it_match;
-          for (it_match = p_found_nodes->begin(); it_match != p_found_nodes->end(); it_match++) {
+          for (it_match = match->begin(); it_match != match->end(); it_match++) {
             std::list < node_t * >*node_list = (*it_match).second;
 
             if (not node_list->empty()) {
@@ -420,10 +421,12 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, Par
         }
         i++;
         
-        freeMapGotten(p_found_nodes);
+        freeMatch(match);
       }
     }
   }
+  
+  freePatternsMatches(pattern_matches, true);
   
 //   delete(set_gotten);
   graph_free(test_graph, true);

@@ -486,7 +486,8 @@ vsize_t test_NodeInfo(){
   
   printf("%d traversals reconstructed from pattern graph.\n", (int) tree->countLeaves());
 
-  vsize_t count = std::get<0>(tree->parcourir(grTest, maxSiteSize, checkLabels, true, false));
+  ParcoursNode::RetourParcourir ret_parcours = tree->parcourir(grTest, maxSiteSize, checkLabels, true, false);
+  vsize_t count = std::get<0>(ret_parcours);
   if (count != expected) {
     color = Red;
     error_number += 1;
@@ -496,8 +497,9 @@ vsize_t test_NodeInfo(){
   }
   printf("%s%d traversals possible in test graph (expected: %d) with tree.%s\n", color.c_str(), (int) count, (int) expected, Color_Off.c_str());
   
+  PatternsMatches* pattern_matches = std::get<1>(ret_parcours);
+  freePatternsMatches(pattern_matches, true);
   tree->freeParcoursNode(); 
-
   
   if (nPattern == 1) {
     Parcours *p =
