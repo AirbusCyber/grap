@@ -14,7 +14,10 @@ void printUsage() {
   printf("        -q or --quiet\n");
   printf("        -m or --print-all-matches         : always print matched nodes (overrides getid fields)\n");
   printf("        -nm or --print-no-matches         : never print matched nodes (overrides getid fields)\n");
+  printf("        -nt or --no-thread                : don't multithread (defaut: 4 threads)\n");
   printf("        -ncl or -ncs or --no-check-labels : do not check the symbols (labels) of sites\n");
+  printf("        -st or --single-traversal         : use single traversal algorithm (default with one pattern)\n");
+  printf("        -t or --tree                      : use tree algorithm (default with multiple patterns)\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -38,6 +41,8 @@ int main(int argc, char *argv[]) {
   bool optionThreads = true;
   bool printAllMatches = false;
   bool printNoMatches = false;
+  bool optionTree = false;
+  bool optionSingleTraversal = false;
 
   // Parsing options
   int a;
@@ -59,7 +64,13 @@ int main(int argc, char *argv[]) {
       checkLabels = false;
     }    
     else if (strcmp(argv[a], "-nt") == 0 || strcmp(argv[a], "--no-threads") == 0) {
-      optionThreads = false;
+      optionThreads = true;
+    }
+    else if (strcmp(argv[a], "-t") == 0 || strcmp(argv[a], "--tree") == 0) {
+      optionTree = true;
+    }
+    else if (strcmp(argv[a], "-st") == 0 || strcmp(argv[a], "--single-traversal") == 0) {
+      optionSingleTraversal = true;
     }
     else if (strcmp(argv[a], "-m") == 0 || strcmp(argv[a], "--print-all-matches") == 0) {
       if (not printNoMatches) printAllMatches = true;
@@ -128,13 +139,49 @@ int main(int argc, char *argv[]) {
     std::cout << "Pattern graph (" << pathPattern << ") has " << (int) n_pattern <<   " nodes." << std::endl;
   }
   
+  bool use_tree = not optionSingleTraversal;
+  
+  if (optionVerbose){
+    std::cout << "Using algorithm: ";
+    if (use_tree){
+      std::cout << "tree" << std::endl; 
+    }
+    else{
+      std::cout << "single traversal" << std::endl; 
+    }
+  }
+  
+  ParcoursNode* tree;
+  if (use_tree){
+    tree = new ParcoursNode();
+
+    if (optionVerbose){
+      cout << "Adding patterns to tree." << endl; 
+    }
+    bool added = tree->addGraphFromNode(pattern_graph, pattern_graph->root,
+                                        pattern_graph->nodes.count, checkLabels);
+    
+    if (not optionQuiet){
+      std::cout << (int) tree->countLeaves() << " unique patterns added to tree.\n";
+    }
+    
+    if (not added) {
+      printf("WARNING: pattern graph was not added to traversal tree "
+              "because it already exists there.\n");
+    }
+    
+    if (optionVerbose){
+      cout << "Done." << endl; 
+    }
+  }
+  
   std::list<string>::iterator test_iterator;
   std::list<ArgsMatchPatternToTest>* args_queue = new std::list<ArgsMatchPatternToTest>();
   std::mutex* queue_mutex = new std::mutex();
   std::mutex* cout_mutex = new std::mutex();
   for (test_iterator = pathTests.begin();  test_iterator != pathTests.end(); test_iterator++){  
     string pathTest = (std::string) *test_iterator;
-    args_queue->push_back(std::make_tuple(optionVerbose, optionQuiet, checkLabels, n_pattern, pathPattern, pattern_graph, pattern_parcours, pathTest, printNoMatches, printAllMatches));
+    args_queue->push_back(std::make_tuple(optionVerbose, optionQuiet, checkLabels, tree, n_pattern, pathPattern, pattern_graph, pattern_parcours, pathTest, printNoMatches, printAllMatches));
   }
   
   if (optionThreads){
@@ -145,7 +192,7 @@ int main(int argc, char *argv[]) {
     vsize_t k_thread;
     
     for (k_thread = 0; k_thread < max_threads; k_thread++){
-      threads.push_back(new std::thread(worker_queue, args_queue, queue_mutex, cout_mutex));
+      threads.push_back(new std::thread(worker_queue, args_queue, queue_mutex, cout_mutex, use_tree));
     }
     
     for (threads_iterator = threads.begin(); threads_iterator != threads.end(); threads_iterator++){
@@ -155,7 +202,11 @@ int main(int argc, char *argv[]) {
     }
   }
   else {
-    worker_queue(args_queue, queue_mutex, cout_mutex);
+    worker_queue(args_queue, queue_mutex, cout_mutex, use_tree);
+  }
+  
+  if (use_tree){
+    tree->freeParcoursNode(); 
   }
   
   delete(queue_mutex);
@@ -164,7 +215,7 @@ int main(int argc, char *argv[]) {
   graph_free(pattern_graph, true);
 }
 
-void worker_queue(std::list<ArgsMatchPatternToTest>* args_queue, std::mutex* queue_mutex, std::mutex* cout_mutex){
+void worker_queue(std::list<ArgsMatchPatternToTest>* args_queue, std::mutex* queue_mutex, std::mutex* cout_mutex, bool use_tree){
   while(true){
     ArgsMatchPatternToTest args;
     queue_mutex->lock();
@@ -177,7 +228,12 @@ void worker_queue(std::list<ArgsMatchPatternToTest>* args_queue, std::mutex* que
     queue_mutex->unlock();
     
     if (found_next){
-      matchPatternToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<4>(args), std::get<5>(args), std::get<6>(args), std::get<7>(args), std::get<8>(args), std::get<9>(args), cout_mutex);
+      if (use_tree){
+        matchTreeToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<4>(args), std::get<5>(args), std::get<6>(args), std::get<7>(args), std::get<8>(args), std::get<9>(args), std::get<10>(args), cout_mutex);
+      }
+      else{
+        matchPatternToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<4>(args), std::get<5>(args), std::get<6>(args), std::get<7>(args), std::get<8>(args), std::get<9>(args), std::get<10>(args), cout_mutex);
+      }
     }
     else{
       break; 
@@ -200,6 +256,12 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, 
   graph_t *test_graph = getGraphFromPath(pathTest.c_str());
   if (test_graph == NULL){
     err_stream <<  "Test graph " << pathTest << " could not be opened, aborting.\n";
+    
+    cout_mutex->lock();
+    std::cout << out_stream.str();
+    std::cerr << err_stream.str();
+    cout_mutex->unlock();
+    
     return;
   }
   
@@ -270,7 +332,7 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, 
   cout_mutex->unlock();
 }
 
-void matchPatternToTest_tree(bool optionVerbose, bool optionQuiet, bool checkLabels, vsize_t n_pattern, string pathPattern, graph_t* pattern_graph, Parcours* pattern_parcours, string pathTest, bool printNoMatches, bool printAllMatches, std::mutex* cout_mutex){
+void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, ParcoursNode* tree, vsize_t n_pattern, string pathPattern, graph_t* pattern_graph, Parcours* pattern_parcours, string pathTest, bool printNoMatches, bool printAllMatches, std::mutex* cout_mutex){
   ostringstream out_stream;
   ostringstream err_stream;
   
@@ -285,6 +347,12 @@ void matchPatternToTest_tree(bool optionVerbose, bool optionQuiet, bool checkLab
   graph_t *test_graph = getGraphFromPath(pathTest.c_str());
   if (test_graph == NULL){
     err_stream <<  "Test graph " << pathTest << " could not be opened, aborting.\n";
+    
+    cout_mutex->lock();
+    std::cout << out_stream.str();
+    std::cerr << err_stream.str();
+    cout_mutex->unlock();
+    
     return;
   }
   
@@ -298,29 +366,24 @@ void matchPatternToTest_tree(bool optionVerbose, bool optionQuiet, bool checkLab
   vsize_t i;
   vsize_t maxSiteSize = pattern_graph->nodes.count;
 
-  ParcoursNode* tree = new ParcoursNode();
-
-  bool added = tree->addGraphFromNode(pattern_graph, pattern_graph->root,
-                                      pattern_graph->nodes.count, checkLabels);
-    
-  if (not added) {
-    printf("WARNING: pattern graph was not added to traversal tree "
-            "because it already exists there.\n");
-  }
-  
-  out_stream << (int) tree->countLeaves() << " traversals reconstructed from pattern graph.\n";
-
-  ParcoursNode::RetourParcourir rt = tree->parcourir(test_graph, maxSiteSize, checkLabels, true);
+  bool getids = (not optionQuiet and not printNoMatches) or printAllMatches;
+  ParcoursNode::RetourParcourir rt = tree->parcourir(test_graph, maxSiteSize, checkLabels, getids, printAllMatches);
   vsize_t count = std::get<0>(rt);
-  out_stream << (int) count << " traversals possible in test graph with tree.\n";
   
-  tree->freeParcoursNode(); 
+  if (not optionQuiet){
+    out_stream << "Test graph (" << pathTest << ") has " << (int) test_graph->nodes.size <<  " nodes." << std::endl;
+    out_stream << (int) count << " traversal(s) possible in " << pathTest << "." << std::endl;
+  }
+  else {
+    if (count > 0){
+      out_stream << pathTest << " " << count << std::endl;
+    }
+  }
   
   // Parse matches and print the extracted nodes
   ParcoursNode::PatternsMatches* pattern_matches = std::get<1>(rt);
   
-  
-  if (not pattern_matches->empty()) {
+  if (getids and not pattern_matches->empty()) {
     ParcoursNode::PatternsMatches::iterator it_patternsmatches;
     for (it_patternsmatches = pattern_matches->begin(); it_patternsmatches != pattern_matches->end(); it_patternsmatches++){
       vsize_t leaf_id = it_patternsmatches->first;
@@ -331,24 +394,27 @@ void matchPatternToTest_tree(bool optionVerbose, bool optionQuiet, bool checkLab
       vsize_t i = 1;
       for (it_match_list = match_list->begin(); it_match_list != match_list->end(); it_match_list++) {
         if (it_match_list != match_list->begin()) out_stream << std::endl;
-        out_stream << "Match " << std::dec << i << "\n";
-
         Match* p_found_nodes = *it_match_list;
-        Match::iterator it_match;
-        for (it_match = p_found_nodes->begin(); it_match != p_found_nodes->end(); it_match++) {
-          std::list < node_t * >*node_list = (*it_match).second;
+        
+        if (not p_found_nodes->empty()){
+          out_stream << "Match " << std::dec << i << "\n";
 
-          if (not node_list->empty()) {
-            vsize_t k = 0;
-            for (std::list < node_t * >::iterator itn = node_list->begin(); itn != node_list->end(); ++itn) {
-              node_t *n = *itn;
-              out_stream << (*it_match).first;
-              if (node_list->size() > 1) out_stream << k;
-              out_stream << ": ";
-              if (n->info->has_address) out_stream << "0x" << std::hex << n->info->address << std::dec << ", ";
-              out_stream << n->info->inst_str;
-              out_stream << endl;
-              k++;
+          Match::iterator it_match;
+          for (it_match = p_found_nodes->begin(); it_match != p_found_nodes->end(); it_match++) {
+            std::list < node_t * >*node_list = (*it_match).second;
+
+            if (not node_list->empty()) {
+              vsize_t k = 0;
+              for (std::list < node_t * >::iterator itn = node_list->begin(); itn != node_list->end(); ++itn) {
+                node_t *n = *itn;
+                out_stream << (*it_match).first;
+                if (node_list->size() > 1) out_stream << k;
+                out_stream << ": ";
+                if (n->info->has_address) out_stream << "0x" << std::hex << n->info->address << std::dec << ", ";
+                out_stream << n->info->inst_str;
+                out_stream << endl;
+                k++;
+              }
             }
           }
         }

@@ -486,7 +486,7 @@ vsize_t test_NodeInfo(){
   
   printf("%d traversals reconstructed from pattern graph.\n", (int) tree->countLeaves());
 
-  vsize_t count = std::get<0>(tree->parcourir(grTest, maxSiteSize, checkLabels, true));
+  vsize_t count = std::get<0>(tree->parcourir(grTest, maxSiteSize, checkLabels, true, false));
   if (count != expected) {
     color = Red;
     error_number += 1;
