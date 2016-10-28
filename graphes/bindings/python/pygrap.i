@@ -69,8 +69,8 @@ graph_t* getGraphFromFile(const char *filename) {
 
 %template(ListNode) std::list<node_t *>;
 %template(MapStrNode) std::map<string,  std::list<node_t *>*>;
-%template(SetGotten) std::set<std::map<string, std::list<node_t *> *> *>;
+%template(ListGotten) std::list<std::map<string, std::list<node_t *> *> *>;
 %template(PairRT) std::pair<vsize_t,
-	 std::set<std::map<string, std::list<node_t *> *> *> *>;
+	 std::list<std::map<string, std::list<node_t *> *> *> *>;
 %template(NodesMap) std::map< vsize_t, node_t * >;
 	   

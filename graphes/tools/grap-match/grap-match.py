@@ -13,8 +13,8 @@ def parse_arguments():
     # Arguments
     group.add_argument("-v", "--verbosity", action="count", default=0,
                        help="increase output verbosity")
-    group.add_argument("-q", "--quiet", action="store_true")
-    parser.add_argument("-ncl", "--nochecklabels", action="store_false",
+    group.add_argument("-q", "--quiet", action="store_true", default=False)
+    parser.add_argument("-ncl", "--nochecklabels", action="store_false", default=True,
                         help="do not check the labels of sites")
     parser.add_argument("patternFile", help="The pattern to search")
     parser.add_argument("testFile", nargs='+', help="The file in which we will lookfor the pattern")
@@ -64,13 +64,13 @@ def main():
         elif count >= 1:
             print("%s %d" % (test_path, count))
 
-        set_gotten = rt.second
+        list_gotten = rt.second
 
-        if not set_gotten.empty():
+        if not list_gotten.empty():
             print("\nExtracted nodes:")
 
             # For each match
-            for f_index, found_nodes in enumerate(set_gotten, start=1):
+            for f_index, found_nodes in enumerate(list_gotten, start=1):
                 print("Match %d" % f_index)
 
                 for getid, node_list in found_nodes.iteritems():
@@ -90,7 +90,7 @@ def main():
                             print s
 
                 freeMapGotten(found_nodes)
-        del(set_gotten)
+        del(list_gotten)
         graph_free(test_graph, True)
     graph_free(pattern_graph, True)
 
