@@ -10,6 +10,22 @@ void debug_print(char *s) {
     printf("%s", s);
 }
 
+GraphList* createGraphList(){
+  GraphList *gl = (GraphList *) malloc_or_quit(sizeof(GraphList));
+  gl->size = 0;
+  gl->graphes = NULL;
+
+  return gl;
+}
+
+GraphList* addGraphToInput(graph_t* g, GraphList* gl){
+  gl->graphes = (graph_t **) realloc_or_quit(gl->graphes, (gl->size + 1) * sizeof(graph_t *));
+  gl->graphes[gl->size] = g;
+  gl->size++;
+
+  return gl;
+}
+
 CoupleList *createEdgeList() {
   CoupleList *cl = (CoupleList *) malloc_or_quit(sizeof(CoupleList));
   cl->size = 0;
@@ -72,10 +88,15 @@ Couple *createEdge(char *f, char *c, OptionList* ol) {
   return e;
 }
 
-graph_t *addEdgesToGraph(CoupleList * cl, graph_t * g) {
+graph_t *addEdgesToGraph(char* name, CoupleList * cl, graph_t * g) {
   int i;
   node_t *f;
   node_t *c;
+  
+  if (name != NULL){
+    g->name = std::string(name);
+  }
+  free(name);
 
   for (i = cl->size - 1; i >= 0; i--) {
     std::map< vsize_t, node_t * >::iterator id_it = g->nodes.nodes_map->find(cl->couples[i]->x);

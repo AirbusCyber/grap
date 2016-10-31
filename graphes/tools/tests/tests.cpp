@@ -87,6 +87,8 @@ void printDescription()
                "(childnumber=1, ...).\n";
   std::cout << "Test 30: [manual] patterns with different size (tree), the "
                "second (matching) pattern is a subgraph of the first.\n";
+  std::cout << "Test 31: [reference] same as test 6 with all 4 patterns in one "
+               "dot file.\n";
 }
 
 #ifdef _WIN32
@@ -212,19 +214,30 @@ int main(int argc, char *argv[]) {
     vsize_t nPattern = 0;
     while (j < std::numeric_limits < vsize_t >::max()) {
       std::string pathPattern = dirPath + "pattern_" + to_string(j) + ".dot";
-      grPattern = (graph_t **) realloc_or_quit(grPattern, (j + 1) * sizeof(graph_t *));
-      grPattern[j] = getGraphFromPath(pathPattern.c_str());
       
-      if (grPattern[j] == NULL){
-       break;
+      GraphList* gl = getGraphListFromPath(pathPattern.c_str());
+      if (gl == NULL or gl->size == 0){
+        break; 
       }
+      
+      vsize_t k;
+      for (k = 0; k < gl->size; k++){
+        grPattern = (graph_t **) realloc_or_quit(grPattern, (j + 1) * sizeof(graph_t *));
+        graph_t* gr = gl->graphes[k];
+        
+        if (gr == NULL){
+          continue;
+        }
+        grPattern[j] = gr;
+        j++;
+        nPattern++;
+      }
+      free(gl);
       
       if (debug){
         std::cout << "Pattern graph " << j << " is:\n";
         graph_fprint(stdout, grPattern[j]);
       }
-      j++;
-      nPattern++;
     }
 
     if (nPattern == 0){

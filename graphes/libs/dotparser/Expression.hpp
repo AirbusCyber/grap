@@ -16,6 +16,12 @@
 #include <iostream>
 
 
+typedef struct GraphList
+{
+  vsize_t size;
+  graph_t** graphes;
+} GraphList;
+
 typedef struct Couple
 {
   vsize_t x;
@@ -46,6 +52,9 @@ vsize_t hash_func(char* s);
 
 void debug_print(char* s);
 
+GraphList* createGraphList();
+GraphList* addGraphToInput(graph_t* g, GraphList* gl);
+
 CoupleList* createEdgeList();
 void freeEdgeList(CoupleList* cl);
 char *removeQuotes(char *s);
@@ -54,7 +63,7 @@ CoupleList* addEdgeToList(Couple* c, CoupleList* cl);
 
 Couple* createEdge(char* f, char* c, OptionList* ol);
 
-graph_t* addEdgesToGraph(CoupleList* cl, graph_t* g);
+graph_t* addEdgesToGraph(char* name, CoupleList* cl, graph_t* g);
 
 node_t* updateNode(OptionList* ol, node_t* n);
 

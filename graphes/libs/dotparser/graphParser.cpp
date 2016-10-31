@@ -1,7 +1,7 @@
 #include "graphParser.hpp"
 
-graph_t *getGraph (const char *expr) {
-  graph_t *graph;
+GraphList *getGraphList (const char *expr) {
+  GraphList* gl;
   yyscan_t scanner;
   YY_BUFFER_STATE state;
 
@@ -12,7 +12,7 @@ graph_t *getGraph (const char *expr) {
 
   state = yy_scan_string (expr, scanner);
 
-  if (yyparse (&graph, scanner)) {
+  if (yyparse (&gl, scanner)) {
     // error parsing
     return NULL;
   }
@@ -21,11 +21,11 @@ graph_t *getGraph (const char *expr) {
 
   yylex_destroy (scanner);
 
-  return graph;
+  return gl;
 }
 
-graph_t *getGraphFromFile (FILE * f) {
-  graph_t *graph;
+GraphList *getGraphListFromFile (FILE * f) {
+  GraphList* gl;
   yyscan_t scanner;
   YY_BUFFER_STATE state;
 
@@ -46,7 +46,7 @@ graph_t *getGraphFromFile (FILE * f) {
   }
 
   state = yy_scan_string (buf, scanner);
-  if (yyparse (&graph, scanner)) {
+  if (yyparse (&gl, scanner)) {
     // error parsing
     std::cerr << "ERR: parsing failed." << std::endl;
     return NULL;
@@ -56,15 +56,39 @@ graph_t *getGraphFromFile (FILE * f) {
   free (buf);
   yylex_destroy (scanner);
 
-  return graph;
+  return gl;
+}
+
+GraphList *getGraphListFromPath (const char *path) {
+  FILE *f = fopen (path, "rb");
+  if (f != NULL) { 
+    GraphList* gl = getGraphListFromFile (f);
+    fclose(f);
+    return gl;
+  }
+  else return NULL; 
+}
+
+graph_t *getGraph (const char *expr) {
+  return popfreeFirstGraph(getGraphList(expr));
+}
+
+graph_t *getGraphFromFile (FILE * f) {
+  return popfreeFirstGraph(getGraphListFromFile(f));
 }
 
 graph_t *getGraphFromPath (const char *path) {
-  FILE *f = fopen (path, "rb");
-  if (f != NULL) { 
-    graph_t* g = getGraphFromFile (f);
-    fclose(f);
-    return g;
+  return popfreeFirstGraph(getGraphListFromPath(path));
+}
+
+graph_t* popfreeFirstGraph(GraphList* gl){
+  graph_t* gr;
+  if (gl != NULL and gl->size >= 1){
+    gr = gl->graphes[0]; 
   }
-  else return NULL; 
+  else{
+    gr = nullptr; 
+  }
+  free(gl); 
+  return gr;
 }

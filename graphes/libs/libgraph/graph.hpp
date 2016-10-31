@@ -25,6 +25,8 @@ typedef struct graph_t {
    @see node.h
    */
   node_t* root;
+  
+  std::string name;
 } graph_t;
 
 /*!

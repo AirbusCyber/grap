@@ -1,0 +1,36 @@
+Digraph G {
+"A" [label = "JCC" , root=true]
+"B" [label = "INST"]
+"C" [label = "INST"]
+"D" [label = "CALL"]
+"A" -> "B"
+"A" -> "C"
+"B" -> "D"
+}
+Digraph G {
+"A" [label = "JCC" , root=true]
+"B" [label = "JCC"]
+"C" [label = "INST"]
+"D" [label = "CALL"]
+"A" -> "B"
+"B" -> "C"
+"C" -> "D"
+}
+Digraph G {
+"A" [label = "JMP" , root=true]
+"B" [label = "CALL"]
+"C" [label = "INST"]
+"D" [label = "RET"]
+"A" -> "B"
+"B" -> "C"
+"B" -> "D"
+}
+Digraph G {
+"A" [label = "INST" , root=true]
+"B" [label = "JCC"]
+"C" [label = "JCC"]
+"D" [label = "RET"]
+"A" -> "B"
+"B" -> "C"
+"B" -> "D"
+}

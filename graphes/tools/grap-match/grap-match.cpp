@@ -364,7 +364,6 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, Par
     out_stream << "Done." << endl; 
   }
   
-  vsize_t i;
   vsize_t maxSiteSize = pattern_graph->nodes.count;
 
   bool getids = (not optionQuiet and not printNoMatches) or printAllMatches;

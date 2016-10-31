@@ -12,8 +12,9 @@
 #define YYINITDEPTH 200000
 #define YYMAXDEPTH 1000000
 
-int yyerror(graph_t **Sgraph, yyscan_t scanner, const char *msg) {
+int yyerror(GraphList **SgraphList, yyscan_t scanner, const char *msg) {
     // Add error handling routine as needed
+    std::cerr << "A parsing error occurred." << std::endl;
     return 0;
 }
  
@@ -30,12 +31,13 @@ typedef void* yyscan_t;
 %define api.pure
 
 %lex-param   { yyscan_t scanner }
-%parse-param { graph_t **Sgraph }
+%parse-param { GraphList** SgraphList }
 %parse-param { yyscan_t scanner }
 
 %union {
     char* type_string;
     int value;
+    GraphList* SgraphList;
     graph_t* Sgraph;
     node_t* Snode;
     Option* Soption;
@@ -60,6 +62,7 @@ typedef void* yyscan_t;
 %token TOKEN_ARROW
 %token <value> TOKEN_NUMBER
 
+%type <SgraphList> graph_list
 %type <Sgraph> graph
 %type <Sgraph> node_list
 %type <Snode> node
@@ -73,13 +76,20 @@ typedef void* yyscan_t;
 %%
 
 input
-    : graph { *Sgraph = $1;}
+    : graph_list { *SgraphList = $1;}
+    ;
+    
+graph_list
+    :
+    {$<SgraphList>$ = createGraphList();}
+    | graph_list[GL] graph[G] { $$ = addGraphToInput($G, $GL); }
+    | error { fprintf(stderr, "Error parsing a graph_list.\n"); RELEASE_ASSERT(false); }
     ;
  
 graph
     : 
-    TOKEN_DIGRAPH_HEADER TOKEN_LENS node_list[G] edge_list[E] TOKEN_RENS { $$ = addEdgesToGraph($E, $G); }
-    | TOKEN_DIGRAPH_HEADER TOKEN_ID[id] TOKEN_LENS node_list[G] edge_list[E] TOKEN_RENS { free($id); $$ = addEdgesToGraph($E, $G); }
+    TOKEN_DIGRAPH_HEADER TOKEN_LENS node_list[G] edge_list[E] TOKEN_RENS { $$ = addEdgesToGraph(NULL , $E, $G); }
+    | TOKEN_DIGRAPH_HEADER TOKEN_ID[id] TOKEN_LENS node_list[G] edge_list[E] TOKEN_RENS {$$ = addEdgesToGraph($id , $E, $G); }
     | error { fprintf(stderr, "Error parsing a graph.\n"); RELEASE_ASSERT(false); }
     ;
 
