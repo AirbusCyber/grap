@@ -52,7 +52,7 @@ CondNode** computeCond(node_t* n);
 
 typedef std::map < string, std::list < node_t * >*> Match;
 typedef std::list <Match*> MatchList;
-typedef std::map < vsize_t, MatchList*> PatternsMatches;
+typedef std::map < std::string, MatchList*> PatternsMatches;
 
 
 Match* clone_match(Match* m);
@@ -62,6 +62,8 @@ public:
   bool complete;
   vsize_t size;
   MotParcours **mots;
+  string name;
+  
   Parcours();
   string toString();
   void addMot(MotParcours * m);
@@ -88,6 +90,8 @@ public:
   bool feuille;
   MotParcours *mot;
   std::list < ParcoursNode * >fils;
+  string name;
+  
   ParcoursNode();
   ParcoursNode(std::list < ParcoursNode * >fils, MotParcours * mot, uint64_t id);
   bool addGraphFromNode(graph_t *, node_t *, vsize_t W, bool checkLabels);

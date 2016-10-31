@@ -1,4 +1,4 @@
-Digraph G {
+Digraph pattern0 {
 "A" [label = "JCC" , root=true]
 "B" [label = "INST"]
 "C" [label = "INST"]
@@ -7,7 +7,7 @@ Digraph G {
 "A" -> "C"
 "B" -> "D"
 }
-Digraph G {
+Digraph pattern1 {
 "A" [label = "JCC" , root=true]
 "B" [label = "JCC"]
 "C" [label = "INST"]
@@ -16,7 +16,7 @@ Digraph G {
 "B" -> "C"
 "C" -> "D"
 }
-Digraph G {
+Digraph pattern2 {
 "A" [label = "JMP" , root=true]
 "B" [label = "CALL"]
 "C" [label = "INST"]
@@ -25,7 +25,7 @@ Digraph G {
 "B" -> "C"
 "B" -> "D"
 }
-Digraph G {
+Digraph pattern3 {
 "A" [label = "INST" , root=true]
 "B" [label = "JCC"]
 "C" [label = "JCC"]

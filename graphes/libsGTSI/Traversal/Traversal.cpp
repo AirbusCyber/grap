@@ -214,6 +214,7 @@ CondNode** computeCond(node_t* n){
 
 Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
   Parcours *p = new Parcours();
+  p->name = graph->name;
 
   node_list_t *listI = &(graph->nodes);
 
@@ -806,6 +807,7 @@ bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {
   if (index >= p->size) {
     bool b = this->feuille;
     this->feuille = true;
+    this->name = p->name;
     return not b;
   }
   MotParcours *m = p->mots[index];
@@ -840,7 +842,6 @@ ParcoursNode::RetourParcourir ParcoursNode::parcourir(graph_t* gr, vsize_t W, bo
   
   PatternsMatches::iterator it_pattersmatches;
   for (it_pattersmatches = patterns_matches->begin(); it_pattersmatches != patterns_matches->end(); it_pattersmatches++){
-    vsize_t leaf_id = it_pattersmatches->first;
     MatchList* match_list = it_pattersmatches->second;
     
     count += match_list->size();
@@ -853,9 +854,9 @@ void ParcoursNode::merge_patternsmatches(PatternsMatches* leaves_to_matches, Pat
   PatternsMatches::iterator it_pattersmatches_rec;
   
   for (it_pattersmatches_rec = leaves_to_matches_rec->begin(); it_pattersmatches_rec != leaves_to_matches_rec->end(); it_pattersmatches_rec++){
-    vsize_t leaf_id = it_pattersmatches_rec->first;
+    std::string leaf_name = it_pattersmatches_rec->first;
     MatchList* match_list_rec = it_pattersmatches_rec->second;
-    PatternsMatches::iterator pattern_match = leaves_to_matches->find(leaf_id);
+    PatternsMatches::iterator pattern_match = leaves_to_matches->find(leaf_name);
     
     if (pattern_match != leaves_to_matches->end()){
       // Case: merge MatchLists 
@@ -865,7 +866,7 @@ void ParcoursNode::merge_patternsmatches(PatternsMatches* leaves_to_matches, Pat
     }
     else {
       // Case: add MatchList
-      leaves_to_matches->insert(std::pair<vsize_t, MatchList*>(leaf_id, match_list_rec));
+      leaves_to_matches->insert(std::pair<std::string, MatchList*>(leaf_name, match_list_rec));
     }
   }
   
@@ -904,7 +905,6 @@ void freePatternsMatches(PatternsMatches* pattern_matches, bool freeMatches){
 
   if (freeMatches){
     for (it_patternsmatches = pattern_matches->begin(); it_patternsmatches != pattern_matches->end(); it_patternsmatches++){
-      vsize_t leaf_id = it_patternsmatches->first;
       MatchList* match_list = it_patternsmatches->second;
       MatchList::iterator it_match_list;
         for (it_match_list = match_list->begin(); it_match_list != match_list->end(); it_match_list++) {
@@ -922,12 +922,12 @@ PatternsMatches* ParcoursNode::parcourirDepuisSommetRec(bool racine, graph_t * g
   PatternsMatches* leaves_to_matches = new PatternsMatches();
 
   if (this->feuille) {
-    PatternsMatches::iterator pattern_match_list = leaves_to_matches->find(this->id);
+    PatternsMatches::iterator pattern_match_list = leaves_to_matches->find(this->name);
     if (pattern_match_list == leaves_to_matches->end()){
       // Need to add a match list for this pattern
       MatchList* ml = new MatchList();
       ml->push_front(clone_match(current_match));
-      leaves_to_matches->insert(std::pair<vsize_t, MatchList*>(this->id, ml));
+      leaves_to_matches->insert(std::pair<std::string, MatchList*>(this->name, ml));
     }
     else{
       pattern_match_list->second->push_front(clone_match(current_match));
