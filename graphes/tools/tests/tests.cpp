@@ -232,7 +232,7 @@ int main(int argc, char *argv[]) {
         j++;
         nPattern++;
       }
-      free(gl);
+      freeGraphList(gl, false, false);
       
       if (debug){
         std::cout << "Pattern graph " << j << " is:\n";

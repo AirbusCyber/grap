@@ -228,7 +228,7 @@ int main(int argc, char *argv[]) {
   delete(queue_mutex);
   delete(cout_mutex);
   if (use_tree){
-    free(pattern_graphs);
+    freeGraphList(pattern_graphs, true, true);
   }
   else{
     pattern_parcours->freeParcours(true);

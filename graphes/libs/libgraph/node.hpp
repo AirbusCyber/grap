@@ -12,19 +12,6 @@
 #include "ga_types.hpp"
 #include "node_info.hpp"
 
-/*!
- @brief Constants for the label type of enhanced nodes.
- */
-enum label_t {
-  LABEL_STAR = 0,
-  LABEL_GENERIC_OPCODE,
-  LABEL_EXACT_OPCODE,
-  LABEL_SUBSTRING,
-  LABEL_EXACT_STRING,
-  LABEL_REGEX
-};
-
-
 struct node_t;
 /*!
  @brief Structure describing a node in a graph.
@@ -98,24 +85,6 @@ node_t* node_copy(node_t* node1, const node_t* node2);
 void node_free(node_t* node, bool free_info);
 
 /*!
- @brief Set the number of children of the node.
-
- A reallocation of internal structures is done if needed.
- @param node The node to set.
- @param nb The number of children
- */
-void node_set_children_nb(node_t* node, vsize_t nb);
-
-/*!
- @brief Set the number of fathers of the node.
-
- A reallocation of internal structures is done if needed.
- @param node The node to set.
- @param nb The number of fathers
- */
-void node_set_fathers_nb(node_t* node, vsize_t nb);
-
-/*!
  @brief Add a child to the node children list.
  @param node the node we add a child to.
  @param child the child node.
@@ -131,15 +100,6 @@ void node_link(node_t* node, node_t* child, bool is_child1);
  pointer.
  */
 node_t* node_father(node_t* node, size_t index);
-
-/*!
- @brief Get the i-th father of a node, for const pointers.
- @param node The node from which to get the father.
- @param index The index of the father to get.
- @return The i-th father of a node if i is valid, otherwise it returns a NULL
- pointer.
- */
-const node_t* node_father_const(const node_t* node, size_t index);
 
 /*!
  @brief Remove all instances of a node from the fathers node list of a node.

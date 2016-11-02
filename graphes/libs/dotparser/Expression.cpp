@@ -26,6 +26,18 @@ GraphList* addGraphToInput(graph_t* g, GraphList* gl){
   return gl;
 }
 
+void freeGraphList(GraphList* gl, bool freeGraphs, bool free_info){
+  if (freeGraphs){
+    vsize_t k;
+    for (k = 0; k < gl->size; k++){
+      graph_free(gl->graphes[k], free_info); 
+    }
+  }
+  
+  free(gl->graphes);
+  free(gl);
+}
+
 CoupleList *createEdgeList() {
   CoupleList *cl = (CoupleList *) malloc_or_quit(sizeof(CoupleList));
   cl->size = 0;

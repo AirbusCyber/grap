@@ -2,7 +2,7 @@
 
 from uuid import uuid4
 
-from pygrap import freeMapGotten, getGraphFromFile, graph_free, parcoursLargeur
+from pygrap import freeMatch, getGraphFromFile, graph_free, parcoursLargeur
 
 from idagrap.config.General import MAX_THRESHOLD
 
@@ -187,7 +187,7 @@ class Pattern:
         # free matches
         for found_nodes in self._matches:
             if found_nodes:
-                freeMapGotten(found_nodes)
+                freeMatch(found_nodes)
 
     def get_file(self):
         """File getter.

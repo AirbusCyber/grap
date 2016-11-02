@@ -89,6 +89,9 @@ graph_t* popfreeFirstGraph(GraphList* gl){
   else{
     gr = nullptr; 
   }
-  free(gl); 
+  
+  if (gl != NULL){
+    freeGraphList(gl, false, false); 
+  }
   return gr;
 }

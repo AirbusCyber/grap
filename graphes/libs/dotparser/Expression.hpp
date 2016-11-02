@@ -54,6 +54,7 @@ void debug_print(char* s);
 
 GraphList* createGraphList();
 GraphList* addGraphToInput(graph_t* g, GraphList* gl);
+void freeGraphList(GraphList* gl, bool freeGraphs, bool free_info);
 
 CoupleList* createEdgeList();
 void freeEdgeList(CoupleList* cl);
