@@ -83,7 +83,9 @@ string MotParcours::toString() {
       }
     }
 
-    s += "?" + (*(this->condition))->toString(this->info);
+    if (this->condition != NULL){
+      s += "?" + this->condition->toString(this->info);
+    }
   }
   
   return s;
@@ -94,7 +96,7 @@ bool MotParcours::sameSymbol(MotParcours *m, bool checkLabels)
   // TODO: etre plus malin avec les comparaisons (ne prendre que les champs de
   // condition en compte dans la comparaison des infos ?)
   return (not checkLabels) or (this->info->equals(m->info)
-                              and (*this->condition)->equals(m->condition));
+                              and this->condition->equals(m->condition));
 }
 
 bool MotParcours::sameRepeatAndCF(MotParcours * m) {  
@@ -168,8 +170,9 @@ void Parcours::addMot(MotParcours * m) {
   assert(m->type == TYPE_M1 or m->type == TYPE_M2);
 }
 
-CondNode** computeCond(node_t* n){
+CondNode* computeCond(node_t* n){
   if (not n->info->lazyRepeat or n->children_nb == 0){
+    n->condition->add_pointer_usage();
     return n->condition;
   }
   else {
@@ -184,16 +187,15 @@ CondNode** computeCond(node_t* n){
       child = n->child2;
     }
 
-    std::list<CondNode**>* not_child = new std::list<CondNode**>();
+    std::list<CondNode*>* not_child = new std::list<CondNode*>();
     not_child->push_front(child->condition);
-    CondNode *cn_tmp = new CondNode(not_child, UnOpEnum::logic_not);
-    CondNode **cn_not = (CondNode **)malloc_or_quit(sizeof(CondNode *));
-    *cn_not = cn_tmp;
-    (*cn_not)->has_fixed_pattern_info = true;
-    (*cn_not)->fixed_pattern_info = child->info;
+    child->condition->add_pointer_usage();
+    CondNode *cn_not = new CondNode(not_child, UnOpEnum::logic_not);
+    cn_not->has_fixed_pattern_info = true;
+    cn_not->fixed_pattern_info = child->info;
 
-    if ((*(n->condition))->children->size() == 0
-        and (*(n->condition))->comparison == bool_true) {
+    if (n->condition->children->size() == 0
+        and n->condition->comparison == bool_true) {
       // Case: The original condition is only "true"
       // Then the new one is "not(child->condition)"
       return cn_not;
@@ -201,13 +203,12 @@ CondNode** computeCond(node_t* n){
     else {
       // Otherwise the new condition is "n->condition and not
       // (child->condition)"
-      std::list<CondNode **> *and_children = new std::list<CondNode **>();
+      std::list<CondNode *>* and_children = new std::list<CondNode *>();
       and_children->push_front(n->condition);
+      n->condition->add_pointer_usage();
       and_children->push_front(cn_not);
       CondNode *cn = new CondNode(and_children, BinOpEnum::logic_and);
-      CondNode **cn_ret = (CondNode **)malloc_or_quit(sizeof(CondNode *));
-      *cn_ret = cn;
-      return cn_ret;
+      return cn;
     }
   }
 }
@@ -316,7 +317,7 @@ Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
       m->k = k;
       m->has_symbol = false;
       m->info = ss->info;
-      m->condition = computeCond(ss);
+      m->condition = nullptr;
       p->addMot(m);
       sc = ss;
     }
@@ -337,7 +338,7 @@ bool MotParcours::matchesSymbol(node_t * n, bool checkLabels) {
   if (not checkLabels)
     return true;
   
-  return (*(this->condition))->evaluate(this->info, n->info);
+  return this->condition->evaluate(this->info, n->info);
 }
 
 bool MotParcours::matchesCF(node_t *n)
@@ -629,7 +630,6 @@ void freeMatch(Match* match){
 }
 
 void freeRetourParcoursDepuisSommet(Parcours::RetourParcoursDepuisSommet rt, bool getids){
-    // freeing match
     Match* match = rt.second;
     freeMatch(match);
 }
@@ -668,10 +668,7 @@ void Parcours::freeParcours(bool free_mots)
     vsize_t i;
     for (i = 0; i < this->size; i++){
       if (this->mots[i] != NULL){
-        if (this->mots[i]->condition != NULL){
-          CondNode::freeCondition(this->mots[i]->condition, false, true);
-          this->mots[i]->condition = NULL;
-        }
+        CondNode::freeCondition(this->mots[i]->condition, true, true);
         delete this->mots[i];
       }
     }
@@ -739,7 +736,6 @@ vsize_t ParcoursNode::addGraph(graph_t * gr, vsize_t W, vsize_t maxLearn, bool c
 
       if (p->complete) {
         if (this->addParcours(p, 0, checkLabels)) {
-          std::cout << p->toString() + "\n";
           added++;
         }
       }
@@ -773,6 +769,11 @@ string ParcoursNode::toDotPartiel() {
   else
     s += "\" [label=\"F ";
   s += h2s(this->id);
+  if (this->mot != NULL and this->mot->condition != NULL){
+    CondNode* cn = this->mot->condition;
+    s += " ";
+    s += h2s((vsize_t) cn);
+  }
   s += "\"]\n";
   list < ParcoursNode * >::iterator it;
   for (it = this->fils.begin(); it != this->fils.end(); it++) {
@@ -816,6 +817,7 @@ bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {
     ParcoursNode *f = (*it);
     
     if (f->mot->equals(m, checkLabels)) {
+      CondNode::freeCondition(m->condition, true, true);
       delete(m);
       return f->addParcours(p, index + 1, checkLabels);
     }
@@ -837,7 +839,6 @@ ParcoursNode::RetourParcourir ParcoursNode::parcourir(graph_t* gr, vsize_t W, bo
   for (n = 0; n < gr->nodes.size; n++) {    
     PatternsMatches* ret = this->parcourirDepuisSommet(gr, n, W, checkLabels, returnFound, printAllMatches);
     merge_patternsmatches(patterns_matches, ret);
-    freePatternsMatches(ret, false);
   }
   
   PatternsMatches::iterator it_pattersmatches;
@@ -863,6 +864,7 @@ void ParcoursNode::merge_patternsmatches(PatternsMatches* leaves_to_matches, Pat
       MatchList* match_list = pattern_match->second;
       
       match_list->insert(match_list->end(), match_list_rec->begin(), match_list_rec->end());
+      delete match_list_rec;
     }
     else {
       // Case: add MatchList
@@ -870,6 +872,7 @@ void ParcoursNode::merge_patternsmatches(PatternsMatches* leaves_to_matches, Pat
     }
   }
   
+  freePatternsMatches(leaves_to_matches_rec, false);
   return;
 }
 
@@ -907,14 +910,14 @@ void freePatternsMatches(PatternsMatches* pattern_matches, bool freeMatches){
     for (it_patternsmatches = pattern_matches->begin(); it_patternsmatches != pattern_matches->end(); it_patternsmatches++){
       MatchList* match_list = it_patternsmatches->second;
       MatchList::iterator it_match_list;
+      
         for (it_match_list = match_list->begin(); it_match_list != match_list->end(); it_match_list++) {
           Match* match = *it_match_list;    
           freeMatch(match);
         }
-        
-        delete match_list;
-      }
-  }
+      delete match_list;
+    }
+  }   
   delete pattern_matches;
 }
 
@@ -925,9 +928,10 @@ PatternsMatches* ParcoursNode::parcourirDepuisSommetRec(bool racine, graph_t * g
     PatternsMatches::iterator pattern_match_list = leaves_to_matches->find(this->name);
     if (pattern_match_list == leaves_to_matches->end()){
       // Need to add a match list for this pattern
-      MatchList* ml = new MatchList();
-      ml->push_front(clone_match(current_match));
-      leaves_to_matches->insert(std::pair<std::string, MatchList*>(this->name, ml));
+      Match* cloned_match = clone_match(current_match);
+        MatchList* ml = new MatchList();
+        ml->push_front(cloned_match);
+        leaves_to_matches->insert(std::pair<std::string, MatchList*>(this->name, ml));
     }
     else{
       pattern_match_list->second->push_front(clone_match(current_match));
@@ -953,7 +957,6 @@ PatternsMatches* ParcoursNode::parcourirDepuisSommetRec(bool racine, graph_t * g
     if (possible) {    
       PatternsMatches* leaves_to_matches_rec = f->parcourirDepuisSommetRec(false, gr, node, numeros, max_numeros_r, matched_nodes_r, checkLabels, current_match_copy, returnFound, printAllMatches);
       merge_patternsmatches(leaves_to_matches, leaves_to_matches_rec);
-      freePatternsMatches(leaves_to_matches_rec, false);
     }
     else {
       freeMatch(current_match_copy);
@@ -1014,6 +1017,7 @@ std::tuple <bool, node_t*, set < node_t * >> ParcoursNode::etapeUnmatchedNode(bo
     
       if (r < m->info->minRepeat or not m->matchesC(current_node)) {
         // pas trouvé, TODO: attention au branchement
+        delete(list_nodes);
         return std::tuple <bool, node_t*, set < node_t * >> (false, current_node, matched_nodes);
       }
     }
@@ -1199,6 +1203,7 @@ void ParcoursNode::freeParcoursNode()
   }
   
   if (this->mot != NULL){
+    CondNode::freeCondition(this->mot->condition, true, true);
     delete this->mot;
   }
   

@@ -170,12 +170,14 @@ public:
   // No children: returns comparison(pattern_field, pattern, test_field, test)
   
   CondNode();
-  CondNode(std::list<CondNode**>* cn);
-  CondNode(std::list<CondNode**>*, UnOpEnum);
-  CondNode(std::list<CondNode**>*, BinOpEnum);
+  CondNode(std::list<CondNode*>* cn);
+  CondNode(std::list<CondNode*>*, UnOpEnum);
+  CondNode(std::list<CondNode*>*, BinOpEnum);
   CondNode(std::string key, std::string op, std::string value);
   
-  std::list<CondNode**>* children;
+  vsize_t n_pointer_usage;
+  
+  std::list<CondNode*>* children;
   UnOpEnum unary_operator;
   BinOpEnum binary_operator;
   
@@ -186,6 +188,7 @@ public:
   void* NodeInfo::* test_field;
   
   bool has_fixed_pattern_info;
+  bool fixed_field_is_new;
   NodeInfo* fixed_pattern_info;
   
   bool apply_pattern_condition_to_test;
@@ -198,12 +201,13 @@ public:
   
   bool evaluate(NodeInfo* pattern, NodeInfo* test);
   
-  bool equals(CondNode** cn);
+  bool equals(CondNode* cn);
   
   std::string toString(NodeInfo*);
   std::string field_toString(void*);
   
-  static void freeCondition(CondNode** cn, bool delete_condition, bool free_pointer);
+  void add_pointer_usage();
+  static void freeCondition(CondNode* cn, bool delete_condition, bool free_pointer);
 };
 
 class CondNodeToken{
@@ -218,7 +222,7 @@ public:
 
 class CondNodeParser{
 public:
-  static CondNode** parseCondNode(std::string);
+  static CondNode* parseCondNode(std::string);
   CondNodeParser();
   
 private:
@@ -231,9 +235,9 @@ private:
   bool accept(std::string expected_type);
   void expect(std::string expected_type);
   
-  CondNode** expression();
-  CondNode** term();
-  CondNode** factor();
+  CondNode* expression();
+  CondNode* term();
+  CondNode* factor();
   
   void tokenize(std::string); 
   

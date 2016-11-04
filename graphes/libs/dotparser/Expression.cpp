@@ -218,11 +218,7 @@ node_t *updateNode(OptionList * ol, node_t * n) {
   bool has_arg1 = false;
   bool has_arg2 = false;
   bool has_arg3 = false;
-  
-  CondNode* cn = new CondNode();
-  CondNode** cn_ptr = (CondNode**) malloc(sizeof(CondNode*));
-  *cn_ptr = cn;
-  n->condition = cn_ptr;
+
   n->info->lazyRepeat = false;
   bool cond_filled = false;
 
@@ -243,7 +239,7 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     else if (strcmp(id, "symb") == 0) {
       hasSymb = 1;
       
-      std::cerr << "ERR: symb option deprecated\n";
+      std::cerr << "ERROR: symb option deprecated\n";
     }
     else if (strcmp(id, "inst") == 0 || strcmp(id, "instruction") == 0 || strcmp(id, "csymb") == 0) {
       hasCSymb = 1;
@@ -253,15 +249,17 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     else if (strcmp(id, "op") == 0 || strcmp(id, "opcode") == 0) {
       n->info->opcode = std::string(v);
     }
-    else if (not cond_filled and (strcmp(id, "symbtype") == 0 or strcmp(id, "csymbtype") == 0)) {
-      if (strcmp(v, "none") == 0 or strcmp(v, "*") == 0) {        
-        (*(n->condition))->comparison = ComparisonFunEnum::bool_true;
+    else if (not cond_filled and (strcmp(id, "symbtype") == 0 or strcmp(id, "csymbtype") == 0)) {      
+      if (strcmp(v, "none") == 0 or strcmp(v, "*") == 0) {          
+        n->condition = new CondNode();
+        n->condition->comparison = ComparisonFunEnum::bool_true;
         cond_filled = true;
       }
-      else if (strcmp(v, "substring") == 0) {        
-        (*(n->condition))->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-        (*(n->condition))->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-        (*(n->condition))->comparison = ComparisonFunEnum::str_contains;
+      else if (strcmp(v, "substring") == 0) {
+        n->condition = new CondNode();
+        n->condition->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
+        n->condition->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
+        n->condition->comparison = ComparisonFunEnum::str_contains;
         cond_filled = true;
       }
     }
@@ -349,9 +347,10 @@ node_t *updateNode(OptionList * ol, node_t * n) {
   }
   
   if ((not cond_filled) and n->info->inst_str != ""){
-    (*(n->condition))->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-    (*(n->condition))->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-    (*(n->condition))->comparison = ComparisonFunEnum::str_beginswith;
+    n->condition = new CondNode();
+    n->condition->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
+    n->condition->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
+    n->condition->comparison = ComparisonFunEnum::str_beginswith;
     cond_filled = true;
   }
   

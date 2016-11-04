@@ -45,10 +45,10 @@ public:
   bool sameRepeatAndCF(MotParcours * m);
   
   NodeInfo* info;
-  CondNode** condition;
+  CondNode* condition;
 };
 
-CondNode** computeCond(node_t* n);
+CondNode* computeCond(node_t* n);
 
 typedef std::map < string, std::list < node_t * >*> Match;
 typedef std::list <Match*> MatchList;

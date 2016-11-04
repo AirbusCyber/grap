@@ -109,47 +109,66 @@ bool NodeInfo::equals(NodeInfo* ni){
 
 
 CondNode::CondNode(){
-  std::list<CondNode**>* cn = new std::list<CondNode**>();
-  this->children = cn;
+  this->children = new std::list<CondNode*>();
   this->comparison = ComparisonFunEnum::bool_false;
+  this->pattern_field = NULL;
+  this->test_field = NULL;
   this->has_fixed_pattern_info = false;
   this->has_fixed_field = false;
+  this->fixed_field_is_new = false;
   this->apply_pattern_condition_to_test = false;
+  this->n_pointer_usage = 1;
 }
 
-CondNode::CondNode(std::list<CondNode**>* cn){
+CondNode::CondNode(std::list<CondNode*>* cn){
   this->children = cn;
   this->comparison = ComparisonFunEnum::bool_false;
+  this->pattern_field = NULL;
+  this->test_field = NULL;
   this->has_fixed_pattern_info = false;
   this->has_fixed_field = false;
+  this->fixed_field_is_new = false;
   this->apply_pattern_condition_to_test = false;
+  this->n_pointer_usage = 1;
 }
 
-CondNode::CondNode(std::list<CondNode**>* cn, UnOpEnum un_op){
+CondNode::CondNode(std::list<CondNode*>* cn, UnOpEnum un_op){
   assert(cn->size() == 1);
   
   this->children = cn;
   this->unary_operator = un_op;
+  this->pattern_field = NULL;
+  this->test_field = NULL;
   this->has_fixed_pattern_info = false;
   this->has_fixed_field = false;
+  this->fixed_field_is_new = false;
   this->apply_pattern_condition_to_test = false;
+  this->n_pointer_usage = 1;
 }
 
-CondNode::CondNode(std::list<CondNode**>* cn, BinOpEnum bin_op){
+CondNode::CondNode(std::list<CondNode*>* cn, BinOpEnum bin_op){
   assert(cn->size() >= 2);
   
   this->children = cn;
+  this->pattern_field = NULL;
+  this->test_field = NULL;
   this->binary_operator = bin_op;
   this->has_fixed_pattern_info = false;
   this->has_fixed_field = false;
+  this->fixed_field_is_new = false;
   this->apply_pattern_condition_to_test = false;
+  this->n_pointer_usage = 1;
 }
 
-CondNode::CondNode(std::string key, std::string op, std::string value){  
-  std::list<CondNode**>* cn = new std::list<CondNode**>();
+CondNode::CondNode(std::string key, std::string op, std::string value){ 
+  std::list<CondNode*>* cn = new std::list<CondNode*>();
   this->children = cn;
+  this->pattern_field = NULL;
+  this->test_field = NULL;
+  this->fixed_field_is_new = false;
   this->has_fixed_pattern_info = false;
   this->apply_pattern_condition_to_test = false;
+  this->n_pointer_usage = 1;
   
   if (key == "inst" or key == "instruction" or key == "op" or key == "opcode"
     or key == "arg1" or key == "arg2" or key == "arg3"){
@@ -191,6 +210,7 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
     }
     else{
       this->has_fixed_field = true;
+      this->fixed_field_is_new = true;
       std::string* str_ptr = new std::string();
       *str_ptr = value;
       this->fixed_field = (void*) str_ptr;
@@ -209,7 +229,7 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
       this->comparison = ComparisonFunEnum::str_regex;
     }
     else {
-      std::cerr << "Unknown string operator: " << op << std::endl;
+      std::cerr << "ERROR: Unknown string operator " << op << std::endl;
       RELEASE_ASSERT(false);
     }
   }
@@ -228,9 +248,10 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
         this->test_field = (void* NodeInfo::*) &NodeInfo::childrenNumber;
       }
       
-      vsize_t* addr_ptr = (vsize_t*) malloc_or_quit(sizeof(vsize_t));
+      vsize_t* addr_ptr = new vsize_t();
       *addr_ptr = (vsize_t) strtol(value.c_str(), NULL, 16);
       this->fixed_field = (void*) addr_ptr;
+      this->fixed_field_is_new = true;
       
       if (op == "==" or op == "is"){
         this->comparison = ComparisonFunEnum::vsizet_equals; 
@@ -277,12 +298,12 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
         this->comparison = ComparisonFunEnum::uint8t_geq;
       }
       else {
-        std::cerr << "Unknown integer operator: " << op << std::endl;
+        std::cerr << "ERROR: Unknown integer operator " << op << std::endl;
         RELEASE_ASSERT(false);
       }
   }
   else {
-    std::cerr << "Unknown key in condition: " << key << std::endl;
+    std::cerr << "ERROR: Unknown key in condition " << key << std::endl;
     RELEASE_ASSERT(false);
   }
 }
@@ -504,7 +525,7 @@ bool CondNode::comparison_fun(void* a1, void* a2)
       return ComparisonFunctions::uint8t_leq(a1, a2);
       
     default:
-      std::cerr << "ERR in node_info.cpp : unknown comparison_fun" << std::endl;
+      std::cerr << "ERROR in node_info.cpp : unknown comparison_fun" << std::endl;
       return false;
   }
 }
@@ -515,7 +536,7 @@ bool CondNode::unary_fun(bool b){
       return not b;
       
     default:
-      std::cerr << "ERR in node_info.cpp : unknown unary_fun\n";
+      std::cerr << "ERROR in node_info.cpp : unknown unary_fun " << this << "\n";
       return false;
   }
 }
@@ -529,7 +550,7 @@ bool CondNode::binary_fun(bool b1, bool b2){
       return b1 or b2;
       
     default:
-      std::cerr << "ERR in node_info.cpp : unknown binary_fun\n";
+      std::cerr << "ERROR in node_info.cpp : unknown binary_fun\n";
       return false;
   }
 }
@@ -558,18 +579,18 @@ bool CondNode::evaluate(NodeInfo* pattern, NodeInfo* test)
    return this->comparison_fun(pattern_comparison_field, &((*test).*(this->test_field)));
   }
   else if (nc == 1){
-   return this->unary_fun((*(this->children->front()))->evaluate(pattern, test)); 
+   return this->unary_fun(this->children->front()->evaluate(pattern, test)); 
   }
   else{
     // 2 or more children
-    bool r = (*(this->children->front()))->evaluate(pattern, test);
+    bool r = this->children->front()->evaluate(pattern, test);
     
-    std::list<CondNode**>::iterator it = this->children->begin();
+    std::list<CondNode*>::iterator it = this->children->begin();
     it++;
     
     while(it != this->children->end()){
-      CondNode** cn = *it;
-      r = this->binary_fun(r, (*cn)->evaluate(pattern, test));
+      CondNode* cn = *it;
+      r = this->binary_fun(r, cn->evaluate(pattern, test));
       
      it++; 
     }
@@ -577,25 +598,25 @@ bool CondNode::evaluate(NodeInfo* pattern, NodeInfo* test)
   }
 }
 
-bool CondNode::equals(CondNode** cn){
+bool CondNode::equals(CondNode* cn){
   vsize_t nc = this->children->size();
-  if (nc != (*cn)->children->size()) return false;
-  if (this->has_fixed_pattern_info != (*cn)->has_fixed_pattern_info or (this->has_fixed_pattern_info and (this->fixed_pattern_info != (*cn)->fixed_pattern_info))) return false;
+  if (nc != cn->children->size()) return false;
+  if (this->has_fixed_pattern_info != cn->has_fixed_pattern_info or (this->has_fixed_pattern_info and (this->fixed_pattern_info != cn->fixed_pattern_info))) return false;
   
   // TODO: compare actual values within fixed_field (not only pointer addresses)
-  if (this->has_fixed_field != (*cn)->has_fixed_field or (this->has_fixed_field and (this->fixed_field != (*cn)->fixed_field))) return false;
+  if (this->has_fixed_field != cn->has_fixed_field or (this->has_fixed_field and (this->fixed_field != cn->fixed_field))) return false;
   
   if (nc == 0){
-    bool r = (this->pattern_field == (*cn)->pattern_field)
-              and (this->test_field == (*cn)->test_field)
-              and (this->comparison == (*cn)->comparison);
+    bool r = (this->pattern_field == cn->pattern_field)
+              and (this->test_field == cn->test_field)
+              and (this->comparison == cn->comparison);
     return r;
   }
   else if(nc == 1){
-    bool r = (this->unary_operator == (*cn)->unary_operator);
+    bool r = (this->unary_operator == cn->unary_operator);
     
     if (r){
-      r = (*(this->children->front()))->equals((*cn)->children->front());
+      r = this->children->front()->equals(cn->children->front());
     }
     
     return r;
@@ -604,12 +625,12 @@ bool CondNode::equals(CondNode** cn){
     bool r = true;
     
     if (r){
-      std::list<CondNode**>::iterator it = this->children->begin();
-      std::list<CondNode**>::iterator it2 = (*cn)->children->begin();
+      std::list<CondNode*>::iterator it = this->children->begin();
+      std::list<CondNode*>::iterator it2 = cn->children->begin();
       
-      while(r and it != this->children->end() and it2 != (*cn)->children->end()){
-        CondNode** cn_tmp = *it;
-        r = r and ((*cn_tmp)->equals(*it2));
+      while(r and it != this->children->end() and it2 != cn->children->end()){
+        CondNode* cn_tmp = *it;
+        r = r and (cn_tmp->equals(*it2));
 
         it++; 
         it2++;
@@ -661,7 +682,7 @@ std::string CondNode::field_toString(void* field)
       return std::to_string((int) *i);
       
     default:
-      std::cerr << "ERR in node_info.cpp : unknown comparison_fun" << std::endl;
+      std::cerr << "ERROR in node_info.cpp : unknown comparison_fun" << std::endl;
       return "";
   }
 }
@@ -698,21 +719,21 @@ std::string CondNode::toString(NodeInfo* ni){
     case 1:
       s = desc_UnOpEnum[this->unary_operator];
       s += "(";
-      s += (*(this->children->front()))->toString(ni);
+      s += this->children->front()->toString(ni);
       s += ")";
       return s;
       
     default:
       s = desc_BinOpEnum[this->binary_operator];
       s += "(";
-      s += (*(this->children->front()))->toString(ni);
+      s += this->children->front()->toString(ni);
       
-      std::list<CondNode**>::iterator it = this->children->begin();
+      std::list<CondNode*>::iterator it = this->children->begin();
       it++;
 
       while(it != this->children->end()){
-        CondNode** cn_tmp = *it;
-        s += ", " + (*cn_tmp)->toString(ni);
+        CondNode* cn_tmp = *it;
+        s += ", " + cn_tmp->toString(ni);
 
         it++;
       }
@@ -722,38 +743,84 @@ std::string CondNode::toString(NodeInfo* ni){
   }
 }
 
-void CondNode::freeCondition(CondNode** cn, bool free_condition, bool free_pointer){  
-  if (not free_condition){
-    if (cn != NULL){
-      cn = NULL;
-    }
-    return;
+void CondNode::add_pointer_usage(){
+  this->n_pointer_usage++;
+
+  std::list<CondNode*>::iterator it = this->children->begin();
+
+  while(it != this->children->end()){
+    (*it)->add_pointer_usage();
+    it++;
+  }
+}
+
+void CondNode::freeCondition(CondNode* cn, bool b1, bool b2){  
+  if (cn == NULL){
+    return; 
+  }
+    
+  bool to_free = false;
+  cn->n_pointer_usage--;
+  if (cn->n_pointer_usage == 0){
+    to_free = true;
   }
   
-  if (cn != NULL){
-    if (*cn != NULL){
-      if ((*cn)->children != NULL){
-        std::list<CondNode**>::iterator it = (*cn)->children->begin();
+  std::list<CondNode*>::iterator it = cn->children->begin();
 
-        vsize_t i = 0;
-        while(it != (*cn)->children->end()){
-          CondNode::freeCondition(*it, free_condition, free_pointer);
-          *it = NULL;
-          
-          it++;
-          i++;
+  while(it != cn->children->end()){      
+    CondNode::freeCondition(*it, b1, b2);     
+    it++;
+  }
+  
+  if (to_free){
+    delete cn->children;  
+    
+    // TODO: find a better way to malloc/new and free/delete fixed field
+    if (cn->has_fixed_field){
+      if (cn->fixed_field_is_new){
+        switch (cn->comparison){
+          case bool_equals:
+            delete(static_cast<bool*>(cn->fixed_field));
+            break;
+            
+          case bool_false:      
+          case bool_true:      
+          case bool_test_true:
+            break;
+            
+          case vsizet_equals:
+          case vsizet_gt:
+          case vsizet_geq:
+          case vsizet_lt:
+          case vsizet_leq:
+            delete(static_cast<vsize_t*>(cn->fixed_field));
+            break;
+            
+          case str_contains:      
+          case str_equals:
+          case str_beginswith:
+          case str_regex:
+            delete(static_cast<std::string*>(cn->fixed_field));
+            break;
+            
+          case uint8t_equals:      
+          case uint8t_gt:
+          case uint8t_geq:
+          case uint8t_lt:
+          case uint8t_leq:
+            delete(static_cast<std::uint8_t*>(cn->fixed_field));
+            break;
+            
+          default:
+            std::cerr << "ERROR in node_info.cpp : unknown comparison_fun" << std::endl;
+            break;
         }
-        
-          delete (*cn)->children;
-          (*cn)->children = NULL;
       }
-      
-          delete(*cn);
-          *cn = NULL;
+      else{
+        free(cn->fixed_field); 
+      }
     }
-        if (free_pointer){
-          free(cn);
-        }
+    delete(cn);
   }
 }
 
@@ -762,8 +829,6 @@ CondNodeToken::CondNodeToken(){
 }
 
 CondNodeToken::CondNodeToken(std::string str){
-//   std::cout << "parsing token " << str << std::endl;
-  
   vsize_t size = str.length();
   
   if (str == "("){
@@ -822,7 +887,7 @@ CondNodeParser::CondNodeParser(){
 }
 
 
-CondNode** CondNodeParser::parseCondNode(std::string str){
+CondNode* CondNodeParser::parseCondNode(std::string str){
   CondNodeParser cnp = CondNodeParser();
   cnp.tokenize(str);
   cnp.advance();
@@ -976,74 +1041,70 @@ void CondNodeParser::expect(std::string expected_type){
   
   if (not r){
     if (this->has_next_token){
-      std::cerr << "Expected " << expected_type << ", found " << this->next_token.type << " (" << this->next_token.value << ")" << std::endl;
+      std::cerr << "ERROR: Expected " << expected_type << ", found " << this->next_token.type << " (" << this->next_token.value << ")" << std::endl;
     }
     else {
-      std::cerr << "End of expression reached." << std::endl; 
+      std::cerr << "ERROR: End of expression reached." << std::endl; 
     }
   }
   
   RELEASE_ASSERT(r);
 }
 
-CondNode** CondNodeParser::expression(){
-  CondNode** cn = this->term();
+CondNode* CondNodeParser::expression(){
+  CondNode* cn = this->term();
   bool children = false;
   
   while(this->accept("OR")){
     if (not children){
-      std::list<CondNode**>* or_children = new std::list<CondNode**>();
+      std::list<CondNode*>* or_children = new std::list<CondNode*>();
       or_children->push_front(cn);
-      cn = (CondNode**) malloc_or_quit(sizeof(CondNode*));
-      *cn = new CondNode(or_children);
-      (*cn)->binary_operator = BinOpEnum::logic_or;
+      cn = new CondNode(or_children);
+      cn->binary_operator = BinOpEnum::logic_or;
     }
     
-    (*cn)->children->push_back(this->term());
+    cn->children->push_back(this->term());
   }
   
   return cn;
 }
 
-CondNode** CondNodeParser::term(){
-  CondNode** cn = this->factor();
+CondNode* CondNodeParser::term(){
+  CondNode* cn = this->factor();
   bool children = false;
   
   while (this->accept("AND")){
     if (not children){
-      std::list<CondNode**>* and_children = new std::list<CondNode**>();
+      std::list<CondNode*>* and_children = new std::list<CondNode*>();
       and_children->push_front(cn);
-      cn = (CondNode**) malloc_or_quit(sizeof(CondNode*));
-      *cn = new CondNode(and_children);
-      (*cn)->binary_operator = BinOpEnum::logic_and;
+      cn = new CondNode(and_children);
+      cn->binary_operator = BinOpEnum::logic_and;
     }
     
-    (*cn)->children->push_back(this->factor());
+    cn->children->push_back(this->factor());
   }
   
   return cn;
 }
 
-CondNode** CondNodeParser::factor(){
-  CondNode** cn;
+CondNode* CondNodeParser::factor(){
+  CondNode* cn;
   
   if (this->accept("LP")){
     cn = this->expression();
     this->expect("RP");
   }
   else if (this->accept("BOOL")){
-    cn = (CondNode**) malloc_or_quit(sizeof(CondNode*));
-    *cn = new CondNode();
+    cn = new CondNode();
     
     if (this->current_token.value == "true" or this->current_token.value == "*"){
-      (*cn)->comparison = ComparisonFunEnum::bool_true;
+      cn->comparison = ComparisonFunEnum::bool_true;
     }
   }
   else if (this->accept("NOT")){
-    std::list<CondNode**>* not_child = new std::list<CondNode**>();
+    std::list<CondNode*>* not_child = new std::list<CondNode*>();
     not_child->push_front(this->expression());
-    cn = (CondNode**) malloc_or_quit(sizeof(CondNode*));
-    *cn = new CondNode(not_child, UnOpEnum::logic_not);
+    cn = new CondNode(not_child, UnOpEnum::logic_not);
   }
   else if (this->accept("W")){
     std::string key = this->current_token.value; 
@@ -1054,11 +1115,10 @@ CondNode** CondNodeParser::factor(){
     this->accept("W");
     std::string value = this->current_token.value;
     
-    cn = (CondNode**) malloc_or_quit(sizeof(CondNode*));
-    *cn = new CondNode(key, op, value);
+    cn = new CondNode(key, op, value);
   }
   else {
-    std::cerr << "ERR: could not parse condition." << std::endl;
+    std::cerr << "ERROR: could not parse condition." << std::endl;
     RELEASE_ASSERT(false); 
   }
   

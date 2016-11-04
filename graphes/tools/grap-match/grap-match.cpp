@@ -220,17 +220,15 @@ int main(int argc, char *argv[]) {
     worker_queue(args_queue, queue_mutex, cout_mutex, use_tree);
   }
   
-  if (use_tree){
-    tree->freeParcoursNode(); 
-  }
-  
   delete(args_queue);
   delete(queue_mutex);
   delete(cout_mutex);
   if (use_tree){
     freeGraphList(pattern_graphs, true, true);
+    tree->freeParcoursNode(); 
   }
   else{
+    std::cout << "0" << std::endl;
     pattern_parcours->freeParcours(true);
     graph_free(pattern_graph, true);
   }
@@ -389,6 +387,7 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, Par
   vsize_t count = std::get<0>(rt);
   PatternsMatches* pattern_matches = std::get<1>(rt);
   PatternsMatches::iterator it_patternsmatches;
+  tree->saveParcoursNodeToDot("tree.dot");
   
   if (not optionQuiet){
     out_stream << "Test graph (" << pathTest << ") has " << (int) test_graph->nodes.size <<  " nodes." << std::endl;
@@ -471,15 +470,11 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, Par
           }
         }
         i++;
-        
-        freeMatch(match);
       }
     }
   }
   
-  freePatternsMatches(pattern_matches, false);
-  
-//   delete(set_gotten);
+  freePatternsMatches(pattern_matches, true);
   graph_free(test_graph, true);
   
   cout_mutex->lock();
