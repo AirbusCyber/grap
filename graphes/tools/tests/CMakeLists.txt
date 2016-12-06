@@ -6,7 +6,7 @@ set(SRCS_TESTS
 
 # tests
 add_executable(tests ${SRCS_TESTS})
-configure_file(tests_grap-match.py ${CMAKE_BINARY_DIR}/tests_grap-match.py COPYONLY)
+configure_file(test-all.py ${CMAKE_BINARY_DIR}/test-all.py COPYONLY)
 
 if("${MSVC}" OR "${MSYS}")
   target_link_libraries(tests common GTSI graph nodeinfo)
