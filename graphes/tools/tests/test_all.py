@@ -26,13 +26,35 @@ def main():
         if v == "-v" or v == "--verbose":
             verbose = True
 
-    error_total = 0
-    print Blue + "Testing grap-match", Color_Off
-    error_gm = test_grap_match_binary(verbose, None, "grap-match", n_tests, expected, pattern_paths, test_paths)
-    error_gmpy = test_grap_match_binary(verbose, "python2", "grap-match.py", n_tests, expected, pattern_paths, test_paths)
+    if verbose:
+        print Blue + "Testing ./tests", Color_Off
+        sys.stdout.flush()
+    error_tests = test_tests(verbose, "./tests")
+    print_error_msg(error_tests, "tests: " + str(error_tests) + " error(s) found.")
 
-    print_error_msg(error_total, "Total: " + str(error_total) + " errors found.")
-    error_total = error_gm + error_gmpy
+    if verbose:
+        print ""
+        print Blue + "Testing ./grap-match", Color_Off
+    error_gm = test_grap_match_binary(verbose, None, "./grap-match", n_tests, expected, pattern_paths, test_paths)
+    print_error_msg(error_gm, "grap-match: " + str(error_gm) + " error(s) found.")
+
+    if verbose:
+        print ""
+        print Blue + "Testing ./grap-match.py", Color_Off
+    error_gmpy = test_grap_match_binary(verbose, "python2", "./grap-match.py", n_tests, expected, pattern_paths, test_paths)
+    print_error_msg(error_gmpy, "grap-match.py: " + str(error_gmpy) + " error(s) found.")
+
+    error_total = error_tests + error_gm + error_gmpy
+
+    if verbose:
+        print ""
+
+    print_error_msg(error_total, "Total: " + str(error_total) + " error(s) found.")
+
+    if error_total > 255:
+        sys.exit(255)
+    else:
+        sys.exit(error_total)
 
 
 def print_error_msg(error_count, message):
@@ -41,6 +63,21 @@ def print_error_msg(error_count, message):
     else:
         color = Red
     print color + message + Color_Off
+
+
+def test_tests(verbose, program):
+    command = [program]
+
+    if verbose:
+        process = subprocess.Popen(command)
+    else:
+        fnull = open(os.devnull, 'w')
+        process = subprocess.Popen(command, stdout=fnull, stderr=fnull)
+
+    process.communicate()
+    exitcode = process.returncode
+
+    return exitcode
 
 
 def test_grap_match_binary(verbose, interpreter, program, n_tests, expected, pattern_paths, test_paths):
@@ -93,6 +130,7 @@ def test_grap_match_binary(verbose, interpreter, program, n_tests, expected, pat
         if verbose:
             print Blue + "Running test", i, Color_Off
             print "Checking labels:"
+        sys.stdout.flush()
         error_count += run_and_parse_command(verbose, i, command_label_tree, expected[i][0], "tree")
         if len(pattern_paths[i]) == 1 and not multiple_patterns_in_dot:
             error_count += run_and_parse_command(verbose, i, command_label_singletraversal, expected[i][0], "single traversal")
@@ -113,8 +151,8 @@ def run_and_parse_command(verbose, i, command, expected_traversals, algo):
     if verbose:
         process = subprocess.Popen(command, stdout=subprocess.PIPE)
     else:
-        FNULL = open(os.devnull, 'w')
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=FNULL)
+        fnull = open(os.devnull, 'w')
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=fnull)
 
     out, err = process.communicate()
     exitcode = process.returncode
@@ -210,5 +248,3 @@ def find_test_dir(args):
     return None
 
 main()
-
-
