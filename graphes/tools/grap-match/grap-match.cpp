@@ -228,10 +228,11 @@ int main(int argc, char *argv[]) {
     tree->freeParcoursNode(); 
   }
   else{
-    std::cout << "0" << std::endl;
     pattern_parcours->freeParcours(true);
     graph_free(pattern_graph, true);
   }
+  
+  return 0;
 }
 
 void worker_queue(std::list<ArgsMatchPatternToTest>* args_queue, std::mutex* queue_mutex, std::mutex* cout_mutex, bool use_tree){
@@ -387,7 +388,6 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, Par
   vsize_t count = std::get<0>(rt);
   PatternsMatches* pattern_matches = std::get<1>(rt);
   PatternsMatches::iterator it_patternsmatches;
-  tree->saveParcoursNodeToDot("tree.dot");
   
   if (not optionQuiet){
     out_stream << "Test graph (" << pathTest << ") has " << (int) test_graph->nodes.size <<  " nodes." << std::endl;

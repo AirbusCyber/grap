@@ -7,6 +7,7 @@ set(SRCS_GRAP-MATCH
 # grap-match
 add_executable(grap-match ${SRCS_GRAP-MATCH})
 target_link_libraries(grap-match common GTSI graph nodeinfo pthread)
+configure_file(grap-match.py ${CMAKE_BINARY_DIR}/grap-match.py COPYONLY)
 
 if(NOT "${MSVC}" AND NOT "${MSYS}")
   install (TARGETS grap-match DESTINATION /usr/local/bin) 

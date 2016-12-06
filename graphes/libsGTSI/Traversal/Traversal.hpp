@@ -102,7 +102,7 @@ public:
   string toDot();
   string toString();
 
-  typedef std::tuple < vsize_t, PatternsMatches*> RetourParcourir;
+  typedef std::pair < vsize_t, PatternsMatches*> RetourParcourir;
   RetourParcourir parcourir(graph_t * gr, vsize_t W, bool checkLabels, bool returnFound, bool printAllMatches);
   PatternsMatches* parcourirDepuisSommetRec(bool racine, graph_t * gr, node_t * r, std::pair < node_t *, node_t * >*numeros, vsize_t max_numeros, std::set < node_t * > matched_nodes, bool checkLabels, Match* current_match, bool returnFound, bool printAllMatches);
   PatternsMatches* parcourirDepuisSommet(graph_t *, vsize_t r, vsize_t W, bool checkLabels, bool printFound, bool printAllMatches);

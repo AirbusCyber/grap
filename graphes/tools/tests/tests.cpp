@@ -180,7 +180,8 @@ int main(int argc, char *argv[]) {
                      "of tests.\n";
       }
       else {
-        std::cout << "Zero (0) test done, are you sure the path is correct ?\n";
+        std::cout << Red << "Zero (0) test done, are you sure the path is correct ?"  << Color_Off << std::endl;
+        error_number++;
       }
       break;
     }

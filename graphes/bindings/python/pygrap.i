@@ -67,10 +67,11 @@ graph_t* getGraphFromFile(const char *filename) {
 
 %}
 
+
 %template(ListNode) std::list<node_t *>;
-%template(MapStrNode) std::map<string,  std::list<node_t *>*>;
-%template(ListGotten) std::list<std::map<string, std::list<node_t *> *> *>;
-%template(PairRT) std::pair<vsize_t,
-	 std::list<std::map<string, std::list<node_t *> *> *> *>;
-%template(NodesMap) std::map< vsize_t, node_t * >;
-	   
+%template(Match) std::map<std::string, std::list <node_t *> *>;
+%template(MatchList) std::list <Match*>;
+%template(RetourParcours) std::pair <vsize_t, MatchList*>;
+%template(PatternsMatches) std::map<std::string, MatchList*>;
+%template(RetourParcourir) std::pair<vsize_t, PatternsMatches*>;
+%template(GraphCppList) std::list<graph_t *>;

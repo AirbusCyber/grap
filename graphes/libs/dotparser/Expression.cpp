@@ -477,3 +477,16 @@ void freeOptionList(OptionList * ol) {
   free(ol->options);
   free(ol);
 }
+
+GraphCppList MakeGraphList(GraphList* gl){
+  GraphCppList list = std::list<graph_t*>();
+    
+  if (gl != NULL){
+    vsize_t k;
+    for (k = 0; k < gl->size; k++){
+      list.push_back(gl->graphes[k]);
+    }
+  }
+  
+  return list;
+}

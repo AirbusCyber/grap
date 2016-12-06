@@ -848,7 +848,7 @@ ParcoursNode::RetourParcourir ParcoursNode::parcourir(graph_t* gr, vsize_t W, bo
     count += match_list->size();
   }
   
-  return std::make_tuple(count, patterns_matches);
+  return RetourParcourir(count, patterns_matches);
 }
 
 void ParcoursNode::merge_patternsmatches(PatternsMatches* leaves_to_matches, PatternsMatches* leaves_to_matches_rec){
