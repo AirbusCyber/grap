@@ -30,19 +30,19 @@ def main():
         print Blue + "Testing ./tests", Color_Off
         sys.stdout.flush()
     error_tests = test_tests(verbose, "./tests")
-    print_error_msg(error_tests, "tests: " + str(error_tests) + " error(s) found.")
+    print_error_msg(error_tests, "./tests: " + str(error_tests) + " error(s) found.")
 
     if verbose:
         print ""
         print Blue + "Testing ./grap-match", Color_Off
     error_gm = test_grap_match_binary(verbose, None, "./grap-match", n_tests, expected, pattern_paths, test_paths)
-    print_error_msg(error_gm, "grap-match: " + str(error_gm) + " error(s) found.")
+    print_error_msg(error_gm, "./grap-match: " + str(error_gm) + " error(s) found.")
 
     if verbose:
         print ""
         print Blue + "Testing ./grap-match.py", Color_Off
     error_gmpy = test_grap_match_binary(verbose, "python2", "./grap-match.py", n_tests, expected, pattern_paths, test_paths)
-    print_error_msg(error_gmpy, "grap-match.py: " + str(error_gmpy) + " error(s) found.")
+    print_error_msg(error_gmpy, "./grap-match.py: " + str(error_gmpy) + " error(s) found.")
 
     error_total = error_tests + error_gm + error_gmpy
 
