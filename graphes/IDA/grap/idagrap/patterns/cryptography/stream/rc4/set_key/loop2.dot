@@ -1,11 +1,11 @@
 Digraph G {
-A [label = "mov", csymbtype="substring", csymb="mov", getid="A", minrepeat="0", maxrepeat="3", lazyrepeat=true]
-B [label = "mov", csymbtype="substring", csymb="mov", getid="B"]
-C [label = "*", csymbtype="*", getid="C", minrepeat="1", maxrepeat="6"]
-D [label = "mov", csymbtype="substring", csymb="mov", getid="D"]
+A [label = "mov", cond="opcode is mov", getid="A", minrepeat="0", maxrepeat="3", lazyrepeat=true]
+B [label = "mov", cond="opcode is mov", getid="B"]
+C [label = "*", cond=true, getid="C", minrepeat="1", maxrepeat="6"]
+D [label = "mov", cond="opcode is mov", getid="D"]
 E [label = "add", cond="opcode is add or opcode is inc", getid="E"]
-F [label = "*", csymbtype="*", getid="F", minrepeat="0", maxrepeat="4", lazyrepeat=true]
-G [label = "cmp", csymbtype="substring", csymb="cmp", getid="G"]
+F [label = "*", cond=true, getid="F", minrepeat="0", maxrepeat="4", lazyrepeat=true]
+G [label = "cmp", cond="opcode is cmp", getid="G"]
 
 A -> B
 B -> C

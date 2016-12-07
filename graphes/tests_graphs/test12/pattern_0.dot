@@ -1,10 +1,10 @@
 digraph G{
-A [label="xor eax, eax", shape="box", csymbtype="string", csymb="xor eax, eax"]
-B [label="add [eax + ebx], al", shape="box", csymbtype="string", csymb="add byte ptr [eax + ebx], al"]
-C [label="inc eax", shape="box", csymbtype="string", csymb="inc eax"]
-D [label="cmp eax, esi", shape="box", csymbtype="string", csymb="cmp eax, esi"]
-E [label="jb", shape="box", csymbtype="substring", csymb="jb"]
-F [label="*", shape="box", csymbtype="*"]
+A [label="xor eax, eax", shape="box", inst="xor eax, eax"]
+B [label="add [eax + ebx], al", shape="box", inst="add byte ptr [eax + ebx], al"]
+C [label="inc eax", shape="box", inst="inc eax"]
+D [label="cmp eax, esi", shape="box", inst="cmp eax, esi"]
+E [label="jb", shape="box", inst="jb"]
+F [label="*", shape="box", cond=true]
 
 A -> B
 B -> C

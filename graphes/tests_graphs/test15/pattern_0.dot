@@ -1,10 +1,10 @@
 digraph G{
-A [label="A: *", shape="box", csymbtype="*", getid=A]
-B [label="B: *", shape="box", csymbtype="*", getid="B"]
-C [label="C: *", shape="box", csymbtype="*", getid=C]
-D [label="D: *", shape="box", csymbtype="*", getid=D]
-E [label="E: *", shape="box", csymbtype="*", getid=E]
-F [label="F: *", shape="box", csymbtype="*", getid=F]
+A [label="A: *", shape="box", cond=true, getid=A]
+B [label="B: *", shape="box", cond=true, getid="B"]
+C [label="C: *", shape="box", cond=true, getid=C]
+D [label="D: *", shape="box", cond=true, getid=D]
+E [label="E: *", shape="box", cond=true, getid=E]
+F [label="F: *", shape="box", cond=true, getid=F]
 
 A -> B
 B -> C

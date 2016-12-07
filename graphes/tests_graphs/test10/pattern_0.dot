@@ -1,10 +1,10 @@
 digraph G{
-A [label="xor", shape="box", csymbtype="substring", csymb="xor"]
-B [label="A: *", shape="box", csymbtype="*", getid="A"]
-C [label="inc", shape="box", csymbtype="substring", csymb="inc"]
-D [label="cmp", shape="box", csymbtype="substring", csymb="cmp"]
-E [label="jb", shape="box", csymbtype="substring", csymb="jb"]
-F [label="*", shape="box", csymbtype="*"]
+A [label="xor", shape="box", inst="xor"]
+B [label="A: *", shape="box", cond=true, getid="A"]
+C [label="inc", shape="box", inst="inc"]
+D [label="cmp", shape="box", inst="cmp"]
+E [label="jb", shape="box", inst="jb"]
+F [label="*", shape="box", cond=true]
 
 A -> B
 B -> C
