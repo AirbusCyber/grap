@@ -1,7 +1,7 @@
 Digraph G {
 "A" [label = "JCC", root=true]
 "B" [label = "INST", repeat="*"]
-"C" [label = "INST", symbtype="*", getid="joined"]
+"C" [label = "INST", cond=true, getid="joined"]
 "A" -> "B" [label = "1"]
 "B" -> "C" [label = "1"]
 "A" -> "C" [label = "2"]

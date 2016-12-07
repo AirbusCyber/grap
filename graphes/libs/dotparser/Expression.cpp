@@ -210,8 +210,6 @@ char *removeQuotes(char *s) {
 
 node_t *updateNode(OptionList * ol, node_t * n) {
   size_t i;
-  char hasSymb = 0;
-  char hasCSymb = 0;
   char hasMinRepeat = 0;
   char hasMaxRepeat = 0;
   
@@ -221,12 +219,13 @@ node_t *updateNode(OptionList * ol, node_t * n) {
 
   n->info->lazyRepeat = false;
   bool cond_filled = false;
+  bool has_inst = false;
 
   for (i = 0; i < ol->size; i++) {
     char *v = removeQuotes(ol->options[i]->value);
     char *id = ol->options[i]->id;
 
-    if (hasSymb == 0 && hasCSymb == 0 && strcmp(id, "label") == 0) {
+    if (not has_inst and strcmp(id, "label") == 0) {
       n->info->inst_str = v;
     }
     else if (strcmp(id, "cond") == 0 || strcmp(id, "condition") == 0){
@@ -236,32 +235,12 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     else if (strcmp(id, "root") == 0 || (strcmp(id, "fillcolor") == 0 && strcmp(v, "orange") == 0)) {
       n->info->is_root = true;
     }
-    else if (strcmp(id, "symb") == 0) {
-      hasSymb = 1;
-      
-      std::cerr << "ERROR: symb option deprecated\n";
-    }
-    else if (strcmp(id, "inst") == 0 || strcmp(id, "instruction") == 0 || strcmp(id, "csymb") == 0) {
-      hasCSymb = 1;
-      
+    else if (strcmp(id, "inst") == 0 || strcmp(id, "instruction") == 0) {     
       n->info->inst_str = std::string(v);
+      has_inst = true;
     }
     else if (strcmp(id, "op") == 0 || strcmp(id, "opcode") == 0) {
       n->info->opcode = std::string(v);
-    }
-    else if (not cond_filled and (strcmp(id, "symbtype") == 0 or strcmp(id, "csymbtype") == 0)) {      
-      if (strcmp(v, "none") == 0 or strcmp(v, "*") == 0) {          
-        n->condition = new CondNode();
-        n->condition->comparison = ComparisonFunEnum::bool_true;
-        cond_filled = true;
-      }
-      else if (strcmp(v, "substring") == 0) {
-        n->condition = new CondNode();
-        n->condition->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-        n->condition->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-        n->condition->comparison = ComparisonFunEnum::str_contains;
-        cond_filled = true;
-      }
     }
     else if (strcmp(id, "repeat") == 0) {
       if (strcmp(v, "*") == 0) {        
