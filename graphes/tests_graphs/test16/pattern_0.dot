@@ -1,7 +1,7 @@
 Digraph G {
-"A" [label = "add", csymb="add", csymbtype="substring", root=true]
-"B" [label = "*", csymbtype="*", minrepeat=0, maxrepeat=3, lazyrepeat=true]
-"C" [label = "cmp", csymb="cmp", csymbtype="substring"]
+"A" [label = "add", cond="opcode is add", root=true]
+"B" [label = "*", cond=true, minrepeat=0, maxrepeat=3, lazyrepeat=true]
+"C" [label = "cmp", cond="opcode is cmp"]
 "A" -> "B" [label = "1"]
 "B" -> "C" [label = "2"]
 }

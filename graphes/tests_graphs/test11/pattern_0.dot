@@ -1,7 +1,7 @@
 digraph G{
-A [label="A: *", shape="box", csymbtype="*", getid="A"]
-B [label="B: (*)+", shape="box", csymbtype="*", repeat="+", getid="B"]
-F [label="C: *", shape="box", csymbtype="*", getid="C"]
+A [label="A: *", shape="box", cond=true, getid="A"]
+B [label="B: (*)+", shape="box", cond=true, repeat="+", getid="B"]
+F [label="C: *", shape="box", cond=true, getid="C"]
 
 A -> B
 B -> B
