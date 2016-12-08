@@ -16,15 +16,16 @@ if __name__ == '__main__':
     parser.add_argument(dest='pattern', help='Pattern file (.dot) to look for')
     parser.add_argument(dest='test', nargs="+", help='Test file(s) to analyse')
 
-    parser.add_argument('-f', '--force', dest='force', action="store_true", help='Force re-generation of existing .dot file')
+    parser.add_argument('-f', '--force', dest='force', action="store_true", default=False, help='Force re-generation of existing .dot file')
     parser.add_argument('-o', '--dot-output', dest='dot', help='Specify exported .dot file name')
-    parser.add_argument('-r', '--readable', dest='readable', action="store_true", help='DOT in displayable format (with xdot)')
-    parser.add_argument('-od', '--only-disassemble', dest='only_disassemble', action="store_true", help='Disassemble files and exit (no matching)')
-    parser.add_argument('-m', '--print-all-matches', dest='print_all_matches', action="store_true", help='Print all matched nodes (overrides getid fields)')
-    parser.add_argument('-nm', '--print-no-matches', dest='print_no_matches', action="store_true", help='Don\'t print matched nodes (overrides getid fields)')
-    parser.add_argument('-v', '--verbose', dest='verbose', action="store_true", help='Verbose output')
-    parser.add_argument('-d', '--debug', dest='debug', action="store_true", help='Debug output')
-    parser.add_argument('-q', '--quiet', dest='quiet', action="store_true", help='Quiet output')
+    parser.add_argument('-r', '--readable', dest='readable', action="store_true", default=False, help='DOT in displayable format (with xdot)')
+    parser.add_argument('-od', '--only-disassemble', dest='only_disassemble', action="store_true", default=False, help='Disassemble files and exit (no matching)')
+    parser.add_argument('-m', '--print-all-matches', dest='print_all_matches', action="store_true", default=False, help='Print all matched nodes (overrides getid fields)')
+    parser.add_argument('-nm', '--print-no-matches', dest='print_no_matches', action="store_true", default=False, help='Don\'t print matched nodes (overrides getid fields)')
+    parser.add_argument('-sa', '--show-all', dest='show_all', action="store_true", default=False, help='show all tested files (not default when quiet, default otherwise)')
+    parser.add_argument('-v', '--verbose', dest='verbose', action="store_true", default=False, help='Verbose output')
+    parser.add_argument('-d', '--debug', dest='debug', action="store_true", default=False, help='Debug output')
+    parser.add_argument('-q', '--quiet', dest='quiet', action="store_true", default=False, help='Quiet output')
     args = parser.parse_args()
 
 
@@ -138,6 +139,9 @@ if __name__ == '__main__':
 
             if args.quiet:
                 command.append("-q")
+
+            if args.show_all:
+                command.append("-sa")
 
             command.append(args.pattern)
 

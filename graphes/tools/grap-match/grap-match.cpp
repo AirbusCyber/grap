@@ -17,6 +17,7 @@ void printUsage() {
   printf("        -nt or --no-thread                : don't multithread (defaut: 4 threads)\n");
   printf("        -ncl or -ncs or --no-check-labels : do not check the symbols (labels) of sites\n");
   printf("        -st or --single-traversal         : use single traversal algorithm (default with one pattern)\n");
+  printf("        -sa or --show-all                 : show all tested files (not default when quiet, default otherwise)\n");
   printf("        -t or --tree                      : use tree algorithm (default with multiple patterns)\n");
 }
 
@@ -43,6 +44,7 @@ int main(int argc, char *argv[]) {
   bool printNoMatches = false;
   bool optionTree = false;
   bool optionSingleTraversal = false;
+  bool optionShowAll = false;
 
   // Parsing options
   int a;
@@ -71,6 +73,9 @@ int main(int argc, char *argv[]) {
     }
     else if (strcmp(argv[a], "-st") == 0 || strcmp(argv[a], "--single-traversal") == 0) {
       optionSingleTraversal = true;
+    }
+    else if (strcmp(argv[a], "-sa") == 0 || strcmp(argv[a], "--show-all") == 0) {
+      optionShowAll = true;
     }
     else if (strcmp(argv[a], "-m") == 0 || strcmp(argv[a], "--print-all-matches") == 0) {
       if (not printNoMatches) printAllMatches = true;
@@ -196,7 +201,7 @@ int main(int argc, char *argv[]) {
   std::mutex* cout_mutex = new std::mutex();
   for (test_iterator = pathTests.begin();  test_iterator != pathTests.end(); test_iterator++){  
     string pathTest = (std::string) *test_iterator;
-    args_queue->push_back(std::make_tuple(optionVerbose, optionQuiet, checkLabels, tree, pathPattern, pattern_parcours, pathTest, printNoMatches, printAllMatches, maxSiteSize));
+    args_queue->push_back(std::make_tuple(optionVerbose, optionQuiet, optionShowAll, checkLabels, tree, pathPattern, pattern_parcours, pathTest, printNoMatches, printAllMatches, maxSiteSize));
   }
   
   if (optionThreads){
@@ -249,10 +254,10 @@ void worker_queue(std::list<ArgsMatchPatternToTest>* args_queue, std::mutex* que
     
     if (found_next){
       if (use_tree){
-        matchTreeToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<4>(args), std::get<5>(args), std::get<6>(args), std::get<7>(args), std::get<8>(args), std::get<9>(args), cout_mutex);
+        matchTreeToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<4>(args), std::get<5>(args), std::get<6>(args), std::get<7>(args), std::get<8>(args), std::get<9>(args), std::get<10>(args), cout_mutex);
       }
       else{
-        matchPatternToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<4>(args), std::get<5>(args), std::get<6>(args), std::get<7>(args), std::get<8>(args), std::get<9>(args), cout_mutex);
+        matchPatternToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<5>(args), std::get<6>(args), std::get<7>(args), std::get<8>(args), std::get<9>(args), std::get<10>(args), cout_mutex);
       }
     }
     else{
@@ -261,7 +266,7 @@ void worker_queue(std::list<ArgsMatchPatternToTest>* args_queue, std::mutex* que
   }
 }
 
-void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, string pathPattern, Parcours* pattern_parcours, string pathTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, std::mutex* cout_mutex){
+void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll, bool checkLabels, string pathPattern, Parcours* pattern_parcours, string pathTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, std::mutex* cout_mutex){
   ostringstream out_stream;
   ostringstream err_stream;
   
@@ -302,7 +307,7 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, 
     out_stream << (int) count << " traversal(s) possible in " << pathTest << "." << std::endl;
   }
   else{
-    if (count > 0){
+    if (count > 0 or optionShowAll){
      out_stream << pathTest << " " << count << std::endl;
     }
   }
@@ -352,7 +357,7 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, 
   cout_mutex->unlock();
 }
 
-void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, ParcoursNode* tree, string pathPattern, Parcours* pattern_parcours, string pathTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, std::mutex* cout_mutex){
+void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll, bool checkLabels, ParcoursNode* tree, string pathPattern, Parcours* pattern_parcours, string pathTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, std::mutex* cout_mutex){
   ostringstream out_stream;
   ostringstream err_stream;
   
@@ -412,8 +417,11 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, Par
     }
   }
   else {
-    if (count > 0){
-      out_stream << pathTest << " - ";
+    if (count > 0 or optionShowAll){
+      out_stream << pathTest;
+      if (count > 0){
+        out_stream << " - ";
+      }
       for (it_patternsmatches = pattern_matches->begin(); it_patternsmatches != pattern_matches->end(); it_patternsmatches++){
         std::string leaf_name = it_patternsmatches->first;
         MatchList* match_list = it_patternsmatches->second;
@@ -431,23 +439,28 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, Par
   // Parse matches and print the extracted nodes
   if (getids and not pattern_matches->empty()) {
     for (it_patternsmatches = pattern_matches->begin(); it_patternsmatches != pattern_matches->end(); it_patternsmatches++){
-      if (it_patternsmatches != pattern_matches->begin()) out_stream << std::endl;
       std::string leaf_name = it_patternsmatches->first;
       MatchList* match_list = it_patternsmatches->second;
+//       if (it_patternsmatches != pattern_matches->begin() and match_list->begin() != match_list->end()) out_stream << "lklk" << std::endl;
   //     std::cout << "\nExtracted nodes:\n";
       MatchList::iterator it_match_list;
 
       vsize_t i = 1;
+      bool matches_all_empty = true;
+      ostringstream matches_out_stream;
       for (it_match_list = match_list->begin(); it_match_list != match_list->end(); it_match_list++) {
-        if (it_match_list != match_list->begin()) out_stream << std::endl;
         Match* match = *it_match_list;
         
         if (not match->empty()){
+          matches_all_empty = false;
+          if (it_match_list != match_list->begin()){
+            matches_out_stream << std::endl;
+          }
           if (leaf_name == ""){
-            out_stream << "Match " << std::dec << i << std::endl;
+            matches_out_stream << "Match " << std::dec << i << std::endl;
           }
           else {
-            out_stream << leaf_name << ", " << "match " << std::dec << i << std::endl;
+            matches_out_stream << leaf_name << ", " << "match " << std::dec << i << std::endl;
           }
 
           Match::iterator it_match;
@@ -458,12 +471,12 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, Par
               vsize_t k = 0;
               for (std::list < node_t * >::iterator itn = node_list->begin(); itn != node_list->end(); ++itn) {
                 node_t *n = *itn;
-                out_stream << (*it_match).first;
-                if (node_list->size() > 1) out_stream << k;
-                out_stream << ": ";
-                if (n->info->has_address) out_stream << "0x" << std::hex << n->info->address << std::dec << ", ";
-                out_stream << n->info->inst_str;
-                out_stream << endl;
+                matches_out_stream << (*it_match).first;
+                if (node_list->size() > 1) matches_out_stream << k;
+                matches_out_stream << ": ";
+                if (n->info->has_address) matches_out_stream << "0x" << std::hex << n->info->address << std::dec << ", ";
+                matches_out_stream << n->info->inst_str;
+                matches_out_stream << endl;
                 k++;
               }
             }
@@ -471,6 +484,11 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool checkLabels, Par
         }
         i++;
       }
+      
+      if (not matches_all_empty and it_patternsmatches != pattern_matches->end()){
+        out_stream <<  std::endl;
+      }
+      out_stream << matches_out_stream.str();
     }
   }
   
