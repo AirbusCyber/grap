@@ -1,4 +1,4 @@
-digraph G{
+digraph bb_loop{
 A [label="A: (*)+", shape="box", cond=true, minrepeat=1, maxrepeat=none, getid="A"]
 A -> A [label=2, childnumber=2]
 }
