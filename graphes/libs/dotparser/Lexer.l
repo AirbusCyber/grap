@@ -23,6 +23,7 @@
 %option bison-bridge
  
 DIGRAPH_HEADER  [dD]igraph
+COMMENT_LINE  ^" "*"//".*
 IGNORE    "labeljust=r"
 IDS       [a-zA-Z0-9*+._]+
 IDC       \"[a-zA-Z0-9*+-._: \\(),\[\]]*\"
@@ -41,6 +42,7 @@ WS        [ \r\n\t]*
  
 {IGNORE}      { }
 {WS}          { }
+{COMMENT_LINE}  { }
  
 {DIGRAPH_HEADER}      { debug_print((char *) "digraph header!\n"); return TOKEN_DIGRAPH_HEADER; }
 {IDS}         { yylval->type_string = strdup(yytext); debug_print((char *) "ids: "); debug_print(yytext); debug_print((char *) "\n"); return TOKEN_ID; }
