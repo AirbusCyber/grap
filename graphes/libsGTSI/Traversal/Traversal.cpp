@@ -979,8 +979,9 @@ std::tuple <bool, node_t*, set < node_t * >> ParcoursNode::etapeUnmatchedNode(bo
     max_numbered++;
     current_node = node;
     
+    bool keep_list_nodes = returnFound and (m->info->get or printAllMatches);
     std::list < node_t * >*list_nodes;
-    if (returnFound and (m->info->get or printAllMatches)) {
+    if (keep_list_nodes) {
       list_nodes = new std::list < node_t * >();
       list_nodes->push_back((node_t *) current_node);
     }
@@ -1004,7 +1005,7 @@ std::tuple <bool, node_t*, set < node_t * >> ParcoursNode::etapeUnmatchedNode(bo
           current_node = current_node->child1;
           r++;
         
-          if (returnFound and m->info->get){
+          if (keep_list_nodes){
             list_nodes->push_back((node_t *) current_node);
           }
         }
@@ -1017,7 +1018,9 @@ std::tuple <bool, node_t*, set < node_t * >> ParcoursNode::etapeUnmatchedNode(bo
     
       if (r < m->info->minRepeat or not m->matchesC(current_node)) {
         // pas trouvé, TODO: attention au branchement
-        delete(list_nodes);
+        if (keep_list_nodes){
+          delete(list_nodes);
+        }
         return std::tuple <bool, node_t*, set < node_t * >> (false, current_node, matched_nodes);
       }
     }

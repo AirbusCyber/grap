@@ -28,7 +28,6 @@ if __name__ == '__main__':
     parser.add_argument('-q', '--quiet', dest='quiet', action="store_true", default=False, help='Quiet output')
     args = parser.parse_args()
 
-
     printed_something = False
 
     if args.pattern is None or args.test is None:
