@@ -1,0 +1,7 @@
+digraph G{
+A [label="Pre", inst="add"]
+B [label="Loop", inst="mov"]
+
+A -> B [childnumber=1]
+A -> B [childnumber=2]
+}

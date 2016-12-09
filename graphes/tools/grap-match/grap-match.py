@@ -84,7 +84,7 @@ def match_single_traversal(pattern_graph, n_test, test_path, test_graph, args):
     if not args.quiet:
         print("Pattern graph (%s) has %d nodes." % (args.patternFile, n_pattern))
   
-    parcours = parcoursLargeur(pattern_graph, pattern_graph.root.list_id, n_pattern)
+    parcours = parcoursGen(pattern_graph, pattern_graph.root.list_id, n_pattern)
     if args.verbosity >= 2:
         print("Pattern Parcours is:\n" + parcours.toString() + "\n")
   

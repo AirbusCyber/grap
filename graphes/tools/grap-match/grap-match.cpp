@@ -150,8 +150,8 @@ int main(int argc, char *argv[]) {
     
     maxSiteSize = pattern_graph->nodes.size;
     
-    // Generate Parcours from a breadth-first-search of the pattern graph
-    pattern_parcours = parcoursLargeur(pattern_graph, pattern_graph->root->list_id, pattern_graph->nodes.size);
+    // Generate Parcours from the pattern graph
+    pattern_parcours = parcoursGen(pattern_graph, pattern_graph->root->list_id, pattern_graph->nodes.size);
     
     if (optionDebug){
       cout << "Pattern Parcours is:\n" << pattern_parcours->toString() << "\n";

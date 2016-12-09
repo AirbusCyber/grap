@@ -213,6 +213,106 @@ CondNode* computeCond(node_t* n){
   }
 }
 
+vsize_t parcoursProfondeurRec(Parcours *p, bool has_father, vsize_t father_number, node_t * s, vsize_t i, set < node_t * >* explored, std::map <node_t*, vsize_t>* node_ids) {
+  set < node_t * >::iterator explored_search;
+  std::map<node_t*, vsize_t>::iterator node_ids_search;
+  vsize_t new_i;
+  
+  explored_search = explored->find(s);
+  if (explored_search == explored->end()){
+    // Case: s not yet explored
+    // TODO: add mot parcours M1 or M2
+    MotParcours* m;
+    
+    if (not has_father) {
+        m = new MotParcours();
+        m->type = TYPE_M1;
+        m->alpha_is_R = false;
+        m->has_symbol = true;
+//         m->i = i;
+        m->info = s->info;
+        m->condition = computeCond(s);
+        p->addMot(m);
+      }
+      else {
+        m = new MotParcours();
+        m->type = TYPE_M2;
+        m->alpha_is_R = false;
+        m->i = i;
+        m->k = father_number;
+        m->has_symbol = true;
+        m->info = s->info;
+        m->condition = computeCond(s);
+        p->addMot(m);
+      }
+    
+    explored->insert(s);
+    node_ids->insert(std::pair<node_t *, vsize_t>(s, i));
+    
+    new_i = i + 1;
+    
+    if (s->has_child1){
+      new_i = parcoursProfondeurRec(p, true, 0, s->child1, new_i, explored, node_ids);
+    }
+    
+    if (s->has_child2){
+      if (s->has_child1){
+        // Make return mot
+        m = new MotParcours();
+        m->type = TYPE_M2;
+        m->alpha_is_R = true;
+        m->has_symbol = false;
+        m->i = i;
+        m->info = NULL;
+        m->condition = NULL;
+        p->addMot(m);
+      }
+      
+      new_i = parcoursProfondeurRec(p, true, 1, s->child2, new_i, explored, node_ids);
+    }
+    
+    return new_i;
+  }
+  else {
+    // Case: node already explored
+      MotParcours* m = new MotParcours();
+      m->type = TYPE_M2;
+      m->alpha_is_R = false;
+      
+      node_ids_search = node_ids->find(s);
+      RELEASE_ASSERT(node_ids_search != node_ids->end());
+      m->i = node_ids_search->second;
+      
+      m->k = father_number;
+      m->has_symbol = false;
+      m->info = s->info;
+      m->condition = nullptr;
+      p->addMot(m);
+      
+      return i;
+  }
+}
+
+Parcours* parcoursGen(graph_t * graph, vsize_t vroot, vsize_t W){
+  return parcoursProfondeur(graph, vroot, W);
+}
+
+Parcours* parcoursProfondeur(graph_t * graph, vsize_t vroot, vsize_t W){
+  //TODO: limit size to W and fill complete accordingly
+  
+  Parcours *p = new Parcours();
+  p->name = graph->name;
+  set < node_t * >* explored = new std::set<node_t*>();
+  std::map <node_t*, vsize_t>* node_ids = new std::map <node_t*, vsize_t>();
+  
+  parcoursProfondeurRec(p, false, 0, node_list_item(&(graph->nodes), vroot), 1, explored, node_ids);
+  p->complete = true;
+  
+  delete explored;
+  delete node_ids;
+  return p;
+}
+
 Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
   Parcours *p = new Parcours();
   p->name = graph->name;
@@ -685,7 +785,7 @@ set < Parcours * >parcoursFromGraph(graph_t * gr, vsize_t W, bool checkLabels) {
   vsize_t n;
 
   for (n = 0; n < gr->nodes.size; n++) {
-    p = parcoursLargeur(gr, n, W);
+    p = parcoursGen(gr, n, W);
 
     if (p->complete) {
       // check if duplicate:
@@ -719,7 +819,7 @@ ParcoursNode::ParcoursNode(std::list < ParcoursNode * >_fils, MotParcours * _mot
 }
 
 bool ParcoursNode::addGraphFromNode(graph_t * gr, node_t * r, vsize_t W, bool checkLabels) {
-  Parcours *p = parcoursLargeur(gr, r->list_id, W);
+  Parcours *p = parcoursGen(gr, r->list_id, W);
   bool ret = this->addParcours(p, 0, checkLabels);
   p->freeParcours(false);
   return ret;
@@ -732,7 +832,7 @@ vsize_t ParcoursNode::addGraph(graph_t * gr, vsize_t W, vsize_t maxLearn, bool c
 
   for (n = 0; n < gr->nodes.size; n++) {
     if (maxLearn == 0 || added < maxLearn) {
-      p = parcoursLargeur(gr, n, W);
+      p = parcoursGen(gr, n, W);
 
       if (p->complete) {
         if (this->addParcours(p, 0, checkLabels)) {
@@ -967,7 +1067,7 @@ PatternsMatches* ParcoursNode::parcourirDepuisSommetRec(bool racine, graph_t * g
   return leaves_to_matches;
 }
 
-std::tuple <bool, node_t*, set < node_t * >> ParcoursNode::etapeUnmatchedNode(bool checkLabels, bool returnFound, MotParcours* m, node_t* node, node_t* current_node, set < node_t * > matched_nodes, std::pair < node_t *, node_t * >*numbers, vsize_t max_numbered, Match* current_match, bool printAllMatches){
+std::tuple <bool, node_t*, set < node_t * >> ParcoursNode::etapeUnmatchedNode(bool checkLabels, bool returnFound, MotParcours* m, node_t* node, node_t* current_node, set < node_t * > matched_nodes, std::pair < node_t *, node_t * >*numbers, vsize_t max_numbered, Match* current_match, bool printAllMatches){  
   // node n'est pas numéroté
   bool cond_symbol = (m->matchesSymbol(node, checkLabels) and m->matchesF(node) and (m->type == TYPE_M1 or max_numbered < m->i));
   bool cond_lazy = m->info->minRepeat == 0 and m->info->lazyRepeat and not checkLabels;
@@ -1046,6 +1146,8 @@ std::tuple <bool, node_t*, set < node_t * >> ParcoursNode::etapeUnmatchedNode(bo
     if (m->info->minRepeat == 0){
       // It is a ghost node: you can do a back reference (-R> max_numeros) but it is not really matched
       // Thus it can still be "numerote" and referenced by another MotParcours
+      node_t* child = NULL;
+      
       numbers[max_numbered] = std::pair < node_t *, node_t * >(node, NULL);
       max_numbered++;
       

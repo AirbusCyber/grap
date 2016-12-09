@@ -181,6 +181,10 @@ def run_and_parse_command(verbose, i, command, expected_traversals, algo):
             if not verbose:
                 print " ".join(command) + ":"
             print Red + str(found_traversals), "traversals possible in test graph (expected:", str(expected_traversals) + ") with " + algo + ".", Color_Off
+
+            if not verbose:
+                print ""
+
             return 1
         else:
             if verbose:

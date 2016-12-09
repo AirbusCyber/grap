@@ -1,0 +1,9 @@
+digraph ghost{
+A [label="A", cond="true"]
+B [label="B?", cond="true", minrepeat=0, maxrepeat=1, lazyrepeat=true]
+C [label="C", cond="opcode is mov"]
+
+A -> B [childnumber=2]
+A -> B [childnumber=1]
+B -> C [childnumber=1]
+}

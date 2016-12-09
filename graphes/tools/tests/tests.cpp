@@ -89,6 +89,8 @@ void printDescription()
                "second (matching) pattern is a subgraph of the first.\n";
   std::cout << "Test 31: [reference] same as test 6 with all 4 patterns in one "
                "dot file.\n";
+  std::cout << "Test 32: [manual] non regression test on ghost nodes bug (fixed"
+                "with switch to depth-first search.\n";
 }
 
 #ifdef _WIN32
@@ -511,7 +513,7 @@ vsize_t test_NodeInfo(){
   
   if (nPattern == 1) {
     Parcours *p =
-        parcoursLargeur(grPattern[0], grPattern[0]->root->list_id, maxSiteSize);
+        parcoursGen(grPattern[0], grPattern[0]->root->list_id, maxSiteSize);
     Parcours::RetourParcours rt =
         p->parcourir(grTest, maxSiteSize, checkLabels, true, false, false);
     vsize_t count2 = rt.first;
