@@ -77,7 +77,7 @@ Couple *createEdge(char *f, char *c, OptionList* ol) {
       char *v = removeQuotes(ol->options[i]->value);
       char *id = ol->options[i]->id;
     
-      if (strcmp(id, "childnumber") == 0){
+      if (strcmp(id, "childnumber") == 0 or strcmp(id, "child_number") == 0){
         vsize_t k = (vsize_t) atoi(v);
         if (k == 1){
           e->is_numbered = true;
