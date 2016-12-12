@@ -178,7 +178,7 @@ class PEDisassembler:
                 else:
                     try:
                         remote_offset = pe.get_offset_from_rva(
-                            int(inst.op_str, 16) - pe.NTHeader.OptionalHeader.ImageBase)
+                            int(inst.op_str, 16) - pe.OPTIONAL_HEADER.ImageBase)
                         insts = _dis(
                             data=data,
                             offset=remote_offset,

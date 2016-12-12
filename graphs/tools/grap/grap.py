@@ -5,7 +5,7 @@ from grap_disassembler import disassembler
 import subprocess
 import os
 
-GRAP_VERSION="1.0.0"
+GRAP_VERSION="0.6.8"
 
 if __name__ == '__main__':
     import argparse
