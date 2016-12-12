@@ -4,7 +4,9 @@
 import re
 import sys
 import pefile
-import logging
+import Queue
+import threading
+import os
 from capstone import Cs
 from capstone import CS_ARCH_X86
 from capstone import CS_MODE_32
@@ -72,6 +74,8 @@ class PEDisassembler:
         self.arch = arch
         self.mode = mode
         self.capstone = Cs(self.arch, self.mode)
+        self.rva_from_offset = dict()
+        self.offset_from_rva = dict()
 
         self.prologues = {
             CS_MODE_32: [
@@ -177,8 +181,7 @@ class PEDisassembler:
                         inst.op_str = iat_api[iat_va]
                 else:
                     try:
-                        remote_offset = pe.get_offset_from_rva(
-                            int(inst.op_str, 16) - pe.OPTIONAL_HEADER.ImageBase)
+                        remote_offset = pe.get_offset_from_rva(int(inst.op_str, 16) - pe.OPTIONAL_HEADER.ImageBase)
                         insts = _dis(
                             data=data,
                             offset=remote_offset,
@@ -242,8 +245,8 @@ class PEDisassembler:
                     pass
                 else:
                     try:
-                        remote_offset = pe.get_offset_from_rva(
-                            int(inst.op_str, 16) - pe.OPTIONAL_HEADER.ImageBase)
+                        remote_offset = pe.get_offset_from_rva(int(inst.op_str, 16) - pe.OPTIONAL_HEADER.ImageBase)
+
                     except Exception as e:
                         # print "ERROR CALL: %s\n%s\n" % (e, inst)
                         pass
@@ -815,14 +818,19 @@ class ELFDisassembler:
         return dot.getvalue()
 
 
-def disassemble_pe(pe_path, dot_path, print_listing=False, readable=False, verbose=False):
-    data = open(pe_path, "r").read()
+def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listing=False, readable=False, verbose=False):
+    if pe_data is None and pe_path is None:
+        print "ERROR: missing PE path or data."
+        return None
+
+    if pe_data is None:
+        pe_data = open(pe_path, "r").read()
 
     try:
-        pe = pefile.PE(data=data)
+        pe = pefile.PE(data=pe_data)
     except:
-        print "pefile could not parse PE, exiting."
-        sys.exit(1)
+        print "ERROR: pefile could not parse PE."
+        return None
 
     arch = CS_ARCH_X86
     is_32 = pe.FILE_HEADER.Characteristics & 0x0100
@@ -845,7 +853,7 @@ def disassemble_pe(pe_path, dot_path, print_listing=False, readable=False, verbo
             iat_dict[imp.address] = entry_str + "." + imp_str
 
     disass = PEDisassembler(arch=arch, mode=mode)
-    insts = disass.dis(data=data, offset=oep, iat_api=iat_dict, pe=pe, verbose=verbose)
+    insts = disass.dis(data=pe_data, offset=oep, iat_api=iat_dict, pe=pe, verbose=verbose)
 
     if dot_path is not None:
         dot = disass.export_to_dot(insts=insts, oep_offset=oep, displayable=readable)
@@ -854,11 +862,19 @@ def disassemble_pe(pe_path, dot_path, print_listing=False, readable=False, verbo
     if print_listing:
         disass.display(insts, offset_from=0)
 
+    return True
 
-def disassemble_elf(elf_path, dot_path, print_listing=False, readable=False, verbose=False):
+
+def disassemble_elf(elf_data = None, elf_path = None, dot_path = None, print_listing=False, readable=False, verbose=False):
+    if elf_path is None:
+        print "ERROR: missing ELF path."
+        return None
+
+    if elf_data is None:
+        elf_data = open(elf_path, "r").read()
+
     from elftools.elf.elffile import ELFFile
     elf = ELFFile(open(elf_path, "r"))
-    data = open(elf_path, "r").read()
 
     arch = CS_ARCH_X86
     mode = CS_MODE_64 if elf.elfclass == 64 else CS_MODE_32
@@ -883,14 +899,73 @@ def disassemble_elf(elf_path, dot_path, print_listing=False, readable=False, ver
         sys.exit(1)
 
     disass = ELFDisassembler(arch=arch, mode=mode)
-    insts = disass.dis(data=data, offset=oep_offset, iat_api={}, elf=elf, verbose=verbose)
+    insts = disass.dis(data=elf_data, offset=oep_offset, iat_api={}, elf=elf, verbose=verbose)
 
-    if path_dot is not None:
+    if dot_path is not None:
         dot = disass.export_to_dot(insts=insts, oep_offset=oep_offset, displayable=readable)
-        open(path_dot, "w").write(dot)
+        open(dot_path, "w").write(dot)
 
     if print_listing:
         disass.display(insts, offset_from=0)
+
+    return True
+
+
+def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listing=False, readable=False, verbose=False):
+    if bin_data is None:
+        bin_data = open(bin_path, "rb").read()
+
+    if bin_data[0:2] == "MZ":
+        if disassemble_pe(pe_data=bin_data, pe_path=bin_path, dot_path=dot_path, print_listing=print_listing,
+                          readable=readable, verbose=verbose):
+            return dot_path
+    elif bin_data[0:4] == "\x7fELF":
+        if disassemble_elf(elf_data=bin_data, elf_path=bin_path, dot_path=dot_path, print_listing=print_listing,
+                           readable=readable, verbose=verbose):
+            return dot_path
+    else:
+        if verbose:
+            print("WARNING: Test file " + bin_path + " does not seem to be a PE/ELF or dot file.")
+        return None
+
+
+def disassemble_files(path_list, dot_path_suffix, multithread=True, n_threads=1, print_listing=False, readable=False, verbose=False):
+    dot_path_list = []
+    arg_list = []
+
+    if multithread:
+        for path in path_list:
+            arg_list.append((path, path + dot_path_suffix, print_listing, readable, verbose))
+
+        def worker():
+            while True:
+                arg = q.get()
+                disassemble_file(bin_path=arg[0], dot_path=arg[1], print_listing=arg[2], readable=arg[3], verbose=arg[4])
+                q.task_done()
+
+        q = Queue.Queue()
+        for i in range(n_threads):
+            t = threading.Thread(target=worker)
+            t.daemon = True
+            t.start()
+
+        for item in arg_list:
+            q.put(item)
+
+        q.join()
+
+        for path in path_list:
+            dotpath = path + dot_path_suffix
+            if os.path.isfile(dotpath):
+                dot_path_list.append(dotpath)
+    else:
+        for path in path_list:
+            r = disassemble_file(bin_path=path, dot_path=path+dot_path_suffix, print_listing=print_listing,
+                                 readable=readable, verbose=verbose)
+            if r is not None:
+                dot_path_list.append(r)
+
+    return dot_path_list
 
 
 if __name__ == '__main__':

@@ -37,6 +37,7 @@ if __name__ == '__main__':
         print("You can specify dot path only when there is one test file.")
         sys.exit(0)
 
+    files_to_disassemble = []
     dot_test_files = []
     for test_path in args.test:
         data = open(test_path, "r").read()
@@ -58,16 +59,17 @@ if __name__ == '__main__':
                     printed_something = True
                 dot_test_files.append(dotpath)
             else:
-                if data[0:2] == "MZ":
-                    disassembler.disassemble_pe(test_path, dotpath, print_listing=False, readable=False, verbose=False)
-                    dot_test_files.append(dotpath)
-                elif data[0:4] == "\x7fELF":
-                    disassembler.disassemble_elf(test_path, dotpath, print_listing=False, readable=False, verbose=False)
-                    dot_test_files.append(dotpath)
+                if len(args.test) == 1:
+                    found_path = disassembler.disassemble_file(bin_path=test_path, dot_path=dotpath,
+                                                               readable=args.readable, verbose=args.verbose)
+                    if found_path is not None:
+                        dot_test_files.append(dotpath)
                 else:
-                    if args.verbose:
-                        print("Test file " + test_path + " does not seem to be a PE/ELF or dot file.")
-                        printed_something = True
+                    files_to_disassemble.append(test_path)
+
+    if len(args.test) > 1:
+        dot_test_files += disassembler.disassemble_files(files_to_disassemble, ".dot", multithread=False,
+                                                         readable=args.readable, verbose=args.verbose)
 
     if not args.only_disassemble:
         if args.pattern is not None and len(dot_test_files) >= 1:
