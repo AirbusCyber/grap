@@ -79,6 +79,7 @@ Couple *createEdge(char *f, char *c, OptionList* ol) {
     
       if (strcmp(id, "childnumber") == 0 or strcmp(id, "child_number") == 0){
         vsize_t k = (vsize_t) atoi(v);
+        
         if (k == 1){
           e->is_numbered = true;
           e->is_child1 = true;
@@ -86,6 +87,9 @@ Couple *createEdge(char *f, char *c, OptionList* ol) {
         else if (k == 2){
           e->is_numbered = true;
           e->is_child1 = false;
+        }
+        else{
+          std::cerr << "WARNING: child_number option of edges should have values of 1 or 2" << std::endl;
         }
       }
       free(v);

@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 project(grap)
 CMAKE_POLICY(SET CMP0015 NEW)
+set (GRAP_VERSION "0.6.8")
+
 
 # Cmake Modules-------------------------------------------------------------
 
