@@ -10,7 +10,8 @@ GRAP_VERSION="0.6.8"
 if __name__ == '__main__':
     import argparse
 
-    parser = argparse.ArgumentParser(description='grap: look for a graph pattern in a PE/ELF binary or a .dot graph file')
+    parser = argparse.ArgumentParser(description='grap: look for a graph pattern in a PE/ELF binary or a .dot graph file',
+                                     formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('--version', action='version', version=GRAP_VERSION)
 
     parser.add_argument(dest='pattern',  help='Pattern file (.dot) to look for')
@@ -70,7 +71,7 @@ if __name__ == '__main__':
 
     if len(args.test) > 1:
         dot_test_files += disassembler.disassemble_files(files_to_disassemble, ".dot", multiprocess=args.multithread,
-                                                         readable=args.readable, verbose=args.verbose)
+                                                         n_processes=6, readable=args.readable, verbose=args.verbose)
 
     if not args.only_disassemble:
         if args.pattern is not None and len(dot_test_files) >= 1:

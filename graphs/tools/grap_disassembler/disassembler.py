@@ -940,7 +940,7 @@ def disas_worker(arg):
     disassemble_file(bin_path=arg[0], dot_path=arg[1], print_listing=arg[2], readable=arg[3], verbose=arg[4])
 
 
-def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_threads=4, print_listing=False, readable=False, verbose=False):
+def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes=1, print_listing=False, readable=False, verbose=False):
     dot_path_list = []
     arg_list = []
 
@@ -948,7 +948,7 @@ def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_threads=4
         for path in path_list:
             arg_list.append((path, path + dot_path_suffix, print_listing, readable, verbose))
 
-        pool = multiprocessing.Pool(processes=n_threads)
+        pool = multiprocessing.Pool(processes=n_processes)
         pool.map(disas_worker, arg_list)
 
         for path in path_list:
