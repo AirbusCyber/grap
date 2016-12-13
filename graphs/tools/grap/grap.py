@@ -10,22 +10,23 @@ GRAP_VERSION="0.6.8"
 if __name__ == '__main__':
     import argparse
 
-    parser = argparse.ArgumentParser(description='grap: look for pattern in a PE/ELF binary or a .dot graph file')
+    parser = argparse.ArgumentParser(description='grap: look for a graph pattern in a PE/ELF binary or a .dot graph file')
     parser.add_argument('--version', action='version', version=GRAP_VERSION)
 
     parser.add_argument(dest='pattern',  help='Pattern file (.dot) to look for')
     parser.add_argument(dest='test', nargs="+", help='Test file(s) to analyse')
 
     parser.add_argument('-f', '--force', dest='force', action="store_true", default=False, help='Force re-generation of existing .dot file')
-    parser.add_argument('-o', '--dot-output', dest='dot', help='Specify exported .dot file name')
-    parser.add_argument('-r', '--readable', dest='readable', action="store_true", default=False, help='DOT in displayable format (with xdot)')
     parser.add_argument('-od', '--only-disassemble', dest='only_disassemble', action="store_true", default=False, help='Disassemble files and exit (no matching)')
+    parser.add_argument('-o', '--dot-output', dest='dot', help='Specify exported .dot file name (when there is only one test file)')
+    parser.add_argument('-r', '--readable', dest='readable', action="store_true", default=False, help='Export .dot in displayable format (with xdot)')
+    parser.add_argument('-nt', '--no-threads', dest='multithread', action="store_false", default=True, help='No multiprocesses nor multithreads')
     parser.add_argument('-m', '--print-all-matches', dest='print_all_matches', action="store_true", default=False, help='Print all matched nodes (overrides getid fields)')
     parser.add_argument('-nm', '--print-no-matches', dest='print_no_matches', action="store_true", default=False, help='Don\'t print matched nodes (overrides getid fields)')
-    parser.add_argument('-sa', '--show-all', dest='show_all', action="store_true", default=False, help='show all tested files (not default when quiet, default otherwise)')
+    parser.add_argument('-sa', '--show-all', dest='show_all', action="store_true", default=False, help='Show all tested (including not matching) files (not default when quiet, default otherwise)')
+    parser.add_argument('-q', '--quiet', dest='quiet', action="store_true", default=False, help='Quiet output')
     parser.add_argument('-v', '--verbose', dest='verbose', action="store_true", default=False, help='Verbose output')
     parser.add_argument('-d', '--debug', dest='debug', action="store_true", default=False, help='Debug output')
-    parser.add_argument('-q', '--quiet', dest='quiet', action="store_true", default=False, help='Quiet output')
     args = parser.parse_args()
 
     printed_something = False
@@ -42,33 +43,33 @@ if __name__ == '__main__':
     for test_path in args.test:
         data = open(test_path, "r").read()
         if data is None:
-            print("Can't open test file " + test_path)
-            sys.exit(0)
-
-        if data[0:7].lower() == "digraph":
-            dot_test_files.append(test_path)
+            print("WARNING: Can't open test file " + test_path)
+            pass
         else:
-            if args.dot is None:
-                dotpath = test_path + ".dot"
+            if data[0:7].lower() == "digraph":
+                dot_test_files.append(test_path)
             else:
-                dotpath = args.dot
-
-            if os.path.exists(dotpath) and not args.force:
-                if args.verbose:
-                    print("Skipping generation of existing " + dotpath)
-                    printed_something = True
-                dot_test_files.append(dotpath)
-            else:
-                if len(args.test) == 1:
-                    found_path = disassembler.disassemble_file(bin_path=test_path, dot_path=dotpath,
-                                                               readable=args.readable, verbose=args.verbose)
-                    if found_path is not None:
-                        dot_test_files.append(dotpath)
+                if args.dot is None:
+                    dot_path = test_path + ".dot"
                 else:
-                    files_to_disassemble.append(test_path)
+                    dot_path = args.dot
+
+                if os.path.exists(dot_path) and not args.force:
+                    if args.verbose:
+                        print("Skipping generation of existing " + dot_path)
+                        printed_something = True
+                    dot_test_files.append(dot_path)
+                else:
+                    if len(args.test) == 1:
+                        found_path = disassembler.disassemble_file(bin_path=test_path, dot_path=dot_path,
+                                                                   readable=args.readable, verbose=args.verbose)
+                        if found_path is not None:
+                            dot_test_files.append(dot_path)
+                    else:
+                        files_to_disassemble.append(test_path)
 
     if len(args.test) > 1:
-        dot_test_files += disassembler.disassemble_files(files_to_disassemble, ".dot", multithread=False,
+        dot_test_files += disassembler.disassemble_files(files_to_disassemble, ".dot", multiprocess=args.multithread,
                                                          readable=args.readable, verbose=args.verbose)
 
     if not args.only_disassemble:
@@ -94,6 +95,9 @@ if __name__ == '__main__':
 
             if args.show_all:
                 command.append("-sa")
+
+            if not args.multithread:
+                command.append("-nt")
 
             command.append(args.pattern)
 

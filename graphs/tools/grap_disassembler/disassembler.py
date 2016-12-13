@@ -4,9 +4,8 @@
 import re
 import sys
 import pefile
-import Queue
-import threading
 import os
+import multiprocessing
 from capstone import Cs
 from capstone import CS_ARCH_X86
 from capstone import CS_MODE_32
@@ -74,8 +73,6 @@ class PEDisassembler:
         self.arch = arch
         self.mode = mode
         self.capstone = Cs(self.arch, self.mode)
-        self.rva_from_offset = dict()
-        self.offset_from_rva = dict()
 
         self.prologues = {
             CS_MODE_32: [
@@ -293,26 +290,26 @@ class PEDisassembler:
         _dis_exported_funcs(pe=pe, insts=insts, data=data, verbose=verbose)
 
         # Search for unrecognized functions from their prolog function
-        for prologue in self.prologues:
-            for m in re.finditer(prologue, data):
+        prologues_re = "|".join(self.prologues)
+        compiled_re = re.compile(prologues_re)
+        for m in compiled_re.finditer(data):
+            function_offset = m.start()
 
-                function_offset = m.start()
+            if function_offset not in insts:
+                if verbose:
+                    try:
+                        rva = pe.get_rva_from_offset(function_offset) + pe.OPTIONAL_HEADER.ImageBase
+                    except:
+                        rva = 0
 
-                if function_offset not in insts:
-                    if verbose:
-                        try:
-                            rva = pe.get_rva_from_offset(function_offset) + pe.OPTIONAL_HEADER.ImageBase
-                        except:
-                            rva = 0
-
-                        print "New function found at offset 0x%08X, RVA: 0x%08X" % (
-                            function_offset,
-                            rva)
-                    insts = _dis(data=data, offset=function_offset, pe=pe, insts=insts, verbose=verbose)
-                else:
-                    if verbose:
-                        print "Old function found at offset 0x%08X, RVA: 0x%08X" % (
-                            function_offset, insts[function_offset].va)
+                    print "New function found at offset 0x%08X, RVA: 0x%08X" % (
+                        function_offset,
+                        rva)
+                insts = _dis(data=data, offset=function_offset, pe=pe, insts=insts, verbose=verbose)
+            else:
+                if verbose:
+                    print "Old function found at offset 0x%08X, RVA: 0x%08X" % (
+                        function_offset, insts[function_offset].va)
 
         return insts
 
@@ -827,7 +824,7 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
         pe_data = open(pe_path, "r").read()
 
     try:
-        pe = pefile.PE(data=pe_data)
+        pe = pefile.PE(pe_path)
     except:
         print "ERROR: pefile could not parse PE."
         return None
@@ -838,19 +835,26 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
     oep = pe.OPTIONAL_HEADER.AddressOfEntryPoint
 
     iat_dict = dict()
-    for entry in pe.DIRECTORY_ENTRY_IMPORT:
-        for imp in entry.imports:
-            if entry.dll is None:
-                entry_str = ""
-            else:
-                entry_str = entry.dll
 
-            if imp.name is None:
-                imp_str = ""
-            else:
-                imp_str = imp.name
+    try:
+        import_table = pe.DIRECTORY_ENTRY_IMPORT.symbols
+    except:
+        import_table = None
 
-            iat_dict[imp.address] = entry_str + "." + imp_str
+    if import_table is not None:
+        for entry in import_table:
+            for imp in entry.imports:
+                if entry.dll is None:
+                    entry_str = ""
+                else:
+                    entry_str = entry.dll
+
+                if imp.name is None:
+                    imp_str = ""
+                else:
+                    imp_str = imp.name
+
+                iat_dict[imp.address] = entry_str + "." + imp_str
 
     disass = PEDisassembler(arch=arch, mode=mode)
     insts = disass.dis(data=pe_data, offset=oep, iat_api=iat_dict, pe=pe, verbose=verbose)
@@ -912,6 +916,9 @@ def disassemble_elf(elf_data = None, elf_path = None, dot_path = None, print_lis
 
 
 def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listing=False, readable=False, verbose=False):
+    if verbose:
+        print "Disassembling", bin_path
+
     if bin_data is None:
         bin_data = open(bin_path, "rb").read()
 
@@ -922,42 +929,32 @@ def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listin
     elif bin_data[0:4] == "\x7fELF":
         if disassemble_elf(elf_data=bin_data, elf_path=bin_path, dot_path=dot_path, print_listing=print_listing,
                            readable=readable, verbose=verbose):
-            return dot_path
+            return dot_path1
     else:
         if verbose:
             print("WARNING: Test file " + bin_path + " does not seem to be a PE/ELF or dot file.")
         return None
 
 
-def disassemble_files(path_list, dot_path_suffix, multithread=True, n_threads=1, print_listing=False, readable=False, verbose=False):
+def disas_worker(arg):
+    disassemble_file(bin_path=arg[0], dot_path=arg[1], print_listing=arg[2], readable=arg[3], verbose=arg[4])
+
+
+def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_threads=4, print_listing=False, readable=False, verbose=False):
     dot_path_list = []
     arg_list = []
 
-    if multithread:
+    if multiprocess:
         for path in path_list:
             arg_list.append((path, path + dot_path_suffix, print_listing, readable, verbose))
 
-        def worker():
-            while True:
-                arg = q.get()
-                disassemble_file(bin_path=arg[0], dot_path=arg[1], print_listing=arg[2], readable=arg[3], verbose=arg[4])
-                q.task_done()
-
-        q = Queue.Queue()
-        for i in range(n_threads):
-            t = threading.Thread(target=worker)
-            t.daemon = True
-            t.start()
-
-        for item in arg_list:
-            q.put(item)
-
-        q.join()
+        pool = multiprocessing.Pool(processes=n_threads)
+        pool.map(disas_worker, arg_list)
 
         for path in path_list:
-            dotpath = path + dot_path_suffix
-            if os.path.isfile(dotpath):
-                dot_path_list.append(dotpath)
+            dot_path = path + dot_path_suffix
+            if os.path.isfile(dot_path):
+                dot_path_list.append(dot_path)
     else:
         for path in path_list:
             r = disassemble_file(bin_path=path, dot_path=path+dot_path_suffix, print_listing=print_listing,
@@ -966,21 +963,6 @@ def disassemble_files(path_list, dot_path_suffix, multithread=True, n_threads=1,
                 dot_path_list.append(r)
 
     return dot_path_list
-
-
-if __name__ == '__main__':
-    import argparse
-
-    parser = argparse.ArgumentParser(description='PE Disassembler')
-    parser.add_argument('-w', '--wexe', help='Windows Executable File (PE)')
-    parser.add_argument('-l', '--lexe', help='Linux Executable File (ELF)')
-
-    parser.add_argument('-d', '--dot', dest='dot', help='Export to a DOT file')
-    parser.add_argument('-r', '--readable', dest='readable', action="store_true", help='DOT in human-readable format')
-    parser.add_argument('-il', '--listing', dest='listing', action="store_true", help='Display all instructions')
-    args = parser.parse_args()
-
-    disassemble_file(args.wexe, args.dot, args.listing, args.readable, args.verbose)
 
 
 

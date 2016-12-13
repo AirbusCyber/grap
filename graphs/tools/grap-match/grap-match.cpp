@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
       checkLabels = false;
     }    
     else if (strcmp(argv[a], "-nt") == 0 || strcmp(argv[a], "--no-threads") == 0) {
-      optionThreads = true;
+      optionThreads = false;
     }
     else if (strcmp(argv[a], "-t") == 0 || strcmp(argv[a], "--tree") == 0) {
       optionTree = true;
