@@ -6,6 +6,7 @@ import sys
 import pefile
 import os
 import multiprocessing
+import signal
 from capstone import Cs
 from capstone import CS_ARCH_X86
 from capstone import CS_MODE_32
@@ -111,13 +112,6 @@ class PEDisassembler:
             if export_table is not None:
                 for exp in export_table:
                     if exp not in insts:
-                        if verbose:
-                            print 'Func %s found at offset 0x%08X, RVA: 0x%08X' % (
-                                exp.name,
-                                exp.address,
-                                pe.OPTIONAL_HEADER.ImageBase + exp.address
-                            )
-
                         insts = _dis(data=data,
                                      offset=exp.address,
                                      pe=pe,
@@ -296,21 +290,7 @@ class PEDisassembler:
             function_offset = m.start()
 
             if function_offset not in insts:
-                if verbose:
-                    try:
-                        rva = pe.get_rva_from_offset(function_offset) + pe.OPTIONAL_HEADER.ImageBase
-                    except:
-                        rva = 0
-
-                    print "New function found at offset 0x%08X, RVA: 0x%08X" % (
-                        function_offset,
-                        rva)
                 insts = _dis(data=data, offset=function_offset, pe=pe, insts=insts, verbose=verbose)
-            else:
-                if verbose:
-                    print "Old function found at offset 0x%08X, RVA: 0x%08X" % (
-                        function_offset, insts[function_offset].va)
-
         return insts
 
     def display(self, insts, offset_from=0):
@@ -710,20 +690,7 @@ class ELFDisassembler:
                 function_offset = m.start()
 
                 if function_offset not in insts:
-                    if verbose:
-                        rva = self.get_rva_from_offset(elf, function_offset)
-
-                        if rva is not None:
-                            print "New function found at offset 0x%08X, RVA: 0x%08X" % (
-                                function_offset,
-                                rva + self.get_image_base_rva(elf))
-                        else:
-                            print "New function found at offset 0x%08X, not found in sections" % (function_offset)
                     insts = _dis(data=data, offset=function_offset, elf=elf, insts=insts, verbose=verbose)
-                else:
-                    if verbose:
-                        print "Old function found at offset 0x%08X, RVA: 0x%08X" % (
-                            function_offset, insts[function_offset].va)
 
         return insts
 
@@ -948,8 +915,19 @@ def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes
         for path in path_list:
             arg_list.append((path, path + dot_path_suffix, print_listing, readable, verbose))
 
+        original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
         pool = multiprocessing.Pool(processes=n_processes)
-        pool.map(disas_worker, arg_list)
+        signal.signal(signal.SIGINT, original_sigint_handler)
+
+        try:
+            res = pool.map_async(disas_worker, arg_list)
+
+            # without timeout (one year) SIGINT is ignored
+            res.get(timeout=31536000)
+        except KeyboardInterrupt:
+            pool.terminate()
+        else:
+            pool.close()
 
         for path in path_list:
             dot_path = path + dot_path_suffix

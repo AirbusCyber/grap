@@ -39,8 +39,8 @@ if __name__ == '__main__':
         print("You can specify dot path only when there is one test file.")
         sys.exit(0)
 
-    files_to_disassemble = []
-    dot_test_files = []
+    files_to_disassemble = set()
+    dot_test_files = set()
     for test_path in args.test:
         data = open(test_path, "r").read()
         if data is None:
@@ -48,7 +48,7 @@ if __name__ == '__main__':
             pass
         else:
             if data[0:7].lower() == "digraph":
-                dot_test_files.append(test_path)
+                dot_test_files.add(test_path)
             else:
                 if args.dot is None:
                     dot_path = test_path + ".dot"
@@ -59,20 +59,24 @@ if __name__ == '__main__':
                     if args.verbose:
                         print("Skipping generation of existing " + dot_path)
                         printed_something = True
-                    dot_test_files.append(dot_path)
+                    dot_test_files.add(dot_path)
                 else:
                     if len(args.test) == 1:
                         found_path = disassembler.disassemble_file(bin_path=test_path, dot_path=dot_path,
                                                                    readable=args.readable, verbose=args.verbose)
                         if found_path is not None:
-                            dot_test_files.append(dot_path)
+                            dot_test_files.add(dot_path)
                     else:
-                        files_to_disassemble.append(test_path)
+                        files_to_disassemble.add(test_path)
 
     if len(args.test) > 1:
-        dot_test_files += disassembler.disassemble_files(files_to_disassemble, ".dot", multiprocess=args.multithread,
-                                                         n_processes=6, readable=args.readable, verbose=args.verbose)
+        files_to_disassemble = sorted(list(files_to_disassemble))
+        disassembled_files = disassembler.disassemble_files(files_to_disassemble, ".dot", multiprocess=args.multithread,
+                                                            n_processes=4, readable=args.readable, verbose=args.verbose)
+        for path in disassembled_files:
+            dot_test_files.add(path)
 
+    dot_test_files = sorted(list(dot_test_files))
     if not args.only_disassemble:
         if args.pattern is not None and len(dot_test_files) >= 1:
             if printed_something or args.verbose:
