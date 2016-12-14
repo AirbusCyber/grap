@@ -896,7 +896,7 @@ def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listin
     elif bin_data[0:4] == "\x7fELF":
         if disassemble_elf(elf_data=bin_data, elf_path=bin_path, dot_path=dot_path, print_listing=print_listing,
                            readable=readable, verbose=verbose):
-            return dot_path1
+            return dot_path
     else:
         if verbose:
             print("WARNING: Test file " + bin_path + " does not seem to be a PE/ELF or dot file.")
