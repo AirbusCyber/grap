@@ -17,7 +17,12 @@
 
 char optionFuncs;
 
+#ifndef _WIN32
+#ifndef NOSECCOMP
 void drop_privileges();
+#endif
+#endif
+
 int main(int argc, char *argv[]);
 vsize_t print_leaf_result(bool r, string, bool);
 vsize_t test_NodeInfo();

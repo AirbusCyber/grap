@@ -21,7 +21,62 @@ void printUsage() {
   printf("        -t or --tree                      : use tree algorithm (default with multiple patterns)\n");
 }
 
+#ifndef _WIN32
+#ifndef NOSECCOMP
+void drop_initial_privileges(){
+  scmp_filter_ctx ctx;
+  
+  // release: SCMP_ACT_KILL
+  // use SCMP_ACT_TRAP or SCMP_ACT_TRACE(0) for debug
+  ctx = seccomp_init(SCMP_ACT_KILL); 
+
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(open), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(close), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit_group), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(writev), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(munmap), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mmap), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(fstat), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mprotect), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(lseek), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(brk), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(clone), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(futex), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(set_robust_list), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(madvise), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(prctl), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mremap), 0);
+
+  
+  int r = seccomp_load(ctx);
+  RELEASE_ASSERT(r == 0);
+}
+
+void drop_privileges(){
+    scmp_filter_ctx ctx;
+  
+  // release: SCMP_ACT_KILL
+  // use SCMP_ACT_TRAP or SCMP_ACT_TRACE(0) for debug
+  ctx = seccomp_init(SCMP_ACT_ALLOW); 
+
+  seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(open), 0);
+  
+  int r = seccomp_load(ctx);
+  RELEASE_ASSERT(r == 0);
+}
+#endif
+#endif
+
 int main(int argc, char *argv[]) {
+  #ifndef _WIN32
+  #ifndef NOSECCOMP
+    drop_initial_privileges();
+  #endif
+  #endif
+  
   optionFuncs = 0;
 
   if (argc <= 2) {
@@ -32,7 +87,7 @@ int main(int argc, char *argv[]) {
   FILE *fpPattern = NULL;
   string pathPattern;
   FILE *fpTest = NULL;
-  std::list<string> pathTests = std::list<string>();
+  std::list<std::pair<std::string, FILE*>> testsInfo = std::list<std::pair<std::string, FILE*>>();
   bool learnOk = false;
   bool scanOk = false;
   bool checkLabels = true;
@@ -94,20 +149,37 @@ int main(int argc, char *argv[]) {
         fpPattern = fopen(pathPattern.c_str(), "r");
 
         if (fpPattern == NULL) {
-          std::cout << "Can't open pattern graph " << pathPattern << std::endl;
+          std::cerr << "ERROR: Can't open pattern graph " << pathPattern << std::endl;
           return 1;
         }
         learnOk = true;
       }
       else {
-        pathTests.push_back(std::string(argv[a]));
-        scanOk = true;
+        std::string path = std::string(argv[a]);
+        FILE* fp = fopen(path.c_str(), "r");
+
+        if (fp == NULL) {
+          std::cerr << "WARNING: Can't open test graph " << path << std::endl;
+        }
+        else{
+          testsInfo.push_back(std::pair<std::string, FILE*>(path, fp)); 
+          scanOk = true;
+        }
       }
     }
   }
+  
+  #ifndef _WIN32
+  #ifndef NOSECCOMP
+    if (optionVerbose){
+      std::cout << "Dropping privileges (seccomp)." << std::endl;
+    }
+    drop_privileges();
+  #endif
+  #endif
 
   if (not learnOk or not scanOk) {
-    printf("Missing pattern or test graph.\n");
+    std::cerr << "ERROR: Missing pattern or test graph." << std::endl;
     printUsage();
     return 1;
   }
@@ -195,13 +267,13 @@ int main(int argc, char *argv[]) {
     }
   }
   
-  std::list<string>::iterator test_iterator;
+  std::list<std::pair<std::string, FILE*>>::iterator test_iterator;
   std::list<ArgsMatchPatternToTest>* args_queue = new std::list<ArgsMatchPatternToTest>();
   std::mutex* queue_mutex = new std::mutex();
   std::mutex* cout_mutex = new std::mutex();
-  for (test_iterator = pathTests.begin();  test_iterator != pathTests.end(); test_iterator++){  
-    string pathTest = (std::string) *test_iterator;
-    args_queue->push_back(std::make_tuple(optionVerbose, optionQuiet, optionShowAll, checkLabels, tree, pathPattern, pattern_parcours, pathTest, printNoMatches, printAllMatches, maxSiteSize));
+  for (test_iterator = testsInfo.begin();  test_iterator != testsInfo.end(); test_iterator++){  
+    std::pair<std::string, FILE*> testInfo = (std::pair<std::string, FILE*>) *test_iterator;
+    args_queue->push_back(std::make_tuple(optionVerbose, optionQuiet, optionShowAll, checkLabels, tree, pathPattern, pattern_parcours, testInfo, printNoMatches, printAllMatches, maxSiteSize));
   }
   
   if (optionThreads){
@@ -253,11 +325,15 @@ void worker_queue(std::list<ArgsMatchPatternToTest>* args_queue, std::mutex* que
     queue_mutex->unlock();
     
     if (found_next){
+      std::pair<std::string, FILE*> pair = std::get<7>(args);
+      std::string test_path = pair.first;
+      FILE* test_file = pair.second;
+      
       if (use_tree){
-        matchTreeToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<4>(args), std::get<5>(args), std::get<6>(args), std::get<7>(args), std::get<8>(args), std::get<9>(args), std::get<10>(args), cout_mutex);
+        matchTreeToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<4>(args), std::get<5>(args), std::get<6>(args), test_path, test_file, std::get<8>(args), std::get<9>(args), std::get<10>(args), cout_mutex);
       }
       else{
-        matchPatternToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<5>(args), std::get<6>(args), std::get<7>(args), std::get<8>(args), std::get<9>(args), std::get<10>(args), cout_mutex);
+        matchPatternToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<5>(args), std::get<6>(args), test_path, test_file, std::get<8>(args), std::get<9>(args), std::get<10>(args), cout_mutex);
       }
     }
     else{
@@ -266,7 +342,7 @@ void worker_queue(std::list<ArgsMatchPatternToTest>* args_queue, std::mutex* que
   }
 }
 
-void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll, bool checkLabels, string pathPattern, Parcours* pattern_parcours, string pathTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, std::mutex* cout_mutex){
+void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll, bool checkLabels, string pathPattern, Parcours* pattern_parcours, string pathTest, FILE* fileTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, std::mutex* cout_mutex){
   ostringstream out_stream;
   ostringstream err_stream;
   
@@ -278,7 +354,7 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll
     out_stream << "Parsing test file." << endl; 
   }
   
-  graph_t *test_graph = getGraphFromPath(pathTest.c_str());
+  graph_t *test_graph = getGraphFromFile(fileTest);
   if (test_graph == NULL){
     err_stream <<  "Test graph " << pathTest << " could not be opened, aborting.\n";
     
@@ -357,7 +433,7 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll
   cout_mutex->unlock();
 }
 
-void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll, bool checkLabels, ParcoursNode* tree, string pathPattern, Parcours* pattern_parcours, string pathTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, std::mutex* cout_mutex){
+void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll, bool checkLabels, ParcoursNode* tree, string pathPattern, Parcours* pattern_parcours, string pathTest, FILE* fileTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, std::mutex* cout_mutex){
   ostringstream out_stream;
   ostringstream err_stream;
   
@@ -369,7 +445,7 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll, b
     out_stream << "Parsing test file." << endl; 
   }
   
-  graph_t *test_graph = getGraphFromPath(pathTest.c_str());
+  graph_t *test_graph = getGraphFromFile(fileTest);
   if (test_graph == NULL){
     err_stream <<  "Test graph " << pathTest << " could not be opened, aborting.\n";
     

@@ -4,9 +4,13 @@ set(SRCS_GRAP-MATCH
   grap-match.hpp
   )
 
-# grap-match
 add_executable(grap-match ${SRCS_GRAP-MATCH})
-target_link_libraries(grap-match common GTSI graph nodeinfo pthread)
+
+if("${MSVC}" OR "${MSYS}")
+  target_link_libraries(grap-match common GTSI graph nodeinfo pthread)
+else()
+  target_link_libraries(grap-match seccomp common GTSI graph nodeinfo pthread)
+endif()  
 configure_file(grap-match.py ${CMAKE_BINARY_DIR}/grap-match.py COPYONLY)
 
 if(NOT "${MSVC}" AND NOT "${MSYS}")

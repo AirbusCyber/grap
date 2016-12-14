@@ -71,8 +71,7 @@ def test_tests(verbose, program):
     if verbose:
         process = subprocess.Popen(command)
     else:
-        fnull = open(os.devnull, 'w')
-        process = subprocess.Popen(command, stdout=fnull, stderr=fnull)
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     process.communicate()
     exitcode = process.returncode
@@ -151,8 +150,7 @@ def run_and_parse_command(verbose, i, command, expected_traversals, algo):
     if verbose:
         process = subprocess.Popen(command, stdout=subprocess.PIPE)
     else:
-        fnull = open(os.devnull, 'w')
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=fnull)
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     out, err = process.communicate()
     exitcode = process.returncode

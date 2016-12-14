@@ -4,11 +4,13 @@
 from grap_disassembler import disassembler
 import subprocess
 import os
+import sys
+import argparse
 
 GRAP_VERSION="0.6.8"
 
 if __name__ == '__main__':
-    import argparse
+    sys.setrecursionlimit(4000)
 
     parser = argparse.ArgumentParser(description='grap: look for a graph pattern in a PE/ELF binary or a .dot graph file',
                                      formatter_class=argparse.RawTextHelpFormatter)

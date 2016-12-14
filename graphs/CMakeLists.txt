@@ -3,9 +3,13 @@ project(grap)
 CMAKE_POLICY(SET CMP0015 NEW)
 set (GRAP_VERSION "0.6.8")
 
+# Options
+set (NOSECCOMP OFF CACHE BOOL "NoSeccomp")
+if(${NOSECCOMP})
+  add_definitions(-DNOSECCOMP)
+endif()
 
 # Cmake Modules-------------------------------------------------------------
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake-modules")
 include(ListCombinations)
 

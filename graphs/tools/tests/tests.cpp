@@ -108,22 +108,25 @@ string Color_Off = "\x1b[0m";
 bool debug = false;
 
 #ifndef _WIN32
+#ifndef NOSECCOMP
 void drop_privileges(){
   scmp_filter_ctx ctx;
   
   // release: SCMP_ACT_KILL
   // use SCMP_ACT_TRAP or SCMP_ACT_TRACE(0) for debug
-  ctx = seccomp_init(SCMP_ACT_TRAP); 
+  ctx = seccomp_init(SCMP_ACT_KILL); 
 
-  // TODO: remove at least the open syscall by dropping privileges at a later
-  // stage
+  // TODO: remove the open syscall by dropping privileges at a later stage
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(open), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(close), 0);
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit_group), 0);
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 0);
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(writev), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(munmap), 0);
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mmap), 0);
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(fstat), 0);
-  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mprotect), 0);
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(lseek), 0);
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(brk), 0);
   
@@ -131,12 +134,14 @@ void drop_privileges(){
   RELEASE_ASSERT(r == 0);
 }
 #endif
+#endif
 
 int main(int argc, char *argv[]) {
-#ifndef _WIN32
-//TODO: fix seccomp
-//   drop_privileges();
-#endif
+  #ifndef _WIN32
+  #ifndef NOSECCOMP
+  drop_privileges();
+  #endif
+  #endif
   
   std::string dir_tests_base = "";
 
