@@ -199,7 +199,7 @@ def parse_tests(test_dir):
     while True:
         path = test_dir + "/" + "test" + str(n_tests)
         if os.path.isdir(path):
-            expected_path = path + "/" + "expected_gtsi"
+            expected_path = path + "/" + "expected"
             test_path = path + "/" + "test.dot"
 
             expected_list = []

@@ -10,8 +10,7 @@ void printDescription()
   std::cout << "       ./tests [dir]: processes tests in target directory "
                "(default: tests_graphs or ../tests_graphs)\n\n";
 
-  std::cout << "Tests are done as follows.";
-  std::cout << "There are test folders. In each test folder:\n";
+  std::cout << "There are test folders, in each test folder:\n";
   std::cout << "  pattern_*.dot are learnt.\n";
   std::cout << "  test.dot is tested against learnt graphs.\n";
   std::cout << "  Once with symbols (labels) checking, once without.\n";
