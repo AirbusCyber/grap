@@ -10,20 +10,17 @@ void printDescription()
   std::cout << "       ./tests [dir]: processes tests in target directory "
                "(default: tests_graphs or ../tests_graphs)\n\n";
 
-  std::cout << "Tests are done as follows.\n";
-  std::cout << "There are test folders. Each test folder:\n";
-  std::cout << "  Tests:\n";
-  std::cout << "    pattern_*.dot are learnt.\n";
-  std::cout << "    test.dot is tested against learnt graphs.\n";
-  std::cout << "    Once with symbols (labels) checking, once without.\n";
+  std::cout << "Tests are done as follows.";
+  std::cout << "There are test folders. In each test folder:\n";
+  std::cout << "  pattern_*.dot are learnt.\n";
+  std::cout << "  test.dot is tested against learnt graphs.\n";
+  std::cout << "  Once with symbols (labels) checking, once without.\n";
+  std::cout << "  The number of matches is compared against those in the expected file (first with labels, second without).\n";
   std::cout << "\n";
-  std::cout << "GTSI:\n";
-  std::cout << "  Pattern graphs are cut into sites (site size: minimum size "
-               "between pattern graphs).\n";
+  std::cout << "Match algorithm:\n";
   std::cout << "  Learning: via traversal tree and with a single traversal "
                "(when there is only one pattern graph).\n";
-  std::cout << "  Testing: via traversal tree (with sites) and with a single "
-               "traversal.\n";
+  std::cout << "  Testing: via traversal tree and with a single traversal.\n";
   std::cout << "  The result is the sum, for each node in the test graph, of "
                "the number of traversals possible from this node.\n";
   std::cout << "  Note that if two pattern graphs are identical, they will "
@@ -91,6 +88,10 @@ void printDescription()
                "dot file.\n";
   std::cout << "Test 32: [manual] non regression test on ghost nodes bug (fixed"
                 "with switch to depth-first search.\n";
+  std::cout << "Test 33: [first run] looking for basic block loops "
+                "in Backspace sample (md5=4ee00c46da143ba70f7e6270960823be)\n";
+  std::cout << "Test 34: [first run] looking for pushes then call "
+                "in Backspace sample (md5=4ee00c46da143ba70f7e6270960823be)\n";
 }
 
 #ifdef _WIN32
@@ -194,20 +195,20 @@ int main(int argc, char *argv[]) {
     }
 
     // read expected results
-    size_t expected_gtsi_with_labels = 0;
-    size_t expected_gtsi_no_labels = 0;
-    std::ifstream f_res_gtsi(dirPath + "expected_gtsi");
+    size_t expected_with_labels = 0;
+    size_t expected_no_labels = 0;
+    std::ifstream f_res(dirPath + "expected");
 
-    if (f_res_gtsi.good()) {
+    if (f_res.good()) {
       string sLine;
 
-      getline(f_res_gtsi, sLine);
-      expected_gtsi_with_labels = (size_t) atoi(sLine.c_str());
-      getline(f_res_gtsi, sLine);
-      expected_gtsi_no_labels = (size_t) atoi(sLine.c_str());
+      getline(f_res, sLine);
+      expected_with_labels = (size_t) atoi(sLine.c_str());
+      getline(f_res, sLine);
+      expected_no_labels = (size_t) atoi(sLine.c_str());
     }
 
-    f_res_gtsi.close();
+    f_res.close();
 
     cout << Blue;
     std::cout << "Running test " + std::to_string(i) + "\n";
@@ -252,12 +253,12 @@ int main(int argc, char *argv[]) {
       break;
     }
 
-    // GTSI with and without labels
-    error_number += test_GTSI(grPattern, nPattern, grTest, expected_gtsi_with_labels, true,
-              " (Check labels)", true, "gtsi-l-" + std::to_string(i) + ".dot");
-    error_number += test_GTSI(grPattern, nPattern, grTest, expected_gtsi_no_labels, false,
-              " (Don't check labels)", true,
-              "gtsi-nl-" + std::to_string(i) + ".dot");
+    // Match with and without labels
+    error_number += test_match(grPattern, nPattern, grTest, expected_with_labels, true,
+              "Checking labels", true, "tree-l-" + std::to_string(i) + ".dot");
+    error_number += test_match(grPattern, nPattern, grTest, expected_no_labels, false,
+              "Not checking labels", true,
+              "tree-nl-" + std::to_string(i) + ".dot");
 
     for (j = 0; j < nPattern; j++) {
       graph_free(grPattern[j], true);
@@ -467,13 +468,13 @@ vsize_t test_NodeInfo(){
   return error_number;
 }
 
- vsize_t test_GTSI(graph_t **grPattern, size_t nPattern, graph_t *grTest,
+ vsize_t test_match(graph_t **grPattern, size_t nPattern, graph_t *grTest,
                size_t expected, bool checkLabels, std::string desc,
                bool exportTree, string treePath)
 {
   vsize_t error_number = 0;
   string color;
-  std::cout << "GTSI" + desc + ":\n";
+  std::cout << desc + ":\n";
 
   vsize_t i;
   vsize_t maxSiteSize = grPattern[0]->nodes.count;
