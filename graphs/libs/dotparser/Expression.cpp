@@ -165,9 +165,9 @@ vsize_t hash_func(char *s) {
 
 node_t *createNode(char *value) {
   vsize_t id = hash_func(value);
-  free(value);
 
   node_t *node = (node_t *) calloc_or_quit(1, sizeof(node_t));
+  node->str_id = std::string(value);
   node->has_child1 = false;
   node->has_child2 = false;
   node->fathers = NULL;
@@ -176,7 +176,8 @@ node_t *createNode(char *value) {
   node->list_id = 0;
   node->node_id = id;
   node->info = new NodeInfo();
-
+  
+  free(value);
   return node;
 }
 
@@ -224,6 +225,8 @@ node_t *updateNode(OptionList * ol, node_t * n) {
   n->info->lazyRepeat = false;
   bool cond_filled = false;
   bool has_inst = false;
+  
+  n->info->inst_str = n->str_id;
 
   for (i = 0; i < ol->size; i++) {
     char *v = removeQuotes(ol->options[i]->value);

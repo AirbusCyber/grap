@@ -23,6 +23,7 @@ typedef struct node_t {
    For statically extraction code address is chosen (begin or maybe end of
    block).
    */
+  std::string str_id;
   vsize_t node_id;
 
   NodeInfo* info;
