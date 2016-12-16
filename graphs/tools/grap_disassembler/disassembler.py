@@ -828,7 +828,7 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
 
     if dot_path is not None:
         dot = disass.export_to_dot(insts=insts, oep_offset=oep, displayable=readable)
-        open(dot_path, "w").write(dot)
+        open(dot_path, "wb").write(dot)
 
     if print_listing:
         disass.display(insts, offset_from=0)
@@ -853,7 +853,6 @@ def disassemble_elf(elf_data = None, elf_path = None, dot_path = None, print_lis
     oep_rva = elf.header.e_entry
 
     def get_offset_from_rva(elf, offset):
-        print "get_offset_from_rva(0x%08X)" % offset
         for section in elf.iter_sections():
             try:
                 if section['sh_addr'] <= oep_rva < section['sh_addr'] + section['sh_size']:

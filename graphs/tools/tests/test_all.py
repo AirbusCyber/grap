@@ -3,6 +3,8 @@ import sys
 import os
 import subprocess
 import tempfile
+from pygrap import *
+from grap_disassembler import disassembler
 
 Red = "\x1b[1;31m";
 Green = "\x1b[1;32m";
@@ -16,7 +18,7 @@ def main():
         print "Test graphs not found in directory"
         return 1
 
-    n_tests, expected, pattern_paths, test_paths = parse_tests(test_dir)
+    n_tests, expected, pattern_paths, test_paths, bin_paths = parse_tests(test_dir)
     if n_tests == 0:
         print "No test found in directory " + test_dir
         return 1
@@ -44,7 +46,13 @@ def main():
     error_gmpy = test_grap_match_binary(verbose, "python2", "./grap-match.py", n_tests, expected, pattern_paths, test_paths)
     print_error_msg(error_gmpy, "./grap-match.py: " + str(error_gmpy) + " error(s) found.")
 
-    error_total = error_tests + error_gm + error_gmpy
+    if verbose:
+        print ""
+        print Blue + "Testing python bindings with disassembler bindings and grap when binary is present", Color_Off
+    error_bindings = test_bindings(verbose, n_tests, expected, pattern_paths, test_paths, bin_paths)
+    print_error_msg(error_gmpy, "Disassembler + python bindings: " + str(error_gmpy) + " error(s) found.")
+
+    error_total = error_tests + error_gm + error_gmpy + error_bindings
 
     if verbose:
         print ""
@@ -146,6 +154,102 @@ def test_grap_match_binary(verbose, interpreter, program, n_tests, expected, pat
     return error_count
 
 
+def test_bindings(verbose, n_tests, expected, pattern_paths, test_paths, bin_paths):
+    error_count = 0
+
+    for i in range(n_tests):
+        if i >= 1 and verbose:
+            print ""
+
+        tmp_pattern = None
+        if len(pattern_paths[i]) == 1:
+            pattern_path = pattern_paths[i][0]
+        else:
+            tmp_pattern = tempfile.NamedTemporaryFile()
+            for path in pattern_paths[i]:
+                data = open(path, "r").read()
+                tmp_pattern.file.write(data)
+            tmp_pattern.file.flush()
+            pattern_path = tmp_pattern.name
+        test_path = test_paths[i]
+        bin_path = bin_paths[i]
+        expect = expected[i][0]
+
+        if verbose:
+            print Blue + "Running test", i, Color_Off
+            print "Checking labels:"
+        sys.stdout.flush()
+        error_count += run_bindings_test(verbose, pattern_path, test_path, bin_path, expect)
+
+        if error_count != 0:
+            return error_count
+
+        if tmp_pattern is not None:
+            tmp_pattern.file.close()
+
+    return error_count
+
+
+def run_bindings_test(verbose, pattern_path, test_path, bin_path, expect):
+    error_number = 0
+
+    if bin_path is not None:
+        tmp_test_grap = tempfile.NamedTemporaryFile()
+        tmp_test_grap_path = tmp_test_grap.name
+        tmp_test_grap.close()
+        command = []
+        command.append("grap")
+        command.append("-od")
+        command.append("-o")
+        command.append(tmp_test_grap_path)
+        command.append(pattern_path)
+        command.append(bin_path)
+
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = process.communicate()
+
+        if verbose and err != "":
+            print err
+
+        matches = match_graph(pattern_path, tmp_test_grap_path)
+        found_traversals = count_matches(matches)
+        if found_traversals < expect:
+            print Red + str(found_traversals), "traversals possible in test graph (expected:", str(expect) + ")", Color_Off
+            error_number += 1
+        else:
+            if verbose:
+                print Green + str(found_traversals), "traversals possible in test graph (expected:", str(expect) + ")", Color_Off
+
+    if bin_path is not None:
+        tmp_test_bindings = tempfile.NamedTemporaryFile()
+        disassembler.disassemble_file(bin_path=bin_path, dot_path=tmp_test_bindings.name)
+        matches = match_graph(pattern_path, tmp_test_bindings.name)
+        tmp_test_bindings.close()
+    else:
+        matches = match_graph(pattern_path, test_path)
+
+    found_traversals = count_matches(matches)
+    if found_traversals != expect:
+        print Red + str(found_traversals), "traversals possible in test graph (expected:", str(expect) + ")", Color_Off
+        error_number += 1
+    else:
+        if verbose:
+            print Green + str(found_traversals), "traversals possible in test graph (expected:", str(expect) + ")", Color_Off
+
+    return error_number
+
+
+def count_matches(matches):
+    if matches is None:
+        return 0
+
+    found_traversals = 0
+    for pattern in matches:
+        for _ in matches[pattern]:
+            found_traversals += 1
+    return found_traversals
+
+
 def run_and_parse_command(verbose, i, command, expected_traversals, algo):
     if verbose:
         process = subprocess.Popen(command, stdout=subprocess.PIPE)
@@ -194,6 +298,7 @@ def parse_tests(test_dir):
     expected = dict()
     pattern_paths = dict()
     test_paths = dict()
+    bin_paths = dict()
 
     n_tests = 0
     while True:
@@ -201,6 +306,7 @@ def parse_tests(test_dir):
         if os.path.isdir(path):
             expected_path = path + "/" + "expected"
             test_path = path + "/" + "test.dot"
+            bin_path = path + "/" + "test"
 
             expected_list = []
             if os.path.isfile(expected_path):
@@ -227,6 +333,11 @@ def parse_tests(test_dir):
                 expected[n_tests] = expected_list
                 test_paths[n_tests] = test_path
                 pattern_paths[n_tests] = pattern_list
+
+                if os.path.isfile(bin_path):
+                    bin_paths[n_tests] = bin_path
+                else:
+                    bin_paths[n_tests] = None
             else:
                 break
 
@@ -234,7 +345,7 @@ def parse_tests(test_dir):
         else:
           break
 
-    return n_tests, expected, pattern_paths, test_paths
+    return n_tests, expected, pattern_paths, test_paths, bin_paths
   
 
 def find_test_dir(args):

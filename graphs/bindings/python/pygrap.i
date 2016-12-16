@@ -118,18 +118,27 @@ def match_graph(pattern_arg, test_arg):
             pattern_path = pattern_arg
         pattern_graphs_ptr = getGraphListFromPath(pattern_path)
         pattern_graphs = MakeGraphList(pattern_graphs_ptr)
-        
+
         if f is not None:
             f.close()
     elif type(pattern_arg) is list:
         pattern_graphs = pattern_arg
     else:
         pattern_graphs = MakeGraphList(pattern_arg)
+    
+    if pattern_graphs is None or len(pattern_graphs) == 0:
+        print("Pattern graph could not be opened or is empty.")
+        return None
+        
 
     if isinstance(test_arg, basestring):
         test_graph = getGraphFromPath(test_arg)
     else:
         test_graph = test_arg
+
+    if test_graph is None:
+        print("Test graph could not be opened or is empty.")
+        return None
 
     tree, max_site_size, n_patterns = compute_tree(pattern_graphs)
     matches = match_tree(tree, max_site_size, test_graph)
