@@ -164,6 +164,20 @@ int main(int argc, char *argv[]) {
         dir_tests_base = "../tests_graphs/";
         fclose(f);
       }
+      else {
+        f = fopen("../src/tests_graphs/test0/test.dot", "rb");
+        if (f != NULL) {
+          dir_tests_base = "../src/tests_graphs/";
+          fclose(f);
+        }
+        else {
+          f = fopen("src/tests_graphs/test0/test.dot", "rb");
+          if (f != NULL) {
+            dir_tests_base = "src/tests_graphs/";
+            fclose(f);
+          }
+        }
+      }
     }
   }
 

@@ -349,7 +349,7 @@ def parse_tests(test_dir):
   
 
 def find_test_dir(args):
-    possible_test_dirs = ["tests_graphs", "../tests_graphs"]
+    possible_test_dirs = ["tests_graphs", "../tests_graphs" , "../src/tests_graphs", "src/tests_graphs"]
 
     if len(args) > 1:
         possible_test_dirs = [args[1]] + possible_test_dirs
