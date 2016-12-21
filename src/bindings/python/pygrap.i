@@ -107,30 +107,36 @@ def match_tree(tree, max_site_size, test_graph):
 
 
 def match_graph(pattern_arg, test_arg):
-    if isinstance(pattern_arg, basestring):
-        f = None
-        if not os.path.isfile(pattern_arg):
-            f=tempfile.NamedTemporaryFile() 
-            f.write(pattern_arg)
-            f.flush()
-            pattern_path = f.name
-        else:
-            pattern_path = pattern_arg
-        pattern_graphs_ptr = getGraphListFromPath(pattern_path)
-        pattern_graphs = MakeGraphList(pattern_graphs_ptr)
-
-        if f is not None:
-            f.close()
-    elif type(pattern_arg) is list:
-        pattern_graphs = pattern_arg
+    if type(pattern_arg) is list:
+        pattern_arg_list = pattern_arg
     else:
-        pattern_graphs = MakeGraphList(pattern_arg)
+        pattern_arg_list = [pattern_arg]
     
-    if pattern_graphs is None or len(pattern_graphs) == 0:
-        print("Pattern graph could not be opened or is empty.")
-        return None
-        
+    pattern_graph_list = []
+    for pattern in pattern_arg_list:
+        if isinstance(pattern, basestring):
+            f = None
+            if not os.path.isfile(pattern):
+                f=tempfile.NamedTemporaryFile() 
+                f.write(pattern)
+                f.flush()
+                pattern_path = f.name
+            else:
+                pattern_path = pattern
 
+            pattern_graphs_ptr = getGraphListFromPath(pattern_path)
+            pattern_graphs = MakeGraphList(pattern_graphs_ptr)
+        
+            if pattern_graphs is None or len(pattern_graphs) == 0:
+                print("Pattern graph could not be opened or is empty.")
+            else:
+                pattern_graph_list += pattern_graphs
+
+            if f is not None:
+                f.close()
+        else:
+            pattern_graph_list.append(pattern)
+        
     if isinstance(test_arg, basestring):
         test_graph = getGraphFromPath(test_arg)
     else:
@@ -140,7 +146,7 @@ def match_graph(pattern_arg, test_arg):
         print("Test graph could not be opened or is empty.")
         return None
 
-    tree, max_site_size, n_patterns = compute_tree(pattern_graphs)
+    tree, max_site_size, n_patterns = compute_tree(pattern_graph_list)
     matches = match_tree(tree, max_site_size, test_graph)
 
     if isinstance(test_arg, basestring):
