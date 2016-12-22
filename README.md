@@ -1,125 +1,75 @@
-Deux composants sont nécessaires : le désassembleur et l'analyse de graphes
+# grap: define and match graph patterns within binaries
+grap takes patterns and binary files, uses a Casptone-based disassembler to obtain the control flow graphs from the binaries, then matches the patterns against them.
 
-Désassembleur:
-cf PandaPE
+Patterns are user-defined graphs with instruction conditions ("opcode is xor and arg1 is eax") and repetition conditions (3 identical instructions, basic blocks...).
 
-Compiler la partie graphes sous Linux:
-cd graphes/
-cmake -DCMAKE_BUILD_TYPE=Release .
-make
+grap is both available as a standalone tool with a disassembler and as an IDA plugin which takes advantage of the disassembly done by IDA and the reverser.
 
-Sous Windows (avec Visual Studio installé):
-Il est nécessaire de générer les fichiers du parseur (Lexer.cpp, Lexer.h, Parser.cpp et Parser.h) avec flex et bison (sous Linux par exemple), puis, dans le dossier graphes/:
-cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release .
-nmake
+# Installation
+We describe how to build and install grap on a Linux distribution.
+For building and installing grap and the IDA plugin on Windows, please read WINDOWS.md.
 
+## Requirements
+The following dependencies must be installed:
 
-Utilisation du script grap:
-./grap motif.dot prg.exe
-./grap motif.dot prg.exe -v
-./grap motif.dot prg.exe -q
+- gnuradio-dev
+- libboost-dev
+- liblog4cpp5-dev
+- lib-uhd-dev
+- doxygen
+- swig
+- cmake
 
-Utilisation de graphes/GTSI-grap directement:
-./GTSI-grap --help
-./GTSI-grap motif.dot prg.dot
-./GTSI-grap motif.dot prg.dot -ncl
-./GTSI-grap motif.dot prg.dot -q
+Please note that those were tested for the latest Ubuntu LTS (16.04) and may differ depending on your distribution.
 
+## Build and install
+The following commands will build and install the project:
 
-# Binding
+- `mkdir build; cd build/` as we advise you to build the project in a dedicated directory
+- `cmake ../src/; make` will build with cmake and make
+- `sudo make install` will install grap into /usr/local/bin/
 
-Pour créer le binding python il est nécessaire d'ajouter l'option suivante dans `cmake`.
+### Python bindings
+By default python bindings are not built. In order to build them you will need the following additional dependencies :
 
-```
-cmake -DPYTHON_BINDING=1
-```
+- 
+- 
 
-Pour installer celui-ci, il suffit d'exécuter la commande ci-après.
-
-```
-make install
-```
-
-# Tools
-
-Pour créer les outils il faut ajouter l'option ci-après à `cmake`.
-
-```
-cmake -DTOOLS=1
-```
+Then you need to add the option PYTHON_BINDINGS=1 option to cmake: for instance `cmake -DPYTHON_BINDINGS=1 ../src`
 
 
-# Compilation Windows
+### Options
+The default build type is "Release", the others can be obtained through cmake options (such as `cmake -DCMAKE_BUILD_TYPE=Debug ../src`):
 
-## MinGW
-
-Pour compiler le projet `grap` et son binding python, il faut suivre les
-instructions suivantes.  Tout d'abord, il est nécessaire d'installer Mingw
-(https://sourceforge.net/projects/mingw/files/latest/download?source=files). Une
-fois installé, il faut ouvrir le gestionnaire de paquets (`guimain.exe`) qui se
-situe dans `C:\MinGW\libexec\mingw-get\` et installer les outils suivants.
-
-```
-mingw-developer-toolkit
-mingw32-base
-mingw32-gcc-g++
-msys-base
-msys-system-builder
-```
-
-Puis, il faudra supprimer le paquet `msys-gcc` qui est obsolète. Pour permettre
-l'accès aux binaires de MinGW, il faut ajouter le lien `C:\MinGW\bin` dans le
-`Path`. Les variables d'environnements sous Windows 7 se situent dans
-`Start> (click droit sur computer) Properties> Advanced system settings> (onglet
-Advanced) Environment Variables`. Il ne reste plus qu'à créer une variable
-utilisateur du nom de `Path` avec comme valeur `C:\MinGW\bin`.
+- Release: best performance, default
+- Debug: with debug information and address sanitizer
+- Valgrind: with debug information, good to use when debugging with valgrind
 
 
-## Flex + Bison
+Other options are also chosen with cmake (`cmake -DTOOLS=0` or `cmake -DNOSECCOMP=1` for instance):
 
-MinGW possède une version de flex et bison. Cependant, ces outils sont
-obsolètes. Pour remédier à ceci, il faut récupérer une version plus récente sur
-le site https://sourceforge.net/projects/winflexbison/. Une fois le document
-décompressé, il est nécessaire de renommer les deux fichiers `win_bison` et
-`win_flex` en `bison` et `flex`. Enfin il faudra copier les deux binaires avec
-le dossier `data` dans `C:\MinGW\msys\1.0\bin`.
+- TOOLS: build tools (grap-match, todot and test binaries), default
+- PYTHON_BINDINGS: build python bindings, not default
+- NOSECCOMP: disable support of the grap-match binary for privilege drop through seccomp, not default
 
-## SWIG
+# Usage
+The tool can be launched by using the following command:
 
-L'installation de SWIG se passe en deux étapes qui sont les suivantes:
-- compilation
-- installation
+`$ grap [options] pattern_file.dot test_files`
 
-Pour télécharger le code source de SWIG il faut se rendre à l'adresse suivante
-https://sourceforge.net/projects/swig/files/swigwin/swigwin-3.0.8/swigwin-3.0.8.zip/download?use_mirror=tenet. Puis,
-il faut décompresser l'archive dans le dossier `C:\MinGW\msys\1.0\home\[USER]\`
-et exécuter le script `bat` qui se situe dans le dossier msys
-(`C:\MinGW\msys\1.0\msys.bat`). Enfin, il faudra exécuter les commandes ci-après.
+## Examples
+* `grap -h`: describes supported options
+* `grap patterns/basic_block_loop.dot -o ls.dot /bin/ls`: disassemble ls into ls.dot and looks for basic block loops
+* `grap -od backspace.dot samples/*`: disassemble files with no attempt at matching
+* `grap -q -sa backspace.dot samples/*.dot`: match disassembled files, show matching and non matching files, one per line
+* `grap -m pattern.dot test.dot`: show all matched nodes
+* `grap -f pattern.dot test.exe`: force re-disassembling the binary, then matches it against pattern.dot
 
-```
-cd swigwin-x.x.x
-./autogen.sh
-./configure --without-pcre
-make
-make install
-```
-## Boost
 
-Pour compiler le projet `grap` il est nécessaire d'avoir les librairies
-Boost. Pour les obtenir, il faut télécharger les binaires 32-bit à l'adresse
-suivante
-https://sourceforge.net/projects/boost/files/boost-binaries/1.61.0/boost_1_61_0-msvc-14.0-32.exe/download
-. Une fois installé, il faut se rendre dans `C:\Program Files\boost_x_xx_x` et
-renommer le dossier `lib32-xxxxx` en `lib`.
+# Reference examples and tests
+Some examples of pattern files and test files are given in the src/tests_graphs/ directory.
+For troubleshooting purposes you can test them all.
 
-## Grap
-
-Maintenant que toutes les dépendances sont installées, il ne reste plus qu'à
-installer `grap`. Pour cela il faut ouvrir une console msys, se mettre dans le
-dossier `grap` et exécuter les commandes suivantes.
-
-```
-cmake . -G "MSYS Makefiles" -DPYTHON_BINDING=1
-make
-make install
-```
+- `./tests` will use the C++ library to test them against expected values, `./tests -h` gives information about each test.
+- `make test` will use the C++ library, the grap-match binary, grap-match.py and python bindings for disassembly and matching to test them. It needs bindings to be built and installed
+- `grap` or `grap-match` can be used to test them individually

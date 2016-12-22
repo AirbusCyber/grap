@@ -75,8 +75,8 @@ void printDescription()
   std::cout << "Test 26: [first run] looking for xor loops in Backspace sample "
                "(md5=4ee00c46da143ba70f7e6270960823be)\n";
   std::cout << "Test 27: [reference to 26] looking for xor loops in Backspace "
-                "sample using a simplified pattern with repetion on first node"
-                "\n";
+                "sample using a simplified pattern with repetition on first"
+                " node\n";
   std::cout << "Test 28: [manual] arg comparison within test grap (arg1 == "
                 "_arg2)\n";  
   std::cout << "Test 29: [reference to 0] same as test 0 but numbered children "
@@ -86,7 +86,7 @@ void printDescription()
   std::cout << "Test 31: [reference] same as test 6 with all 4 patterns in one "
                "dot file.\n";
   std::cout << "Test 32: [manual] non regression test on ghost nodes bug (fixed"
-                "with switch to depth-first search.\n";
+                " with switch to depth-first search.\n";
   std::cout << "Test 33: [first run] looking for basic block loops "
                 "in Backspace sample (md5=4ee00c46da143ba70f7e6270960823be)\n";
   std::cout << "Test 34: [first run] looking for pushes then call "
