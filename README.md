@@ -12,13 +12,14 @@ For building and installing grap and the IDA plugin on Windows, please read WIND
 ## Requirements
 The following dependencies must be installed:
 
-- gnuradio-dev
-- libboost-dev
-- liblog4cpp5-dev
-- lib-uhd-dev
-- doxygen
-- swig
 - cmake
+- bison
+- flex 
+- libboost-regex-dev
+- libseccomp-dev
+- python2.7
+- python-pefile
+- python-capstone
 
 Please note that those were tested for the latest Ubuntu LTS (16.04) and may differ depending on your distribution.
 
@@ -32,10 +33,10 @@ The following commands will build and install the project:
 ### Python bindings
 By default python bindings are not built. In order to build them you will need the following additional dependencies :
 
-- 
-- 
+- python2.7-dev
+- swig
 
-Then you need to add the option PYTHON_BINDINGS=1 option to cmake: for instance `cmake -DPYTHON_BINDINGS=1 ../src`
+Then you need to add the option PYTHON_BINDING=1 option to cmake: for instance `cmake -DPYTHON_BINDING=1 ../src`
 
 
 ### Options
@@ -49,7 +50,7 @@ The default build type is "Release", the others can be obtained through cmake op
 Other options are also chosen with cmake (`cmake -DTOOLS=0` or `cmake -DNOSECCOMP=1` for instance):
 
 - TOOLS: build tools (grap-match, todot and test binaries), default
-- PYTHON_BINDINGS: build python bindings, not default
+- PYTHON_BINDING: build python bindings, not default
 - NOSECCOMP: disable support of the grap-match binary for privilege drop through seccomp, not default
 
 # Usage
