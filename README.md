@@ -19,6 +19,7 @@ The following dependencies must be installed:
 - libseccomp-dev
 - python2.7
 - python-pefile
+- python-pyelftools
 - python-capstone
 
 Please note that those were tested for the latest Ubuntu LTS (16.04) and may differ depending on your distribution.
