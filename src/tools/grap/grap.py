@@ -114,8 +114,16 @@ if __name__ == '__main__':
             if args.verbose or args.debug:
                 print(" ".join(command))
 
-            popen = subprocess.Popen(tuple(command))
-            popen.wait()
+            process = subprocess.Popen(tuple(command))
+            process.communicate()
+            exitcode = process.returncode
+
+            if exitcode != 0:
+                if exitcode != 1:
+                    print("An unexpected error occurred in grap-match, try running it directly:")
+                    print(" ".join(command))
+                    print("\"Bad system call\" would mean this is caused by seccomp terminating the program. You may want to disable seccomp (see README).")
+                sys.exit(exitcode)
         else:
             if not args.quiet:
                 print("Missing pattern or test file.")
