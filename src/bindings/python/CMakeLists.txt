@@ -1,5 +1,5 @@
 # Variables-----------------------------------------------------------------
-set(PYTHON_BINDING OFF CACHE BOOL "Python bindings")
+set(PYTHON_BINDING ON CACHE BOOL "Python bindings")
 
 # Removes the use of 'pythonxx_d.lib'
 if(${MSVC})

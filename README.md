@@ -17,10 +17,11 @@ The following dependencies must be installed:
 - flex 
 - libboost-regex-dev
 - libseccomp-dev
-- python2.7
+- python2.7-dev
 - python-pefile
 - python-pyelftools
 - python-capstone
+- swig
 
 Please note that those were tested for the latest Ubuntu LTS (16.04) and may differ depending on your distribution.
 
@@ -31,16 +32,7 @@ The following commands will build and install the project:
 - `cmake ../src/; make` will build with cmake and make
 - `sudo make install` will install grap into /usr/local/bin/
 
-### Python bindings
-By default python bindings are not built. In order to build them you will need the following additional dependencies :
-
-- python2.7-dev
-- swig
-
-Then you need to add the option PYTHON_BINDING=1 option to cmake: for instance `cmake -DPYTHON_BINDING=1 ../src`
-
-
-### Options
+## Options
 The default build type is "Release", the others can be obtained through cmake options (such as `cmake -DCMAKE_BUILD_TYPE=Debug ../src`):
 
 - Release: best performance, default
@@ -48,10 +40,10 @@ The default build type is "Release", the others can be obtained through cmake op
 - Valgrind: with debug information, good to use when debugging with valgrind
 
 
-Other options are also chosen with cmake (`cmake -DTOOLS=0` or `cmake -DNOSECCOMP=1` for instance):
+Other options are also chosen with cmake (`cmake -DTOOLS=0 ../src` or `cmake -DNOSECCOMP=1 ../src` for instance):
 
 - TOOLS: build tools (grap-match, todot and test binaries), default
-- PYTHON_BINDING: build python bindings, not default
+- PYTHON_BINDING: build python bindings, default
 - NOSECCOMP: disable support of the grap-match binary for privilege drop through seccomp, not default
 
 # Usage
