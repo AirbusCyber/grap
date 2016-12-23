@@ -49,7 +49,6 @@ void drop_initial_privileges(){
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(madvise), 0);
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(prctl), 0);
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mremap), 0);
-
   
   int r = seccomp_load(ctx);
   RELEASE_ASSERT(r == 0);
@@ -63,6 +62,7 @@ void drop_privileges(){
   ctx = seccomp_init(SCMP_ACT_ALLOW); 
 
   seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(open), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(prctl), 0);
   
   int r = seccomp_load(ctx);
   RELEASE_ASSERT(r == 0);
