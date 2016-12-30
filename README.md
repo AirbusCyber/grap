@@ -33,18 +33,16 @@ The following commands will build and install the project:
 - `sudo make install` will install grap into /usr/local/bin/
 
 ## Options
-The default build type is "Release", the others can be obtained through cmake options (such as `cmake -DCMAKE_BUILD_TYPE=Debug ../src`):
-
-- Release: best performance, default
-- Debug: with debug information and address sanitizer
-- Valgrind: with debug information, good to use when debugging with valgrind
-
-
-Other options are also chosen with cmake (`cmake -DTOOLS=0 ../src` or `cmake -DNOSECCOMP=1 ../src` for instance):
+Options are chosen with cmake (`cmake -DTOOLS=0 ../src` or `cmake -DNOSECCOMP=1 ../src` for instance):
 
 - TOOLS: build tools (grap-match, todot and test binaries), default
 - PYTHON_BINDING: build python bindings, default
 - NOSECCOMP: disable support of the grap-match binary for privilege drop through seccomp, not default
+
+Note that grap-match's use of seccomp restricts the number of system calls available to the binary for security purposes. 
+In particular the "open" syscall is unavailable after the initial argument parsing.
+
+You may want to disable this feature if it generates the "Bad system call" error but will lose the security provided.
 
 # Usage
 The tool can be launched by using the following command:
