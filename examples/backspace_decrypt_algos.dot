@@ -1,0 +1,55 @@
+digraph decrypt_xor_sub {
+A [label="A", cond="opcode is xor and arg2 is 0x11", getid=A]
+B [label="B", cond="opcode is sub and arg2 is 0x25"]
+
+A -> B
+}
+
+digraph decrypt_sub_xor_sub {
+A [label="A", cond="opcode is sub", getid=A]
+B [label="B", cond="opcode is xor and arg2 is 0xb"]
+C [label="C", cond="opcode is sub and arg2 is 0x12"]
+
+A -> B
+B -> C
+}
+
+digraph decrypt_sub_xor_add {
+A [label="A", cond="opcode is sub", getid=A]
+B [label="B", cond="opcode is xor and arg2 is 0x19"]
+C [label="C", cond="opcode is add and arg2 is 0x13"]
+
+A -> B
+B -> C
+}
+
+digraph decrypt_xor_sub_sub {
+A [label="A", cond="opcode is xor and arg2 is 0x17", getid=A]
+B [label="B", cond="opcode is sub"]
+C [label="C", cond="opcode is add and arg2 is 0x13"]
+
+A -> B
+B -> C
+}
+
+digraph decrypt_sub_add1 {
+A [label="A", cond="opcode is 'or' and arg2 is 0xff", getid=A]
+B [label="B", cond="opcode is sub"]
+C [label="C", cond="opcode is add"]
+D [label="D", cond="opcode is mov and arg1 contains ["]
+
+A -> B
+B -> C
+C -> D
+}
+
+digraph decrypt_sub_add2 {
+A [label="A", cond="opcode is 'or' and arg2 is 0xff", getid=A]
+B [label="B", cond="opcode is add"]
+C [label="C", cond="opcode is sub"]
+D [label="D", cond="opcode is add and arg1 contains ["]
+
+A -> B
+B -> C
+C -> D
+}

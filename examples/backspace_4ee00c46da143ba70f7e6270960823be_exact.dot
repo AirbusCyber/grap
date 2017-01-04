@@ -1,0 +1,24 @@
+digraph decrypt_sample_4ee00c46da143ba70f7e6270960823be{
+A [label="mov eax, ??", cond="opcode is mov and arg1 is eax"]
+B [label="add eax, ??", cond="opcode is add and arg1 is eax"]
+C [label="mov ??, [eax]", cond="opcode is mov and arg2 contains [eax]"]
+D [label="xor ??, 0x11", cond="opcode is xor and arg2 is 0x11"]
+E [label="sub ??, 0x25", cond="opcode is sub and arg2 is 0x25"]
+F [label="inc ??", cond="opcode is inc"]
+G [label="cmp ??, ??", cond="opcode is cmp"]
+H [label="mov [eax], ??", cond="opcode is mov and arg1 contains [eax]"]
+I [label="j* ??", cond="opcode beginswith j"]
+J [label="*", cond=true]
+
+A -> B [label=1]
+B -> C [label=1]
+C -> D [label=1]
+D -> E [label=1]
+E -> F [label=1]
+F -> G [label=1]
+G -> H [label=1]
+H -> I [label=1]
+I -> J [label=1, child_number=1]
+I -> A [label=2, child_number=2]
+}
+

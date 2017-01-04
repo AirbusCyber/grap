@@ -33,7 +33,7 @@ The following commands will build and install the project:
 - `sudo make install` will install grap into /usr/local/bin/
 
 ## Options
-Options are chosen with cmake (`cmake -DTOOLS=0 ../src` or `cmake -DNOSECCOMP=1 ../src` for instance):
+Compilation options are chosen with cmake (`cmake -DTOOLS=0 ../src` or `cmake -DNOSECCOMP=1 ../src` for instance):
 
 - TOOLS: build tools (grap-match, todot and test binaries), default
 - PYTHON_BINDING: build python bindings, default
@@ -49,16 +49,51 @@ The tool can be launched by using the following command:
 
 `$ grap [options] pattern_file.dot test_files`
 
-## Examples
-* `grap -h`: describes supported options
-* `grap patterns/basic_block_loop.dot -o ls.dot /bin/ls`: disassemble ls into ls.dot and looks for basic block loops
-* `grap -od backspace.dot samples/*`: disassemble files with no attempt at matching
-* `grap -q -sa backspace.dot samples/*.dot`: match disassembled files, show matching and non matching files, one per line
-* `grap -m pattern.dot test.dot`: show all matched nodes
-* `grap -f pattern.dot test.exe`: force re-disassembling the binary, then matches it against pattern.dot
+Below are a few examples of supported options:
 
+- `grap -h`: describes supported options
+- `grap patterns/basic_block_loop.dot -o ls.dot /bin/ls`: disassemble ls into ls.dot and looks for basic block loops
+- `grap -od (pattern.dot) (samples/*)`: disassemble files with no attempt at matching
+- `grap -q -sa (pattern.dot) (samples/*.dot)`: match disassembled files, show matching and non matching files, one per line
+- `grap -m (pattern.dot) (test.dot)`: show all matched nodes
+- `grap -f (pattern.dot) (test.exe)`: force re-disassembling the binary, then matches it against pattern.dot
 
-# Reference examples and tests
+Note that you can only pass one pattern file as argument but this file may contain multiple pattern graphs.
+
+# Pattern examples
+The following pattern detects a decryption loop consisting of a xor followed by sub found in a Backspace sample:
+```
+digraph decryption_md5_4ee00c46da143ba70f7e6270960823be {
+A [cond=true, repeat=3]
+B [cond="opcode is xor and arg2 is 0x11"]
+C [cond="opcode is sub and arg2 is 0x25"]
+D [cond=true, repeat=3]
+E [cond="opcode beginswith j and nchildren == 2"]
+
+A -> B
+B -> C
+C -> D
+D -> E
+E -> A [childnumber=2]
+}
+```
+
+You may find additional pattern examples in two directories:
+
+- patterns/ contains a few patterns that can be useful on any binary such as a pattern to detect short loops or to detect a loop on basic blocks,
+- examples/ contains patterns used against the Backspace malware.
+
+# Documentation
+You will find more documentation in the doc/ folder, especially about the syntax of pattern and test graphs.
+
+The examples/ folder contains a python file demonstrating how to use the python bindings to analyze Backspace samples.
+
+# Tests
+Note that grap is a python script that will:
+
+- Use the python disassembler to create DOT files from binaries
+- Call the installed C++ binary grap-match to match patterns to the DOT files
+
 Some examples of pattern files and test files are given in the src/tests_graphs/ directory.
 For troubleshooting purposes you can test them all.
 

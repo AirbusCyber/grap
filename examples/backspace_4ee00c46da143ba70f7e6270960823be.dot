@@ -1,0 +1,14 @@
+digraph decrypt_sample_4ee00c46da143ba70f7e6270960823be_simple{
+A [label="?? (x3)", cond=true, repeat=3]
+B [label="xor ??, 0x11", cond="opcode is xor and arg2 is 0x11"]
+C [label="sub ??, 0x25", cond="opcode is sub and arg2 is 0x25"]
+D [label="?? (x3)", cond=true, repeat=3]
+E [label="j*", cond="opcode beginswith j and nchildren == 2"]
+
+A -> B
+B -> C
+C -> D
+D -> E
+E -> A [label=2, childnumber=2]
+}
+
