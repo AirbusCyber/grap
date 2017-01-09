@@ -21,4 +21,6 @@
  */
 void graph_fprint (FILE * fp, graph_t * graph);
 
+void graph_save_to_path(std::string path, graph_t * graph);
+
 #endif 

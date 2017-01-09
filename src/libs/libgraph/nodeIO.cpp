@@ -20,18 +20,31 @@ size_t node_to_dot(const node_t *node, const node_t *root, size_t node_number,
                    FILE *fp)
 {
   size_t ret;
+  
+  if (sizeof(vsize_t) >= 8){
+    ret = (size_t)fprintf(fp, "\"%" PRIx64 "\" [", node->node_id);
+  }
+  else {
+    // Typically: vsize_t on a 32 bits machine
+    ret = (size_t)fprintf(fp, "\"%x\" [", (int32_t) node->node_id);
+  }
 
-  ret = (size_t)fprintf(fp, "\"%" PRIx64 "\" [", node->node_id);
   const char *s = node->info->inst_str.c_str();
-
-  ret += (size_t)fprintf(fp, "inst = ");
+  ret += (size_t)fprintf(fp, "inst=\"");
   ret += (size_t)fprintf(fp, "%s", s);
+  ret += (size_t)fprintf(fp, "\", ");
+
+  if (sizeof(vsize_t) >= 8){
+    ret += (size_t)fprintf(fp, "address=\"0x%" PRIx64 "\", ", node->info->address);
+  }
+  else {
+    // Typically: vsize_t on a 32 bits machine
+    ret += (size_t)fprintf(fp, "address=\"0x%x\", ", (int32_t) node->info->address);
+  }  
 
   // printing label
-  fprintf(fp, ", label = \"%" PRIx64 "(%zu) : ", node->node_id, node_number);
-  ret += (size_t)fprintf(fp, "%s", "(");
+  ret += (size_t)fprintf(fp, "%s", "label=\"");
   ret += (size_t)fprintf(fp, "%s", node->info->inst_str.c_str());
-  ret += (size_t)fprintf(fp, "%s", ")");
 
   if (node->info->minRepeat > 1 || !node->info->has_maxRepeat
       || node->info->maxRepeat > 1) {
@@ -82,6 +95,21 @@ size_t node_to_dot(const node_t *node, const node_t *root, size_t node_number,
   }
   free(str);
 
+  ret += (size_t)printVK(fp, (char *)"opcode", (char*) node->info->opcode.c_str(), 1);
+  ret += (size_t)printVKint(fp, (char *)"nargs", (int) node->info->nargs, 1);
+  
+  if (node->info->nargs >= 1){
+    ret += (size_t)printVK(fp, (char *)"arg1", (char*) node->info->arg1.c_str(), 1);
+  }
+  
+  if (node->info->nargs >= 2){
+    ret += (size_t)printVK(fp, (char *)"arg2", (char*) node->info->arg2.c_str(), 1);
+  }
+  
+  if (node->info->nargs >= 3){
+    ret += (size_t)printVK(fp, (char *)"arg3", (char*) node->info->arg3.c_str(), 1);
+  }
+  
   if (node == root)
     ret += (size_t)fprintf(fp, ", style=\"bold,filled\", fillcolor=yellow]\n");
   else
@@ -92,20 +120,29 @@ size_t node_to_dot(const node_t *node, const node_t *root, size_t node_number,
 
 size_t node_edges_to_dot(const node_t *node, FILE *fp)
 {
-  size_t j;
   size_t ret;
 
   ret = 0;  
   if (node->has_child1){
-    ret += (size_t)fprintf(fp, "\"%" PRIx64 "\" -> \"%" PRIx64
-                               "\" [label = \"%" PRIx64 "\", childnumber=1]",
-                           node->node_id, node->child1->node_id, j);
-    ret += (size_t)fprintf(fp, "\n");
+      if (sizeof(vsize_t) >= 8){
+        ret += (size_t)fprintf(fp, "\"%" PRIx64 "\" -> \"%" PRIx64 "\" [label=1, childnumber=1]", node->node_id, node->child1->node_id);
+      }
+      else {
+        // Typically: vsize_t on a 32 bits machine
+        ret += (size_t)fprintf(fp, "\"%x\" -> \"%x\" [label=1, childnumber=1]", node->node_id, node->child1->node_id);
+      }
+  ret += (size_t)fprintf(fp, "\n");
   }
+  
   if (node->has_child2){
-    ret += (size_t)fprintf(fp, "\"%" PRIx64 "\" -> \"%" PRIx64
-                               "\" [label = \"%" PRIx64 "\", childnumber=2]",
-                           node->node_id, node->child2->node_id, j);
+    if (sizeof(vsize_t) >= 8){
+      ret += (size_t)fprintf(fp, "\"%" PRIx64 "\" -> \"%" PRIx64 "\" [label=2, childnumber=2]", node->node_id, node->child2->node_id);
+    }
+    else {
+      // Typically: vsize_t on a 32 bits machine
+      ret += (size_t)fprintf(fp, "\"%x\" -> \"%x\" [label=2, childnumber=2]", node->node_id, node->child2->node_id);
+    }
+
     ret += (size_t)fprintf(fp, "\n");
   }
   
