@@ -1,5 +1,5 @@
 Digraph G {
-"A" [label = "A", cond="opcode == JCC", root=true]
+"A" [label = "A", cond="opcode is JCC", root=true]
 "B" [label = "B", cond="inst contains INST"]
 "C" [label = "INST"]
 "A" -> "B" [label = "1"]

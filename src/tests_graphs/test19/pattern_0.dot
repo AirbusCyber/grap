@@ -1,9 +1,9 @@
 digraph G{
 A [label="xor", shape="box", cond = "inst contains xor"]
 B [label="A: *", shape="box", cond = "*", getid="A"]
-C [label="inc", shape="box", cond = "inst >= inc"]
+C [label="inc", shape="box", cond = "inst contains inc"]
 D [label="cmp", shape="box", cond = "opcode is cmp"]
-E [label="jb", shape="box", cond = "opcode == jb"]
+E [label="jb", shape="box", cond = "opcode is jb"]
 F [label="*", shape="box", cond = true]
 
 A -> B

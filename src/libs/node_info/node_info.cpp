@@ -216,10 +216,10 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
       this->fixed_field = (void*) str_ptr;
     }
     
-    if (op == "==" or op == "is"){
+    if (op == "is"){
       this->comparison = ComparisonFunEnum::str_equals; 
     }
-    else if (op == ">=" or op == "contains"){
+    else if (op == "contains"){
       this->comparison = ComparisonFunEnum::str_contains;
     }
     else if (op == "beginswith"){
@@ -253,7 +253,7 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
       this->fixed_field = (void*) addr_ptr;
       this->fixed_field_is_new = true;
       
-      if (op == "==" or op == "is"){
+      if (op == "=="){
         this->comparison = ComparisonFunEnum::vsizet_equals; 
       }
       else if (op == ">"){
@@ -282,7 +282,7 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
       *addr_ptr = (uint8_t) strtol(value.c_str(), NULL, 10);
       this->fixed_field = (void*) addr_ptr;
       
-      if (op == "==" or op == "is"){
+      if (op == "=="){
         this->comparison = ComparisonFunEnum::uint8t_equals; 
       }
       else if (op == ">"){
