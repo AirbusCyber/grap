@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-# include <inttypes.h>
+#include <inttypes.h>
 
 /*!
  @brief Type of memory pointers.

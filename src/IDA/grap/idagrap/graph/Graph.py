@@ -1,6 +1,6 @@
 #/usr/bin/env python
 
-from pygrap import (NodesMap, graph_alloc, graph_free, graph_t, node_alloc,
+from pygrap import (graph_alloc, graph_free, graph_t, node_alloc,
                     node_copy, node_link, node_list_add, node_list_find,
                     update_children_fathers_number)
 
@@ -33,7 +33,6 @@ class CFG:
             graph = graph_alloc(0)
 
         self.graph = graph
-        self.graph.nodes.nodes_map = NodesMap()
 
     def extract(self):
         """Extract the control flow graph from the binary."""
