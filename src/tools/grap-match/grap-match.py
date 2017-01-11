@@ -191,24 +191,24 @@ def match_tree(tree, max_site_size, test_path, test_graph, args):
             print ""
       
     # Parse matches and print the extracted nodes
-    if getids and not len(pattern_matches) > 0:
+    if getids and len(pattern_matches) > 0:
         first = True
         for pattern_name in pattern_matches:
-            if not first:
+            match_list = pattern_matches[pattern_name]
+
+            if not first and not match_list.empty():
                 print ""
             first = False
-
-            match_list = pattern_matches[pattern_name]
   
             i = 1
             first2 = True
             for match in match_list:
-                if not first2:
+                if not first2 and not match.empty():
                     print ""
                 first2 = False
                 
                 if not match.empty():
-                    if leaf_name == "":
+                    if pattern_name == "":
                         print "Match", str(i)
                     else:
                         print pattern_name + ", " + "match " +str(i)

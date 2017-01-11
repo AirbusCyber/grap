@@ -519,8 +519,6 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll, b
     for (it_patternsmatches = pattern_matches->begin(); it_patternsmatches != pattern_matches->end(); it_patternsmatches++){
       std::string leaf_name = it_patternsmatches->first;
       MatchList* match_list = it_patternsmatches->second;
-//       if (it_patternsmatches != pattern_matches->begin() and match_list->begin() != match_list->end()) out_stream << "lklk" << std::endl;
-  //     std::cout << "\nExtracted nodes:\n";
       MatchList::iterator it_match_list;
 
       vsize_t i = 1;
