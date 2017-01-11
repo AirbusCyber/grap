@@ -8,6 +8,7 @@ from idagrap.analysis.Analysis import PatternsAnalysis
 from idagrap.graph.Graph import CFG
 from idagrap.patterns.Modules import MODULES
 from idc import CIC_ITEM, GetColor, SetColor
+from idagrap.patterns.test.misc.ModulesTestMisc import get_test_misc
 
 
 class CryptoIdentifier:
@@ -62,6 +63,10 @@ class CryptoIdentifier:
         # Pattern searching
         #
         print "[I] Searching for patterns."
+        
+        # Update "Test" patterns
+        MODULES["Test"]["Misc"] = get_test_misc()
+        
         # Group
         for grp_name, grp in MODULES.iteritems():
             print "Group: " + grp_name
@@ -93,7 +98,8 @@ class CryptoIdentifier:
                         #
                         # Analyzing
                         #
-                        print "\t\t\t\t[I] Linking the patterns matches which are in the same area"
+                        if patterns._perform_analysis:
+                            print "\t\t\t\t[I] Linking the patterns matches which are in the same area"
                         ana = PatternsAnalysis(patterns, algo)
 
                         print "\t\t\t\t[I] Filtering those patterns"
@@ -260,3 +266,4 @@ class CryptoColor:
         for insts in self._matches_colors.itervalues():
             for ea, color in insts.iteritems():
                 SetColor(ea, CIC_ITEM, self.rgb_to_bgr(color['new']))
+

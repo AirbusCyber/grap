@@ -2,7 +2,7 @@
 
 from uuid import uuid4
 
-from pygrap import freeMatch, getGraphFromFile, graph_free, parcoursLargeur
+from pygrap import freeMatch, getGraphFromFile, graph_free, parcoursGen
 
 from idagrap.config.General import MAX_THRESHOLD
 
@@ -259,9 +259,10 @@ class Pattern:
             getid (bool): Get or not the ID (default value: True).
         """
         pattern_graph = getGraphFromFile(self._file)
+        
         pattern_size = pattern_graph.nodes.size
 
-        parcours = parcoursLargeur(pattern_graph,
+        parcours = parcoursGen(pattern_graph,
                                    pattern_graph.root.list_id,
                                    pattern_size)
 
@@ -322,12 +323,14 @@ class Patterns():
         _name (str): Name of the Patterns (eg. "RC4 Set_Key")
         _description (str): Description of the Patterns (eg.
                             "Initialization function of the RC4 algorithm.")
+        _perform_analysis (bool): Set to False to skip analysis
 
     Args:
         patterns (Pattern list): List of patterns (default value: None).
         threshold (float): Threshold of the module (default value: 1.0).
         name (str): Name of the Patterns (default value: "")
         description (str): Description of the Patterns (default value: "").
+        perform_analysis (bool): Set to False to skip analysis
     """
 
     _patterns = []
@@ -336,7 +339,7 @@ class Patterns():
     _name = ""
     _description = ""
 
-    def __init__(self, patterns=None, threshold=MAX_THRESHOLD, name="", description=""):
+    def __init__(self, patterns=None, threshold=MAX_THRESHOLD, name="", description="", perform_analysis=True):
         """Initialization of the class."""
         if not patterns:
             patterns = []
@@ -346,6 +349,7 @@ class Patterns():
         self._size = len(patterns)
         self._name = name
         self._description = description
+        self._perform_analysis = perform_analysis
 
     def __str__(self):
         """String representation of the class."""
@@ -444,3 +448,4 @@ class Patterns():
         if value >= self._threshold:
             return True
         return False
+

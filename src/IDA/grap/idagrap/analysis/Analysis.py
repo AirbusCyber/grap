@@ -36,7 +36,13 @@ class PatternsAnalysis:
         self._algo = algo
         self._found_patterns = []
 
-        self.search_relationships()
+        if patterns._perform_analysis:
+            self.search_relationships()
+        else:
+            patterns = self._patterns.get_patterns()
+            for p in patterns:
+                for m in p.get_matches():
+                    m.add_link(m)
 
     def search_relationships(self):
         """Searching relationships between patterns.
@@ -71,6 +77,13 @@ class PatternsAnalysis:
         """
         patterns = self._patterns
         pattern_list = self._patterns.get_patterns()
+        
+        if not patterns._perform_analysis:
+            for p in pattern_list:
+                for m in p.get_matches():
+                    links = m.get_links()
+                    self._found_patterns.append(links)
+            return
 
         for pattern in pattern_list:
 
@@ -133,3 +146,4 @@ class PatternsAnalysis:
     def get_patterns(self):
         """Patterns getter."""
         return self._patterns
+

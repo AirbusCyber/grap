@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-from .misc.ModulesTestMisc import TEST_MISC
+from .misc.ModulesTestMisc import get_test_misc
 
 TEST = {
-    "Misc": TEST_MISC,
+    "Misc": get_test_misc(),
 }
+
