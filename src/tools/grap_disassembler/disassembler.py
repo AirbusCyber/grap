@@ -318,7 +318,7 @@ class PEDisassembler:
                     inst_str = "%s %s" % (inst.mnemonic, inst.op_str)
 
                 if offset != oep_offset:
-                    nodes.write(('"%016X" [label="%s", address="%016X", inst="%s", '
+                    nodes.write(('"%X" [label="%s", address="0x%X", inst="%s", '
                                  'style="", shape=box, fillcolor="white"]\n') % (
                         inst.va,
                         "%016X: %s %s" % (inst.va, inst.mnemonic, inst.op_str),
@@ -326,7 +326,7 @@ class PEDisassembler:
                         inst_str
                     ))
                 else:
-                    nodes.write(('"%016X" [label="%s", address="%016X", inst="%s", '
+                    nodes.write(('"%X" [label="%s", address="0x%X", inst="%s", '
                                  'style="", shape=box, fillcolor="white", root=true]\n') % (
                         inst.va,
                         "%016X: %s %s" % (inst.va, inst.mnemonic, inst.op_str),
@@ -335,14 +335,14 @@ class PEDisassembler:
                     ))
 
                 if inst.to_succ is not None:
-                    edges.write(('"%016X" -> "%016X" [label=0, color=%s, child_number=1]\n') % (
+                    edges.write(('"%X" -> "%X" [label=0, color=%s, child_number=1]\n') % (
                         inst.va,
                         insts[inst.to_succ].va,
                         "black"
                     ))
 
                 if inst.to_other is not None:
-                    edges.write(('"%016X" -> "%016X" [label=1, color=%s, child_number=2]\n') % (
+                    edges.write(('"%X" -> "%X" [label=1, color=%s, child_number=2]\n') % (
                         inst.va,
                         insts[inst.to_other].va,
                         "red"
@@ -356,23 +356,23 @@ class PEDisassembler:
                     inst_str = "%s %s" % (inst.mnemonic, inst.op_str)
 
                 if offset != oep_offset:
-                    nodes.write(('"%016X" [inst="%s", address="%016X"]\n') % (
+                    nodes.write(('"%X" [inst="%s", address="0x%X"]\n') % (
                         inst.va,
                         inst_str,
                         inst.va
                     ))
                 else:
-                    nodes.write(('"%016X" [inst="%s", address="%016X", root=true]\n') % (
+                    nodes.write(('"%X" [inst="%s", address="0x%X", root=true]\n') % (
                         inst.va,
                         inst_str,
                         inst.va
                     ))
 
                 if inst.to_succ is not None:
-                    edges.write(('"%016X" -> "%016X" [child_number=1]\n') % (inst.va, insts[inst.to_succ].va))
+                    edges.write(('"%X" -> "%X" [child_number=1]\n') % (inst.va, insts[inst.to_succ].va))
 
                 if inst.to_other is not None:
-                    edges.write(('"%016X" -> "%016X" [child_number=2]\n') % (inst.va, insts[inst.to_other].va))
+                    edges.write(('"%X" -> "%X" [child_number=2]\n') % (inst.va, insts[inst.to_other].va))
 
         dot.write(header)
         dot.write(nodes.getvalue())
@@ -718,7 +718,7 @@ class ELFDisassembler:
                     inst_str = "%s %s" % (inst.mnemonic, inst.op_str)
 
                 if offset != oep_offset:
-                    nodes.write(('"%016X" [label="%s", address="%016X", inst="%s", '
+                    nodes.write(('"%X" [label="%s", address="0x%X", inst="%s", '
                                  'style="", shape=box, fillcolor="white"]\n') % (
                         inst.va,
                         "%016X: %s %s" % (inst.va, inst.mnemonic, inst.op_str),
@@ -726,7 +726,7 @@ class ELFDisassembler:
                         inst_str
                     ))
                 else:
-                    nodes.write(('"%016X" [label="%s", address="%016X", inst="%s", '
+                    nodes.write(('"%X" [label="%s", address="0x%X", inst="%s", '
                                  'style="", shape=box, fillcolor="white", root=true]\n') % (
                         inst.va,
                         "%016X: %s %s" % (inst.va, inst.mnemonic, inst.op_str),
@@ -735,14 +735,14 @@ class ELFDisassembler:
                     ))
 
                 if inst.to_succ is not None:
-                    edges.write(('"%016X" -> "%016X" [label=0, color=%s, child_number=1]\n') % (
+                    edges.write(('"%X" -> "%X" [label=0, color=%s, child_number=1]\n') % (
                         inst.va,
                         insts[inst.to_succ].va,
                         "black"
                     ))
 
                 if inst.to_other is not None:
-                    edges.write(('"%016X" -> "%016X" [label=1, color=%s, child_number=2]\n') % (
+                    edges.write(('"%X" -> "%X" [label=1, color=%s, child_number=2]\n') % (
                         inst.va,
                         insts[inst.to_other].va,
                         "red"
@@ -756,23 +756,23 @@ class ELFDisassembler:
                     inst_str = "%s %s" % (inst.mnemonic, inst.op_str)
 
                 if offset != oep_offset:
-                    nodes.write(('"%016X" [inst="%s", address="%016X"]\n') % (
+                    nodes.write(('"%X" [inst="%s", address="0x%X"]\n') % (
                         inst.va,
                         inst_str,
                         inst.va
                     ))
                 else:
-                    nodes.write(('"%016X" [inst="%s", address="%016X", root=true]\n') % (
+                    nodes.write(('"%X" [inst="%s", address="0x%X", root=true]\n') % (
                         inst.va,
                         inst_str,
                         inst.va
                     ))
 
                 if inst.to_succ is not None:
-                    edges.write(('"%016X" -> "%016X" [child_number=1]\n') % (inst.va, insts[inst.to_succ].va))
+                    edges.write(('"%X" -> "%X" [child_number=1]\n') % (inst.va, insts[inst.to_succ].va))
 
                 if inst.to_other is not None:
-                    edges.write(('"%016X" -> "%016X" [child_number=2]\n') % (inst.va, insts[inst.to_other].va))
+                    edges.write(('"%X" -> "%X" [child_number=2]\n') % (inst.va, insts[inst.to_other].va))
 
         dot.write(header)
         dot.write(nodes.getvalue())

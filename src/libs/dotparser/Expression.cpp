@@ -78,7 +78,7 @@ Couple *createEdge(char *f, char *c, OptionList* ol) {
       char *id = ol->options[i]->id;
     
       if (strcmp(id, "childnumber") == 0 or strcmp(id, "child_number") == 0){
-        vsize_t k = (vsize_t) atoi(v);
+        vsize_t k = (vsize_t) strtol(v, NULL, 0);
         
         if (k == 1){
           e->is_numbered = true;
@@ -271,7 +271,7 @@ node_t *updateNode(OptionList * ol, node_t * n) {
         hasMaxRepeat = 1;
       }
       else {
-        vsize_t repeat_number = (vsize_t) atoi(v);
+        vsize_t repeat_number = (vsize_t) strtol(v, NULL, 0);
         n->info->minRepeat = repeat_number;
         hasMinRepeat = 1;
         
@@ -282,13 +282,13 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     }
     else if (strcmp(id, "minrepeat") == 0) {
       hasMinRepeat = 1;
-      n->info->minRepeat = (vsize_t) atoi(v);
+      n->info->minRepeat = (vsize_t) strtol(v, NULL, 0);
     }
     else if (strcmp(id, "maxrepeat") == 0) {
       if ((strcmp(v, "none") != 0)){
         hasMaxRepeat = 1;
         n->info->has_maxRepeat = true;
-        n->info->maxRepeat = (vsize_t) atoi(v);
+        n->info->maxRepeat = (vsize_t) strtol(v, NULL, 0);
       }
     }
     else if (strcmp(id, "lazyrepeat") == 0){
@@ -300,18 +300,18 @@ node_t *updateNode(OptionList * ol, node_t * n) {
       }
     }
     else if (strcmp(id, "minchildren") == 0) {
-      n->info->minChildrenNumber = (vsize_t) atoi(v);
+      n->info->minChildrenNumber = (vsize_t) strtol(v, NULL, 0);
     }
     else if (strcmp(id, "maxchildren") == 0) {
       n->info->has_maxChildrenNumber = true;
-      n->info->maxChildrenNumber = (vsize_t) atoi(v);
+      n->info->maxChildrenNumber = (vsize_t) strtol(v, NULL, 0);
     }
     else if (strcmp(id, "minfathers") == 0) {
-      n->info->minFathersNumber = (vsize_t) atoi(v);
+      n->info->minFathersNumber = (vsize_t) strtol(v, NULL, 0);
     }
     else if (strcmp(id, "maxfathers") == 0) {
       n->info->has_maxFathersNumber = true;
-      n->info->maxFathersNumber = (vsize_t) atoi(v);
+      n->info->maxFathersNumber = (vsize_t) strtol(v, NULL, 0);
     }
     else if (strcmp(id, "getid") == 0) {
       n->info->get = true;
@@ -319,7 +319,7 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     }
     else if (strcmp(id, "addr") == 0 or strcmp(id, "address") == 0) {
       n->info->has_address = true;
-      n->info->address = (vsize_t) strtol(v, NULL, 16);
+      n->info->address = (vsize_t) strtol(v, NULL, 0);
     }
     else if (not has_arg1 and strcmp(id, "arg1") == 0) {
       n->info->arg1 = std::string(v);
