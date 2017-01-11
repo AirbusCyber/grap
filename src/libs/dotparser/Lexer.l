@@ -25,8 +25,8 @@
 DIGRAPH_HEADER  [dD]igraph
 COMMENT_LINE  ^" "*"//".*
 IGNORE    "labeljust=r"
-IDS       [a-zA-Z0-9*+._]+
-IDC       \"[a-zA-Z0-9*+-._:;@ \\(),\[\]]*\"
+IDS       [a-zA-Z0-9*+._?]+
+IDC       \"[a-zA-Z0-9*+-._:;@ \\(),?\[\]]*\"
 IDV       \"[a-zA-Z0-9*+-._:;@ \\(),\[\]=!<>^$?|{}']*\"
 LENS      "{"
 RENS      "}"
