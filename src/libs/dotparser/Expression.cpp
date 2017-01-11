@@ -264,20 +264,20 @@ node_t *updateNode(OptionList * ol, node_t * n) {
       }
       else if (strcmp(v, "?") == 0) {
         n->info->minRepeat = 0;
-	hasMinRepeat = 1;
-	
-	n->info->maxRepeat = 1;
-	n->info->has_maxRepeat = true;
-	hasMaxRepeat = 1;
+        hasMinRepeat = 1;
+        
+        n->info->maxRepeat = 1;
+        n->info->has_maxRepeat = true;
+        hasMaxRepeat = 1;
       }
       else {
-	vsize_t repeat_number = (vsize_t) atoi(v);
+        vsize_t repeat_number = (vsize_t) atoi(v);
         n->info->minRepeat = repeat_number;
         hasMinRepeat = 1;
-	
-	n->info->maxRepeat = repeat_number;
-	n->info->has_maxRepeat = true;
-	hasMaxRepeat = 1;
+        
+        n->info->maxRepeat = repeat_number;
+        n->info->has_maxRepeat = true;
+        hasMaxRepeat = 1;
       }
     }
     else if (strcmp(id, "minrepeat") == 0) {
