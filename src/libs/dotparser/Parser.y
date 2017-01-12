@@ -129,8 +129,7 @@ option_value
     
 option
     :
-    TOKEN_ID[I] { $$ = createOption($I, ""); }
-    | TOKEN_ID[I] TOKEN_EQ option_value[V] { $$ = createOption($I, $V); }
+    TOKEN_ID[I] TOKEN_EQ option_value[V] { $$ = createOption($I, $V); }
     | error { fprintf(stderr, "Error parsing an option.\n"); RELEASE_ASSERT(false); }
     ;
     
@@ -147,11 +146,5 @@ edge
     | TOKEN_ID[F] TOKEN_ARROW TOKEN_ID[C] { $$ = createEdge($F, $C, NULL); }
     | error { fprintf(stderr, "Error parsing an edge.\n"); RELEASE_ASSERT(false); }
     ;
-
-//graph_options
-//    :
-//    { $$ = 0; printf("nl\n"); }
-//    | TOKEN_ID TOKEN_EQ TOKEN_ID { $$ = 0; }
-//    ;
  
 %%
