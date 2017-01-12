@@ -54,6 +54,7 @@ public:
   
   bool get;
   std::string getid;
+  std::string color;
 };
 
 enum ComparisonFunEnum {

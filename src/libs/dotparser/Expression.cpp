@@ -317,6 +317,9 @@ node_t *updateNode(OptionList * ol, node_t * n) {
       n->info->get = true;
       n->info->getid = std::string(v);
     }
+    else if (strcmp(id, "color") == 0) {
+      n->info->color = std::string(v);
+    }
     else if (strcmp(id, "addr") == 0 or strcmp(id, "address") == 0) {
       n->info->has_address = true;
       n->info->address = (vsize_t) strtol(v, NULL, 0);

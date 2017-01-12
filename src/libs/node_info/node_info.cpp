@@ -23,6 +23,7 @@ NodeInfo::NodeInfo(){
   this->maxRepeat = 1;
   this->get = false;
   this->getid = "";
+  this->color = "";
 }
 
 std::string NodeInfo::toString()
@@ -81,6 +82,13 @@ std::string NodeInfo::toString()
   }
   else {
     s += ", noget"; 
+  }
+  
+  if (this->color != ""){
+    s += ", color=" + this->color;
+  }
+  else {
+    s += ", nocolor"; 
   }
   
   return s;

@@ -711,7 +711,6 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
   numbers[0].first = graph->root;        
   free(numbers);
   delete matched_nodes;
-  
   return RetourParcoursDepuisSommet(true, found_nodes);
 }
 
