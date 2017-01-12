@@ -48,6 +48,7 @@ class CryptoIdentificationWidget(QMainWindow):
         self.parent = parent
         self.name = "Crypto"
         self.icon = self.cc.QIcon(config['icons_path'] + "crypto.png")
+        self.color = False
 
         # This widget relies on the crypto identifier
         self.central_widget = self.cc.QWidget()
@@ -121,12 +122,15 @@ class CryptoIdentificationWidget(QMainWindow):
         """
         if boolean:
             self._activateColoringBoutton()
+            self.color = True
         else:
             self._deactivateColoringBoutton()
+            self.color = False
 
     def _activateColoringBoutton(self):
         """Action to execute when the coloring button is activated."""
         # Colors generation
+        self.cc.CryptoColor.n_assigned_colors = 0
         for ana in self.cc.CryptoIdentifier.get_analyzed_patterns():
             found_patterns = ana.get_found_patterns()
             pcolors = self.cc.CryptoColor.get_patterns_colors()
@@ -175,7 +179,12 @@ class CryptoIdentificationWidget(QMainWindow):
         self.cc.CryptoIdentifier.analyzing()
 
         # Update the UI
-        self.populateSignatureTree()
+        if self.color:
+            # Simulate unclick then click on color button
+            self.cc.CryptoColor.clear()
+            self._activateColoringBoutton()
+        else:
+            self.populateSignatureTree()
 
     def _createSignatureWidget(self):
         """
@@ -186,7 +195,7 @@ class CryptoIdentificationWidget(QMainWindow):
         signature_layout = self.cc.QVBoxLayout()
         self.signature_tree = self.cc.QTreeWidget()
         self.signature_tree.setColumnCount(1)
-        self.signature_tree.setHeaderLabels(["Found Crypto Signatures"])
+        self.signature_tree.setHeaderLabels(["Found patterns"])
 
         # Action
         self.signature_tree.itemDoubleClicked.connect(self._onSignatureTreeItemDoubleClicked)
@@ -214,43 +223,69 @@ class CryptoIdentificationWidget(QMainWindow):
             # If there is 1 or more matches
             if len(found_patterns) > 0:
 
-                algo_info = self.cc.QTreeWidgetItem(self.signature_tree)
-                algo_info.setText(0, algo.get_name())
-
-                patterns_info = self.cc.QTreeWidgetItem(algo_info)
+                if patterns._perform_analysis:
+                    algo_info = self.cc.QTreeWidgetItem(self.signature_tree)
+                    algo_info.setText(0, algo.get_name())
+                    patterns_info = self.cc.QTreeWidgetItem(algo_info)
+                else:
+                    patterns_info = self.cc.QTreeWidgetItem(self.signature_tree)
                 patterns_info.setText(0, "%s (%d matches)" % (
                     patterns.get_name(),
                     len(found_patterns))
                 )
 
                 for match_dict_list in found_patterns:
-                    matches_info = self.cc.QTreeWidgetItem(patterns_info)
+                    if patterns._perform_analysis:
+                        matches_info = self.cc.QTreeWidgetItem(patterns_info)
 
                     for pattern_id, match_dicts in match_dict_list.iteritems():
-                        pattern_info = self.cc.QTreeWidgetItem(matches_info)
-                        pattern_info.setText(0, "%s (%d matches)" % (
-                            patterns.get_pattern_name(pattern_id),
-                            len(match_dicts.values())
-                        ))
-
-                        if pattern_id in colors:
-                            pattern_info.setForeground(0, self.cc.QBrush(self.cc.QColor(colors[pattern_id])))
-
-                        for match in match_dicts.itervalues():
-                            match_info = self.cc.QTreeWidgetItem(pattern_info)
-                            match_info.setText(0, "0x%x (%d instructions)" % (
-                                match.get_start_address(),
-                                match.get_num_insts()
+                        if patterns._perform_analysis:
+                            pattern_info = self.cc.QTreeWidgetItem(matches_info)
+                            pattern_info.setText(0, "%s (%d matches)" % (
+                                patterns.get_pattern_name(pattern_id),
+                                len(match_dicts.values())
                             ))
 
+                            if pattern_id in colors:
+                                pattern_info.setForeground(0, self.cc.QBrush(self.cc.QColor(colors[pattern_id])))
 
-                            matches_info.setText(0, "%s" % idc.GetFunctionName(match.get_start_address()))
+                        for match in match_dicts.itervalues():
+                            if patterns._perform_analysis:
+                                match_info = self.cc.QTreeWidgetItem(pattern_info)
+                                match_info.setText(0, "0x%x (%d instructions)" % (
+                                    match.get_start_address(),
+                                    match.get_num_insts()
+                                    ))
+                            else:
+                                match_info = self.cc.QTreeWidgetItem(patterns_info)
+                            
+                            if pattern_id in colors and not patterns._perform_analysis:
+                                patterns_info.setForeground(0, self.cc.QBrush(self.cc.QColor(colors[pattern_id])))
+
+                            if patterns._perform_analysis:
+                                matches_info.setText(0, "%s" % idc.GetFunctionName(match.get_start_address()))
+                            else:
+                                    match_info.setText(0, "0x%x in %s (%d instructions)" % (
+                                    match.get_start_address(),
+                                    idc.GetFunctionName(match.get_start_address()),
+                                    match.get_num_insts()
+                                    ))
 
                             # Add the start address of the match
                             self.qtreewidgetitems_to_addresses[match_info] = match.get_start_address()
-
+                            self.signature_tree.setItemExpanded(match_info, True)
+                        if patterns._perform_analysis:
+                            self.signature_tree.setItemExpanded(pattern_info, True)
+                    if patterns._perform_analysis:
+                        self.signature_tree.setItemExpanded(matches_info, True)
+                    
+                if len(found_patterns) <= 5:
+                    self.signature_tree.setItemExpanded(patterns_info, True)
+                if patterns._perform_analysis:
+                    self.signature_tree.setItemExpanded(algo_info, True)
+        
         self.signature_tree.setSortingEnabled(True)
-
+        
     def _onSignatureTreeItemDoubleClicked(self, item, column):
         """Action for the double clicked.
 
@@ -261,3 +296,4 @@ class CryptoIdentificationWidget(QMainWindow):
         # Jump to the match address
         if item in self.qtreewidgetitems_to_addresses:
             idc.Jump(self.qtreewidgetitems_to_addresses[item])
+

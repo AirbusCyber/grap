@@ -150,6 +150,8 @@ class CryptoColor:
         self._HUE = 0
         self._SATURATION = 0.10
         self._LIGHTNESS = 0.50
+        self.preferred_colors = [(0.134364244112, 0.9), (0.495435087092, 0.449491064789), (0.992543412176, 0.859946528795), (0.216599397131, 0.422116575583), (0.445387194055, 0.721540032341)]
+        self.n_assigned_colors = 0
 
     def add_pattern(self, patternid):
         """Associate a color to a pattern id.
@@ -208,8 +210,14 @@ class CryptoColor:
         Returns:
             (int): The return value is an rgb color.
         """
-        hue = random.random()
-        sat = random.random()
+        
+        if self.n_assigned_colors < len(self.preferred_colors):
+            hue = self.preferred_colors[self.n_assigned_colors][0]
+            sat = self.preferred_colors[self.n_assigned_colors][1]
+            self.n_assigned_colors += 1
+        else:
+            hue = random.random()
+            sat = random.random()
 
         rgb = colorsys.hls_to_rgb(hue, self._LIGHTNESS, sat)
 
@@ -263,6 +271,7 @@ class CryptoColor:
 
     def highlight_matches(self):
         """Highlight all the matches."""
+        
         for insts in self._matches_colors.itervalues():
             for ea, color in insts.iteritems():
                 SetColor(ea, CIC_ITEM, self.rgb_to_bgr(color['new']))
