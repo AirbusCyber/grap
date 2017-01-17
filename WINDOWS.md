@@ -1,40 +1,16 @@
-Sous Windows (avec Visual Studio installé):
-Il est nécessaire de générer les fichiers du parseur (Lexer.cpp, Lexer.h, Parser.cpp et Parser.h) avec flex et bison (sous Linux par exemple), puis, dans le dossier graphes/:
-cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release .
-nmake
 
-# Binding
+Host configuration : Windows 7 with Visual Studio 2015
 
-Pour créer le binding python il est nécessaire d'ajouter l'option suivante dans `cmake`.
-
-```
-cmake -DPYTHON_BINDING=1
-```
-
-Pour installer celui-ci, il suffit d'exécuter la commande ci-après.
-
-```
-make install
-```
-
-# Tools
-
-Pour créer les outils il faut ajouter l'option ci-après à `cmake`.
-
-```
-cmake -DTOOLS=1
-```
-
-
-# Compilation Windows
+# Requirements 
+The compilation of grap needs the following tools.
 
 ## MinGW
 
-Pour compiler le projet `grap` et son binding python, il faut suivre les
-instructions suivantes.  Tout d'abord, il est nécessaire d'installer Mingw
-(https://sourceforge.net/projects/mingw/files/latest/download?source=files). Une
-fois installé, il faut ouvrir le gestionnaire de paquets (`guimain.exe`) qui se
-situe dans `C:\MinGW\libexec\mingw-get\` et installer les outils suivants.
+First thing first we need Mingw
+(https://sourceforge.net/projects/mingw/files/latest/download?source=files).
+Once installed, it's necessary to open the package manager of Wingw
+(`guimain.exe` which can be found in the flowing directory
+`C:\MinGW\libexec\mingw-get\`) and install those tools:
 
 ```
 mingw-developer-toolkit
@@ -44,34 +20,31 @@ msys-base
 msys-system-builder
 ```
 
-Puis, il faudra supprimer le paquet `msys-gcc` qui est obsolète. Pour permettre
-l'accès aux binaires de MinGW, il faut ajouter le lien `C:\MinGW\bin` dans le
-`Path`. Les variables d'environnements sous Windows 7 se situent dans
-`Start> (click droit sur computer) Properties> Advanced system settings> (onglet
-Advanced) Environment Variables`. Il ne reste plus qu'à créer une variable
-utilisateur du nom de `Path` avec comme valeur `C:\MinGW\bin`.
+
+Then, it's essential to remove the deprecated version of gcc which is
+`msys-gcc`. To finish, you must add the Mingw binairies path to the environment
+variables. To do so, go to `Start> (click droit sur computer) Properties>
+Advanced system settings> (onglet Advanced) Environment Variables` and the user
+variable `Path` with the value `C:\MinGW`.
 
 
 ## Flex + Bison
-
-MinGW possède une version de flex et bison. Cependant, ces outils sont
-obsolètes. Pour remédier à ceci, il faut récupérer une version plus récente sur
-le site https://sourceforge.net/projects/winflexbison/. Une fois le document
-décompressé, il est nécessaire de renommer les deux fichiers `win_bison` et
-`win_flex` en `bison` et `flex`. Enfin il faudra copier les deux binaires avec
-le dossier `data` dans `C:\MinGW\msys\1.0\bin`.
+MinGW has a version of Flex and Bison which are deprecated. To fix this, you
+must install the last version available on their website
+https://sourceforge.net/projects/winflexbison/. Once the file decompressed, you
+must rename `win_bison` and `win_flex` respectively to `bison`, `flex`. Then
+those files must be moved to `data` directory in `C:\MinGW\msys\1.0\bin`.
 
 ## SWIG
-
-L'installation de SWIG se passe en deux étapes qui sont les suivantes:
+The installation of SWIG will take place in two stages:
 - compilation
 - installation
 
-Pour télécharger le code source de SWIG il faut se rendre à l'adresse suivante
-https://sourceforge.net/projects/swig/files/swigwin/swigwin-3.0.8/swigwin-3.0.8.zip/download?use_mirror=tenet. Puis,
-il faut décompresser l'archive dans le dossier `C:\MinGW\msys\1.0\home\[USER]\`
-et exécuter le script `bat` qui se situe dans le dossier msys
-(`C:\MinGW\msys\1.0\msys.bat`). Enfin, il faudra exécuter les commandes ci-après.
+First of all, you must download the sources
+https://sourceforge.net/projects/swig/files/swigwin/swigwin-3.0.8/swigwin-3.0.8.zip/download?use_mirror=tenet
+. Then, unzip the archive in `C:\MinGW\msys\1.0\home\[USER]\` and execute the
+msys *bat* script (`C:\MinGW\msys\1.0\msys.bat`). Finally, run the following
+lines in the terminal:
 
 ```
 cd swigwin-x.x.x
@@ -82,21 +55,47 @@ make install
 ```
 ## Boost
 
-Pour compiler le projet `grap` il est nécessaire d'avoir les librairies
-Boost. Pour les obtenir, il faut télécharger les binaires 32-bit à l'adresse
-suivante
+Download the 32-bit MSCV Boost at
 https://sourceforge.net/projects/boost/files/boost-binaries/1.61.0/boost_1_61_0-msvc-14.0-32.exe/download
-. Une fois installé, il faut se rendre dans `C:\Program Files\boost_x_xx_x` et
-renommer le dossier `lib32-xxxxx` en `lib`.
+and install it in `C:\Program Files\`. Then rename the `lib32-xxxx` directory
+in `C:\Program Files\boost_x_xx_x` to `lib`.
 
-## Grap
+# Compilation
+## Grap 
 
-Maintenant que toutes les dépendances sont installées, il ne reste plus qu'à
-installer `grap`. Pour cela il faut ouvrir une console msys, se mettre dans le
-dossier `grap` et exécuter les commandes suivantes.
+Now that all dependencies are installed we can compile `grap`. To do
+so, open a msys terminal, move to the `grap` directory and execute the
+following lines: 
 
 ```
+mkdir build
+cd build
 cmake . -G "MSYS Makefiles" -DPYTHON_BINDING=1
 make
 make install
 ```
+
+
+## Binding
+
+To create the python binding you must specify the following option:
+
+```
+cmake -DPYTHON_BINDING=1
+```
+
+The installation can be done with command below:
+
+
+```
+make install
+```
+
+## Tools
+
+The creation of the grap tools can be created with the option below:
+
+```
+cmake -DTOOLS=1
+```
+
