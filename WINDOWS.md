@@ -32,8 +32,9 @@ variable `Path` with the value `C:\MinGW`.
 MinGW has a version of Flex and Bison which are deprecated. To fix this, you
 must install the last version available on their website
 https://sourceforge.net/projects/winflexbison/. Once the file decompressed, you
-must rename `win_bison` and `win_flex` respectively to `bison`, `flex`. Then
-those files must be moved to `data` directory in `C:\MinGW\msys\1.0\bin`.
+must rename `win_bison` and `win_flex` binairies respectively to `bison`,
+`flex`. Then moved those two files and the `data` directory in
+`C:\MinGW\msys\1.0\bin`.
 
 ## SWIG
 The installation of SWIG will take place in two stages:
@@ -70,7 +71,7 @@ following lines:
 ```
 mkdir build
 cd build
-cmake . -G "MSYS Makefiles" -DPYTHON_BINDING=1
+cmake ../src -G "Visual Studio 14" -DPYTHON_BINDING=1
 make
 make install
 ```
