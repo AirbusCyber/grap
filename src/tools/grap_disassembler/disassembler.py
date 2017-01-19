@@ -796,10 +796,20 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
         print "ERROR: pefile could not parse PE."
         return None
 
+    def find_entry_point_section(pe, eop_rva):
+        for section in pe.sections:
+            if section.contains_rva(eop_rva):
+                return section
+
+        return None
+
     arch = CS_ARCH_X86
     is_32 = pe.FILE_HEADER.Characteristics & 0x0100
     mode = CS_MODE_32 if is_32 else CS_MODE_64
-    oep = pe.OPTIONAL_HEADER.AddressOfEntryPoint
+
+    oep_rva = pe.OPTIONAL_HEADER.AddressOfEntryPoint
+    code_section = pe.get_section_by_rva(oep_rva)
+    oep_offset = oep_rva - code_section.VirtualAddress + code_section.PointerToRawData
 
     iat_dict = dict()
 
@@ -824,10 +834,10 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
                 iat_dict[imp.address] = entry_str + "." + imp_str
 
     disass = PEDisassembler(arch=arch, mode=mode)
-    insts = disass.dis(data=pe_data, offset=oep, iat_api=iat_dict, pe=pe, verbose=verbose)
+    insts = disass.dis(data=pe_data, offset=oep_offset, iat_api=iat_dict, pe=pe, verbose=verbose)
 
     if dot_path is not None:
-        dot = disass.export_to_dot(insts=insts, oep_offset=oep, displayable=readable)
+        dot = disass.export_to_dot(insts=insts, oep_offset=oep_offset, displayable=readable)
         open(dot_path, "wb").write(dot)
 
     if print_listing:

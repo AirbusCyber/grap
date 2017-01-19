@@ -23,7 +23,7 @@ class CryptoIdentificationWidget(QMainWindow):
         cc (ClassCollection): Collection of many classes.
         parent (QWidget): The parent QWidget.
         central_widget (QWidget): QWidget of this widget.
-        signature_widget (QWidget): Table for the found crypto.
+        signature_widget (QWidget): Table for the found patterns.
         name (str): Name of the widget.
         icon (QIcon): Icon for the widget.
         scanGraphAction (QAction): Toolbar action.
@@ -46,7 +46,7 @@ class CryptoIdentificationWidget(QMainWindow):
 
         # Enable access to shared IDAscope modules
         self.parent = parent
-        self.name = "Crypto"
+        self.name = "Patterns"
         self.icon = self.cc.QIcon(config['icons_path'] + "crypto.png")
         self.color = False
 
