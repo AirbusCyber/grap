@@ -7,7 +7,9 @@ import threading
 from idagrap.analysis.Analysis import PatternsAnalysis
 from idagrap.graph.Graph import CFG
 from idagrap.patterns.Modules import MODULES
+from idagrap.modules.Pattern import Pattern, Patterns, Match
 from idc import CIC_ITEM, GetColor, SetColor
+from pygrap import graph_save_to_path, match_graph
 from idagrap.patterns.test.misc.ModulesTestMisc import get_test_misc
 
 
@@ -75,38 +77,61 @@ class CryptoIdentifier:
             for tp_name, tp in grp.iteritems():
                 print "\tType: " + tp_name
 
-                for algo in tp:
-
-                    # print algo
-                    print "\t\tAlgorithm: %s" % algo.get_name()
-
-                    # List of Patterns
-                    for patterns in algo.get_patterns():
-
-                        print "\t\t\tFunction: %s" % patterns.get_name()
-
-                        # List of Pattern
-                        for pattern in patterns.get_patterns():
-                            print "\t\t\t\t[I] Searching for " + pattern.get_name()
-
-                            pattern.parcourir(cfg.graph)
-                            print "\t\t\t\t[I] %d %s pattern found" % (
-                                len(pattern.get_matches()),
-                                pattern.get_name()
-                            )
-
-                        #
-                        # Analyzing
-                        #
-                        if patterns._perform_analysis:
-                            print "\t\t\t\t[I] Linking the patterns matches which are in the same area"
-                        ana = PatternsAnalysis(patterns, algo)
-
-                        print "\t\t\t\t[I] Filtering those patterns"
+                if grp_name == "Test" and tp_name == "Misc":
+                    patterns_path_list = []
+                    for algo in tp:
+                        for patterns in algo.get_patterns():                            
+                            for pattern in patterns.get_patterns():
+                                path = pattern.get_file()
+                                print "\t\tAdded patterns from " + path
+                                patterns_path_list.append(path)
+                            
+                    print "\t\tMatching patterns against binary... this may take a few seconds"
+                    matches = match_graph(patterns_path_list, cfg.graph)
+                    print "\t\t", len(matches), "patterns found."
+                    for pattern_name in matches:
+                        pattern = Pattern(name=pattern_name)
+                        patterns_t = Patterns(patterns=[pattern], name=pattern_name, perform_analysis=False, matches=matches[pattern_name])
+                        pattern._matches = []
+                        for c_match in matches[pattern_name]:
+                            match = Match(c_match, pattern_name)
+                            pattern._matches.append(match)
+                        ana = PatternsAnalysis(patterns_t, None)
                         ana.filter_patterns()
-
-                        # Add the analyzed patterns to the list
                         self._analyzed_patterns.append(ana)
+                else:
+                    for algo in tp:
+
+                        # print algo
+                        print "\t\tAlgorithm: %s" % algo.get_name()
+
+                        # List of Patterns
+                        for patterns in algo.get_patterns():
+
+                            print "\t\t\tFunction: %s" % patterns.get_name()
+
+                            # List of Pattern
+                            for pattern in patterns.get_patterns():
+                                print "\t\t\t\t[I] Searching for " + pattern.get_name()
+
+                                pattern.parcourir(cfg.graph)
+                                print "\t\t\t\t[I] %d %s pattern found" % (
+                                    len(pattern.get_matches()),
+                                    pattern.get_name()
+                                )
+
+                            #
+                            # Analyzing
+                            #
+                            if patterns._perform_analysis:
+                                print "\t\t\t\t[I] Linking the patterns matches which are in the same area"
+                            ana = PatternsAnalysis(patterns, algo)
+
+                            print "\t\t\t\t[I] Filtering those patterns"
+                            ana.filter_patterns()
+
+                            # Add the analyzed patterns to the list
+                            self._analyzed_patterns.append(ana)
 
     def get_analyzed_patterns(self):
         """Analyzed patterns getter."""

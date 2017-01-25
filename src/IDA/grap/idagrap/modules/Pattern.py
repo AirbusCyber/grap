@@ -2,7 +2,7 @@
 
 from uuid import uuid4
 
-from pygrap import freeMatch, getGraphFromFile, graph_free, parcoursGen
+from pygrap import freeMatch, getGraphFromFile, graph_free, parcoursGen, graph_save_to_path, match_graph
 
 from idagrap.config.General import MAX_THRESHOLD
 
@@ -107,7 +107,10 @@ class Match:
         Returns:
             (ea_t): The return value is the start address of this Match.
         """
-        node = self._match.values()[0][0]
+        if self._match.values() is not None and len(self._match.values()) >= 1 and len(self._match.values()[0]) >= 1:
+            node = self._match.values()[0][0]
+        else:
+            return None
 
         return node.info.address
 
@@ -185,9 +188,8 @@ class Pattern:
     def __del__(self):
         """Exit function."""
         # free matches
-        for found_nodes in self._matches:
-            if found_nodes:
-                freeMatch(found_nodes)
+        for match in self._matches:
+            freeMatch(match.get_match())
 
     def get_file(self):
         """File getter.
@@ -259,6 +261,7 @@ class Pattern:
             getid (bool): Get or not the ID (default value: True).
         """
         pattern_graph = getGraphFromFile(self._file)
+        graph_save_to_path("E:\p_"+pattern_graph.name+".dot", pattern_graph)
         
         pattern_size = pattern_graph.nodes.size
 
@@ -338,9 +341,9 @@ class Patterns():
     _size = 0
     _name = ""
     _description = ""
+    _matches = None
 
-    def __init__(self, patterns=None, threshold=MAX_THRESHOLD, name="", description="", perform_analysis=True):
-        """Initialization of the class."""
+    def __init__(self, patterns=None, threshold=MAX_THRESHOLD, name="", description="", perform_analysis=True, matches=None):
         if not patterns:
             patterns = []
 
@@ -350,6 +353,7 @@ class Patterns():
         self._name = name
         self._description = description
         self._perform_analysis = perform_analysis
+        self._matches = matches
 
     def __str__(self):
         """String representation of the class."""
@@ -365,6 +369,13 @@ class Patterns():
         res += "]\n"
 
         return res
+        
+    def match(self, graph):
+        path_list = [p.get_file() for p in self._patterns]
+        self._matches = match_graph(path_list, graph)
+        
+    def get_matches(self):
+        return self._matches
 
     def get_patterns(self):
         """Patterns getter.

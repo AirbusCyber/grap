@@ -211,10 +211,11 @@ class CryptoIdentificationWidget(QMainWindow):
         self.signature_tree.clear()
         self.signature_tree.setSortingEnabled(False)
         self.qtreewidgetitems_to_addresses = {}
+      
 
         # For each analyzed patterns
         for ana in self.cc.CryptoIdentifier.get_analyzed_patterns():
-
+            tree_matches = ana._patterns._matches
             found_patterns = ana.get_found_patterns()
             algo = ana.get_algo()
             patterns = ana.get_patterns()
@@ -250,30 +251,35 @@ class CryptoIdentificationWidget(QMainWindow):
                                 pattern_info.setForeground(0, self.cc.QBrush(self.cc.QColor(colors[pattern_id])))
 
                         for match in match_dicts.itervalues():
-                            if patterns._perform_analysis:
-                                match_info = self.cc.QTreeWidgetItem(pattern_info)
-                                match_info.setText(0, "0x%x (%d instructions)" % (
-                                    match.get_start_address(),
-                                    match.get_num_insts()
-                                    ))
+                            if match.get_start_address() is not None:
+                                if patterns._perform_analysis:
+                                    match_info = self.cc.QTreeWidgetItem(pattern_info)
+                                    match_info.setText(0, "0x%x (%d instructions)" % (
+                                        match.get_start_address(),
+                                        match.get_num_insts()
+                                        ))
+                                else:
+                                    match_info = self.cc.QTreeWidgetItem(patterns_info)
+                                
+                                if pattern_id in colors and not patterns._perform_analysis:
+                                    patterns_info.setForeground(0, self.cc.QBrush(self.cc.QColor(colors[pattern_id])))
+
+                                if patterns._perform_analysis:
+                                    matches_info.setText(0, "%s" % idc.GetFunctionName(match.get_start_address()))
+                                else:
+                                        match_info.setText(0, "0x%x in %s (%d instructions)" % (
+                                        match.get_start_address(),
+                                        idc.GetFunctionName(match.get_start_address()),
+                                        match.get_num_insts()
+                                        ))
+
+                                # Add the start address of the match
+                                self.qtreewidgetitems_to_addresses[match_info] = match.get_start_address()
+                                self.signature_tree.setItemExpanded(match_info, True)
                             else:
                                 match_info = self.cc.QTreeWidgetItem(patterns_info)
-                            
-                            if pattern_id in colors and not patterns._perform_analysis:
-                                patterns_info.setForeground(0, self.cc.QBrush(self.cc.QColor(colors[pattern_id])))
-
-                            if patterns._perform_analysis:
-                                matches_info.setText(0, "%s" % idc.GetFunctionName(match.get_start_address()))
-                            else:
-                                    match_info.setText(0, "0x%x in %s (%d instructions)" % (
-                                    match.get_start_address(),
-                                    idc.GetFunctionName(match.get_start_address()),
-                                    match.get_num_insts()
-                                    ))
-
-                            # Add the start address of the match
-                            self.qtreewidgetitems_to_addresses[match_info] = match.get_start_address()
-                            self.signature_tree.setItemExpanded(match_info, True)
+                                match_info.setText(0, "One pattern matched with no extracted node (no getid option)")
+                                self.signature_tree.setItemExpanded(match_info, False)
                         if patterns._perform_analysis:
                             self.signature_tree.setItemExpanded(pattern_info, True)
                     if patterns._perform_analysis:
