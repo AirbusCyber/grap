@@ -311,6 +311,10 @@ int main(int argc, char *argv[]) {
     graph_free(pattern_graph, true);
   }
   
+  for (test_iterator = testsInfo.begin();  test_iterator != testsInfo.end(); test_iterator++){
+    fclose((*test_iterator).second);
+  }
+  
   return 0;
 }
 

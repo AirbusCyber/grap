@@ -1,0 +1,3 @@
+digraph popular{
+A [cond="nfathers>=10", getid=A]
+}
