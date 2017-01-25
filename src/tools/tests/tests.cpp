@@ -88,9 +88,9 @@ void printDescription()
   std::cout << "Test 32: [manual] non regression test on ghost nodes bug (fixed"
                 " with switch to depth-first search.\n";
   std::cout << "Test 33: [first run] looking for basic block loops "
-                "in Backspace sample (md5=4ee00c46da143ba70f7e6270960823be)\n";
-  std::cout << "Test 34: [first run] looking for pushes then call "
-                "in Backspace sample (md5=4ee00c46da143ba70f7e6270960823be)\n";
+                "in /bin/ls sample\n";
+  std::cout << "Test 34: [first run] looking for popular nodes (>=10) "
+                "in /bin/ls sample)\n";
 }
 
 #ifdef _WIN32
