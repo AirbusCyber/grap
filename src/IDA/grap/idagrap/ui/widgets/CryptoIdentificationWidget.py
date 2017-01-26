@@ -275,20 +275,21 @@ class CryptoIdentificationWidget(QMainWindow):
 
                                 # Add the start address of the match
                                 self.qtreewidgetitems_to_addresses[match_info] = match.get_start_address()
-                                self.signature_tree.setItemExpanded(match_info, True)
+#                                From IDA 6.9 (Qt5 instead of Qt4), setItemExpanded does not work, why ?                                
+#                                self.signature_tree.setItemExpanded(match_info, True)
                             else:
                                 match_info = self.cc.QTreeWidgetItem(patterns_info)
                                 match_info.setText(0, "One pattern matched with no extracted node (no getid option)")
-                                self.signature_tree.setItemExpanded(match_info, False)
+#                                self.signature_tree.setItemExpanded(match_info, False)
                         if patterns._perform_analysis:
-                            self.signature_tree.setItemExpanded(pattern_info, True)
+#                            self.signature_tree.setItemExpanded(pattern_info, True)
                     if patterns._perform_analysis:
-                        self.signature_tree.setItemExpanded(matches_info, True)
+#                        self.signature_tree.setItemExpanded(matches_info, True)
                     
-                if len(found_patterns) <= 5:
-                    self.signature_tree.setItemExpanded(patterns_info, True)
-                if patterns._perform_analysis:
-                    self.signature_tree.setItemExpanded(algo_info, True)
+#                if len(found_patterns) <= 5:
+#                    self.signature_tree.setItemExpanded(patterns_info, True)
+#                if patterns._perform_analysis:
+#                    self.signature_tree.setItemExpanded(algo_info, True)
         
         self.signature_tree.setSortingEnabled(True)
         
