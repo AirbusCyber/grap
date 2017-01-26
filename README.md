@@ -21,7 +21,7 @@ The following dependencies must be installed:
 - python-pefile
 - python-pyelftools
 - python-capstone
-- swig
+- swig (version 3 or newer is mandatory)
 
 Please note that those were tested for the latest Ubuntu LTS (16.04) and may differ depending on your distribution.
 
