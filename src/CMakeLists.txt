@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(grap)
 CMAKE_POLICY(SET CMP0015 NEW)
-set (GRAP_VERSION "0.6.8")
+set (GRAP_VERSION "1.0.0")
 
 # Options
 set (NOSECCOMP OFF CACHE BOOL "NoSeccomp")
