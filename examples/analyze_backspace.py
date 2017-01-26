@@ -5,20 +5,39 @@ from pygrap import *
 from grap_disassembler import disassembler
 import pefile
 
+def print_usage():
+    print "You need at least one argument: the (backspace) binary to analyze"
+    print "-v will output the generated graph patterns"
+    print "-h will print this message"
+
 def main():
     if len(sys.argv) <= 1:
-        print "error: Need one file to analyze."
+        print_usage()
+        sys.exit(1)
+    elif len(sys.argv) <= 2:
+        verbose = False
+        bin_path = sys.argv[1]
+        dot_path = sys.argv[1] + ".dot"
+    else:
+        verbose = True
+        bin_path = sys.argv[2]
+        dot_path = sys.argv[2] + ".dot"
+
+    if sys.argv[1] == "-h" or sys.argv[1] == "--help":
+        print_usage()
         sys.exit(1)
 
-    bin_path = sys.argv[1]
-    dot_path = sys.argv[1] + ".dot"
+    if bin_path[-4:] == ".dot":
+        print "The argument should be a binary and not a .dot file"
+        sys.exit(1)
 
     if not os.path.isfile(dot_path):
         disassembler.disassemble_file(bin_path=bin_path, dot_path=dot_path)
 
     test_graph = getGraphFromPath(dot_path)
-
-    print "Analyzing", bin_path
+    
+    if verbose:
+       print "Analyzing", bin_path
 
     if not os.path.isfile(bin_path) or not os.path.isfile(dot_path):
         print "Error: binary or dot file doesn't exist, exiting."
@@ -32,14 +51,17 @@ def main():
         sys.exit(1)
 
     for algorithm_name in matches_decrypt:
-        print "Matched algorithm:", algorithm_name
+        if verbose:
+            print "Matched algorithm:", algorithm_name
 
         first_match = matches_decrypt[algorithm_name][0]
         first_group = first_match["A"]
         first_instruction = first_group[0]
         description = first_instruction.info.inst_str
         address = first_instruction.info.address
-        print "First matched subgraph got as A instruction:", "\"" + description + "\"", "at", hex(int(address))
+
+        if verbose:
+            print "Found decryption pattern at address", hex(int(address))
 
         # Find the beginning of the function:
         # It is a node with at least 5 fathers which address a fulfills: address - 30 <= a <= address
@@ -50,6 +72,9 @@ def main():
         }
         """.replace("FILL_ADDR_COND", address_cond)
 
+        if verbose:
+            print "Looking for entrypoint with pattern:"
+            print entrypoint_pattern
         matches_entrypoint = match_graph(entrypoint_pattern, test_graph)
 
         if len(matches_entrypoint) != 1 or len(matches_entrypoint["decrypt_fun_begin"]) != 1:
@@ -57,24 +82,32 @@ def main():
             sys.exit(1)
 
         entrypoint = hex(int(matches_entrypoint["decrypt_fun_begin"][0]["ep"][0].info.address))
+        
+        if verbose:
+            print "Found decryption function at", entrypoint
+
         push_call_pattern = """
         digraph push_call_decrypt{
-            push [label="push", cond="opcode is push", minrepeat=2, maxrepeat=5, getid=push]
+            push [label="push", cond="opcode is push", repeat=2, getid=push]
             call [label="call", cond="opcode is call"]
-            entrypoint [label="entrypoint", cond="address is FILL_ADDR"]
+            entrypoint [label="entrypoint", cond="address == FILL_ADDR"]
 
             push -> call
             call -> entrypoint [childnumber=2]
         }
         """.replace("FILL_ADDR", entrypoint)
 
+        if verbose:
+            print "Looking for calls to decrypt function with pattern:"
+            print push_call_pattern
         matches_calls = match_graph(push_call_pattern, test_graph)
 
         if len(matches_calls) == 0:
             print "error: No call found, exiting"
             sys.exit(1)
 
-        print len(matches_calls["push_call_decrypt"]), "calls to decrypt function found."
+        if verbose:
+            print len(matches_calls["push_call_decrypt"]), "calls to decrypt function found."
 
         str_tuple = []
         for m in matches_calls["push_call_decrypt"]:
@@ -86,9 +119,10 @@ def main():
 
         decrypted_strings = decrypt_strings(algorithm_name, str_tuple, bin_path)
 
-        print "\nDecrypted strings:"
+        print "Decrypted strings in", bin_path + ":"
         for d in decrypted_strings:
             print d
+        print ""
 
     graph_free(test_graph, True)
 
