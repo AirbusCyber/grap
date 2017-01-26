@@ -7,8 +7,11 @@ grap is both available as a standalone tool with a disassembler and as an IDA pl
 
 # Installation
 We describe how to build and install grap on a Linux distribution.
-For building and installing grap on Windows, please read [WINDOWS.md](WINDOWS.md).
-For installation and usage instruction of the IDA plugin, please read [IDA.md](IDA.md).
+
+Please read:
+
+- [WINDOWS.md](WINDOWS.md): building and installing grap on Windows
+- [IDA.md](IDA.md): installation and usage instruction of the IDA plugin
 
 ## Requirements
 The following dependencies must be installed:
