@@ -102,3 +102,6 @@ For troubleshooting purposes you can test them all.
 - `grap` or `grap-match` can be used to test them individually
 
 More options for debug can be found in [doc/DEBUG.md](doc/DEBUG.md).
+
+# License
+grap is licensed under the MIT license. The full license text can be found in [src/LICENSE](src/LICENSE].
