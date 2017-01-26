@@ -84,7 +84,7 @@ You may find additional pattern examples in two directories:
 - examples/ contains patterns used against the Backspace malware.
 
 # Documentation
-You will find more documentation in the [doc/](doc/) folder, especially about the syntax of pattern and test graphs ([doc/patterns.pdf](doc/patterns.pdf)).
+You will find more documentation in the [doc/](doc/) folder, especially about the syntax of pattern and test graphs ([doc/graphs.pdf](doc/graphs.pdf)).
 
 The [examples/](examples/) folder contains a python file demonstrating how to use the python bindings to analyze Backspace samples.
 
