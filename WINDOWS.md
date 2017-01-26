@@ -9,7 +9,4 @@ You will find compiled files in the src/compiled/ folder and need to copy them:
 - _pygrap.pyd into C:\Python27\Lib\site-packages\
 
 # IDA plugin
-IDA plugin is in the src/IDA/grap/ folder, you need to copy them:
-
-- grap.py into C:\Program Files (x86)\IDA\plugins\
-- idagrap/ into C:\Program Files (x86)\IDA\plugins\
+Read [IDA.md](IDA.md) for installation and usage instruction of the IDA plugin.
