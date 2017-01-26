@@ -100,3 +100,5 @@ For troubleshooting purposes you can test them all.
 - `./tests` will use the C++ library to test them against expected values, `./tests -h` gives information about each test.
 - `make test` will use the C++ library, the grap-match binary, grap-match.py and python bindings for disassembly and matching to test them. It needs bindings to be built and installed
 - `grap` or `grap-match` can be used to test them individually
+
+More options for debug can be found in [doc/DEBUG.md](doc/DEBUG.md).

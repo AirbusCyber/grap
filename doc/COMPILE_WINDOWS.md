@@ -1,6 +1,6 @@
 This document will guide you through the compilation of grap and its bindings on Windows.
 
-Alternatively you can use pre-compiled binaries (see [WINDOWS](../WINDOWS.md))
+Alternatively you can use pre-compiled binaries (see [WINDOWS.md](../WINDOWS.md))
 
 # Requirements 
 This guide is written for Windows 7 with Visual Studio 2015.
