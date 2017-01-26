@@ -104,4 +104,4 @@ For troubleshooting purposes you can test them all.
 More options for debug can be found in [doc/DEBUG.md](doc/DEBUG.md).
 
 # License
-grap is licensed under the MIT license. The full license text can be found in [src/LICENSE](src/LICENSE].
+grap is licensed under the MIT license. The full license text can be found in [src/LICENSE](src/LICENSE).
