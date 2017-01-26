@@ -6,9 +6,9 @@ Patterns are user-defined graphs with instruction conditions ("opcode is xor and
 grap is both available as a standalone tool with a disassembler and as an IDA plugin which takes advantage of the disassembly done by IDA and the reverser.
 
 # Installation
-We describe how to build and install grap on a Linux distribution.
+This document describes how to build and install grap on a Linux distribution.
 
-Please read:
+You may also read:
 
 - [WINDOWS.md](WINDOWS.md): building and installing grap on Windows
 - [IDA.md](IDA.md): installation and usage instruction of the IDA plugin

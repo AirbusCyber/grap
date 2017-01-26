@@ -1,5 +1,5 @@
-# Installation
-IDA plugin is in the src/IDA/grap/ folder, you need to copy into IDA's plugin folder.
+# IDA plugin installation
+The IDA plugin is in the src/IDA/grap/ folder, you need to copy it into IDA's plugin folder.
 For instance on Windows:
 
 - grap.py into C:\Program Files (x86)\IDA\plugins\
