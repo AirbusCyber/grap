@@ -84,9 +84,9 @@ You may find additional pattern examples in two directories:
 - examples/ contains patterns used against the Backspace malware.
 
 # Documentation
-You will find more documentation in the doc/ folder, especially about the syntax of pattern and test graphs.
+You will find more documentation in the [doc/](doc/) folder, especially about the syntax of pattern and test graphs ([doc/patterns.pdf](doc/patterns.pdf)).
 
-The examples/ folder contains a python file demonstrating how to use the python bindings to analyze Backspace samples.
+The [examples/](examples/) folder contains a python file demonstrating how to use the python bindings to analyze Backspace samples.
 
 # Tests
 Note that grap is a python script that will:
