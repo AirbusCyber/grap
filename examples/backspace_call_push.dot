@@ -1,26 +1,37 @@
 digraph push_calls{
-0 [label="pop or push", shape=box, cond="inst regex '^p(op|ush).*'"]
+0 [label="pop or push", cond="opcode is pop or opcode is push"]
 A [label="push1 (x2)", cond="opcode is push", repeat=2]
 B [label="call1", cond="opcode is call"]
-C [label="push2 (x2)", condition="opcode is push", minrepeat=2, maxrepeat=2]
-D [label="call2", cond="instruction beginswith call"]
+C [label="push2 (x2)", cond="opcode is push", repeat=2]
+D [label="call2", cond="opcode is call"]
+E [label="push3 (x2)", cond="opcode is push", repeat=2]
+F [label="call2", cond="opcode is call"]
+G [label="push4 (x2)", cond="opcode is push", repeat=2]
+H [label="call3", cond="opcode is call"]
+
 
 Pre [label="Pre", cond=true, maxrepeat=4]
 Loop [label="Loop", cond=true, minrepeat=3, maxrepeat=12, getid="loop"]
 End [label="End", cond=true, minrepeat=0, maxrepeat=2, lazyrepeat=true]
 Ret[label="Ret", cond="opcode beginswith ret"]
 
-0 -> A [label=1, childnumber=1]
-A -> B [label=1, childnumber=1]
-B -> C [label=1, childnumber=1]
-C -> D [label=1, childnumber=1]
+0 -> A
+A -> B
+B -> C
+C -> D
+D -> E
+E -> F
+F -> G
+G -> H
 
-B -> Pre [label=2, childnumber=2]
-D -> Pre [label=2, childnumber=2]
+B -> Pre [childnumber=2]
+D -> Pre [childnumber=2]
+F -> Pre [childnumber=2]
+H -> Pre [childnumber=2]
 
-Pre -> Loop [label=1, childnumber=1]
-Pre -> End [label=2, childnumber=2]
-Loop -> End [label=1, childnumber=1]
-Loop -> Loop [label=2, childnumber=2]
-End -> Ret [label=1, childnumber=1]
+Pre -> Loop [childnumber=1]
+Pre -> End [childnumber=2]
+Loop -> End [childnumber=1]
+Loop -> Loop [childnumber=2]
+End -> Ret
 }

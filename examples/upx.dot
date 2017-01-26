@@ -1,0 +1,31 @@
+digraph upx_loop1 {
+A [cond="opcode is mov and arg2 contains [edx]"]
+B [cond="opcode is inc and arg1 contains edx"]
+C [cond="opcode is mov and arg1 contains [edi]"]
+D [cond="opcode is inc and arg1 contains edi"]
+E [cond="opcode is dec"]
+F [cond="nchildren == 2"]
+
+A -> B
+B -> C
+C -> D
+D -> E
+E -> F
+F -> A [childnumber=2]
+}
+
+digraph upx_loop2 {
+A [cond="opcode is mov and arg2 contains [edx]"]
+B [cond="opcode is add and arg1 contains edx"]
+C [cond="opcode is mov and arg1 contains [edi]"]
+D [cond="opcode is add and arg1 contains edi"]
+E [cond="opcode is sub and arg1 contains ecx"]
+F [cond="nchildren == 2"]
+
+A -> B
+B -> C
+C -> D
+D -> E
+E -> F
+F -> A [childnumber=2]
+}

@@ -53,3 +53,10 @@ A -> B
 B -> C
 C -> D
 }
+
+digraph decrypt_sub {
+A [label="A", cond="opcode is sub and arg1 contains eax", getid=A]
+B [label="B", cond="opcode is add and arg1 contains [eax]"]
+
+A -> B
+}
