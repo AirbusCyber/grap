@@ -23,7 +23,7 @@ def main():
         bin_path = sys.argv[2]
         dot_path = sys.argv[2] + ".dot"
 
-    if sys.argv[1] == "-h" or sys.argv[1] == "--help":
+    if len(sys.argv) == 2 and (sys.argv[1] == "-h" or sys.argv[1] == "--help"):
         print_usage()
         sys.exit(1)
 
