@@ -1,0 +1,24 @@
+digraph decrypt_sample_4ee{
+A [label="mov eax, ??", cond="opcode is mov and arg1 is eax", getid=A]
+B [label="add eax, ecx", cond="opcode is add and arg1 is eax and arg2 is ecx", getid=B]
+C [label="mov ??, [eax]", cond="opcode is mov and arg2 contains [eax]", getid=C]
+D [label="xor ??, 0x11", cond="opcode is xor and (arg2 is 0x11 or arg2 is 11h)", getid=D]
+E [label="sub ??, 0x25", cond="opcode is sub and (arg2 is 0x25 or arg2 is 25h)", getid=E]
+F [label="inc ecx", cond="opcode is inc and arg1 is ecx", getid=F]
+G [label="cmp ecx, ??", cond="opcode is cmp and arg1 is ecx", getid=G]
+H [label="mov [eax], ??", cond="opcode is mov and arg1 contains [eax]", getid=H]
+I [label="j* ??", cond="opcode beginswith j", getid=I]
+J [label="*", cond=true, getid=J]
+
+A -> B [label=1]
+B -> C [label=1]
+C -> D [label=1]
+D -> E [label=1]
+E -> F [label=1]
+F -> G [label=1]
+G -> H [label=1]
+H -> I [label=1]
+I -> J [label=1, child_number=1]
+I -> A [label=2, child_number=2]
+}
+

@@ -1,4 +1,4 @@
-digraph decrypt_sample_4ee00c46da143ba70f7e6270960823be{
+digraph decrypt_sample_4ee00c46da143ba70f7e6270960823be_exact{
 A [label="mov eax, ??", cond="opcode is mov and arg1 is eax"]
 B [label="add eax, ??", cond="opcode is add and arg1 is eax"]
 C [label="mov ??, [eax]", cond="opcode is mov and arg2 contains [eax]"]
