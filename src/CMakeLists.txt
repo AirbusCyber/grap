@@ -3,6 +3,13 @@ project(grap)
 CMAKE_POLICY(SET CMP0015 NEW)
 set (GRAP_VERSION "1.0.0")
 
+# Default build type: Release
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "No build type selected, default to Release")
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type (default Release)" FORCE)
+endif()
+
+
 # Options
 set (NOSECCOMP OFF CACHE BOOL "NoSeccomp")
 if(${NOSECCOMP})
