@@ -85,7 +85,7 @@ E -> A [childnumber=2]
 You may find additional pattern examples in two directories:
 
 - [patterns/](patterns/) contains a few patterns that can be useful on any binary such as a pattern to detect short loops or to detect a loop on basic blocks,
-- [examples/](examples/) contains patterns used against the Backspace malware.
+- [examples/](examples/) contains patterns used against the Backspace malware (see [examples/backspace_samples.md](examples/backspace_samples.md) to obtain the binary samples).
 
 # Documentation
 You will find more documentation in the [doc/](doc/) folder, especially about the syntax of pattern and test graphs ([doc/graphs.pdf](doc/graphs.pdf)).
