@@ -3,7 +3,7 @@ grap takes patterns and binary files, uses a Casptone-based disassembler to obta
 
 Patterns are user-defined graphs with instruction conditions ("opcode is xor and arg1 is eax") and repetition conditions (3 identical instructions, basic blocks...).
 
-grap is both available as a standalone tool with a disassembler and as an IDA plugin which takes advantage of the disassembly done by IDA and the reverser.
+grap is available as a standalone tool with a disassembler and python bindings, and as an IDA plugin which takes advantage of the disassembly done by IDA and the reverser.
 
 # Installation
 This document describes how to build and install grap on a Linux distribution.
@@ -45,7 +45,6 @@ Compilation options are chosen with cmake (`cmake -DTOOLS=0 ../src` or `cmake -D
 
 Note that grap-match's use of seccomp restricts the number of system calls available to the binary for security purposes. 
 In particular the "open" syscall is unavailable after the initial argument parsing.
-
 You may want to disable this feature if it generates the "Bad system call" error but will lose the security provided.
 
 # Usage
