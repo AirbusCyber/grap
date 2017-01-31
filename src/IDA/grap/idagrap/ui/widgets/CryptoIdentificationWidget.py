@@ -281,9 +281,9 @@ class CryptoIdentificationWidget(QMainWindow):
                                 match_info = self.cc.QTreeWidgetItem(patterns_info)
                                 match_info.setText(0, "One pattern matched with no extracted node (no getid option)")
 #                                self.signature_tree.setItemExpanded(match_info, False)
-                        if patterns._perform_analysis:
+#                        if patterns._perform_analysis:
 #                            self.signature_tree.setItemExpanded(pattern_info, True)
-                    if patterns._perform_analysis:
+#                    if patterns._perform_analysis:
 #                        self.signature_tree.setItemExpanded(matches_info, True)
                     
 #                if len(found_patterns) <= 5:
