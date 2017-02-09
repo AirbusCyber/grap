@@ -212,8 +212,8 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
         this->pattern_field = (void* NodeInfo::*) &NodeInfo::arg3;
       }
       else {
-        std::cerr << "ERROR: Unknown field " << field << std::endl;
-        RELEASE_ASSERT(false);
+        std::cerr << "WARNING: Unknown field " << field << ". Defaulting to condition 'not true'." << std::endl;
+	new (this) CondNode();
       }
     }
     else{
@@ -237,8 +237,8 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
       this->comparison = ComparisonFunEnum::str_regex;
     }
     else {
-      std::cerr << "ERROR: Unknown string operator " << op << std::endl;
-      RELEASE_ASSERT(false);
+      std::cerr << "WARNING: Unknown string operator " << op << ". Defaulting to condition 'not true'." << std::endl;
+      new (this) CondNode();
     }
   }
   else if (key == "addr" or key == "address" 
@@ -278,8 +278,8 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
         this->comparison = ComparisonFunEnum::vsizet_geq;
       }
       else {
-        std::cerr << "Unknown integer operator: " << op << std::endl;
-        RELEASE_ASSERT(false);
+        std::cerr << "WARNING: Unknown integer operator " << op << " Defaulting to condition 'not true'." << std::endl;
+        new (this) CondNode();
       }
   }  
   else if (key == "nargs"){
@@ -306,13 +306,13 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
         this->comparison = ComparisonFunEnum::uint8t_geq;
       }
       else {
-        std::cerr << "ERROR: Unknown integer operator " << op << std::endl;
-        RELEASE_ASSERT(false);
+        std::cerr << "WARNING: Unknown integer operator " << op << " Defaulting to condition 'not true'." << std::endl;
+        new (this) CondNode();
       }
   }
   else {
-    std::cerr << "ERROR: Unknown key in condition " << key << std::endl;
-    RELEASE_ASSERT(false);
+    std::cerr << "WARNING: Unknown key in condition " << key << ". Defaulting to condition 'not true'." << std::endl;
+    new (this) CondNode();
   }
 }
 
@@ -1044,19 +1044,20 @@ bool CondNodeParser::accept(std::string expected_type){
   }
 }
 
-void CondNodeParser::expect(std::string expected_type){
+bool CondNodeParser::expect(std::string expected_type){
   bool r = this->accept(expected_type);
   
   if (not r){
     if (this->has_next_token){
-      std::cerr << "ERROR: Expected " << expected_type << ", found " << this->next_token.type << " (" << this->next_token.value << ")" << std::endl;
+      std::cerr << "WARNING: Expected " << expected_type << ", found " << this->next_token.type << " (" << this->next_token.value << ")" << std::endl;
     }
     else {
-      std::cerr << "ERROR: End of expression reached." << std::endl; 
+      std::cerr << "WARNING: End of expression reached." << std::endl;
     }
   }
   
-  RELEASE_ASSERT(r);
+  assert(r);
+  return r;
 }
 
 CondNode* CondNodeParser::expression(){
@@ -1100,7 +1101,12 @@ CondNode* CondNodeParser::factor(){
   
   if (this->accept("LP")){
     cn = this->expression();
-    this->expect("RP");
+    bool r = this->expect("RP");
+    
+    if (not r){
+      std::cerr << "WARNING: could not parse condition. Defaulting condition to 'not true'." << std::endl;
+      return new CondNode();
+    }
   }
   else if (this->accept("BOOL")){
     cn = new CondNode();
@@ -1117,7 +1123,11 @@ CondNode* CondNodeParser::factor(){
   else if (this->accept("W")){
     std::string key = this->current_token.value; 
     
-    this->expect("OP");
+    bool r = this->expect("OP");
+    if (not r){
+      std::cerr << "WARNING: could not parse condition. Defaulting condition to 'not true'." << std::endl;
+      return new CondNode();
+    }
     std::string op = this->current_token.value;
     
     this->accept("W");
@@ -1126,8 +1136,8 @@ CondNode* CondNodeParser::factor(){
     cn = new CondNode(key, op, value);
   }
   else {
-    std::cerr << "ERROR: could not parse condition." << std::endl;
-    RELEASE_ASSERT(false); 
+    std::cerr << "WARNING: could not parse condition. Defaulting condition to 'not true'." << std::endl;
+    return new CondNode();
   }
   
   return cn;

@@ -234,7 +234,7 @@ private:
   
   void advance();
   bool accept(std::string expected_type);
-  void expect(std::string expected_type);
+  bool expect(std::string expected_type);
   
   CondNode* expression();
   CondNode* term();
