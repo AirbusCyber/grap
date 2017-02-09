@@ -91,7 +91,7 @@ Couple *createEdge(char *f, char *c, OptionList* ol) {
           e->is_child1 = false;
         }
         else{
-          std::cerr << "WARNING: child_number option of edges should have values of 1 or 2" << std::endl;
+          std::cerr << "WARNING: Edges' childnumber option should have values of 1 or 2" << std::endl;
         }
       }
       free(v);

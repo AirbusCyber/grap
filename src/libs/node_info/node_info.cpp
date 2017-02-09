@@ -212,7 +212,7 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
         this->pattern_field = (void* NodeInfo::*) &NodeInfo::arg3;
       }
       else {
-        std::cerr << "WARNING: Unknown field " << field << ". Defaulting to condition 'not true'." << std::endl;
+        std::cerr << "WARNING: Unknown field " << field << ". Defaulting condition to 'not true'." << std::endl;
 	new (this) CondNode();
       }
     }
@@ -237,7 +237,7 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
       this->comparison = ComparisonFunEnum::str_regex;
     }
     else {
-      std::cerr << "WARNING: Unknown string operator " << op << ". Defaulting to condition 'not true'." << std::endl;
+      std::cerr << "WARNING: Unknown string operator " << op << ". Defaulting condition to 'not true'." << std::endl;
       new (this) CondNode();
     }
   }
@@ -278,7 +278,7 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
         this->comparison = ComparisonFunEnum::vsizet_geq;
       }
       else {
-        std::cerr << "WARNING: Unknown integer operator " << op << " Defaulting to condition 'not true'." << std::endl;
+        std::cerr << "WARNING: Unknown integer operator " << op << " Defaulting condition to 'not true'." << std::endl;
         new (this) CondNode();
       }
   }  
@@ -306,12 +306,12 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
         this->comparison = ComparisonFunEnum::uint8t_geq;
       }
       else {
-        std::cerr << "WARNING: Unknown integer operator " << op << " Defaulting to condition 'not true'." << std::endl;
+        std::cerr << "WARNING: Unknown integer operator " << op << " Defaulting condition to 'not true'." << std::endl;
         new (this) CondNode();
       }
   }
   else {
-    std::cerr << "WARNING: Unknown key in condition " << key << ". Defaulting to condition 'not true'." << std::endl;
+    std::cerr << "WARNING: Unknown key " << key << ". Defaulting condition to 'not true'." << std::endl;
     new (this) CondNode();
   }
 }
@@ -1103,7 +1103,7 @@ CondNode* CondNodeParser::factor(){
     bool r = this->expect("RP");
     
     if (not r){
-      std::cerr << "WARNING: could not parse condition. Defaulting condition to 'not true'." << std::endl;
+      std::cerr << "WARNING: Could not parse condition (expected closing parenthesis). Defaulting condition to 'not true'." << std::endl;
       return new CondNode();
     }
   }
@@ -1124,7 +1124,7 @@ CondNode* CondNodeParser::factor(){
     
     bool r = this->expect("OP");
     if (not r){
-      std::cerr << "WARNING: could not parse condition. Defaulting condition to 'not true'." << std::endl;
+      std::cerr << "WARNING: Could not parse condition (expected operand). Defaulting condition to 'not true'." << std::endl;
       return new CondNode();
     }
     std::string op = this->current_token.value;
@@ -1135,7 +1135,7 @@ CondNode* CondNodeParser::factor(){
     cn = new CondNode(key, op, value);
   }
   else {
-    std::cerr << "WARNING: could not parse condition. Defaulting condition to 'not true'." << std::endl;
+    std::cerr << "WARNING: Could not parse condition. Defaulting condition to 'not true'." << std::endl;
     return new CondNode();
   }
   
