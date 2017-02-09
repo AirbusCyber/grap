@@ -93,6 +93,8 @@ void printDescription()
                 "in /bin/ls sample)\n";
   std::cout << "Test 35: [manual] 3 invalid dot files (parsers should"
 		" not crash)\n";
+  std::cout << "Test 36: [reference to 35] same as test 35 with all"
+		" patterns in a single file\n";
 }
 
 #ifdef _WIN32
