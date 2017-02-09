@@ -1,0 +1,7 @@
+graph G B {
+"A" [cond="opcode is jne"]
+"B" [cond="opcode is xor and arg1 is eax"]
+"C" [cond="opcode is push"]
+"A" -> "B" [childnumber=1]
+"A" -> "C" [childnumber=2]
+}
