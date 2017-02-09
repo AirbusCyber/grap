@@ -71,7 +71,6 @@ typedef void* yyscan_t;
 %type <SedgeList> edge_list
 %type <Soption> option
 %type <SoptionList> option_list
-//%type <value> graph_options
 
 %%
 
@@ -96,13 +95,12 @@ node_list
     :
     {$<Sgraph>$ = createGraph();}
     | node_list[G] node[nG] { $$ = addNodeToGraph($nG, $G); }
-    | error { fprintf(stderr, "WARNING: Error parsing a node_list.\n"); $$ = NULL; }
+    | node_list[G] error { fprintf(stderr, "WARNING: Error parsing a node_list.\n"); $$ = $G; }
     ;
    
 node
     :
     node_id[N] TOKEN_LCRO option_list[O] TOKEN_RCRO { $$ = updateNode($O, $N); }
-    | error { fprintf(stderr, "WARNING: Error parsing a node.\n"); $$ = NULL; }
     ;
         
 node_id
@@ -136,14 +134,13 @@ edge_list
     :
     {$<SedgeList>$ = createEdgeList();}
     | edge[E] edge_list[L] { $$ = addEdgeToList($E, $L); }
-    | error { fprintf(stderr, "WARNING: Error parsing an edge_list.\n"); $$ = NULL; }
+    | error edge_list[L] { fprintf(stderr, "WARNING: Error parsing an edge_list.\n"); $$ = $L; }
     ;
     
 edge
     :
     TOKEN_ID[F] TOKEN_ARROW TOKEN_ID[C] TOKEN_LCRO option_list[L] TOKEN_RCRO { $$ = createEdge($F, $C, $L); }
     | TOKEN_ID[F] TOKEN_ARROW TOKEN_ID[C] { $$ = createEdge($F, $C, NULL); }
-    | error { fprintf(stderr, "WARNING: Error parsing an edge.\n"); $$ = NULL; }
     ;
  
 %%
