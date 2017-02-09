@@ -1056,7 +1056,6 @@ bool CondNodeParser::expect(std::string expected_type){
     }
   }
   
-  assert(r);
   return r;
 }
 

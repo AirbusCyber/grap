@@ -199,7 +199,7 @@ int main(int argc, char *argv[]) {
   
   GraphList* pattern_graphs = getGraphListFromFile(fpPattern);
   if (pattern_graphs == NULL or pattern_graphs->size == 0){
-    std::cerr <<  "Pattern graph could not be opened or is empty, existing.\n";
+    std::cerr <<  "Pattern graph could not be opened or is empty, exiting.\n";
     return 1;
   }
   

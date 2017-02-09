@@ -14,7 +14,7 @@
 
 int yyerror(GraphList **SgraphList, yyscan_t scanner, const char *msg) {
     // Add error handling routine as needed
-    std::cerr << "A parsing error occurred." << std::endl;
+    std::cerr << "WARNING: An error occurred while parsing a DOT file." << std::endl;
     return 0;
 }
  
@@ -83,33 +83,32 @@ graph_list
     :
     {$<SgraphList>$ = createGraphList();}
     | graph_list[GL] graph[G] { $$ = addGraphToInput($G, $GL); }
-    | error { fprintf(stderr, "Error parsing a graph_list.\n"); RELEASE_ASSERT(false); }
+    | graph_list[GL] error { $$ = $GL; }
     ;
  
 graph
     : 
     TOKEN_DIGRAPH_HEADER TOKEN_LENS node_list[G] edge_list[E] TOKEN_RENS { $$ = addEdgesToGraph(NULL , $E, $G); }
     | TOKEN_DIGRAPH_HEADER TOKEN_ID[id] TOKEN_LENS node_list[G] edge_list[E] TOKEN_RENS {$$ = addEdgesToGraph($id , $E, $G); }
-    | error { fprintf(stderr, "Error parsing a graph.\n"); RELEASE_ASSERT(false); }
     ;
 
 node_list
     :
     {$<Sgraph>$ = createGraph();}
     | node_list[G] node[nG] { $$ = addNodeToGraph($nG, $G); }
-    | error { fprintf(stderr, "Error parsing a node_list.\n"); RELEASE_ASSERT(false); }
+    | error { fprintf(stderr, "WARNING: Error parsing a node_list.\n"); $$ = NULL; }
     ;
    
 node
     :
     node_id[N] TOKEN_LCRO option_list[O] TOKEN_RCRO { $$ = updateNode($O, $N); }
-    | error { fprintf(stderr, "Error parsing a node.\n"); RELEASE_ASSERT(false); }
+    | error { fprintf(stderr, "WARNING: Error parsing a node.\n"); $$ = NULL; }
     ;
         
 node_id
     :
     TOKEN_ID { $$ = createNode($1); }
-    | error { fprintf(stderr, "Error parsing a node_id.\n"); RELEASE_ASSERT(false); }
+    | error { fprintf(stderr, "WARNING: Error parsing a node_id.\n"); $$ = NULL; }
     ;
     
 option_list
@@ -117,34 +116,34 @@ option_list
     {$<SoptionList>$ = createOptionList();}
     | option[O] option_list[L] { $$ = addOptionToList($O, $L); }
     | option[O] TOKEN_VIRG option_list[L] { $$ = addOptionToList($O, $L); }
-    | error { fprintf(stderr, "Error parsing an option_list.\n"); RELEASE_ASSERT(false); }
+    | error option_list[L] { $$ = $L; }
     ;
     
 option_value
     :
     TOKEN_ID[V] { $$ = $V; }
     | TOKEN_IDV[V] { $$ = $V; }
-    | error { fprintf(stderr, "Error parsing an option_value.\n"); RELEASE_ASSERT(false); }
+    | error { fprintf(stderr, "WARNING: Error parsing an option_value.\n"); $$ = NULL; }
     ;
     
 option
     :
     TOKEN_ID[I] TOKEN_EQ option_value[V] { $$ = createOption($I, $V); }
-    | error { fprintf(stderr, "Error parsing an option.\n"); RELEASE_ASSERT(false); }
+    | error { fprintf(stderr, "WARNING: Error parsing an option.\n"); $$ = NULL; }
     ;
     
 edge_list
     :
     {$<SedgeList>$ = createEdgeList();}
     | edge[E] edge_list[L] { $$ = addEdgeToList($E, $L); }
-    | error { fprintf(stderr, "Error parsing an edge_list.\n"); RELEASE_ASSERT(false); }
+    | error { fprintf(stderr, "WARNING: Error parsing an edge_list.\n"); $$ = NULL; }
     ;
     
 edge
     :
     TOKEN_ID[F] TOKEN_ARROW TOKEN_ID[C] TOKEN_LCRO option_list[L] TOKEN_RCRO { $$ = createEdge($F, $C, $L); }
     | TOKEN_ID[F] TOKEN_ARROW TOKEN_ID[C] { $$ = createEdge($F, $C, NULL); }
-    | error { fprintf(stderr, "Error parsing an edge.\n"); RELEASE_ASSERT(false); }
+    | error { fprintf(stderr, "WARNING: Error parsing an edge.\n"); $$ = NULL; }
     ;
  
 %%

@@ -91,6 +91,8 @@ void printDescription()
                 "in /bin/ls sample\n";
   std::cout << "Test 34: [first run] looking for popular nodes (>=10) "
                 "in /bin/ls sample)\n";
+  std::cout << "Test 35: [manual] 3 invalid dot files (parsers should"
+		" not crash)\n";
 }
 
 #ifdef _WIN32
@@ -232,34 +234,37 @@ int main(int argc, char *argv[]) {
       graph_fprint (stdout, grTest);
     }
 
-    vsize_t j = 0;
+    vsize_t j;
     vsize_t nPattern = 0;
-    while (j < std::numeric_limits < vsize_t >::max()) {
+    for (j = 0; j < std::numeric_limits < vsize_t >::max(); j++) {
       std::string pathPattern = dirPath + "pattern_" + to_string(j) + ".dot";
+      
+      FILE* f = fopen(pathPattern.c_str(), "rb");
+      if (f != NULL) {
+	fclose(f);
+      }
+      else {
+	break;
+      }
       
       GraphList* gl = getGraphListFromPath(pathPattern.c_str());
       if (gl == NULL or gl->size == 0){
-        break; 
+        continue; 
       }
       
       vsize_t k;
-      for (k = 0; k < gl->size; k++){
-        grPattern = (graph_t **) realloc_or_quit(grPattern, (j + 1) * sizeof(graph_t *));
-        graph_t* gr = gl->graphes[k];
+      for (k = 0; k < gl->size; k++){	
+	graph_t* gr = gl->graphes[k];
         
         if (gr == NULL){
           continue;
         }
-        grPattern[j] = gr;
-        j++;
+        
+	grPattern = (graph_t **) realloc_or_quit(grPattern, (nPattern + 1) * sizeof(graph_t *));
+        grPattern[nPattern] = gr;
         nPattern++;
       }
       freeGraphList(gl, false, false);
-      
-      if (debug){
-        std::cout << "Pattern graph " << j << " is:\n";
-        graph_fprint(stdout, grPattern[j]);
-      }
     }
 
     if (nPattern == 0){

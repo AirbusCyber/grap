@@ -19,9 +19,11 @@ GraphList* createGraphList(){
 }
 
 GraphList* addGraphToInput(graph_t* g, GraphList* gl){
-  gl->graphes = (graph_t **) realloc_or_quit(gl->graphes, (gl->size + 1) * sizeof(graph_t *));
-  gl->graphes[gl->size] = g;
-  gl->size++;
+  if (g != nullptr){
+    gl->graphes = (graph_t **) realloc_or_quit(gl->graphes, (gl->size + 1) * sizeof(graph_t *));
+    gl->graphes[gl->size] = g;
+    gl->size++;
+  }
 
   return gl;
 }
@@ -434,14 +436,21 @@ OptionList *createOptionList() {
 }
 
 OptionList *addOptionToList(Option * o, OptionList * ol) {
-  ol->options = (Option **) realloc_or_quit(ol->options, (ol->size + 1) * sizeof(Option *));
-  ol->options[ol->size] = o;
-  ol->size++;
+  if (o != nullptr){
+    ol->options = (Option **) realloc_or_quit(ol->options, (ol->size + 1) * sizeof(Option *));
+    ol->options[ol->size] = o;
+    ol->size++;
+  }
 
   return ol;
 }
 
 Option *createOption(char *I, char *V) {
+  if (V == nullptr){
+    V = (char*) calloc_or_quit(1, sizeof(char));
+    V[0] = '\00';
+  }
+  
   Option *o = (Option *) malloc_or_quit(sizeof(Option));
 
   char *key = (char *) malloc_or_quit((strlen(I) + 1) * sizeof(char));
