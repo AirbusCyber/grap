@@ -4,6 +4,6 @@
 from distutils.core import setup
 
 setup(name="pygrap",
-      version='${GRAP_VERSION}',
-      package_dir={ '': '${CMAKE_CURRENT_SOURCE_DIR}' },
+      version='1.0.0',
+      package_dir={ '': '/home/aurelien/grap/src/tools' },
       packages=['grap_disassembler'])

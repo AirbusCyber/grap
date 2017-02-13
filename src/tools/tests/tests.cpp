@@ -450,7 +450,7 @@ vsize_t test_NodeInfo(){
   children2->push_front(cn_not);
   cn_not->add_pointer_usage();
   
-  CondNode* cn_or = new CondNode(children2, BinOpEnum::logic_or);
+  CondNode* cn_or = new CondNode(BinOpEnum::logic_or, children2);
   r = cn_or->evaluate(np, nt);
   error_number += print_leaf_result(r, "2 ", false);
   

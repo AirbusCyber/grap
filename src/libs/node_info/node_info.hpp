@@ -173,7 +173,7 @@ public:
   CondNode();
   CondNode(std::list<CondNode*>* cn);
   CondNode(std::list<CondNode*>*, UnOpEnum);
-  CondNode(std::list<CondNode*>*, BinOpEnum);
+  CondNode(BinOpEnum, std::list<CondNode*>*);
   CondNode(std::string key, std::string op, std::string value);
   
   vsize_t n_pointer_usage;

@@ -205,9 +205,9 @@ int main(int argc, char *argv[]) {
   
   fclose(fpPattern);
   
-  graph_t* pattern_graph;
-  ParcoursNode* tree;
-  Parcours *pattern_parcours;
+  graph_t* pattern_graph = nullptr;
+  ParcoursNode* tree = nullptr;
+  Parcours *pattern_parcours = nullptr;
   vsize_t maxSiteSize;
   
   if (not use_tree){

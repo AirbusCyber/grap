@@ -206,7 +206,7 @@ CondNode* computeCond(node_t* n){
       and_children->push_front(n->condition);
       n->condition->add_pointer_usage();
       and_children->push_front(cn_not);
-      CondNode *cn = new CondNode(and_children, BinOpEnum::logic_and);
+      CondNode *cn = new CondNode(BinOpEnum::logic_and, and_children);
       return cn;
     }
   }
@@ -632,7 +632,7 @@ Parcours::RetourParcoursDepuisSommet Parcours::parcourirDepuisSommet(graph_t * g
     else {
       // Case: m is not of return type but defines an edge to a child number (m->k)
       if (matched_nodes->size() == 0 or ((m->k == 0 and current_node->has_child1) or (m->k == 1 and current_node->has_child2))){
-        node_t *child_node;
+        node_t *child_node = nullptr;
         
         if (matched_nodes->size() == 0){
           // Case: first word (TYPE_M1) did not match a node because of repeat option (minrepeat == 0)

@@ -129,7 +129,7 @@ size_t node_edges_to_dot(const node_t *node, FILE *fp)
       }
       else {
         // Typically: vsize_t on a 32 bits machine
-        ret += (size_t)fprintf(fp, "\"%x\" -> \"%x\" [label=1, childnumber=1]", node->node_id, node->child1->node_id);
+        ret += (size_t)fprintf(fp, "\"%x\" -> \"%x\" [label=1, childnumber=1]", (unsigned int) node->node_id, (unsigned int) node->child1->node_id);
       }
   ret += (size_t)fprintf(fp, "\n");
   }
@@ -140,7 +140,7 @@ size_t node_edges_to_dot(const node_t *node, FILE *fp)
     }
     else {
       // Typically: vsize_t on a 32 bits machine
-      ret += (size_t)fprintf(fp, "\"%x\" -> \"%x\" [label=2, childnumber=2]", node->node_id, node->child2->node_id);
+      ret += (size_t)fprintf(fp, "\"%x\" -> \"%x\" [label=2, childnumber=2]", (unsigned int) node->node_id, (unsigned int) node->child2->node_id);
     }
 
     ret += (size_t)fprintf(fp, "\n");

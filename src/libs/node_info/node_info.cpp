@@ -154,7 +154,7 @@ CondNode::CondNode(std::list<CondNode*>* cn, UnOpEnum un_op){
   this->n_pointer_usage = 1;
 }
 
-CondNode::CondNode(std::list<CondNode*>* cn, BinOpEnum bin_op){
+CondNode::CondNode(BinOpEnum bin_op, std::list<CondNode*>* cn){
   assert(cn->size() >= 2);
   
   this->children = cn;
