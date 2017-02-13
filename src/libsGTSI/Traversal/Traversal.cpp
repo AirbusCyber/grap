@@ -212,7 +212,7 @@ CondNode* computeCond(node_t* n){
   }
 }
 
-vsize_t parcoursProfondeurRec(Parcours *p, bool has_father, vsize_t father_number, node_t * s, vsize_t i, set < node_t * >* explored, std::map <node_t*, vsize_t>* node_ids) {
+vsize_t parcoursProfondeurRec(Parcours *p, bool has_father, vsize_t father_number, node_t * s, vsize_t i, set < node_t * >* explored, std::map <node_t*, vsize_t>* node_ids, vsize_t W) {
   set < node_t * >::iterator explored_search;
   std::map<node_t*, vsize_t>::iterator node_ids_search;
   vsize_t new_i;
@@ -220,15 +220,19 @@ vsize_t parcoursProfondeurRec(Parcours *p, bool has_father, vsize_t father_numbe
   explored_search = explored->find(s);
   if (explored_search == explored->end()){
     // Case: s not yet explored
-    // TODO: add mot parcours M1 or M2
     MotParcours* m;
+    
+    // i: next number (1, 2...) for a new node
+    // W: desired number of nodes
+    if (i > W){
+      return i;
+    }
     
     if (not has_father) {
         m = new MotParcours();
         m->type = TYPE_M1;
         m->alpha_is_R = false;
         m->has_symbol = true;
-//         m->i = i;
         m->info = s->info;
         m->condition = computeCond(s);
         p->addMot(m);
@@ -251,7 +255,7 @@ vsize_t parcoursProfondeurRec(Parcours *p, bool has_father, vsize_t father_numbe
     new_i = i + 1;
     
     if (s->has_child1){
-      new_i = parcoursProfondeurRec(p, true, 0, s->child1, new_i, explored, node_ids);
+      new_i = parcoursProfondeurRec(p, true, 0, s->child1, new_i, explored, node_ids, W);
     }
     
     if (s->has_child2){
@@ -267,7 +271,7 @@ vsize_t parcoursProfondeurRec(Parcours *p, bool has_father, vsize_t father_numbe
         p->addMot(m);
       }
       
-      new_i = parcoursProfondeurRec(p, true, 1, s->child2, new_i, explored, node_ids);
+      new_i = parcoursProfondeurRec(p, true, 1, s->child2, new_i, explored, node_ids, W);
     }
     
     return new_i;
@@ -297,15 +301,18 @@ Parcours* parcoursGen(graph_t * graph, vsize_t vroot, vsize_t W){
 }
 
 Parcours* parcoursProfondeur(graph_t * graph, vsize_t vroot, vsize_t W){
-  //TODO: limit size to W and fill complete accordingly
-  
   Parcours *p = new Parcours();
   p->name = graph->name;
   set < node_t * >* explored = new std::set<node_t*>();
   std::map <node_t*, vsize_t>* node_ids = new std::map <node_t*, vsize_t>();
   
-  parcoursProfondeurRec(p, false, 0, node_list_item(&(graph->nodes), vroot), 1, explored, node_ids);
-  p->complete = true;
+  vsize_t i = parcoursProfondeurRec(p, false, 0, node_list_item(&(graph->nodes), vroot), 1, explored, node_ids, W);
+  if (W == i-1){
+    p->complete = true; 
+  }
+  else {
+    p->complete = false;
+  }
   
   delete explored;
   delete node_ids;
@@ -818,9 +825,18 @@ ParcoursNode::ParcoursNode(std::list < ParcoursNode * >_fils, MotParcours * _mot
 
 bool ParcoursNode::addGraphFromNode(graph_t * gr, node_t * r, vsize_t W, bool checkLabels) {
   Parcours *p = parcoursGen(gr, r->list_id, W);
-  bool ret = this->addParcours(p, 0, checkLabels);
-  p->freeParcours(false);
-  return ret;
+  
+  if (p->complete){
+    bool ret = this->addParcours(p, 0, checkLabels);
+    p->freeParcours(false);
+    
+    return ret;
+  }
+  else {
+    std::cerr << "WARNING: Graph is not complete (hint: the patterns need to be connected graphs, from the root node)." << std::endl; 
+    p->freeParcours(true); 
+    return false;
+  }
 }
 
 vsize_t ParcoursNode::addGraph(graph_t * gr, vsize_t W, vsize_t maxLearn, bool checkLabels) {

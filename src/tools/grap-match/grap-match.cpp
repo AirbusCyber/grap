@@ -255,18 +255,13 @@ int main(int argc, char *argv[]) {
         }
       }
       else {
-        std::cerr << "WARNING: one duplicate pattern was not added." << std::endl; 
+        std::cerr << "WARNING: One duplicate or incomplete pattern was not added." << std::endl; 
       }
     }
     
     if (not optionQuiet){
       std::cout << (int) n_patterns << " unique patterns added to tree." << std::endl;
-    }    
-    
-    if (n_patterns == 0) {
-      std::cerr << "ERROR: No pattern found, exiting." << std::endl;
-      return 1;
-    }
+    }   
   }
   
   std::list<std::pair<std::string, FILE*>>::iterator test_iterator;

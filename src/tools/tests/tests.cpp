@@ -511,7 +511,7 @@ vsize_t test_NodeInfo(){
     
     if (not added) {
       printf("WARNING: pattern graph %d was not added to traversal tree "
-             "because it already exists there.\n",
+             "because it already exists there or is not complete.\n",
              (int)i);
     }
   }

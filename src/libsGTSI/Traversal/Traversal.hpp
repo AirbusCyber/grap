@@ -82,7 +82,7 @@ void freePatternsMatches(PatternsMatches* patterns_matches, bool freeMatches);
 
 typedef std::tuple < node_t *, uint8_t, node_t * >TupleQueue;
 
-vsize_t parcoursProfondeurRec(Parcours *p, bool has_father, vsize_t father_number, node_t * s, vsize_t i, set < node_t * >* explored, std::map <node_t*, vsize_t>* node_ids);
+vsize_t parcoursProfondeurRec(Parcours *p, bool has_father, vsize_t father_number, node_t * s, vsize_t i, set < node_t * >* explored, std::map <node_t*, vsize_t>* node_ids, vsize_t W);
 Parcours* parcoursProfondeur(graph_t * graph, vsize_t vroot, vsize_t W);
 Parcours *parcoursLargeur(graph_t * graph, vsize_t root, vsize_t W);
 Parcours* parcoursGen(graph_t * graph, vsize_t root, vsize_t W);
