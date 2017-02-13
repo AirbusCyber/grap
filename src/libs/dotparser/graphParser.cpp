@@ -41,14 +41,14 @@ GraphList *getGraphListFromFile (FILE * f) {
 
   if (yylex_init (&scanner)) {
     // couldn't initialize
-    std::cerr << "ERR: couldn't initialize yylex." << std::endl;
+    std::cerr << "ERROR: Couldn't initialize yylex." << std::endl;
     return NULL;
   }
 
   state = yy_scan_string (buf, scanner);
   if (yyparse (&gl, scanner)) {
     // error parsing
-    std::cerr << "ERR: parsing failed." << std::endl;
+    std::cerr << "ERROR: Parsing failed." << std::endl;
     return NULL;
   }
 

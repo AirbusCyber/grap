@@ -94,7 +94,7 @@ def compute_tree(pattern_graphs):
             if pattern_graph.nodes.count > max_site_size:
                 max_site_size = pattern_graph.nodes.count
         else:
-            sys.stderr.write("WARNING: one duplicate pattern was not added.\n")
+            sys.stderr.write("WARNING: One duplicate or incomplete pattern was not added.\n")
 
     return tree, max_site_size, n_patterns
 

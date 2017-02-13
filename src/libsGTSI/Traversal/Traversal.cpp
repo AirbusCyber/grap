@@ -29,7 +29,7 @@ string MotParcours::toString() {
     }
   }
   else {
-    std::cerr << "ERROR in MotParcours::toString.\n";
+    std::cerr << "ERROR in MotParcours::toString." << std::endl;
     return "ERR";
   }
   
@@ -1278,7 +1278,7 @@ ParcoursNode::RetourEtape ParcoursNode::etape(MotParcours * m, node_t * s, graph
     }
   }
   else {
-    std::cerr << "ERR: unknown type." << std::endl;
+    std::cerr << "ERROR: Unknown type." << std::endl;
     return std::make_tuple(false, s, numbers, max_numbered, matched_nodes);
   }
 }

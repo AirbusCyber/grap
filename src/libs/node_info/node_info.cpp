@@ -390,7 +390,7 @@ bool ComparisonFunctions::str_regex(void* a1, void* a2)
     return boost::regex_match(*s2, txt_regex);
   }
   catch (...) {
-    std::cerr << "ERR: regex creation failed." << std::endl;
+    std::cerr << "ERROR: Regex creation failed." << std::endl;
     return false; 
   }
 }
@@ -533,7 +533,7 @@ bool CondNode::comparison_fun(void* a1, void* a2)
       return ComparisonFunctions::uint8t_leq(a1, a2);
       
     default:
-      std::cerr << "ERROR in node_info.cpp : unknown comparison_fun" << std::endl;
+      std::cerr << "ERROR in node_info.cpp: unknown comparison_fun." << std::endl;
       return false;
   }
 }
@@ -544,7 +544,7 @@ bool CondNode::unary_fun(bool b){
       return not b;
       
     default:
-      std::cerr << "ERROR in node_info.cpp : unknown unary_fun " << this << "\n";
+      std::cerr << "ERROR in node_info.cpp: unknown unary_fun " << this << "." << std::endl;
       return false;
   }
 }
@@ -558,7 +558,7 @@ bool CondNode::binary_fun(bool b1, bool b2){
       return b1 or b2;
       
     default:
-      std::cerr << "ERROR in node_info.cpp : unknown binary_fun\n";
+      std::cerr << "ERROR in node_info.cpp: unknown binary_fun." << std::endl;
       return false;
   }
 }
@@ -690,7 +690,7 @@ std::string CondNode::field_toString(void* field)
       return std::to_string((int) *i);
       
     default:
-      std::cerr << "ERROR in node_info.cpp : unknown comparison_fun" << std::endl;
+      std::cerr << "ERROR in node_info.cpp: unknown comparison_fun." << std::endl;
       return "";
   }
 }
@@ -700,7 +700,7 @@ std::string CondNode::toString(NodeInfo* ni){
   std::string r;
   
   if (this->children->size() == 0 and ni == NULL and not this->has_fixed_pattern_info and not this->has_fixed_field){
-    std::cerr << "ERR: missing leaf node info" << std::endl;
+    std::cerr << "ERROR: Missing leaf node info." << std::endl;
     return "";
   }
   
@@ -820,7 +820,7 @@ void CondNode::freeCondition(CondNode* cn, bool b1, bool b2){
             break;
             
           default:
-            std::cerr << "ERROR in node_info.cpp : unknown comparison_fun" << std::endl;
+            std::cerr << "ERROR in node_info.cpp: unknown comparison_fun." << std::endl;
             break;
         }
       }
@@ -1049,7 +1049,7 @@ bool CondNodeParser::expect(std::string expected_type){
   
   if (not r){
     if (this->has_next_token){
-      std::cerr << "WARNING: Expected " << expected_type << ", found " << this->next_token.type << " (" << this->next_token.value << ")" << std::endl;
+      std::cerr << "WARNING: Expected " << expected_type << ", found " << this->next_token.type << " (" << this->next_token.value << ")." << std::endl;
     }
     else {
       std::cerr << "WARNING: End of expression reached." << std::endl;

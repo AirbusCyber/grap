@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
         fpPattern = fopen(pathPattern.c_str(), "r");
 
         if (fpPattern == NULL) {
-          std::cerr << "ERROR: Can't open pattern graph " << pathPattern << std::endl;
+          std::cerr << "ERROR: Can't open pattern graph " << pathPattern << "." << std::endl;
           return 1;
         }
         learnOk = true;
@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
         FILE* fp = fopen(path.c_str(), "r");
 
         if (fp == NULL) {
-          std::cerr << "WARNING: Can't open test graph " << path << std::endl;
+          std::cerr << "WARNING: Can't open test graph " << path << "." << std::endl;
         }
         else{
           testsInfo.push_back(std::pair<std::string, FILE*>(path, fp)); 
@@ -199,7 +199,7 @@ int main(int argc, char *argv[]) {
   
   GraphList* pattern_graphs = getGraphListFromFile(fpPattern);
   if (pattern_graphs == NULL or pattern_graphs->size == 0){
-    std::cerr <<  "Pattern graph could not be opened or is empty, exiting.\n";
+    std::cerr <<  "ERROR: Pattern graph could not be opened or is empty, exiting." << std::endl;
     return 1;
   }
   
@@ -212,7 +212,7 @@ int main(int argc, char *argv[]) {
   
   if (not use_tree){
     if (pattern_graphs->size >= 2){
-      std::cerr << "WARNING: only the first pattern will be processed with the single traversal algorithm." << std::endl;
+      std::cerr << "WARNING: Only the first pattern will be processed with the single traversal algorithm." << std::endl;
     }
     
     pattern_graph = popfreeFirstGraph(pattern_graphs);

@@ -91,7 +91,7 @@ Couple *createEdge(char *f, char *c, OptionList* ol) {
           e->is_child1 = false;
         }
         else{
-          std::cerr << "WARNING: Edges' childnumber option should have values of 1 or 2" << std::endl;
+          std::cerr << "WARNING: Edges' childnumber option should have values of 1 or 2." << std::endl;
         }
       }
       free(v);
@@ -134,7 +134,7 @@ graph_t *addEdgesToGraph(char* name, CoupleList * cl, graph_t * g) {
     }
 
     if (f == NULL || c == NULL) {
-      printf("WARNING: when adding a node, father or child was not found in graph.\n");
+      printf("WARNING: When adding a node, father or child was not found in graph.\n");
     }
     else {
       if (cl->couples[i]->is_numbered){

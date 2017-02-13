@@ -784,7 +784,7 @@ class ELFDisassembler:
 
 def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listing=False, readable=False, verbose=False):
     if pe_data is None and pe_path is None:
-        print "ERROR: missing PE path or data."
+        print "ERROR: Missing PE path or data."
         return None
 
     if pe_data is None:
@@ -848,7 +848,7 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
 
 def disassemble_elf(elf_data = None, elf_path = None, dot_path = None, print_listing=False, readable=False, verbose=False):
     if elf_path is None:
-        print "ERROR: missing ELF path."
+        print "ERROR: Missing ELF path."
         return None
 
     if elf_data is None:

@@ -50,7 +50,7 @@ void node_link (node_t * node, node_t * child, bool is_child1) {
       node->has_child1 = true;
     }
     else{
-      std::cerr << "WARNING: overwriting existing node child." << std::endl; 
+      std::cerr << "WARNING: Overwriting existing node child." << std::endl; 
     }
     node->child1 = child;
   }
@@ -60,7 +60,7 @@ void node_link (node_t * node, node_t * child, bool is_child1) {
       node->has_child2 = true;
     }
     else{
-      std::cerr << "WARNING: overwriting existing node child." << std::endl; 
+      std::cerr << "WARNING: Overwriting existing node child." << std::endl; 
     }
     node->child2 = child;
   }
