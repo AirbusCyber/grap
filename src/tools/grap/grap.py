@@ -44,10 +44,19 @@ if __name__ == '__main__':
     files_to_disassemble = set()
     dot_test_files = set()
     for test_path in args.test:
-        data = open(test_path, "r").read()
+        try:
+            data = open(test_path, "r").read()
+        except IOError:
+            if os.path.isdir(test_path):
+                print("Skipping directory " + test_path)
+            elif not os.path.isfile(test_path):
+                print("Skipping " + test_path + " (not found).")
+            continue
+
+
         if data is None:
             print("WARNING: Can't open test file " + test_path)
-            pass
+            continue
         else:
             if data[0:7].lower() == "digraph":
                 dot_test_files.add(test_path)
