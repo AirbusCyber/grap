@@ -20,6 +20,8 @@ if __name__ == '__main__':
     parser.add_argument(dest='test', nargs="+", help='Test file(s) to analyse')
 
     parser.add_argument('-f', '--force', dest='force', action="store_true", default=False, help='Force re-generation of existing .dot file')
+    parser.add_argument('--raw', dest='raw_disas', action="store_true", default=False, help='Disassemble raw file')
+    parser.add_argument('-r64', '--raw-64', dest='raw_64', action="store_true", default=False, help='Disassemble raw file with x86_64 (not default)')
     parser.add_argument('-od', '--only-disassemble', dest='only_disassemble', action="store_true", default=False, help='Disassemble files and exit (no matching)')
     parser.add_argument('-o', '--dot-output', dest='dot', help='Specify exported .dot file name (when there is only one test file)')
     parser.add_argument('-r', '--readable', dest='readable', action="store_true", default=False, help='Export .dot in displayable format (with xdot)')
@@ -53,7 +55,6 @@ if __name__ == '__main__':
                 print("Skipping " + test_path + " (not found).")
             continue
 
-
         if data is None:
             print("WARNING: Can't open test file " + test_path)
             continue
@@ -74,7 +75,8 @@ if __name__ == '__main__':
                 else:
                     if len(args.test) == 1:
                         found_path = disassembler.disassemble_file(bin_path=test_path, dot_path=dot_path,
-                                                                   readable=args.readable, verbose=args.verbose)
+                                                                   readable=args.readable, verbose=args.verbose,
+                                                                   raw=args.raw_disas, raw_64=args.raw_64)
                         if found_path is not None:
                             dot_test_files.add(dot_path)
                     else:
@@ -83,7 +85,8 @@ if __name__ == '__main__':
     if len(args.test) > 1:
         files_to_disassemble = sorted(list(files_to_disassemble))
         disassembled_files = disassembler.disassemble_files(files_to_disassemble, ".dot", multiprocess=args.multithread,
-                                                            n_processes=4, readable=args.readable, verbose=args.verbose)
+                                                            n_processes=4, readable=args.readable, verbose=args.verbose,
+                                                            raw=args.raw_disas, raw_64=args.raw_64)
         for path in disassembled_files:
             dot_test_files.add(path)
 

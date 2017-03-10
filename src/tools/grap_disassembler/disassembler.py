@@ -664,7 +664,8 @@ def disassemble_elf(elf_data = None, elf_path = None, dot_path = None, print_lis
     return True
 
 
-def disassemble_raw(raw_data = None, raw_path = None, dot_path = None, print_listing=False, readable=False, verbose=False):
+def disassemble_raw(raw_data = None, raw_path = None, dot_path = None, print_listing=False, readable=False,
+                    raw_64=False, verbose=False):
     if raw_data is None and raw_path is None:
         print "ERROR: Missing PE path or data."
         return None
@@ -673,8 +674,7 @@ def disassemble_raw(raw_data = None, raw_path = None, dot_path = None, print_lis
         raw_data = open(raw_path, "r").read()
 
     arch = CS_ARCH_X86
-    #mode = CS_MODE_32 if is_32 else CS_MODE_64
-    mode = CS_MODE_32
+    mode = CS_MODE_64 if raw_64 else CS_MODE_32
 
     oep_offset = 0
 
@@ -693,7 +693,8 @@ def disassemble_raw(raw_data = None, raw_path = None, dot_path = None, print_lis
     return True
 
 
-def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listing=False, readable=False, raw=False, verbose=False):
+def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listing=False, readable=False, raw=False,
+                     raw_64=False, verbose=False):
     if verbose:
         print "Disassembling", bin_path
 
@@ -702,7 +703,7 @@ def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listin
 
     if raw:
         if disassemble_raw(raw_data=bin_data, raw_path=bin_path, dot_path=dot_path, print_listing=print_listing,
-                           readable=readable, verbose=verbose):
+                           readable=readable, raw_64=raw_64, verbose=verbose):
             return dot_path
     elif bin_data[0:2] == "MZ":
         if disassemble_pe(pe_data=bin_data, pe_path=bin_path, dot_path=dot_path, print_listing=print_listing,
@@ -714,7 +715,7 @@ def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listin
             return dot_path
     else:
         if verbose:
-            print("WARNING: Test file " + bin_path + " does not seem to be a PE/ELF or dot file.")
+            print("WARNING: Test file " + bin_path + " does not seem to be a PE/ELF or dot file. Use raw option if raw file.")
         return None
 
 
