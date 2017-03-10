@@ -15,7 +15,6 @@ from cStringIO import StringIO
 
 
 class Instruction:
-
     def __init__(self, id, offset, va, address, mnemonic, op_str, size, bytes):
         self.id = id
         self.offset = offset
@@ -69,7 +68,7 @@ class Instruction:
         return m
 
 
-class PEDisassembler:
+class GenericDisassembler:
     def __init__(self, arch, mode):
         self.arch = arch
         self.mode = mode
@@ -85,7 +84,183 @@ class PEDisassembler:
             ]
         }[mode]
 
-    def dis(self, data, offset, iat_api, pe, verbose=False):
+    def _dis(self, data, offset, insts, bin_instance, iat_api=dict(), verbose=False, ifrom=None, from_pred=True):
+        '''
+            <insts> is a dict like {'offset': <Instruction>}
+        '''
+
+        if offset is None:
+            return insts
+
+        if offset in insts:
+            if ifrom:
+                insts[offset].add_ifrom(ifrom.offset)
+                insts[ifrom.offset].add_ito(insts[offset].offset, from_pred)
+            return insts
+
+        try:
+            inst_va = self.get_va_from_offset(bin_instance, offset)
+        except:
+            if verbose:
+                print 'WARNING: RVA not found from offset', hex(offset)
+            return insts
+
+        try:
+            i = self.capstone.disasm(data[offset:], inst_va, count=1).next()
+        except:
+            return insts
+
+        inst = Instruction(
+            id=i.id,
+            offset=offset,
+            va=inst_va,
+            address=i.address,
+            mnemonic=i.mnemonic,
+            op_str=i.op_str,
+            size=i.size,
+            bytes=i.bytes,
+        )
+        insts[inst.offset] = inst
+
+        if ifrom:
+            insts[inst.offset].add_ifrom(ifrom.offset)
+            insts[ifrom.offset].add_ito(inst.offset, from_pred)
+
+        # No child
+        if inst.mnemonic in ['ret', 'retf']:
+            pass
+
+        # 1 remote child
+        elif inst.mnemonic in ['jmp', 'jmpf']:
+
+            if "word ptr [0x" in inst.op_str:
+                iat_va = int(inst.op_str.split('[')[1].split(']')[0], 16)
+
+                if iat_va in iat_api:
+                    inst.op_str = iat_api[iat_va]
+            else:
+                try:
+                    remote_offset = self.get_offset_from_va(bin_instance, int(inst.op_str, 16))
+                    if remote_offset is not None:
+                        insts = self._dis(
+                            data=data,
+                            offset=remote_offset,
+                            iat_api=iat_api,
+                            bin_instance=bin_instance,
+                            insts=insts,
+                            ifrom=insts[inst.offset],
+                            from_pred=False,
+                            verbose=verbose
+                        )
+                except:
+                    pass
+
+        # 2 children (next, then remote) - except call
+        elif inst.mnemonic in [
+            'jz', 'je', 'jcxz', 'jecxz', 'jrcxz', 'jnz', 'jp', 'jpe', 'jnp', 'ja', 'jae', 'jb', 'jbe',
+            'jg', 'jge', 'jl', 'jle', 'js', 'jns', 'jo', 'jno', 'jecxz', 'loop', 'loopne', 'loope',
+            'jne']:
+            next_offset = inst.offset + inst.size
+
+            try:
+                remote_offset = self.get_offset_from_va(bin_instance, int(inst.op_str, 16))
+            except:
+                return insts
+
+            insts = self._dis(
+                data=data,
+                offset=next_offset,
+                iat_api=iat_api,
+                bin_instance=bin_instance,
+                insts=insts,
+                ifrom=insts[inst.offset],
+                from_pred=True,
+                verbose=verbose
+            )
+
+            insts = self._dis(
+                data=data,
+                offset=remote_offset,
+                iat_api=iat_api,
+                bin_instance=bin_instance,
+                insts=insts,
+                ifrom=insts[inst.offset],
+                from_pred=False,
+                verbose=verbose
+            )
+
+        # 2 children (next, then remote) - call
+        elif inst.mnemonic in ['call']:
+
+            next_offset = inst.offset + inst.size
+            remote_offset = None
+
+            # Call to Imported API (in IAT)
+            # dword ptr [0x........] or qword ptr [0x........]
+            if "word ptr [0x" in inst.op_str:
+                iat_va = int(inst.op_str.split('[')[1].split(']')[0], 16)
+
+                if iat_va in iat_api:
+                    inst.op_str = iat_api[iat_va]
+            elif inst.op_str in ['eax', 'ebx', 'ecx', 'edx', 'esi', 'edi', 'esp', 'ebp']:
+                pass
+            else:
+                try:
+                    remote_offset = self.get_offset_from_va(bin_instance, int(inst.op_str, 16))
+                except Exception as e:
+                    # print "ERROR CALL: %s\n%s\n" % (e, inst)
+                    pass
+
+            insts = self._dis(
+                data=data,
+                offset=next_offset,
+                iat_api=iat_api,
+                bin_instance=bin_instance,
+                insts=insts,
+                ifrom=insts[inst.offset],
+                from_pred=True,
+                verbose=verbose
+            )
+
+            if remote_offset:
+                insts = self._dis(
+                    data=data,
+                    offset=remote_offset,
+                    iat_api=iat_api,
+                    bin_instance=bin_instance,
+                    insts=insts,
+                    ifrom=insts[inst.offset],
+                    from_pred=False,
+                    verbose=verbose
+                )
+
+        # 1 child (next) - basic instruction
+        else:
+            next_offset = inst.offset + inst.size
+            insts = self._dis(
+                data=data,
+                offset=next_offset,
+                iat_api=iat_api,
+                bin_instance=bin_instance,
+                insts=insts,
+                ifrom=insts[inst.offset],
+                from_pred=True,
+                verbose=verbose
+            )
+
+        return insts
+
+    def dis_prologues(self, data, bin_instance, iat_api, insts, verbose):
+        prologues_re = "|".join(self.prologues)
+        compiled_re = re.compile(prologues_re)
+        for m in compiled_re.finditer(data):
+            function_offset = m.start()
+
+            if function_offset not in insts:
+                insts = self._dis(data=data, offset=function_offset, iat_api=iat_api, bin_instance=bin_instance, insts=insts, verbose=verbose)
+        return insts
+
+    def dis(self, data, offset, iat_api, bin_instance, verbose=False):
         '''
             data: raw binary of full PE
             va: va of the instruction located at <data[index]>
@@ -94,203 +269,14 @@ class PEDisassembler:
 
         insts = dict()
 
-        def _dis_exported_funcs(pe, insts, data, verbose):
-            """
-            Disassemble all the exported functions.
-
-            Args:
-                pe (PE) : PE Object
-                insts (Dict)  : Dictionary of instructions
-            """
-
-            # Export table
-            try:
-                export_table = pe.DIRECTORY_ENTRY_EXPORT.symbols
-            except:
-                export_table = None
-
-            if export_table is not None:
-                for exp in export_table:
-                    if exp not in insts:
-                        insts = _dis(data=data,
-                                     offset=exp.address,
-                                     pe=pe,
-                                     insts=insts,
-                                     verbose=verbose)
-
-        def _dis(data, offset, insts, pe, verbose=False, ifrom=None, from_pred=True):
-            '''
-                <insts> is a dict like {'offset': <Instruction>}
-            '''
-
-            if offset in insts:
-                if ifrom:
-                    insts[offset].add_ifrom(ifrom.offset)
-                    insts[ifrom.offset].add_ito(insts[offset].offset, from_pred)
-
-                return insts
-
-            try:
-                inst_va = pe.get_rva_from_offset(offset) + pe.OPTIONAL_HEADER.ImageBase
-            except:
-                if verbose:
-                    print 'WARNING: RVA not found from offset', hex(offset)
-                return insts
-
-            try:
-                i = self.capstone.disasm(data[offset:], inst_va, count=1).next()
-            except:
-                return insts
-
-            inst = Instruction(
-                id=i.id,
-                offset=offset,
-                va=inst_va,
-                address=i.address,
-                mnemonic=i.mnemonic,
-                op_str=i.op_str,
-                size=i.size,
-                bytes=i.bytes,
-            )
-            insts[inst.offset] = inst
-
-            if ifrom:
-                insts[inst.offset].add_ifrom(ifrom.offset)
-                insts[ifrom.offset].add_ito(inst.offset, from_pred)
-
-            # No child
-            if inst.mnemonic in ['ret', 'retf']:
-                pass
-
-            # 1 remote child
-            elif inst.mnemonic in ['jmp', 'jmpf']:
-
-                if "word ptr [0x" in inst.op_str:
-                    iat_va = int(inst.op_str.split('[')[1].split(']')[0], 16)
-
-                    if iat_va in iat_api:
-                        inst.op_str = iat_api[iat_va]
-                else:
-                    try:
-                        remote_offset = pe.get_offset_from_rva(int(inst.op_str, 16) - pe.OPTIONAL_HEADER.ImageBase)
-                        insts = _dis(
-                            data=data,
-                            offset=remote_offset,
-                            pe=pe,
-                            insts=insts,
-                            ifrom=insts[inst.offset],
-                            from_pred=False,
-                            verbose=verbose
-                        )
-                    except:
-                        pass
-
-            # 2 children (next, then remote) - except call
-            elif inst.mnemonic in [
-                    'jz', 'je', 'jcxz', 'jecxz', 'jrcxz', 'jnz', 'jp', 'jpe', 'jnp', 'ja', 'jae', 'jb', 'jbe',
-                    'jg', 'jge', 'jl', 'jle', 'js', 'jns', 'jo', 'jno', 'jecxz', 'loop', 'loopne', 'loope',
-                    'jne']:
-                next_offset = inst.offset + inst.size
-
-                try:
-                    remote_offset = pe.get_offset_from_rva(int(inst.op_str, 16) - pe.OPTIONAL_HEADER.ImageBase)
-                except:
-                    if verbose:
-                        print 'WARNING: RVA not found from offset', hex(int(inst.op_str, 16) - pe.OPTIONAL_HEADER.ImageBase)
-                    return insts
-
-                insts = _dis(
-                    data=data,
-                    offset=next_offset,
-                    pe=pe,
-                    insts=insts,
-                    ifrom=insts[inst.offset],
-                    from_pred=True,
-                    verbose=verbose
-                )
-
-                insts = _dis(
-                    data=data,
-                    offset=remote_offset,
-                    pe=pe,
-                    insts=insts,
-                    ifrom=insts[inst.offset],
-                    from_pred=False,
-                    verbose=verbose
-                )
-
-            # 2 children (next, then remote) - call
-            elif inst.mnemonic in ['call']:
-
-                next_offset = inst.offset + inst.size
-                remote_offset = None
-
-                # Call to Imported API (in IAT)
-                # dword ptr [0x........] or qword ptr [0x........]
-                if "word ptr [0x" in inst.op_str:
-                    iat_va = int(inst.op_str.split('[')[1].split(']')[0], 16)
-
-                    if iat_va in iat_api:
-                        inst.op_str = iat_api[iat_va]
-                elif inst.op_str in ['eax', 'ebx', 'ecx', 'edx', 'esi', 'edi', 'esp', 'ebp']:
-                    pass
-                else:
-                    try:
-                        remote_offset = pe.get_offset_from_rva(int(inst.op_str, 16) - pe.OPTIONAL_HEADER.ImageBase)
-
-                    except Exception as e:
-                        # print "ERROR CALL: %s\n%s\n" % (e, inst)
-                        pass
-
-                insts = _dis(
-                    data=data,
-                    offset=next_offset,
-                    pe=pe,
-                    insts=insts,
-                    ifrom=insts[inst.offset],
-                    from_pred=True,
-                    verbose=verbose
-                )
-
-                if remote_offset:
-                    insts = _dis(
-                        data=data,
-                        offset=remote_offset,
-                        pe=pe,
-                        insts=insts,
-                        ifrom=insts[inst.offset],
-                        from_pred=False,
-                        verbose=verbose
-                    )
-
-            # 1 child (next) - basic instruction
-            else:
-                next_offset = inst.offset + inst.size
-                insts = _dis(
-                    data=data,
-                    offset=next_offset,
-                    pe=pe,
-                    insts=insts,
-                    ifrom=insts[inst.offset],
-                    from_pred=True,
-                    verbose=verbose
-                )
-
-            return insts
-
-        insts = _dis(data=data, offset=offset, pe=pe, insts=insts, verbose=verbose)
+        insts = self._dis(data=data, offset=offset, iat_api=iat_api, bin_instance=bin_instance, insts=insts, verbose=verbose)
 
         # Exploration of the exported functions
-        _dis_exported_funcs(pe=pe, insts=insts, data=data, verbose=verbose)
+        self._dis_exported_funcs(bin_instance=bin_instance, insts=insts, data=data, verbose=verbose, iat_api=iat_api)
 
         # Search for unrecognized functions from their prolog function
-        prologues_re = "|".join(self.prologues)
-        compiled_re = re.compile(prologues_re)
-        for m in compiled_re.finditer(data):
-            function_offset = m.start()
+        insts = self.dis_prologues(data=data, bin_instance=bin_instance, iat_api=iat_api, insts=insts, verbose=verbose)
 
-            if function_offset not in insts:
-                insts = _dis(data=data, offset=function_offset, pe=pe, insts=insts, verbose=verbose)
         return insts
 
     def display(self, insts, offset_from=0):
@@ -382,27 +368,58 @@ class PEDisassembler:
         return dot.getvalue()
 
 
-class ELFDisassembler:
-    def __init__(self, arch, mode):
-        self.arch = arch
-        self.mode = mode
-        self.capstone = Cs(self.arch, self.mode)
+class PEDisassembler(GenericDisassembler):
+    def get_offset_from_rva(self, pe, rva):
+        remote_offset = pe.get_offset_from_rva(rva)
+        return remote_offset
 
-        self.prologues = {
-            CS_MODE_32: [
-                "\x55\x89\xE5",  # push ebp & mov ebp, esp
-                "\x55\x8B\xEC",  # push ebp & mov ebp, esp
-            ],
-            CS_MODE_64: [
-                "\x55\x48\x89\xE5",  # push rbp & mov rbp, rsp
-            ]
-        }[mode]
+    def get_offset_from_va(self, pe, rva):
+        return self.get_offset_from_rva(pe, rva - self.get_image_base_rva(pe))
 
+    def get_rva_from_offset(self, pe, offset):
+        return pe.get_rva_from_offset(offset)
+
+    def get_va_from_offset(self, pe, offset):
+        return self.get_rva_from_offset(pe, offset) + self.get_image_base_rva(pe)
+
+    def get_image_base_rva(self, pe):
+        return pe.OPTIONAL_HEADER.ImageBase
+
+    def _dis_exported_funcs(self, bin_instance, insts, data, verbose, iat_api=dict()):
+        """
+        Disassemble all the exported functions.
+
+        Args:
+            pe (PE) : PE Object
+            insts (Dict)  : Dictionary of instructions
+        """
+
+        # Export table
+        try:
+            export_table = bin_instance.DIRECTORY_ENTRY_EXPORT.symbols
+        except:
+            export_table = None
+
+        if export_table is not None:
+            for exp in export_table:
+                if exp not in insts:
+                    insts = self._dis(data=data,
+                                 offset=exp.address,
+                                 iat_api=iat_api,
+                                 bin_instance=bin_instance,
+                                 insts=insts,
+                                 verbose=verbose)
+
+
+class ELFDisassembler(GenericDisassembler):
     def get_offset_from_rva(self, elf, rva):
         for segment in elf.iter_segments():
             if segment['p_vaddr'] <= rva < segment['p_vaddr'] + segment['p_memsz']:
                 return segment['p_offset'] + (rva - segment['p_vaddr'])
         return None
+
+    def get_offset_from_va(self, elf, va):
+        return self.get_offset_from_rva(elf, va - self.get_image_base_rva(elf))
 
     def get_rva_from_offset(self, elf, offset):
         for segment in elf.iter_segments():
@@ -410,12 +427,56 @@ class ELFDisassembler:
                 return segment['p_vaddr'] + (offset - segment['p_offset'])
         return None
 
+    def get_va_from_offset(self, elf, offset):
+        return self.get_rva_from_offset(elf, offset) + self.get_image_base_rva(elf)
+
     def get_image_base_rva(self, elf):
         for section in elf.iter_sections():
             return section['sh_addr'] - section['sh_offset']
         return None
 
-    def dis(self, data, offset, iat_api, elf, verbose=False):
+    def _dis_exported_funcs(self, data, bin_instance, insts, verbose):
+        """
+        Disassemble all the exported functions.
+
+        Args:
+            elf (ELFFile) : ELF Object
+            insts (Dict)  : Dictionary of instructions
+        """
+        image_base = self.get_image_base_rva(bin_instance)
+
+        if bin_instance.get_section_by_name('.dynsym') is not None:
+            # Dynsym
+            for sym in bin_instance.get_section_by_name('.dynsym').iter_symbols():
+
+                info = sym.entry
+
+                # If the symbol is an exported function
+                if info.st_info['type'] == 'STT_FUNC' and \
+                   info.st_info['bind'] == 'STB_GLOBAL':
+
+                    # If this is a new non-empty function
+                    if info.st_value != 0 and info.st_value not in insts:
+
+                        offset = self.get_offset_from_rva(
+                            bin_instance,
+                            (info.st_value - image_base)
+                        )
+
+                        if verbose:
+                            print 'Func %s found at offset 0x%08X, RVA: 0x%08X' % (
+                                sym.name,
+                                offset,
+                                info.st_value
+                            )
+
+                        insts = self._dis(data=data,
+                                     offset=offset,
+                                     bin_instance=bin_instance,
+                                     insts=insts,
+                                     verbose=verbose)
+
+    def dis(self, data, offset, iat_api, bin_instance, verbose=False):
         '''
             data: raw binary of full elf
             va: va of the instruction located at <data[index]>
@@ -424,215 +485,7 @@ class ELFDisassembler:
         '''
         insts = dict()
 
-        def _dis_exported_funcs(elf, insts, verbose):
-            """
-            Disassemble all the exported functions.
-
-            Args:
-                elf (ELFFile) : ELF Object
-                insts (Dict)  : Dictionary of instructions
-            """
-            image_base = self.get_image_base_rva(elf)
-
-            if elf.get_section_by_name('.dynsym') is not None:
-                # Dynsym
-                for sym in elf.get_section_by_name('.dynsym').iter_symbols():
-
-                    info = sym.entry
-
-                    # If the symbol is an exported function
-                    if info.st_info['type'] == 'STT_FUNC' and \
-                       info.st_info['bind'] == 'STB_GLOBAL':
-
-                        # If this is a new non-empty function
-                        if info.st_value != 0 and info.st_value not in insts:
-
-                            offset = self.get_offset_from_rva(
-                                elf,
-                                (info.st_value - image_base)
-                            )
-
-                            if verbose:
-                                print 'Func %s found at offset 0x%08X, RVA: 0x%08X' % (
-                                    sym.name,
-                                    offset,
-                                    info.st_value
-                                )
-
-                            insts = _dis(data=data,
-                                         offset=offset,
-                                         elf=elf,
-                                         insts=insts,
-                                         verbose=verbose)
-
-        def _dis(data, offset, insts, elf, ifrom=None, verbose=False, from_pred=True):
-            '''
-                <insts> is a dict like {'offset': <Instruction>}
-            '''
-
-            if offset is None:
-                return insts
-
-            if offset in insts:
-                if ifrom:
-                    insts[offset].add_ifrom(ifrom.offset)
-                    insts[ifrom.offset].add_ito(insts[offset].offset, from_pred)
-                return insts
-
-            rva = self.get_rva_from_offset(elf, offset)
-            if rva is None:
-                if verbose:
-                    print "Offset " + hex(offset) + " not found in segments: discarded."
-                return insts
-
-            image_base = self.get_image_base_rva(elf)
-            inst_va = rva + image_base
-
-            try:
-                i = self.capstone.disasm(data[offset:], inst_va, count=1).next()
-            except:
-                return insts
-
-            inst = Instruction(
-                id=i.id,
-                offset=offset,
-                va=inst_va,
-                address=i.address,
-                mnemonic=i.mnemonic,
-                op_str=i.op_str,
-                size=i.size,
-                bytes=i.bytes,
-            )
-            insts[inst.offset] = inst
-
-            if ifrom:
-                insts[inst.offset].add_ifrom(ifrom.offset)
-                insts[ifrom.offset].add_ito(inst.offset, from_pred)
-
-            # No child
-            if inst.mnemonic in ['ret', 'retf']:
-                pass
-
-            # 1 remote child
-            elif inst.mnemonic in ['jmp', 'jmpf']:
-
-                if "word ptr [0x" in inst.op_str:
-                    iat_va = int(inst.op_str.split('[')[1].split(']')[0], 16)
-
-                    if iat_va in iat_api:
-                        inst.op_str = iat_api[iat_va]
-                else:
-                    try:
-                        remote_offset = self.get_offset_from_rva(
-                            elf,
-                            int(inst.op_str, 16) - self.get_image_base_rva(elf))
-                        insts = _dis(
-                            data=data,
-                            offset=remote_offset,
-                            elf=elf,
-                            insts=insts,
-                            ifrom=insts[inst.offset],
-                            from_pred=False,
-                            verbose=verbose
-                        )
-                    except:
-                        pass
-
-            # 2 children (next, then remote) - except call
-            elif inst.mnemonic in [
-                    'jz', 'je', 'jcxz', 'jecxz', 'jrcxz', 'jnz', 'jp', 'jpe', 'jnp', 'ja', 'jae', 'jb', 'jbe',
-                    'jg', 'jge', 'jl', 'jle', 'js', 'jns', 'jo', 'jno', 'jecxz', 'loop', 'loopne', 'loope',
-                    'jne']:
-                next_offset = inst.offset + inst.size
-                remote_offset = self.get_offset_from_rva(elf, int(inst.op_str, 16) - self.get_image_base_rva(elf))
-
-                # inst.next.append(next_offset)
-                # inst.next.append(remote_offset)
-                # print inst
-
-                insts = _dis(
-                    data=data,
-                    offset=next_offset,
-                    elf=elf,
-                    insts=insts,
-                    ifrom=insts[inst.offset],
-                    from_pred=True,
-                    verbose=verbose
-                )
-
-                insts = _dis(
-                    data=data,
-                    offset=remote_offset,
-                    elf=elf,
-                    insts=insts,
-                    ifrom=insts[inst.offset],
-                    from_pred=False,
-                    verbose=verbose
-                )
-
-            # 2 children (next, then remote) - call
-            elif inst.mnemonic in ['call']:
-
-                next_offset = inst.offset + inst.size
-                remote_offset = None
-
-                # Call to Imported API (in IAT)
-                # dword ptr [0x........] or qword ptr [0x........]
-                if "word ptr [0x" in inst.op_str:
-                    iat_va = int(inst.op_str.split('[')[1].split(']')[0], 16)
-
-                    if iat_va in iat_api:
-                        inst.op_str = iat_api[iat_va]
-                elif inst.op_str in ['eax', 'ebx', 'ecx', 'edx', 'esi', 'edi', 'esp', 'ebp']:
-                    pass
-                else:
-                    try:
-                        remote_offset = self.get_offset_from_rva(
-                            elf,
-                            int(inst.op_str, 16) - self.get_image_base_rva(elf))
-                    except Exception as e:
-                        # print "ERROR CALL: %s\n%s\n" % (e, inst)
-                        pass
-
-                insts = _dis(
-                    data=data,
-                    offset=next_offset,
-                    elf=elf,
-                    insts=insts,
-                    ifrom=insts[inst.offset],
-                    from_pred=True,
-                    verbose=verbose
-                )
-
-                if remote_offset:
-                    insts = _dis(
-                        data=data,
-                        offset=remote_offset,
-                        elf=elf,
-                        insts=insts,
-                        ifrom=insts[inst.offset],
-                        from_pred=False,
-                        verbose=verbose
-                    )
-
-            # 1 child (next) - basic instruction
-            else:
-                next_offset = inst.offset + inst.size
-                # inst.next.append(next_offset)
-                # print inst
-                insts = _dis(
-                    data=data,
-                    offset=next_offset,
-                    elf=elf,
-                    insts=insts,
-                    ifrom=insts[inst.offset],
-                    from_pred=True,
-                    verbose=verbose
-                )
-
-            return insts
-
-        insts = _dis(data=data, offset=offset, elf=elf, insts=insts, verbose=verbose)
+        insts = self._dis(data=data, offset=offset, bin_instance=bin_instance, insts=insts, verbose=verbose)
 
         # Function 'start' jumps on function 'main' with a dynamic jump. 'main' address is given in argument
         # so we get that argument and we continue to disassemble
@@ -672,114 +525,21 @@ class ELFDisassembler:
                 rva_init = int(i2.op_str.split(", 0x")[1], 16)
                 rva_main = int(i3.op_str.split(", 0x")[1], 16)
 
-                insts = _dis(data=data, offset=self.get_offset_from_rva(elf, rva_fini), elf=elf, insts=insts, verbose=verbose)
-                insts = _dis(data=data, offset=self.get_offset_from_rva(elf, rva_init), elf=elf, insts=insts, verbose=verbose)
-                insts = _dis(data=data, offset=self.get_offset_from_rva(elf, rva_main), elf=elf, insts=insts, verbose=verbose)
+                insts = self._dis(data=data, offset=self.get_offset_from_rva(bin_instance, rva_fini), bin_instance=bin_instance, insts=insts, verbose=verbose)
+                insts = self._dis(data=data, offset=self.get_offset_from_rva(bin_instance, rva_init), bin_instance=bin_instance, insts=insts, verbose=verbose)
+                insts = self._dis(data=data, offset=self.get_offset_from_rva(bin_instance, rva_main), bin_instance=bin_instance, insts=insts, verbose=verbose)
 
                 break
             except:
                 continue
 
         # Exploration of the exported functions
-        _dis_exported_funcs(elf=elf, insts=insts, verbose=verbose)
+        self._dis_exported_funcs(data=data, bin_instance=bin_instance, insts=insts, verbose=verbose)
 
         # Search for unrecognized functions from their prolog function
-        for prologue in self.prologues:
-            for m in re.finditer(prologue, data):
-
-                function_offset = m.start()
-
-                if function_offset not in insts:
-                    insts = _dis(data=data, offset=function_offset, elf=elf, insts=insts, verbose=verbose)
+        insts = self.dis_prologues(data=data, bin_instance=bin_instance, iat_api=iat_api, insts=insts, verbose=verbose)
 
         return insts
-
-    def display(self, insts, offset_from=0):
-        for offset, inst in sorted(insts.iteritems()):
-            if offset >= offset_from:
-                print inst
-
-    def export_to_dot(self, insts, oep_offset, displayable=True):
-        '''
-            Export the intruction graph to .dot format
-        '''
-        nodes = StringIO()
-        edges = StringIO()
-        dot = StringIO()
-
-        header = "digraph G {\n"
-        footer = "}"
-
-        if displayable:
-            for offset, inst in sorted(insts.iteritems()):
-                if inst.op_str == "":
-                    inst_str = "%s" % inst.mnemonic
-                else:
-                    inst_str = "%s %s" % (inst.mnemonic, inst.op_str)
-
-                if offset != oep_offset:
-                    nodes.write(('"%X" [label="%s", address="0x%X", inst="%s", '
-                                 'style="", shape=box, fillcolor="white"]\n') % (
-                        inst.va,
-                        "%016X: %s %s" % (inst.va, inst.mnemonic, inst.op_str),
-                        inst.va,
-                        inst_str
-                    ))
-                else:
-                    nodes.write(('"%X" [label="%s", address="0x%X", inst="%s", '
-                                 'style="", shape=box, fillcolor="white", root=true]\n') % (
-                        inst.va,
-                        "%016X: %s %s" % (inst.va, inst.mnemonic, inst.op_str),
-                        inst.va,
-                        inst_str
-                    ))
-
-                if inst.to_succ is not None:
-                    edges.write(('"%X" -> "%X" [label=0, color=%s, child_number=1]\n') % (
-                        inst.va,
-                        insts[inst.to_succ].va,
-                        "black"
-                    ))
-
-                if inst.to_other is not None:
-                    edges.write(('"%X" -> "%X" [label=1, color=%s, child_number=2]\n') % (
-                        inst.va,
-                        insts[inst.to_other].va,
-                        "red"
-                    ))
-        else:
-
-            for offset, inst in sorted(insts.iteritems()):
-                if inst.op_str == "":
-                    inst_str = "%s" % inst.mnemonic
-                else:
-                    inst_str = "%s %s" % (inst.mnemonic, inst.op_str)
-
-                if offset != oep_offset:
-                    nodes.write(('"%X" [inst="%s", address="0x%X"]\n') % (
-                        inst.va,
-                        inst_str,
-                        inst.va
-                    ))
-                else:
-                    nodes.write(('"%X" [inst="%s", address="0x%X", root=true]\n') % (
-                        inst.va,
-                        inst_str,
-                        inst.va
-                    ))
-
-                if inst.to_succ is not None:
-                    edges.write(('"%X" -> "%X" [child_number=1]\n') % (inst.va, insts[inst.to_succ].va))
-
-                if inst.to_other is not None:
-                    edges.write(('"%X" -> "%X" [child_number=2]\n') % (inst.va, insts[inst.to_other].va))
-
-        dot.write(header)
-        dot.write(nodes.getvalue())
-        dot.write(edges.getvalue())
-        dot.write(footer)
-
-        return dot.getvalue()
 
 
 def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listing=False, readable=False, verbose=False):
@@ -834,7 +594,7 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
                 iat_dict[imp.address] = entry_str + "." + imp_str
 
     disass = PEDisassembler(arch=arch, mode=mode)
-    insts = disass.dis(data=pe_data, offset=oep_offset, iat_api=iat_dict, pe=pe, verbose=verbose)
+    insts = disass.dis(data=pe_data, offset=oep_offset, iat_api=iat_dict, bin_instance=pe, verbose=verbose)
 
     if dot_path is not None:
         dot = disass.export_to_dot(insts=insts, oep_offset=oep_offset, displayable=readable)
@@ -879,7 +639,7 @@ def disassemble_elf(elf_data = None, elf_path = None, dot_path = None, print_lis
         sys.exit(1)
 
     disass = ELFDisassembler(arch=arch, mode=mode)
-    insts = disass.dis(data=elf_data, offset=oep_offset, iat_api={}, elf=elf, verbose=verbose)
+    insts = disass.dis(data=elf_data, offset=oep_offset, iat_api={}, bin_instance=elf, verbose=verbose)
 
     if dot_path is not None:
         dot = disass.export_to_dot(insts=insts, oep_offset=oep_offset, displayable=readable)
