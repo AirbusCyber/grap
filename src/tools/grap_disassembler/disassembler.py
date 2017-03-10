@@ -542,6 +542,26 @@ class ELFDisassembler(GenericDisassembler):
         return insts
 
 
+class RawDisassembler(GenericDisassembler):
+    def get_offset_from_rva(self, raw, rva):
+        return rva
+
+    def get_offset_from_va(self, raw, rva):
+        return rva - self.get_image_base_rva(raw)
+
+    def get_rva_from_offset(self, raw, offset):
+        return offset
+
+    def get_va_from_offset(self, raw, offset):
+        return self.get_rva_from_offset(raw, offset) + self.get_image_base_rva(raw)
+
+    def get_image_base_rva(self, raw):
+        return 0
+
+    def _dis_exported_funcs(self, bin_instance, insts, data, verbose, iat_api=dict()):
+        return
+
+
 def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listing=False, readable=False, verbose=False):
     if pe_data is None and pe_path is None:
         print "ERROR: Missing PE path or data."
@@ -554,13 +574,6 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
         pe = pefile.PE(pe_path)
     except:
         print "ERROR: pefile could not parse PE."
-        return None
-
-    def find_entry_point_section(pe, eop_rva):
-        for section in pe.sections:
-            if section.contains_rva(eop_rva):
-                return section
-
         return None
 
     arch = CS_ARCH_X86
@@ -651,14 +664,47 @@ def disassemble_elf(elf_data = None, elf_path = None, dot_path = None, print_lis
     return True
 
 
-def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listing=False, readable=False, verbose=False):
+def disassemble_raw(raw_data = None, raw_path = None, dot_path = None, print_listing=False, readable=False, verbose=False):
+    if raw_data is None and raw_path is None:
+        print "ERROR: Missing PE path or data."
+        return None
+
+    if raw_data is None:
+        raw_data = open(raw_path, "r").read()
+
+    arch = CS_ARCH_X86
+    #mode = CS_MODE_32 if is_32 else CS_MODE_64
+    mode = CS_MODE_32
+
+    oep_offset = 0
+
+    iat_dict = dict()
+
+    disass = RawDisassembler(arch=arch, mode=mode)
+    insts = disass.dis(data=raw_data, offset=oep_offset, iat_api=iat_dict, bin_instance=None, verbose=verbose)
+
+    if dot_path is not None:
+        dot = disass.export_to_dot(insts=insts, oep_offset=oep_offset, displayable=readable)
+        open(dot_path, "wb").write(dot)
+
+    if print_listing:
+        disass.display(insts, offset_from=0)
+
+    return True
+
+
+def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listing=False, readable=False, raw=False, verbose=False):
     if verbose:
         print "Disassembling", bin_path
 
     if bin_data is None:
         bin_data = open(bin_path, "rb").read()
 
-    if bin_data[0:2] == "MZ":
+    if raw:
+        if disassemble_raw(raw_data=bin_data, raw_path=bin_path, dot_path=dot_path, print_listing=print_listing,
+                           readable=readable, verbose=verbose):
+            return dot_path
+    elif bin_data[0:2] == "MZ":
         if disassemble_pe(pe_data=bin_data, pe_path=bin_path, dot_path=dot_path, print_listing=print_listing,
                           readable=readable, verbose=verbose):
             return dot_path
