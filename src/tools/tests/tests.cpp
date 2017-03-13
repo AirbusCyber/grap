@@ -95,6 +95,14 @@ void printDescription()
 		" not crash)\n";
   std::cout << "Test 36: [reference to 35] same as test 35 with all"
 		" patterns in a single file\n";
+  std::cout << "Test 37: [manual] with A true, B false and C false,"
+                "A and not B and C should be false";
+  std::cout << "Test 38: [manual] with A true, B false and C false,"
+                "A and (not B) and C should be false";
+  std::cout << "Test 39: [manual] with A true, B false and C false,"
+                "A and not (B) and C should be false";
+  std::cout << "Test 40: [manual] with A true, B false and C false,"
+                "A and not (B and C) should be true";
 }
 
 #ifdef _WIN32

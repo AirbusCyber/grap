@@ -1116,7 +1116,13 @@ CondNode* CondNodeParser::factor(){
   }
   else if (this->accept("NOT")){
     std::list<CondNode*>* not_child = new std::list<CondNode*>();
-    not_child->push_front(this->expression());
+    if (this->accept("LP")){
+      not_child->push_front(this->expression());
+      this->expect("RP");
+    }
+    else {
+      not_child->push_front(this->factor());
+    }
     cn = new CondNode(not_child, UnOpEnum::logic_not);
   }
   else if (this->accept("W")){

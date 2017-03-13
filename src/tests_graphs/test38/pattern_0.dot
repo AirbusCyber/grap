@@ -1,0 +1,3 @@
+digraph test37 {
+"A" [cond="opcode is xor and (not arg1 is ebx) and arg2 is ecx"]
+}

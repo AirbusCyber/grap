@@ -1,0 +1,7 @@
+Digraph G {
+"A" [inst = "jne C" , root=true]
+"B" [inst = "xor eax, eax"]
+"C" [inst = "push ebp"]
+"A" -> "B" [childnumber=1]
+"A" -> "C" [childnumber=2]
+}
