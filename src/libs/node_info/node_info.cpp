@@ -977,7 +977,7 @@ void CondNodeParser::tokenize(std::string str){
       }
     }
     else if (state == 2){
-      if (char_type == 0){
+      if (not delimiter_used and char_type == 0){
         CondNodeToken t = CondNodeToken(str.substr(begin, i-begin));
         this->tokens.push_back(t);
         state = 0;
@@ -988,6 +988,7 @@ void CondNodeParser::tokenize(std::string str){
         t.value = str.substr(begin+1, i-begin-1);
         this->tokens.push_back(t);
         state = 0;
+        delimiter_used = false;
       }
       else if (not delimiter_used and char_type == 1){
         CondNodeToken t = CondNodeToken(str.substr(begin, i-begin));
