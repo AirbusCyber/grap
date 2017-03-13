@@ -723,7 +723,7 @@ def disas_worker(arg):
     disassemble_file(bin_path=arg[0], dot_path=arg[1], print_listing=arg[2], readable=arg[3], verbose=arg[4])
 
 
-def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes=1, print_listing=False, readable=False, verbose=False):
+def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes=1, print_listing=False, readable=False, raw=False, raw_64=False, verbose=False):
     dot_path_list = []
     arg_list = []
 
@@ -752,7 +752,7 @@ def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes
     else:
         for path in path_list:
             r = disassemble_file(bin_path=path, dot_path=path+dot_path_suffix, print_listing=print_listing,
-                                 readable=readable, verbose=verbose)
+                                 readable=readable, raw=raw, raw_64=raw_64, verbose=verbose)
             if r is not None:
                 dot_path_list.append(r)
 
