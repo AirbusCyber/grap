@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from grap_disassembler import disassembler
+import pygrap
 import subprocess
 import os
 import sys
@@ -90,9 +91,17 @@ if __name__ == '__main__':
         for path in disassembled_files:
             dot_test_files.add(path)
 
+    if args.pattern is None or os.path.exists(args.pattern):
+        pattern_path = args.pattern
+    else:
+        pattern_path = pygrap.get_dot_path_from_string(args.pattern)
+
+        if args.verbose:
+            print "Inferred pattern path written:", pattern_path
+
     dot_test_files = sorted(list(dot_test_files))
     if not args.only_disassemble:
-        if args.pattern is not None and len(dot_test_files) >= 1:
+        if pattern_path is not None and len(dot_test_files) >= 1:
             if printed_something or args.verbose:
                 print("")
             command = ["/usr/local/bin/grap-match"]
@@ -118,7 +127,7 @@ if __name__ == '__main__':
             if not args.multithread:
                 command.append("-nt")
 
-            command.append(args.pattern)
+            command.append(pattern_path)
 
             for test_path in dot_test_files:
                 command.append(test_path)

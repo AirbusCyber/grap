@@ -12,6 +12,9 @@ if(PYTHON_BINDING)
   set(SWIG_FILE pygrap.i)
   get_property(SRCS GLOBAL PROPERTY SRCS_BINDING)
 
+  # Dependencies
+  set(SWIG_MODULE_pygrap_EXTRA_DEPS dot_writer.py)
+
   # SWIG
   FIND_PACKAGE(SWIG REQUIRED)
 

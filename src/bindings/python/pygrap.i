@@ -77,6 +77,8 @@ graph_t* getGraphFromFile(const char *filename) {
 %template(GraphCppList) std::list<graph_t *>;
 
 %pythoncode %{
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 import sys
 import os
 import tempfile
@@ -158,3 +160,5 @@ def match_graph(pattern_arg, test_arg):
 
     return matches
 %}
+
+%pythoncode "dot_writer.py"
