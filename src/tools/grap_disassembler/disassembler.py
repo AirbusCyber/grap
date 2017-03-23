@@ -100,14 +100,17 @@ class GenericDisassembler:
 
         try:
             inst_va = self.get_va_from_offset(bin_instance, offset)
-        except:
+        except Exception, e:
             if verbose:
-                print 'WARNING: RVA not found from offset', hex(offset)
+                print "WARNING:", repr(e)
             return insts
+
 
         try:
             i = self.capstone.disasm(data[offset:], inst_va, count=1).next()
-        except:
+        except Exception, e:
+            if verbose:
+                print "WARNING:", repr(e)
             return insts
 
         inst = Instruction(
@@ -132,7 +135,6 @@ class GenericDisassembler:
 
         # 1 remote child
         elif inst.mnemonic in ['jmp', 'jmpf']:
-
             if "word ptr [0x" in inst.op_str:
                 iat_va = int(inst.op_str.split('[')[1].split(']')[0], 16)
 
@@ -152,7 +154,9 @@ class GenericDisassembler:
                             from_pred=False,
                             verbose=verbose
                         )
-                except:
+                except Exception, e:
+                    if verbose:
+                        print "WARNING:", repr(e)
                     pass
 
         # 2 children (next, then remote) - except call
@@ -164,7 +168,9 @@ class GenericDisassembler:
 
             try:
                 remote_offset = self.get_offset_from_va(bin_instance, int(inst.op_str, 16))
-            except:
+            except Exception, e:
+                if verbose:
+                    print "WARNING:", repr(e)
                 return insts
 
             insts = self._dis(
@@ -208,7 +214,8 @@ class GenericDisassembler:
                 try:
                     remote_offset = self.get_offset_from_va(bin_instance, int(inst.op_str, 16))
                 except Exception as e:
-                    # print "ERROR CALL: %s\n%s\n" % (e, inst)
+                    if verbose:
+                        print "WARNING:", repr(e)
                     pass
 
             insts = self._dis(
@@ -397,7 +404,9 @@ class PEDisassembler(GenericDisassembler):
         # Export table
         try:
             export_table = bin_instance.DIRECTORY_ENTRY_EXPORT.symbols
-        except:
+        except Exception, e:
+            if verbose:
+                print "WARNING:", repr(e)
             export_table = None
 
         if export_table is not None:
@@ -530,7 +539,9 @@ class ELFDisassembler(GenericDisassembler):
                 insts = self._dis(data=data, offset=self.get_offset_from_rva(bin_instance, rva_main), bin_instance=bin_instance, insts=insts, verbose=verbose)
 
                 break
-            except:
+            except Exception, e:
+                if verbose:
+                    print "WARNING:", repr(e)
                 continue
 
         # Exploration of the exported functions
@@ -572,7 +583,9 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
 
     try:
         pe = pefile.PE(pe_path)
-    except:
+    except Exception, e:
+        if verbose:
+            print "WARNING:", repr(e)
         print "ERROR: pefile could not parse PE."
         return None
 
@@ -588,7 +601,9 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
 
     try:
         import_table = pe.DIRECTORY_ENTRY_IMPORT.symbols
-    except:
+    except Exception, e:
+        if verbose:
+            print "WARNING:", repr(e)
         import_table = None
 
     if import_table is not None:
@@ -640,8 +655,9 @@ def disassemble_elf(elf_data = None, elf_path = None, dot_path = None, print_lis
             try:
                 if section['sh_addr'] <= oep_rva < section['sh_addr'] + section['sh_size']:
                     return section['sh_offset'] + (oep_rva - section['sh_addr'])
-            except Exception as e:
-                print e
+            except Exception, e:
+                if verbose:
+                    print "WARNING:", repr(e)
                 continue
         return None
 
@@ -665,7 +681,7 @@ def disassemble_elf(elf_data = None, elf_path = None, dot_path = None, print_lis
 
 
 def disassemble_raw(raw_data = None, raw_path = None, dot_path = None, print_listing=False, readable=False,
-                    raw_64=False, verbose=False):
+                    raw_64=False, entrypoint=None, verbose=False):
     if raw_data is None and raw_path is None:
         print "ERROR: Missing PE path or data."
         return None
@@ -676,7 +692,10 @@ def disassemble_raw(raw_data = None, raw_path = None, dot_path = None, print_lis
     arch = CS_ARCH_X86
     mode = CS_MODE_64 if raw_64 else CS_MODE_32
 
-    oep_offset = 0
+    if entrypoint is not None:
+        oep_offset = entrypoint
+    else:
+        oep_offset = 0
 
     iat_dict = dict()
 
@@ -694,7 +713,7 @@ def disassemble_raw(raw_data = None, raw_path = None, dot_path = None, print_lis
 
 
 def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listing=False, readable=False, raw=False,
-                     raw_64=False, verbose=False):
+                     raw_64=False, entrypoint=None, verbose=False):
     if verbose:
         print "Disassembling", bin_path
 
@@ -703,7 +722,7 @@ def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listin
 
     if raw:
         if disassemble_raw(raw_data=bin_data, raw_path=bin_path, dot_path=dot_path, print_listing=print_listing,
-                           readable=readable, raw_64=raw_64, verbose=verbose):
+                           readable=readable, raw_64=raw_64, entrypoint=entrypoint, verbose=verbose):
             return dot_path
     elif bin_data[0:2] == "MZ":
         if disassemble_pe(pe_data=bin_data, pe_path=bin_path, dot_path=dot_path, print_listing=print_listing,
@@ -759,4 +778,9 @@ def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes
     return dot_path_list
 
 
-
+if __name__ == "__main__":
+    if len(sys.argv) == 2:
+        sys.setrecursionlimit(1000000)
+        bin_path = sys.argv[1]
+        dot_path = bin_path + ".dot"
+        disassemble_file(bin_path=bin_path, dot_path=dot_path, verbose=True)

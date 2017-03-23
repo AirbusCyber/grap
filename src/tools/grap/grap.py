@@ -11,7 +11,7 @@ import argparse
 GRAP_VERSION="1.0.0"
 
 if __name__ == '__main__':
-    sys.setrecursionlimit(4000)
+    sys.setrecursionlimit(1000000)
 
     parser = argparse.ArgumentParser(description='grap: look for a graph pattern in a PE/ELF binary or a .dot graph file',
                                      formatter_class=argparse.RawTextHelpFormatter)
