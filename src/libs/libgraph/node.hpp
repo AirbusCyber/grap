@@ -51,6 +51,8 @@ typedef struct node_t {
    */
   struct node_t** fathers;
 
+  bool children_are_wildcards;
+  
   bool has_child1;
   node_t* child1;
   
@@ -91,7 +93,7 @@ void node_free(node_t* node, bool free_info);
  @param child the child node.
  @see node_new_child() node_child()
  */
-void node_link(node_t* node, node_t* child, bool is_child1);
+void node_link(node_t* node, node_t* child, bool is_wildcard, bool is_child1);
 
 /*!
  @brief Get the i-th father of a node.

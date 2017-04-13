@@ -43,7 +43,7 @@ void node_free (node_t * node, bool free_info) {
   free(node);
 }
 
-void node_link (node_t * node, node_t * child, bool is_child1) {
+void node_link (node_t * node, node_t * child, bool is_wildcard, bool is_child1) {
   if (is_child1){
     if (not node->has_child1) {
       node->children_nb++;
@@ -64,7 +64,11 @@ void node_link (node_t * node, node_t * child, bool is_child1) {
     }
     node->child2 = child;
   }
-  
+ 
+  if (is_wildcard){
+    node->children_are_wildcards = true; 
+  }
+ 
   child->fathers_nb++;
   child->fathers = (node_t**) realloc_or_quit(child->fathers, child->fathers_nb * sizeof(node_t*));
   child->fathers[child->fathers_nb - 1] = node;

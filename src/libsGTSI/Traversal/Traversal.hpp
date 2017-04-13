@@ -29,10 +29,13 @@ enum TypeMotParcours {
 
 class MotParcours {
 public:
+  MotParcours* duplicate();
+  
   TypeMotParcours type;
   bool has_symbol;
   vsize_t i;
   bool alpha_is_R;
+  bool children_are_wildcards;
   uint8_t k;
   MotParcours();
   string toString();
@@ -63,10 +66,12 @@ public:
   vsize_t size;
   MotParcours **mots;
   string name;
+  bool need_postprocessing;
   
   Parcours();
   string toString();
   void addMot(MotParcours * m);
+//   std::list<Parcours *> postprocessParcours();
   typedef std::pair < bool, Match*> RetourParcoursDepuisSommet;
   RetourParcoursDepuisSommet parcourirDepuisSommet(graph_t *, vsize_t root, vsize_t W, bool checkLabels, bool printFound, bool printAllMatches);
   std::pair <bool, node_t*> parcoursUnmatchedNode(bool checkLabels, bool returnFound, MotParcours* m, node_t* node, node_t* current_node, set < node_t * >* matched_nodes, std::pair < node_t *, node_t * >*numbers, vsize_t max_numbered, Match* found_nodes, bool printAllMatches);
@@ -82,7 +87,7 @@ void freePatternsMatches(PatternsMatches* patterns_matches, bool freeMatches);
 
 typedef std::tuple < node_t *, uint8_t, node_t * >TupleQueue;
 
-vsize_t parcoursProfondeurRec(Parcours *p, bool has_father, vsize_t father_number, node_t * s, vsize_t i, set < node_t * >* explored, std::map <node_t*, vsize_t>* node_ids, vsize_t W);
+vsize_t parcoursProfondeurRec(Parcours *p, bool has_father, vsize_t father_number, node_t * s, bool i_wildcard, vsize_t i, set < node_t * >* explored, std::map <node_t*, vsize_t>* node_ids, vsize_t W);
 Parcours* parcoursProfondeur(graph_t * graph, vsize_t vroot, vsize_t W);
 Parcours *parcoursLargeur(graph_t * graph, vsize_t root, vsize_t W);
 Parcours* parcoursGen(graph_t * graph, vsize_t root, vsize_t W);
@@ -99,7 +104,7 @@ public:
   
   ParcoursNode();
   ParcoursNode(std::list < ParcoursNode * >fils, MotParcours * mot, uint64_t id);
-  bool addGraphFromNode(graph_t *, node_t *, vsize_t W, bool checkLabels);
+  bool addGraphFromNode(graph_t* gr, node_t* r, vsize_t W, bool checkLabels);
   bool addParcours(Parcours * p, vsize_t index, bool checkLabels);
   void saveParcoursNodeToDot(string path);
   string toDotPartiel();

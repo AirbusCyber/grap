@@ -7,6 +7,23 @@ MotParcours::MotParcours() {
 
 }
 
+MotParcours* MotParcours::duplicate(){
+  MotParcours* m = new MotParcours();
+  
+  m->type = this->type;
+  m->has_symbol = this->has_symbol;
+  m->i = this->i;
+  m->alpha_is_R = this->alpha_is_R;
+  m->children_are_wildcards = this->children_are_wildcards;
+  m->k = this->k;
+  
+  m->info = this->info;
+  m->condition = this->condition;
+  m->condition->add_pointer_usage();
+  
+  return this;
+}
+
 string MotParcours::toString() {
   string s = "";
 
@@ -95,6 +112,8 @@ bool MotParcours::sameSymbol(MotParcours *m, bool checkLabels)
 {
   // TODO: etre plus malin avec les comparaisons (ne prendre que les champs de
   // condition en compte dans la comparaison des infos ?)
+  std::cout << "info cond" << std::endl;
+  std::cout << this->info->equals(m->info) << " " << this->condition->equals(m->condition) << std::endl;
   return (not checkLabels) or (this->info->equals(m->info)
                               and this->condition->equals(m->condition));
 }
@@ -112,10 +131,13 @@ bool MotParcours::sameRepeatAndCF(MotParcours * m) {
   return r;
 }
 
-bool MotParcours::equals(MotParcours * m, bool checkLabels) {
+bool MotParcours::equals(MotParcours * m, bool checkLabels) {  
   if (this->type == m->type) {
     if (this->type == TYPE_M1) {
-      return this->sameSymbol(m, checkLabels) and this->sameRepeatAndCF(m);
+      bool r = this->sameSymbol(m, checkLabels) and this->sameRepeatAndCF(m);
+      std::cout << std::hex << this->condition->toString(this->info) << " VS " << m->condition->toString(m->info) << std::endl;
+      std::cout << r << std::endl;
+      return r;
     }
     else {
       if (this->alpha_is_R == m->alpha_is_R) {
@@ -123,7 +145,7 @@ bool MotParcours::equals(MotParcours * m, bool checkLabels) {
           return this->i == m->i;
         }
         else {
-          return this->k == m->k and this->i == m->i and this->sameSymbol(m, checkLabels) and this->sameRepeatAndCF(m);
+          return (this->k == m->k or this->children_are_wildcards or m->children_are_wildcards) and this->i == m->i and this->sameSymbol(m, checkLabels) and this->sameRepeatAndCF(m);
         }
       }
       else {
@@ -138,6 +160,7 @@ bool MotParcours::equals(MotParcours * m, bool checkLabels) {
 Parcours::Parcours() {
   this->mots = NULL;
   this->size = 0;
+  this->need_postprocessing = false;
 }
 
 bool Parcours::equals(Parcours * p, bool checkLabels) {
@@ -212,7 +235,11 @@ CondNode* computeCond(node_t* n){
   }
 }
 
-vsize_t parcoursProfondeurRec(Parcours *p, bool has_father, vsize_t father_number, node_t * s, vsize_t i, set < node_t * >* explored, std::map <node_t*, vsize_t>* node_ids, vsize_t W) {
+vsize_t parcoursProfondeurRec(Parcours *p, bool has_father, vsize_t father_number, node_t * s, bool i_wildcard, vsize_t i, set < node_t * >* explored, std::map <node_t*, vsize_t>* node_ids, vsize_t W) {
+  if (i_wildcard){
+    p->need_postprocessing = true; 
+  }
+  
   set < node_t * >::iterator explored_search;
   std::map<node_t*, vsize_t>::iterator node_ids_search;
   vsize_t new_i;
@@ -230,6 +257,7 @@ vsize_t parcoursProfondeurRec(Parcours *p, bool has_father, vsize_t father_numbe
     
     if (not has_father) {
         m = new MotParcours();
+        m->children_are_wildcards = i_wildcard;
         m->type = TYPE_M1;
         m->alpha_is_R = false;
         m->has_symbol = true;
@@ -239,6 +267,7 @@ vsize_t parcoursProfondeurRec(Parcours *p, bool has_father, vsize_t father_numbe
       }
       else {
         m = new MotParcours();
+        m->children_are_wildcards = i_wildcard;
         m->type = TYPE_M2;
         m->alpha_is_R = false;
         m->i = i;
@@ -254,24 +283,27 @@ vsize_t parcoursProfondeurRec(Parcours *p, bool has_father, vsize_t father_numbe
     
     new_i = i + 1;
     
-    if (s->has_child1){
-      new_i = parcoursProfondeurRec(p, true, 0, s->child1, new_i, explored, node_ids, W);
-    }
-    
-    if (s->has_child2){
+    if (s->has_child1 or s->has_child2){      
       if (s->has_child1){
-        // Make return mot
-        m = new MotParcours();
-        m->type = TYPE_M2;
-        m->alpha_is_R = true;
-        m->has_symbol = false;
-        m->i = i;
-        m->info = NULL;
-        m->condition = NULL;
-        p->addMot(m);
+        new_i = parcoursProfondeurRec(p, true, 0, s->child1, s->children_are_wildcards, new_i, explored, node_ids, W);
       }
       
-      new_i = parcoursProfondeurRec(p, true, 1, s->child2, new_i, explored, node_ids, W);
+      if (s->has_child2){
+        if (s->has_child1){
+          // Make return mot
+          m = new MotParcours();
+          m->children_are_wildcards = i_wildcard;
+          m->type = TYPE_M2;
+          m->alpha_is_R = true;
+          m->has_symbol = false;
+          m->i = i;
+          m->info = NULL;
+          m->condition = NULL;
+          p->addMot(m);
+        }
+        
+        new_i = parcoursProfondeurRec(p, true, 1, s->child2, s->children_are_wildcards, new_i, explored, node_ids, W);
+      }
     }
     
     return new_i;
@@ -279,6 +311,7 @@ vsize_t parcoursProfondeurRec(Parcours *p, bool has_father, vsize_t father_numbe
   else {
     // Case: node already explored
       MotParcours* m = new MotParcours();
+      m->children_are_wildcards = i_wildcard;
       m->type = TYPE_M2;
       m->alpha_is_R = false;
       
@@ -306,7 +339,7 @@ Parcours* parcoursProfondeur(graph_t * graph, vsize_t vroot, vsize_t W){
   set < node_t * >* explored = new std::set<node_t*>();
   std::map <node_t*, vsize_t>* node_ids = new std::map <node_t*, vsize_t>();
   
-  vsize_t i = parcoursProfondeurRec(p, false, 0, node_list_item(&(graph->nodes), vroot), 1, explored, node_ids, W);
+  vsize_t i = parcoursProfondeurRec(p, false, 0, node_list_item(&(graph->nodes), vroot), false, 1, explored, node_ids, W);
   if (W == i-1){
     p->complete = true; 
   }
@@ -320,6 +353,8 @@ Parcours* parcoursProfondeur(graph_t * graph, vsize_t vroot, vsize_t W){
 }
 
 Parcours *parcoursLargeur(graph_t * graph, vsize_t vroot, vsize_t W) {
+  std::cerr << "WARNING: parcoursLargeur is deprecated" << std::endl;
+  
   Parcours *p = new Parcours();
   p->name = graph->name;
 
@@ -823,8 +858,22 @@ ParcoursNode::ParcoursNode(std::list < ParcoursNode * >_fils, MotParcours * _mot
   this->id = _id;
 }
 
+// std::list<Parcours *> Parcours::postprocessParcours(){
+//   std::list<Parcours *> pl;
+//   
+// //   if (not this->need_postprocessing){
+// //     pl.push_back(this);
+// //   }
+// //   else {
+// //     
+// //   }
+// //   
+//   return pl;
+// }
+
 bool ParcoursNode::addGraphFromNode(graph_t * gr, node_t * r, vsize_t W, bool checkLabels) {
   Parcours *p = parcoursGen(gr, r->list_id, W);
+//   std::list<Parcours *> pl = p->postprocessParcours();
   
   if (p->complete){
     bool ret = this->addParcours(p, 0, checkLabels);
@@ -902,23 +951,58 @@ bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {
     return not b;
   }
   MotParcours *m = p->mots[index];
-  list < ParcoursNode * >::iterator it;
-  for (it = this->fils.begin(); it != this->fils.end(); it++) {
-    ParcoursNode *f = (*it);
+  list <MotParcours*> mots = list <MotParcours*>();
+  
+  if (m->type == TYPE_M2 and not m->alpha_is_R) {
+     if (m->children_are_wildcards){
+       std::cout << "Wildcard!" << std::endl;
+       m->children_are_wildcards = false;
+       m->i = 0;
+       mots.push_back(m);
+       
+       MotParcours* m2 = m->duplicate();
+       m2->i = 1;
+       mots.push_back(m2);
+     }
+     else {
+       mots.push_back(m);
+     }
+  }
+  else {
+    mots.push_back(m);
+  }
+  
+  list <MotParcours*>::iterator mots_it;
+  bool r = false;
+  for (mots_it = mots.begin(); mots_it != mots.end(); mots_it++){
+    MotParcours* mm = (*mots_it);
+    list < ParcoursNode * >::iterator it;
+    for (it = this->fils.begin(); it != this->fils.end(); it++) {
+      ParcoursNode *f = (*it);
+      
+      if (f->mot->equals(mm, checkLabels)) {
+        CondNode::freeCondition(mm->condition, true, true);
+//         delete(mm);
+        if (f->addParcours(p, index + 1, checkLabels)){
+          r = true;
+        }
+        break;
+      }
+    }
     
-    if (f->mot->equals(m, checkLabels)) {
-      CondNode::freeCondition(m->condition, true, true);
-      delete(m);
-      return f->addParcours(p, index + 1, checkLabels);
+    ParcoursNode *pn = new ParcoursNode();
+    std::cout << "created pn: " << std::hex << (uint64_t) pn << std::dec << std::endl;
+    pn->mot = mm;
+    pn->id = (uint64_t) pn;
+
+    this->fils.push_back(pn);
+    if (pn->addParcours(p, index + 1, checkLabels)){
+      r = true; 
+      break;
     }
   }
-
-  ParcoursNode *pn = new ParcoursNode();
-  pn->mot = m;
-  pn->id = (uint64_t) pn;
-
-  this->fils.push_back(pn);
-  return pn->addParcours(p, index + 1, checkLabels);
+  
+  return r;
 }
 
 ParcoursNode::RetourParcourir ParcoursNode::parcourir(graph_t* gr, vsize_t W, bool checkLabels, bool returnFound, bool printAllMatches) {

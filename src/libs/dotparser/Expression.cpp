@@ -71,6 +71,7 @@ Couple *createEdge(char *f, char *c, OptionList* ol) {
   e->x = hash_func(f);
   e->y = hash_func(c);
   e->is_numbered = false;
+  e->is_wildcard = false;
   e->is_child1 = false;
   
   if (ol != NULL){
@@ -80,18 +81,23 @@ Couple *createEdge(char *f, char *c, OptionList* ol) {
       char *id = ol->options[i]->id;
     
       if (strcmp(id, "childnumber") == 0 or strcmp(id, "child_number") == 0){
-        vsize_t k = (vsize_t) strtol(v, NULL, 0);
-        
-        if (k == 1){
-          e->is_numbered = true;
-          e->is_child1 = true;
+        if (strcmp(v, "?") == 0 or strcmp(v, "*") == 0){
+          e->is_wildcard = true; 
         }
-        else if (k == 2){
-          e->is_numbered = true;
-          e->is_child1 = false;
-        }
-        else{
-          std::cerr << "WARNING: Edges' childnumber option should have values of 1 or 2." << std::endl;
+        else {
+          vsize_t k = (vsize_t) strtol(v, NULL, 0);
+          
+          if (k == 1){
+            e->is_numbered = true;
+            e->is_child1 = true;
+          }
+          else if (k == 2){
+            e->is_numbered = true;
+            e->is_child1 = false;
+          }
+          else{
+            std::cerr << "WARNING: Edges' childnumber option should have values of 1 or 2." << std::endl;
+          }
         }
       }
       free(v);
@@ -138,10 +144,10 @@ graph_t *addEdgesToGraph(char* name, CoupleList * cl, graph_t * g) {
     }
     else {
       if (cl->couples[i]->is_numbered){
-        node_link(f, c, cl->couples[i]->is_child1);
+        node_link(f, c, cl->couples[i]->is_wildcard, cl->couples[i]->is_child1);
       }
       else{
-        node_link(f, c, not f->has_child1);
+        node_link(f, c, cl->couples[i]->is_wildcard, not f->has_child1);
       }
     }
   }
