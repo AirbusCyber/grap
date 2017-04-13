@@ -839,30 +839,6 @@ bool ParcoursNode::addGraphFromNode(graph_t * gr, node_t * r, vsize_t W, bool ch
   }
 }
 
-vsize_t ParcoursNode::addGraph(graph_t * gr, vsize_t W, vsize_t maxLearn, bool checkLabels) {
-  Parcours *p = NULL;
-  vsize_t n;
-  vsize_t added = 0;
-
-  for (n = 0; n < gr->nodes.size; n++) {
-    if (maxLearn == 0 || added < maxLearn) {
-      p = parcoursGen(gr, n, W);
-
-      if (p->complete) {
-        if (this->addParcours(p, 0, checkLabels)) {
-          added++;
-        }
-      }
-    }
-    else {
-      break;
-    }
-  }
-  
-  delete p;
-  return added;
-}
-
 string ParcoursNode::toString() {
   string s;
   s += this->mot->toString();

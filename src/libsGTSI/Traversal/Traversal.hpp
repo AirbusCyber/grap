@@ -100,7 +100,6 @@ public:
   ParcoursNode();
   ParcoursNode(std::list < ParcoursNode * >fils, MotParcours * mot, uint64_t id);
   bool addGraphFromNode(graph_t *, node_t *, vsize_t W, bool checkLabels);
-  vsize_t addGraph(graph_t *, vsize_t W, vsize_t maxLearn, bool checkLabels);
   bool addParcours(Parcours * p, vsize_t index, bool checkLabels);
   void saveParcoursNodeToDot(string path);
   string toDotPartiel();
