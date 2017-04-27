@@ -112,8 +112,8 @@ bool MotParcours::sameSymbol(MotParcours *m, bool checkLabels)
 {
   // TODO: etre plus malin avec les comparaisons (ne prendre que les champs de
   // condition en compte dans la comparaison des infos ?)
-  std::cout << "info cond" << std::endl;
-  std::cout << this->info->equals(m->info) << " " << this->condition->equals(m->condition) << std::endl;
+//   std::cout << "info cond" << std::endl;
+//   std::cout << this->info->equals(m->info) << " " << this->condition->equals(m->condition) << std::endl;
   return (not checkLabels) or (this->info->equals(m->info)
                               and this->condition->equals(m->condition));
 }
@@ -135,8 +135,8 @@ bool MotParcours::equals(MotParcours * m, bool checkLabels) {
   if (this->type == m->type) {
     if (this->type == TYPE_M1) {
       bool r = this->sameSymbol(m, checkLabels) and this->sameRepeatAndCF(m);
-      std::cout << std::hex << this->condition->toString(this->info) << " VS " << m->condition->toString(m->info) << std::endl;
-      std::cout << r << std::endl;
+//       std::cout << std::hex << this->condition->toString(this->info) << " VS " << m->condition->toString(m->info) << std::endl;
+//       std::cout << r << std::endl;
       return r;
     }
     else {
@@ -950,6 +950,7 @@ bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {
     this->name = p->name;
     return not b;
   }
+  std::cout << "beg" << std::endl;
   MotParcours *m = p->mots[index];
   list <MotParcours*> mots = list <MotParcours*>();
   
@@ -975,14 +976,19 @@ bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {
   list <MotParcours*>::iterator mots_it;
   bool r = false;
   for (mots_it = mots.begin(); mots_it != mots.end(); mots_it++){
+    std::cout << "processing one mot" << std::endl;
     MotParcours* mm = (*mots_it);
     list < ParcoursNode * >::iterator it;
+    bool found = false;
+    
     for (it = this->fils.begin(); it != this->fils.end(); it++) {
       ParcoursNode *f = (*it);
       
       if (f->mot->equals(mm, checkLabels)) {
+        std::cout << "found" << std::endl;
+        found = true;
         CondNode::freeCondition(mm->condition, true, true);
-//         delete(mm);
+        delete(mm);
         if (f->addParcours(p, index + 1, checkLabels)){
           r = true;
         }
@@ -990,15 +996,17 @@ bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {
       }
     }
     
-    ParcoursNode *pn = new ParcoursNode();
-    std::cout << "created pn: " << std::hex << (uint64_t) pn << std::dec << std::endl;
-    pn->mot = mm;
-    pn->id = (uint64_t) pn;
+    if (not found){
+      ParcoursNode *pn = new ParcoursNode();
+//       std::cout << "created pn: " << std::hex << (uint64_t) pn << std::dec << std::endl;
+      pn->mot = mm;
+      pn->id = (uint64_t) pn;
 
-    this->fils.push_back(pn);
-    if (pn->addParcours(p, index + 1, checkLabels)){
-      r = true; 
-      break;
+      this->fils.push_back(pn);
+      if (pn->addParcours(p, index + 1, checkLabels)){
+        r = true; 
+//         break;
+      }
     }
   }
   
