@@ -78,7 +78,7 @@ def convert_export_str_to_dot(str_in, dot_file, pattern_name):
     next_node_number = 1
     terms = str_in.split(";")
     for t in terms:
-        nodes_splitted = re.split('(-[1-2]?>)', t)
+        nodes_splitted = re.split('(-[1-2*?]?>)', t)
         
         last_node = None
         for n in range(0, len(nodes_splitted), 2):
@@ -117,9 +117,11 @@ def convert_export_str_to_dot(str_in, dot_file, pattern_name):
             if n != 0:
                 link_str = nodes_splitted[n-1]
                 if "1" in link_str:
-                    link_cn = 1
+                    link_cn = "1"
                 elif "2" in link_str:
-                    link_cn = 2
+                    link_cn = "2"
+                elif "*" in link_str or "?" in link_str:
+                    link_cn = "*"
                 else:
                     link_cn = None
                 edges.append((last_node, link_cn, node))
