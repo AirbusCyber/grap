@@ -159,7 +159,6 @@ bool MotParcours::equals(MotParcours * m, bool checkLabels) {
 Parcours::Parcours() {
   this->mots = NULL;
   this->size = 0;
-  this->need_postprocessing = false;
 }
 
 bool Parcours::equals(Parcours * p, bool checkLabels) {
@@ -235,10 +234,6 @@ CondNode* computeCond(node_t* n){
 }
 
 vsize_t parcoursProfondeurRec(Parcours *p, bool has_father, vsize_t father_number, node_t * s, bool i_wildcard, vsize_t i, set < node_t * >* explored, std::map <node_t*, vsize_t>* node_ids, vsize_t W) {
-  if (i_wildcard){
-    p->need_postprocessing = true; 
-  }
-  
   set < node_t * >::iterator explored_search;
   std::map<node_t*, vsize_t>::iterator node_ids_search;
   vsize_t new_i;

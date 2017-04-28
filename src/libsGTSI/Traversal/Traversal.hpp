@@ -66,12 +66,10 @@ public:
   vsize_t size;
   MotParcours **mots;
   string name;
-  bool need_postprocessing;
   
   Parcours();
   string toString();
   void addMot(MotParcours * m);
-//   std::list<Parcours *> postprocessParcours();
   typedef std::pair < bool, Match*> RetourParcoursDepuisSommet;
   RetourParcoursDepuisSommet parcourirDepuisSommet(graph_t *, vsize_t root, vsize_t W, bool checkLabels, bool printFound, bool printAllMatches);
   std::pair <bool, node_t*> parcoursUnmatchedNode(bool checkLabels, bool returnFound, MotParcours* m, node_t* node, node_t* current_node, set < node_t * >* matched_nodes, std::pair < node_t *, node_t * >*numbers, vsize_t max_numbered, Match* found_nodes, bool printAllMatches);
