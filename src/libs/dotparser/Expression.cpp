@@ -149,6 +149,10 @@ graph_t *addEdgesToGraph(char* name, CoupleList * cl, graph_t * g) {
       else{
         node_link(f, c, cl->couples[i]->is_wildcard, not f->has_child1);
       }
+      
+      if (cl->couples[i]->is_wildcard){
+        g->has_wildcards = true; 
+      }
     }
   }
 

@@ -13,6 +13,7 @@
 class NodeInfo {
 public:
   NodeInfo();
+  NodeInfo* duplicate();
   
   std::string toString();
   

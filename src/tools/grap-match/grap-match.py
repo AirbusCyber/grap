@@ -47,6 +47,10 @@ def main():
     if not args.singletraversal:
         tree, max_site_size, n_patterns = compute_tree(pattern_graphs, args)
 
+    if args.verbosity >= 2:
+        print "Grap tree:"
+        print tree.toDot()
+
     first = True
     for test_path in args.testFile:
         if args.verbosity >= 1:

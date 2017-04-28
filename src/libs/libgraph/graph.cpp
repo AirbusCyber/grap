@@ -6,6 +6,7 @@ graph_t* graph_alloc(vsize_t max_size) {
   graph = new graph_t();
   node_list_build(&graph->nodes, max_size);
   graph->root = NULL;
+  graph->has_wildcards = false;
   return graph;
 }
 

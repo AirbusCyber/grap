@@ -18,7 +18,7 @@ def main():
         print "Test graphs not found in directory"
         return 1
 
-    n_tests, expected, pattern_paths, test_paths, bin_paths = parse_tests(test_dir)
+    n_tests, expected, pattern_paths, test_paths, bin_paths, wildcards = parse_tests(test_dir)
     if n_tests == 0:
         print "No test found in directory " + test_dir
         return 1
@@ -37,19 +37,19 @@ def main():
     if verbose:
         print ""
         print Blue + "Testing ./grap-match", Color_Off
-    error_gm = test_grap_match_binary(verbose, None, "./grap-match", n_tests, expected, pattern_paths, test_paths)
+    error_gm = test_grap_match_binary(verbose, None, "./grap-match", n_tests, expected, pattern_paths, test_paths, wildcards)
     print_error_msg(error_gm, "./grap-match: " + str(error_gm) + " error(s) found.")
 
     if verbose:
         print ""
         print Blue + "Testing ./grap-match.py", Color_Off
-    error_gmpy = test_grap_match_binary(verbose, "python2", "./grap-match.py", n_tests, expected, pattern_paths, test_paths)
+    error_gmpy = test_grap_match_binary(verbose, "python2", "./grap-match.py", n_tests, expected, pattern_paths, test_paths, wildcards)
     print_error_msg(error_gmpy, "./grap-match.py: " + str(error_gmpy) + " error(s) found.")
 
     if verbose:
         print ""
         print Blue + "Testing python bindings with disassembler bindings and grap when binary is present", Color_Off
-    error_bindings = test_bindings(verbose, n_tests, expected, pattern_paths, test_paths, bin_paths)
+    error_bindings = test_bindings(verbose, n_tests, expected, pattern_paths, test_paths, bin_paths, wildcards)
     print_error_msg(error_gmpy, "Disassembler + python bindings: " + str(error_gmpy) + " error(s) found.")
 
     error_total = error_tests + error_gm + error_gmpy + error_bindings
@@ -87,7 +87,7 @@ def test_tests(verbose, program):
     return exitcode
 
 
-def test_grap_match_binary(verbose, interpreter, program, n_tests, expected, pattern_paths, test_paths):
+def test_grap_match_binary(verbose, interpreter, program, n_tests, expected, pattern_paths, test_paths, wildcards):
     error_count = 0
     if not os.path.isfile(program):
         print program + " not found."
@@ -139,13 +139,13 @@ def test_grap_match_binary(verbose, interpreter, program, n_tests, expected, pat
             print "Checking labels:"
         sys.stdout.flush()
         error_count += run_and_parse_command(verbose, i, command_label_tree, expected[i][0], "tree")
-        if len(pattern_paths[i]) == 1 and not multiple_patterns_in_dot:
+        if len(pattern_paths[i]) == 1 and not multiple_patterns_in_dot and not wildcards[i]:
             error_count += run_and_parse_command(verbose, i, command_label_singletraversal, expected[i][0], "single traversal")
 
         if verbose:
             print "Not checking labels:"
         error_count += run_and_parse_command(verbose, i, command_nolabel_tree, expected[i][1], "tree")
-        if len(pattern_paths[i]) == 1 and not multiple_patterns_in_dot:
+        if len(pattern_paths[i]) == 1 and not multiple_patterns_in_dot and not wildcards[i]:
             error_count += run_and_parse_command(verbose, i, command_nolabel_singletraversal, expected[i][1], "single traversal")
 
         if tmp_pattern is not None:
@@ -154,7 +154,7 @@ def test_grap_match_binary(verbose, interpreter, program, n_tests, expected, pat
     return error_count
 
 
-def test_bindings(verbose, n_tests, expected, pattern_paths, test_paths, bin_paths):
+def test_bindings(verbose, n_tests, expected, pattern_paths, test_paths, bin_paths, wildcards):
     error_count = 0
 
     for i in range(n_tests):
@@ -179,7 +179,7 @@ def test_bindings(verbose, n_tests, expected, pattern_paths, test_paths, bin_pat
             print Blue + "Running test", i, Color_Off
             print "Checking labels:"
         sys.stdout.flush()
-        error_count += run_bindings_test(verbose, pattern_path, test_path, bin_path, expect)
+        error_count += run_bindings_test(verbose, pattern_path, test_path, bin_path, expect, wildcards)
 
         if error_count != 0:
             return error_count
@@ -190,7 +190,7 @@ def test_bindings(verbose, n_tests, expected, pattern_paths, test_paths, bin_pat
     return error_count
 
 
-def run_bindings_test(verbose, pattern_path, test_path, bin_path, expect):
+def run_bindings_test(verbose, pattern_path, test_path, bin_path, expect, wildcards):
     error_number = 0
 
     if bin_path is not None:
@@ -299,6 +299,7 @@ def parse_tests(test_dir):
     pattern_paths = dict()
     test_paths = dict()
     bin_paths = dict()
+    wildcards = dict()
 
     n_tests = 0
     while True:
@@ -307,6 +308,7 @@ def parse_tests(test_dir):
             expected_path = path + "/" + "expected"
             test_path = path + "/" + "test.dot"
             bin_path = path + "/" + "test"
+            wildcard_path = path + "/" + "wildcard"
 
             expected_list = []
             if os.path.isfile(expected_path):
@@ -341,11 +343,16 @@ def parse_tests(test_dir):
             else:
                 break
 
+            if os.path.isfile(wildcard_path):
+                wildcards[n_tests] = True
+            else:
+                wildcards[n_tests] = False
+
             n_tests += 1
         else:
           break
 
-    return n_tests, expected, pattern_paths, test_paths, bin_paths
+    return n_tests, expected, pattern_paths, test_paths, bin_paths, wildcards
   
 
 def find_test_dir(args):

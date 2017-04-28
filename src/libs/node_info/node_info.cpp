@@ -21,10 +21,44 @@ NodeInfo::NodeInfo(){
   this->minRepeat = 1;
   this->has_maxRepeat = true;
   this->maxRepeat = 1;
+  this->lazyRepeat = false;
   this->get = false;
   this->getid = "";
   this->color = "";
 }
+ 
+
+NodeInfo* NodeInfo::duplicate(){
+  NodeInfo* ni = new NodeInfo();
+  
+  ni->inst_str = this->inst_str;
+  ni->opcode = this->opcode;
+  ni->nargs = this->nargs;
+  ni->arg1 = this->arg1;
+  ni->arg2 = this->arg2;
+  ni->arg3 = this->arg3;
+  ni->is_root = this->is_root;
+  ni->has_address = this->has_address;
+  ni->address = this->address;
+  ni->childrenNumber = this->childrenNumber;
+  ni->fathersNumber = this->fathersNumber;
+  ni->minChildrenNumber = this->minChildrenNumber;
+  ni->has_maxChildrenNumber= this->has_maxChildrenNumber;
+  ni->maxChildrenNumber = this->maxChildrenNumber;
+  ni->minFathersNumber  = this->minFathersNumber;
+  ni->has_maxFathersNumber = this->has_maxFathersNumber;
+  ni->maxFathersNumber = this->maxFathersNumber;
+  ni->minRepeat = this->minRepeat;
+  ni->has_maxRepeat = this->has_maxRepeat;
+  ni->maxRepeat = this->maxRepeat;
+  ni->lazyRepeat = this->lazyRepeat;
+  ni->get = this->get;
+  ni->getid = this->getid;
+  ni->color = this->color;
+  
+  return ni;
+}
+
 
 std::string NodeInfo::toString()
 {

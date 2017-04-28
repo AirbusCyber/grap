@@ -103,6 +103,10 @@ void printDescription()
                 "A and not (B) and C should be false\n";
   std::cout << "Test 40: [manual] with A true, B false and C false, "
                 "A and not (B and C) should be true\n";
+  std::cout << "Test 41: [manual] simple edge wildcard\n";
+  std::cout << "Test 42: [manual] edge wildcard on 3 following "
+                "instructions\n";
+  std::cout << "Test 43: [manual] edge wildcard on loop\n";
 }
 
 #ifdef _WIN32
@@ -544,7 +548,7 @@ vsize_t test_NodeInfo(){
   freePatternsMatches(pattern_matches, true);
   tree->freeParcoursNode(); 
   
-  if (nPattern == 1) {
+  if (nPattern == 1 and not grPattern[0]->has_wildcards) {
     Parcours *p =
         parcoursGen(grPattern[0], grPattern[0]->root->list_id, maxSiteSize);
     Parcours::RetourParcours rt =

@@ -219,7 +219,11 @@ int main(int argc, char *argv[]) {
     
     if (pattern_graph == NULL){
       std::cerr << "ERROR: No pattern found, exiting." << std::endl;
-      return 1; 
+      return 1;
+    }
+       
+    if (pattern_graph->has_wildcards){
+      std::cerr << "WARNING: Edge wildcards are not handled by the single traversal algorithm." << std::endl; 
     }
     
     maxSiteSize = pattern_graph->nodes.size;
@@ -261,7 +265,11 @@ int main(int argc, char *argv[]) {
     
     if (not optionQuiet){
       std::cout << (int) n_patterns << " unique patterns added to tree." << std::endl;
-    }   
+    }
+    
+    if (optionDebug){
+      std::cout << "Grap tree:" << std::endl << tree->toDot() << std::endl; 
+    }
   }
   
   std::list<std::pair<std::string, FILE*>>::iterator test_iterator;

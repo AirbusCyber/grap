@@ -27,6 +27,8 @@ typedef struct graph_t {
   node_t* root;
   
   std::string name;
+  
+  bool has_wildcards;
 } graph_t;
 
 /*!
