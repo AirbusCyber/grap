@@ -135,6 +135,7 @@ if __name__ == '__main__':
             if args.verbose or args.debug:
                 print(" ".join(command))
 
+            sys.stdout.flush()
             process = subprocess.Popen(tuple(command))
             process.communicate()
             exitcode = process.returncode

@@ -7,16 +7,21 @@ import tempfile
 
 
 class Node:
-    operators_str = ["==", "!=", ">=", "<=", "<", ">", "is", "contains", "beginswith", "regex"]
-
+    math_operators = ["==", "!=", ">=", "<=", "<", ">"]
+    text_operators = ["is", "contains", "beginswith", "regex"]
     def __init__(self, _id, _cond):
         self.id = _id
         self.cond = _cond
 
     def parse_cond(self, cond_str):
+        re_math = re.compile("|".join(self.math_operators))
+        matches_math = re_math.findall(cond_str)
+        if len(matches_math) >= 1:
+            return cond_str
+
         splitted = cond_str.split()
         if len(splitted) >= 3:
-            compiled_re = re.compile("|".join(self.operators_str))
+            compiled_re = re.compile("|".join(self.text_operators))
             matches = compiled_re.findall(cond_str)
             if len(matches) >= 1:
                 return cond_str
@@ -125,7 +130,7 @@ def convert_export_str_to_dot(str_in, dot_file, pattern_name):
 
 
 def get_dot_path_from_string(str_in):
-    tmp_file = tempfile.NamedTemporaryFile(delete=False)
+    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".dot")
     convert_export_str_to_dot(str_in, tmp_file, "tmp")
     tmp_file.flush()
     tmp_file.close()
