@@ -1,0 +1,17 @@
+Digraph G {
+A [root=true]
+B [label=B]
+C [label=C]
+D [label=D]
+E [label=E]
+F [label=F]
+
+A -> B [childnumber=1]
+B -> C [childnumber=1]
+C -> D [childnumber=1]
+D -> A [childnumber=1]
+
+A -> E [childnumber=2]
+E -> F [childnumber=1]
+E -> A [childnumber=2]
+}

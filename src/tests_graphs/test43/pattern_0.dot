@@ -1,0 +1,7 @@
+digraph test43 {
+A [cond=true]
+B [cond=true, repeat=*]
+
+A -> B [childnumber=*]
+B -> A [childnumber=*]
+}

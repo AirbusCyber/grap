@@ -1,0 +1,6 @@
+digraph test41 {
+A [cond=true]
+B [cond="inst contains eax"]
+
+A -> B [childnumber=*]
+}
