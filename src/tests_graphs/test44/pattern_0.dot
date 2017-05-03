@@ -1,0 +1,27 @@
+digraph test44 {
+"A" [cond="opcode is xor", getid="A"]
+"B" [cond="opcode is xor", lazyrepeat=true, repeat=*]
+"C" [cond="endbasicblock"]
+
+"D" [cond="opcode is xor", lazyrepeat=true, repeat=*, getid="D"]
+"E" [cond="endbasicblock"]
+
+"F" [cond="opcode is xor", lazyrepeat=true, repeat=*, getid="F"]
+"f" [cond="endbasicblock"]
+
+"G" [cond="opcode is xor", lazyrepeat=true, repeat=*, getid="G"]
+"g" [cond="endbasicblock"]
+
+"A" -> "B"
+"B" -> "C"
+"C" -> "D" [childnumber=2]
+
+"D" -> "E"
+"E" -> "F" [childnumber=2]
+"E" -> "G" [childnumber=1]
+
+"F" -> "f"
+"f" -> "D"
+
+"G" -> "g"
+}

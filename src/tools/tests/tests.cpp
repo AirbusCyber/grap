@@ -103,6 +103,8 @@ void printDescription()
                 "A and not (B) and C should be false\n";
   std::cout << "Test 40: [manual] with A true, B false and C false, "
                 "A and not (B and C) should be true\n";
+  std::cout << "Test 44: [manual] end basic blocks test (all cases match)\n";
+  std::cout << "Test 45: [manual] end basic blocks test (count)\n";
 }
 
 #ifdef _WIN32
