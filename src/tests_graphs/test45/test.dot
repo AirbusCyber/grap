@@ -1,0 +1,45 @@
+digraph G {
+"A" [label = "xor eax, eax" , root=true]
+"B" [label = "xor eax, eax"]
+"C" [label = "xor eax, eax"]
+"D" [label = "jmp 0x1"]
+
+"E" [label = "xor eax, ebx"]
+"F" [label = "xor eax, eax"]
+"G" [label = "xor eax, eax"]
+"H" [label = "je 0x1"]
+
+"I" [label = "xor eax, ecx"]
+"a" [label = "xor eax, eax"]
+"b" [label = "mov eax, eax"]
+"c" [label = "ret"]
+
+"J" [label = "xor eax, edx"]
+"d" [label = "xor eax, eax"]
+"e" [label = "xor eax, eax"]
+"f" [label = "xor eax, eax"]
+"g" [label = "xor eax, eax"]
+"h" [label = "xor eax, eax"]
+
+"A" -> "B" [childnumber=1]
+"B" -> "C" [childnumber=1]
+"C" -> "D" [childnumber=1]
+
+"D" -> "E" [childnumber=2]
+"E" -> "F" [childnumber=1]
+"F" -> "G" [childnumber=1]
+"G" -> "H" [childnumber=1]
+
+"H" -> "I" [childnumber=2]
+"I" -> "a" [childnumber=1]
+"a" -> "b" [childnumber=1]
+"b" -> "c" [childnumber=1]
+
+"H" -> "J" [childnumber=1]
+"J" -> "d" [childnumber=1]
+"d" -> "e" [childnumber=1]
+"e" -> "f" [childnumber=1]
+"f" -> "g" [childnumber=1]
+"g" -> "h" [childnumber=1]
+"h" -> "E" [childnumber=1]
+}

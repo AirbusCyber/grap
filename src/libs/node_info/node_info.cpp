@@ -1,4 +1,5 @@
 #include "node_info.hpp"
+#include "node.hpp"
 
 NodeInfo::NodeInfo(){
   this->inst_str = "";
@@ -155,6 +156,7 @@ CondNode::CondNode(){
   this->comparison = ComparisonFunEnum::bool_false;
   this->pattern_field = NULL;
   this->test_field = NULL;
+  this->is_end_basic_block = false;
   this->has_fixed_pattern_info = false;
   this->has_fixed_field = false;
   this->fixed_field_is_new = false;
@@ -167,6 +169,7 @@ CondNode::CondNode(std::list<CondNode*>* cn){
   this->comparison = ComparisonFunEnum::bool_false;
   this->pattern_field = NULL;
   this->test_field = NULL;
+  this->is_end_basic_block = false;
   this->has_fixed_pattern_info = false;
   this->has_fixed_field = false;
   this->fixed_field_is_new = false;
@@ -181,6 +184,7 @@ CondNode::CondNode(std::list<CondNode*>* cn, UnOpEnum un_op){
   this->unary_operator = un_op;
   this->pattern_field = NULL;
   this->test_field = NULL;
+  this->is_end_basic_block = false;
   this->has_fixed_pattern_info = false;
   this->has_fixed_field = false;
   this->fixed_field_is_new = false;
@@ -195,6 +199,7 @@ CondNode::CondNode(BinOpEnum bin_op, std::list<CondNode*>* cn){
   this->pattern_field = NULL;
   this->test_field = NULL;
   this->binary_operator = bin_op;
+  this->is_end_basic_block = false;
   this->has_fixed_pattern_info = false;
   this->has_fixed_field = false;
   this->fixed_field_is_new = false;
@@ -207,6 +212,7 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
   this->children = cn;
   this->pattern_field = NULL;
   this->test_field = NULL;
+  this->is_end_basic_block = false;
   this->fixed_field_is_new = false;
   this->has_fixed_pattern_info = false;
   this->apply_pattern_condition_to_test = false;
@@ -597,44 +603,74 @@ bool CondNode::binary_fun(bool b1, bool b2){
   }
 }
 
-bool CondNode::evaluate(NodeInfo* pattern, NodeInfo* test)
+bool CondNode::endblockcheck_fun(node_t *testNode) {
+  /*
+   * Check if the node is the end of a basic block
+   *
+   * This is the case when:
+   *   1. it is a jump
+   *   2. the current instruction does not have exactly one children (e.g. “ret”)
+   *   3. the following instruction has more than one parent
+   */
+
+  // TODO: use something else than opcode string to check if it is a jump
+  std::string jumpStr("j");
+  if(testNode->children_nb != 1 or ComparisonFunctions::str_beginswith((void*) &jumpStr, &testNode->info->opcode)){
+    return true;
+  }
+  else{
+    node_t *child = testNode->has_child1 ? testNode->child1 : testNode->child2;
+
+    return child->fathers_nb > 1;
+  }
+}
+
+bool CondNode::evaluate(NodeInfo* patternInfo, NodeInfo* testInfo, node_t* testNode)
 {
   if (this->has_fixed_pattern_info){
-    pattern = this->fixed_pattern_info; 
+    patternInfo = this->fixed_pattern_info;
   }
   else if (this->apply_pattern_condition_to_test){
-    pattern = test; 
+    patternInfo = testInfo;
   }
   
   vsize_t nc = this->children->size();
   
   if (nc == 0){
    void* pattern_comparison_field;
-    
+
+   if (this->is_end_basic_block)
+   {
+     if(testNode == nullptr)
+       return false;
+     else
+       return this->endblockcheck_fun(testNode);
+   }
+
    if (this->has_fixed_field){
      pattern_comparison_field = this->fixed_field;
    }
    else{
-     pattern_comparison_field = &((*pattern).*(this->pattern_field));
+     pattern_comparison_field = &((*patternInfo).*(this->pattern_field));
    }
 
-   return this->comparison_fun(pattern_comparison_field, &((*test).*(this->test_field)));
+   return this->comparison_fun(pattern_comparison_field, &((*testInfo).*(this->test_field)));
   }
   else if (nc == 1){
-   return this->unary_fun(this->children->front()->evaluate(pattern, test)); 
+   return this->unary_fun(this->children->front()->evaluate(patternInfo, testInfo, testNode));
   }
   else{
     // 2 or more children
-    bool r = this->children->front()->evaluate(pattern, test);
-    
+    bool r = this->children->front()->evaluate(patternInfo, testInfo, testNode);
+
     std::list<CondNode*>::iterator it = this->children->begin();
     it++;
     
     while(it != this->children->end()){
       CondNode* cn = *it;
-      r = this->binary_fun(r, cn->evaluate(pattern, test));
-      
-     it++; 
+      r = this->binary_fun(r, cn->evaluate(patternInfo, testInfo, testNode));
+
+     it++;
     }
     return r;
   }
@@ -899,7 +935,7 @@ CondNodeToken::CondNodeToken(std::string str){
     this->type = "OP";
     this->value = str;
   }
-  else if (str == "false" or str == "true" or str == "*"){
+  else if (str == "false" or str == "true" or str == "*" or str == "endbasicblock"){
     this->type = "BOOL";
     this->value = str;
   }
@@ -1144,8 +1180,11 @@ CondNode* CondNodeParser::factor(){
   }
   else if (this->accept("BOOL")){
     cn = new CondNode();
-    
-    if (this->current_token.value == "true" or this->current_token.value == "*"){
+
+    if (this->current_token.value == "endbasicblock"){
+      cn->is_end_basic_block = true;
+    }
+    else if (this->current_token.value == "true" or this->current_token.value == "*"){
       cn->comparison = ComparisonFunEnum::bool_true;
     }
   }

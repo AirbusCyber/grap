@@ -107,6 +107,8 @@ void printDescription()
   std::cout << "Test 42: [manual] edge wildcard on 3 following "
                 "instructions\n";
   std::cout << "Test 43: [manual] edge wildcard on loop\n";
+  std::cout << "Test 44: [manual] end basic blocks test (all cases match)\n";
+  std::cout << "Test 45: [manual] end basic blocks test (count)\n";
 }
 
 #ifdef _WIN32
@@ -205,7 +207,7 @@ int main(int argc, char *argv[]) {
   graph_t *grPattern2 = nullptr;
   graph_t *grTest = nullptr;
   
-  vsize_t i = 6;
+  vsize_t i = 0;
   while (i < std::numeric_limits<vsize_t>::max()) {
     std::string dirPath = dir_tests_base + "/test" + std::to_string(i) + "/";
     std::string pathTest = dirPath + "test.dot";
@@ -548,7 +550,7 @@ vsize_t test_NodeInfo(){
   freePatternsMatches(pattern_matches, true);
   tree->freeParcoursNode(); 
   
-  if (nPattern == 1 and not grPattern[0]->has_wildcards) {
+  if (nPattern == 1) {
     Parcours *p =
         parcoursGen(grPattern[0], grPattern[0]->root->list_id, maxSiteSize);
     Parcours::RetourParcours rt =

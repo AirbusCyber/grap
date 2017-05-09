@@ -10,6 +10,8 @@
 #include <iso646.h> // defines "or", "and" as alternatives to ||, &&
 #include <boost/regex.hpp>
 
+struct node_t;
+
 class NodeInfo {
 public:
   NodeInfo();
@@ -185,9 +187,12 @@ public:
   
   bool unary_fun(bool);
   bool binary_fun(bool, bool);
+  bool endblockcheck_fun(node_t *testNode);
   
   void* NodeInfo::* pattern_field;
   void* NodeInfo::* test_field;
+
+  bool is_end_basic_block;
   
   bool has_fixed_pattern_info;
   bool fixed_field_is_new;
@@ -201,7 +206,7 @@ public:
   bool comparison_fun(void*, void*);
   ComparisonFunEnum comparison;
   
-  bool evaluate(NodeInfo* pattern, NodeInfo* test);
+  bool evaluate(NodeInfo* patternInfo, NodeInfo* testInfo, node_t* testNode = nullptr);
   
   bool equals(CondNode* cn);
   

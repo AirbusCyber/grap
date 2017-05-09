@@ -473,7 +473,7 @@ bool MotParcours::matchesSymbol(node_t * n, bool checkLabels) {
   if (not checkLabels)
     return true;
   
-  return this->condition->evaluate(this->info, n->info);
+  return this->condition->evaluate(this->info, n->info, n);
 }
 
 bool MotParcours::matchesCF(node_t *n)
