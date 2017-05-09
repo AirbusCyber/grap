@@ -550,7 +550,7 @@ vsize_t test_NodeInfo(){
   freePatternsMatches(pattern_matches, true);
   tree->freeParcoursNode(); 
   
-  if (nPattern == 1) {
+  if (nPattern == 1 and not grPattern[0]->has_wildcards) {
     Parcours *p =
         parcoursGen(grPattern[0], grPattern[0]->root->list_id, maxSiteSize);
     Parcours::RetourParcours rt =
