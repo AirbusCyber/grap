@@ -942,7 +942,6 @@ bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {
 
   MotParcours *m = p->mots[index];
   list <MotParcours*> mots = list <MotParcours*>();
-  bool duplicate = false;
   
   if (m->type == TYPE_M2 and not m->alpha_is_R) {
      if (m->children_are_wildcards){
@@ -950,12 +949,10 @@ bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {
        m->children_are_wildcards = false;
        m->k = 0;
        mots.push_back(m);
-       
+
        MotParcours* m2 = m->duplicate();
        m2->k = 1;
        mots.push_back(m2);
-
-       duplicate = true;
      }
      else {
        mots.push_back(m);
@@ -993,10 +990,8 @@ bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {
 
       this->fils.push_back(pn);
       if (pn->mot->has_symbol){
-        if (duplicate){
-          // TODO: one too many pointer usage (start = 1), so conditions will not be freed when there is duplication
+          // TODO: one too many pointer usage (start = 1), so conditions will not be freed
           pn->mot->condition->add_pointer_usage();
-        }
       }
       if (pn->addParcours(p, index + 1, checkLabels)){
         r = true; 
