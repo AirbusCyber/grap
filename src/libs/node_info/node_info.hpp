@@ -214,7 +214,7 @@ public:
   std::string field_toString(void*);
   
   void add_pointer_usage();
-  static void freeCondition(CondNode* cn, bool delete_condition, bool free_pointer);
+  static bool freeCondition(CondNode* cn, bool delete_condition, bool free_pointer);
 };
 
 class CondNodeToken{

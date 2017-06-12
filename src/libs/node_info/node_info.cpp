@@ -253,7 +253,7 @@ CondNode::CondNode(std::string key, std::string op, std::string value){
       }
       else {
         std::cerr << "WARNING: Unknown field " << field << ". Defaulting condition to 'not true'." << std::endl;
-	new (this) CondNode();
+        new (this) CondNode();
       }
     }
     else{
@@ -823,18 +823,16 @@ std::string CondNode::toString(NodeInfo* ni){
 
 void CondNode::add_pointer_usage(){
   this->n_pointer_usage++;
+  std::list<CondNode*>::iterator it;
 
-  std::list<CondNode*>::iterator it = this->children->begin();
-
-  while(it != this->children->end()){
+  for (it = this->children->begin(); it != this->children->end(); it++){
     (*it)->add_pointer_usage();
-    it++;
   }
 }
 
-void CondNode::freeCondition(CondNode* cn, bool b1, bool b2){  
+bool CondNode::freeCondition(CondNode* cn, bool b1, bool b2){
   if (cn == NULL){
-    return; 
+    return false;
   }
     
   bool to_free = false;
@@ -843,13 +841,14 @@ void CondNode::freeCondition(CondNode* cn, bool b1, bool b2){
     to_free = true;
   }
   
-  std::list<CondNode*>::iterator it = cn->children->begin();
+  std::list< CondNode* >* children = cn->children;
+  std::list<CondNode*>::iterator it = children->begin();
 
-  while(it != cn->children->end()){      
-    CondNode::freeCondition(*it, b1, b2);     
+  while(it != cn->children->end()){
+    CondNode::freeCondition(*it, b1, b2);
     it++;
   }
-  
+
   if (to_free){
     delete cn->children;  
     
@@ -900,6 +899,8 @@ void CondNode::freeCondition(CondNode* cn, bool b1, bool b2){
     }
     delete(cn);
   }
+
+  return to_free;
 }
 
 CondNodeToken::CondNodeToken(){

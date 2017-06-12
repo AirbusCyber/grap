@@ -42,8 +42,16 @@ string MotParcours::toString() {
       s += std::to_string((int) this->k);
       s += "> ";
     }
-    
+
     s += std::to_string((int) this->i);
+    if (this->has_symbol){
+      if (this->info->has_address){
+        s += " (";
+        s += std::to_string((int) this->info->address);
+        s += ")";
+      }
+    }
+    
     if (this->has_symbol){
       s += ":";
     }
@@ -931,9 +939,10 @@ bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {
     this->name = p->name;
     return not b;
   }
-  
+
   MotParcours *m = p->mots[index];
   list <MotParcours*> mots = list <MotParcours*>();
+  bool duplicate = false;
   
   if (m->type == TYPE_M2 and not m->alpha_is_R) {
      if (m->children_are_wildcards){
@@ -945,6 +954,8 @@ bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {
        MotParcours* m2 = m->duplicate();
        m2->k = 1;
        mots.push_back(m2);
+
+       duplicate = true;
      }
      else {
        mots.push_back(m);
@@ -981,6 +992,12 @@ bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {
       pn->id = (uint64_t) pn;
 
       this->fils.push_back(pn);
+      if (pn->mot->has_symbol){
+        if (duplicate){
+          // TODO: one too many pointer usage (start = 1), so conditions will not be freed when there is duplication
+          pn->mot->condition->add_pointer_usage();
+        }
+      }
       if (pn->addParcours(p, index + 1, checkLabels)){
         r = true; 
       }
@@ -1367,8 +1384,9 @@ void ParcoursNode::freeParcoursNode()
   }
   
   if (this->mot != NULL){
-    CondNode::freeCondition(this->mot->condition, true, true);
-    delete this->mot;
+    if (CondNode::freeCondition(this->mot->condition, true, true)){
+      delete this->mot;
+    }
   }
   
   delete this;
