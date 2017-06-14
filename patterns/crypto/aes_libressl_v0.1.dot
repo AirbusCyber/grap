@@ -1,0 +1,122 @@
+digraph LibreSSL_AES_common{
+Ro [cond="opcode is shl and arg2 is 0x10", getid="LibreSSL_AES_common"]
+A [cond=true, lazyrepeat=true, repeat=*]
+B [cond="opcode is shl and arg2 is 0x18"]
+C [cond=true, lazyrepeat=true, repeat=*]
+D [cond="opcode is shl and arg2 is 0x10"]
+E [cond=true, lazyrepeat=true, repeat=*]
+F [cond="opcode is shl and arg2 is 0x18"]
+G [cond=true, repeat=*]
+
+H [cond="nfathers == 2"]
+I [cond=true, lazyrepeat=true, repeat=*]
+J [cond="opcode is shr and arg2 is 0x18"]
+K [cond=true, lazyrepeat=true, repeat=*]
+L [cond="opcode is shr and arg2 is 0x10"]
+M [cond=true, lazyrepeat=true, repeat=*]
+N [cond="opcode is shr and arg2 is 0x18"]
+O [cond=true, lazyrepeat=true, repeat=*]
+P [cond="opcode is shr and arg2 is 0x10"]
+Q [cond=true, lazyrepeat=true, repeat=*]
+R [cond="opcode beginswith j and nchildren == 2"]
+
+S [cond=true, lazyrepeat=true, repeat=*]
+T [cond="opcode is shr and arg2 is 0x18"]
+U [cond=true, lazyrepeat=true, repeat=*]
+V [cond="opcode is 'and' and arg2 is 0xff000000"]
+
+X [cond=true, lazyrepeat=true, repeat=*]
+Y [cond="opcode is shr and arg2 is 0x18"]
+Z [cond=true, lazyrepeat=true, repeat=*]
+a [cond="opcode is shr and arg2 is 0x10"]
+b [cond=true, lazyrepeat=true, repeat=*]
+c [cond="opcode is shr and arg2 is 0x18"]
+d [cond=true, lazyrepeat=true, repeat=*]
+e [cond="opcode is shr and arg2 is 0x10"]
+f [cond=true, lazyrepeat=true, repeat=*]
+g [cond="endbasicblock"]
+
+Ro -> A
+A -> B
+B -> C
+C -> D
+D -> E
+E -> F
+F -> G
+
+G -> H [childnumber=*]
+H -> I
+I -> J
+J -> K
+K -> L
+L -> M
+M -> N
+N -> O
+O -> P
+P -> Q
+Q -> R
+
+R -> S [childnumber=*]
+S -> T
+T -> U
+U -> V
+
+R -> X [childnumber=*]
+X -> Y
+Y -> Z
+Z -> a
+a -> b
+b -> c
+c -> d
+d -> e
+e -> f
+f -> g
+g -> H [childnumber=*]
+}
+
+digraph LibreSSL_AES_compact{
+Ro [cond="opcode is shl", getid="LibreSSL_AES_compact"]
+A [cond="opcode is shl", repeat=2]
+B [cond="opcode is xor", repeat=3]
+C [cond=true, lazyrepeat=true, repeat=*]
+D [cond="opcode is shl and arg2 is 0x18"]
+E [cond=true, lazyrepeat=true, repeat=*]
+F [cond="opcode beginswith j and nchildren == 2"]
+
+G [cond="opcode is xor"]
+H [cond=true, lazyrepeat=true, repeat=*]
+I [cond="endbasicblock"]
+
+K [cond=true, lazyrepeat=true, repeat=*]
+L [cond="opcode is 'and' and arg2 is 0x80808080", repeat=2]
+M [cond=true, lazyrepeat=true, repeat=*]
+N [cond="opcode is 'and' and arg2 is 0xfefefefe", repeat=2]
+O [cond=true, lazyrepeat=true, repeat=*]
+P [cond="opcode is 'and' and arg2 is 0x1b1b1b1b", repeat=2]
+Q [cond=true, lazyrepeat=true, repeat=*]
+R [cond="opcode beginswith j"]
+
+Ro -> A
+A -> B
+B -> C
+C -> D
+D -> E
+E -> F
+
+F -> G [childnumber=*]
+G -> H
+H -> I
+
+F -> K [childnumber=*]
+K -> L
+L -> M
+M -> N
+N -> O
+O -> P
+P -> Q
+Q -> R
+}
+
+digraph AES_NI{
+Ro [cond="opcode is aesenc or opcode is aesenclast or opcode is aesdec or opcode is aesdeclast", getid="LibreSSL_AES_NI"]
+}
