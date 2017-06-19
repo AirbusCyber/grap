@@ -83,7 +83,7 @@ class CFG:
             if ifrom and is_child1 is not None:
                 # Link the father and the child
                 node_link(node_list_find(node_list, ifrom.getid()),
-                          node_list_find(node_list, n.getid()),
+                          node_list_find(node_list, n.getid()), False,
                           is_child1)
             return
 
@@ -101,7 +101,7 @@ class CFG:
 
         if ifrom and is_child1 is not None:
             node_link(node_list_find(node_list, ifrom.getid()),
-                      node_list_find(node_list, n.getid()),
+                      node_list_find(node_list, n.getid()), False,
                       is_child1)
 
         # No child
