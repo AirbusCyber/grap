@@ -5,6 +5,7 @@
 #include "graphParser.hpp"
 #include <thread>
 #include <mutex>
+#include <sstream>
 
 #ifndef _WIN32
   #include <seccomp.h>
