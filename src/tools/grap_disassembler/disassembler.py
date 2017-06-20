@@ -7,10 +7,6 @@ import pefile
 import os
 import multiprocessing
 import signal
-from capstone import Cs
-from capstone import CS_ARCH_X86
-from capstone import CS_MODE_32
-from capstone import CS_MODE_64
 from cStringIO import StringIO
 
 
@@ -70,6 +66,11 @@ class Instruction:
 
 class GenericDisassembler:
     def __init__(self, arch, mode):
+        from capstone import Cs
+        from capstone import CS_ARCH_X86
+        from capstone import CS_MODE_32
+        from capstone import CS_MODE_64
+
         self.arch = arch
         self.mode = mode
         self.capstone = Cs(self.arch, self.mode)
