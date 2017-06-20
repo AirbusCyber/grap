@@ -7,7 +7,7 @@ set(SRCS_GRAP-MATCH
 add_executable(grap-match ${SRCS_GRAP-MATCH})
 
 if("${MSVC}" OR "${MSYS}")
-  target_link_libraries(grap-match common GTSI graph nodeinfo pthread)
+  target_link_libraries(grap-match common GTSI graph nodeinfo)
 else()
   target_link_libraries(grap-match seccomp common GTSI graph nodeinfo pthread)
 endif()  

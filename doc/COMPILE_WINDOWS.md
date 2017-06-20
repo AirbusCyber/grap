@@ -1,81 +1,60 @@
-This document will guide you through the compilation of grap and its bindings on Windows.
+This document will guide you through the compilation of *grap* and its bindings on Windows.
 
 Alternatively you can use pre-compiled binaries (see [WINDOWS.md](../WINDOWS.md))
 
-# Requirements 
-This guide is written for Windows 7 with Visual Studio 2015.
-The compilation of grap needs the following tools.
+# Requirements
+This guide is written for Windows 7 with Visual Studio 2017.
+The compilation of *grap* needs the following tools.
 
-## MinGW
+## CMake
 
-First thing first we need Mingw
-(https://sourceforge.net/projects/mingw/files/latest/download?source=files).
-Once installed, it's necessary to open the package manager of Wingw
-(`guimain.exe` which can be found in the flowing directory
-`C:\MinGW\libexec\mingw-get\`) and install those tools:
+Install the latest version of *CMake* available on their website https://cmake.org/download/. During the installation wizard, enable the option to add *CMake* to the PATH.
 
+## Python 2.7 + required packages
+
+Install the latest version of *Python* 2.7 (32-bit) available on their website https://www.python.org/downloads/windows/. During the installation wizard, enable the option to add *Python* to the PATH.
+
+Install the packages required by *grap* with these commands (in a command shell as an administrator):
 ```
-mingw-developer-toolkit
-mingw32-base
-mingw32-gcc-g++
-msys-base
-msys-system-builder
+pip install pefile
+pip install pyelftools
+pip install capstone-windows
 ```
+Note that “`capstone-windows` package includes prebuilt Windows core of *Capstone*, so no external *Capstone* library is needed”.
 
-
-Then, it's essential to remove the deprecated version of gcc which is
-`msys-gcc`. To finish, you must add the Mingw binairies path to the environment
-variables. To do so, go to `Start> (click droit sur computer) Properties>
-Advanced system settings> (onglet Advanced) Environment Variables` and the user
-variable `Path` with the value `C:\MinGW`.
-
-
-## Flex + Bison
-MinGW has a version of Flex and Bison which are deprecated. To fix this, you
-must install the last version available on their website
-https://sourceforge.net/projects/winflexbison/. Once the file decompressed, you
-must rename `win_bison` and `win_flex` binairies respectively to `bison`,
-`flex`. Then moved those two files and the `data` directory in
-`C:\MinGW\msys\1.0\bin`.
-
-## SWIG
-The installation of SWIG will take place in two stages:
-- compilation
-- installation
-
-First of all, you must download the sources
-https://sourceforge.net/projects/swig/files/swigwin/swigwin-3.0.8/swigwin-3.0.8.zip/download?use_mirror=tenet
-. Then, unzip the archive in `C:\MinGW\msys\1.0\home\[USER]\` and execute the
-msys *bat* script (`C:\MinGW\msys\1.0\msys.bat`). Finally, run the following
-lines in the terminal:
-
-```
-cd swigwin-x.x.x
-./autogen.sh
-./configure --without-pcre
-make
-make install
-```
 ## Boost
 
-Download the 32-bit MSCV Boost at
-https://sourceforge.net/projects/boost/files/boost-binaries/1.61.0/boost_1_61_0-msvc-14.0-32.exe/download
-and install it in `C:\Program Files\`. Then rename the `lib32-xxxx` directory
-in `C:\Program Files\boost_x_xx_x` to `lib`.
+Download the latest version of *Boost* for Windows (for example https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.zip at the time of writing).
+Extract it, then launch `bootstrap.bat` in boot_<version> directory.
+Edit `project-config.jam` to configure compilation with your version of MSVC. For example, with Visual Studio 2017:
+```
+import option ;
+
+using msvc : 14.1 : "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\bin\HostX64\x64\cl.exe";
+
+option.set keep-going : false ;
+```
+Open the *Developer Command Prompt for VS*, and in the Boost directory (where `project-config.jam` is located), run `b2 toolset=msvc-14.1 address-model=32 runtime-link=static`.
+
+## Flex + Bison
+Install the latest version of *Win flex-bison* available on their website https://sourceforge.net/projects/winflexbison/. Once the file decompressed, rename `win_bison.exe` and `win_flex.exe` binairies respectively to `bison.exe` and `flex.exe`.
+
+Add then the directory where these two executables are located to the PATH.
+
+## SWIG
+Install the latest version of *SWIG* available on their website http://www.swig.org/download.html (note that prebuilt executable is available for Windows).
+Add then the directory where the executable are located to the PATH.
 
 # Compilation
-## Grap 
+## Grap
 
-Now that all dependencies are installed we can compile `grap`. To do
-so, open a msys terminal, move to the `grap` directory and execute the
-following lines: 
+Now that all dependencies are installed we can compile *grap*. To do so, open a Command Prompt, move to the *grap* directory and execute the following lines:
 
 ```
 mkdir build
 cd build
-cmake ../src -G "Visual Studio 14" -DPYTHON_BINDING=1
-make
-make install
+cmake ../src -G "Visual Studio 15" -DBOOST_ROOT=<boost root> -DPYTHON_BINDING=1
+cmake --build .
 ```
 
 
@@ -89,14 +68,13 @@ cmake -DPYTHON_BINDING=1
 
 The installation can be done with command below:
 
-
 ```
-make install
+(make install)
 ```
 
 ## Tools
 
-The creation of the grap tools can be created with the option below:
+The creation of the *grap* tools can be created with the option below:
 
 ```
 cmake -DTOOLS=1
