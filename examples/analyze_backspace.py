@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 import sys
 import os
-from pygrap import *
-from grap_disassembler import disassembler
+import pygrap
 import pefile
 
 def print_usage():
@@ -31,10 +30,10 @@ def main():
         print "The argument should be a binary and not a .dot file"
         sys.exit(1)
 
-    if not os.path.isfile(dot_path):
-        disassembler.disassemble_file(bin_path=bin_path, dot_path=dot_path)
+    # use_existing specifies wether an existing dot file should be used unchanged or overwritter
+    pygrap.disassemble_file(bin_path=bin_path, dot_path=dot_path, use_existing=True)
 
-    test_graph = getGraphFromPath(dot_path)
+    test_graph = pygrap.getGraphFromPath(dot_path)
     
     if verbose:
        print "Analyzing", bin_path
@@ -44,7 +43,7 @@ def main():
         sys.exit(1)
 
     pattern_decrypt = "backspace_decrypt_algos.dot"
-    matches_decrypt = match_graph(pattern_decrypt, test_graph)
+    matches_decrypt = pygrap.match_graph(pattern_decrypt, test_graph)
 
     if len(matches_decrypt) >= 2:
         print "Error: two or more decryption algorithms matched, exiting."
@@ -75,7 +74,7 @@ def main():
         if verbose:
             print "Looking for entrypoint with pattern:"
             print entrypoint_pattern
-        matches_entrypoint = match_graph(entrypoint_pattern, test_graph)
+        matches_entrypoint = pygrap.match_graph(entrypoint_pattern, test_graph)
 
         if len(matches_entrypoint) != 1 or len(matches_entrypoint["decrypt_fun_begin"]) != 1:
             print "Error: Entrypoint not found, exiting"
@@ -100,7 +99,7 @@ def main():
         if verbose:
             print "Looking for calls to decrypt function with pattern:"
             print push_call_pattern
-        matches_calls = match_graph(push_call_pattern, test_graph)
+        matches_calls = pygrap.match_graph(push_call_pattern, test_graph)
 
         if len(matches_calls) == 0:
             print "error: No call found, exiting"
@@ -124,7 +123,7 @@ def main():
             print d
         print ""
 
-    graph_free(test_graph, True)
+    pygrap.graph_free(test_graph, True)
 
 
 def decrypt_xor_sub(s):

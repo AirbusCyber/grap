@@ -712,8 +712,10 @@ def disassemble_raw(raw_data = None, raw_path = None, dot_path = None, print_lis
     return True
 
 
-def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listing=False, readable=False, raw=False,
-                     raw_64=False, entrypoint=None, verbose=False):
+def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listing=False, readable=False, raw=False, raw_64=False, entrypoint=None, verbose=False, use_existing=False):
+    if use_existing and os.path.exists(dot_path):
+        return dot_path
+
     if verbose:
         print "Disassembling", bin_path
 
@@ -742,7 +744,7 @@ def disas_worker(arg):
     disassemble_file(bin_path=arg[0], dot_path=arg[1], print_listing=arg[2], readable=arg[3], verbose=arg[4])
 
 
-def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes=1, print_listing=False, readable=False, raw=False, raw_64=False, verbose=False):
+def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes=4, print_listing=False, readable=False, raw=False, raw_64=False, verbose=False, use_existing=False):
     dot_path_list = []
     arg_list = []
 
@@ -771,7 +773,7 @@ def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes
     else:
         for path in path_list:
             r = disassemble_file(bin_path=path, dot_path=path+dot_path_suffix, print_listing=print_listing,
-                                 readable=readable, raw=raw, raw_64=raw_64, verbose=verbose)
+                                 readable=readable, raw=raw, raw_64=raw_64, verbose=verbose, use_existing=use_existing)
             if r is not None:
                 dot_path_list.append(r)
 

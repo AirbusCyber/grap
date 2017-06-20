@@ -14,6 +14,7 @@ if(PYTHON_BINDING)
 
   # Dependencies
   set(SWIG_MODULE_pygrap_EXTRA_DEPS dot_writer.py)
+  set(SWIG_MODULE_pygrap_EXTRA_DEPS ../../tools/grap_disassembler/disassembler.py)
 
   # SWIG
   FIND_PACKAGE(SWIG REQUIRED)

@@ -162,3 +162,5 @@ def match_graph(pattern_arg, test_arg):
 %}
 
 %pythoncode "dot_writer.py"
+%pythoncode "../../tools/grap_disassembler/disassembler.py"
+
