@@ -9,6 +9,14 @@ import multiprocessing
 import signal
 from cStringIO import StringIO
 
+try:
+    from capstone import Cs
+    from capstone import CS_ARCH_X86
+    from capstone import CS_MODE_32
+    from capstone import CS_MODE_64
+except ImportError:
+    print "Warning: Capstone not found"
+
 
 class Instruction:
     def __init__(self, id, offset, va, address, mnemonic, op_str, size, bytes):
@@ -66,11 +74,6 @@ class Instruction:
 
 class GenericDisassembler:
     def __init__(self, arch, mode):
-        from capstone import Cs
-        from capstone import CS_ARCH_X86
-        from capstone import CS_MODE_32
-        from capstone import CS_MODE_64
-
         self.arch = arch
         self.mode = mode
         self.capstone = Cs(self.arch, self.mode)
