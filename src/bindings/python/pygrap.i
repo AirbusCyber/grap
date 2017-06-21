@@ -76,12 +76,30 @@ graph_t* getGraphFromFile(const char *filename) {
 %template(RetourParcourir) std::pair<vsize_t, PatternsMatches*>;
 %template(GraphCppList) std::list<graph_t *>;
 
+%pythoncode "dot_writer.py"
+%pythoncode "../../tools/grap_disassembler/disassembler.py"
+
 %pythoncode %{
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 import sys
 import os
 import tempfile
+
+def get_disassembled_graph(bin_data=None, bin_path=None, raw=False, raw_64=False, verbose=False):
+    if bin_data is not None or bin_path is not None:
+        dot_file=tempfile.NamedTemporaryFile()
+
+        if dot_file is not None:
+            path=disassemble_file(bin_data=bin_data, bin_path=bin_path, dot_path=dot_file.name, raw=raw, raw_64=raw_64, verbose=verbose)
+            
+            graph = None
+            if path == dot_file.name:
+                graph=getGraphFromPath(path)
+            dot_file.close()
+            return graph
+    return None
+    
 
 def compute_tree(pattern_graphs):
     tree = ParcoursNode()
@@ -160,7 +178,4 @@ def match_graph(pattern_arg, test_arg):
 
     return matches
 %}
-
-%pythoncode "dot_writer.py"
-%pythoncode "../../tools/grap_disassembler/disassembler.py"
 
