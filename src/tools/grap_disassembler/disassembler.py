@@ -582,7 +582,7 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
         pe_data = open(pe_path, "r").read()
 
     try:
-        pe = pefile.PE(pe_path)
+        pe = pefile.PE(data=pe_data)
     except Exception, e:
         if verbose:
             print "WARNING:", repr(e)
@@ -639,11 +639,11 @@ def disassemble_elf(elf_data = None, elf_path = None, dot_path = None, print_lis
         print "ERROR: Missing ELF path."
         return None
 
+    from elftools.elf.elffile import ELFFile
     if elf_data is None:
         elf_data = open(elf_path, "r").read()
 
-    from elftools.elf.elffile import ELFFile
-    elf = ELFFile(open(elf_path, "r"))
+    elf = ELFFile(StringIO(elf_data))
 
     arch = CS_ARCH_X86
     mode = CS_MODE_64 if elf.elfclass == 64 else CS_MODE_32
@@ -720,6 +720,8 @@ def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listin
         print "Disassembling", bin_path
 
     if bin_data is None:
+        if bin_path is None:
+            return None
         bin_data = open(bin_path, "rb").read()
 
     if raw:
