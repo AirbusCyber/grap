@@ -53,10 +53,11 @@ Now that all dependencies are installed we can compile *grap*. To do so, open a 
 ```
 mkdir build
 cd build
-cmake ../src -G "Visual Studio 15" -DBOOST_ROOT=<boost root> -DPYTHON_BINDING=1
-cmake --build .
+cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 15" -DBOOST_ROOT=<boost root> -DPYTHON_BINDING=1 ../src
+cmake --build . --config Release
 ```
 
+It may be necessary to run again the last command (`cmake --build`) if errors occur during the build.
 
 ## Binding
 
