@@ -30,6 +30,7 @@
 # helpers
 import QtShim as QtShim
 from idagrap.core.CryptoIdentifier import CryptoColor, CryptoIdentifier
+from idagrap.core.PatternGenerator import PatternGenerator
 
 
 class ClassCollection():
@@ -86,3 +87,5 @@ class ClassCollection():
         # IDAgrap
         self.CryptoIdentifier = CryptoIdentifier()
         self.CryptoColor = CryptoColor()
+        
+        self.PatternGenerator = PatternGenerator()

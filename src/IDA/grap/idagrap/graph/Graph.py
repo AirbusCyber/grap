@@ -111,7 +111,7 @@ class CFG:
         # 1 remote child
         elif inst.itype in JMPS:
             try:
-                self.dis(inst.Operands[0].addr, True, n)
+                self.dis(inst.Operands[0].addr, False, n)
             except:
                 pass
 

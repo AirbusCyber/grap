@@ -46,7 +46,7 @@ class CryptoIdentificationWidget(QMainWindow):
 
         # Enable access to shared IDAscope modules
         self.parent = parent
-        self.name = "Patterns"
+        self.name = "Search patterns"
         self.icon = self.cc.QIcon(config['icons_path'] + "crypto.png")
         self.color = False
 

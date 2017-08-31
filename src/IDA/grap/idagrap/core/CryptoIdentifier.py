@@ -3,6 +3,7 @@
 import colorsys
 import random
 import threading
+from ColorCore import ColorCore
 
 from idagrap.analysis.Analysis import PatternsAnalysis
 from idagrap.graph.Graph import CFG
@@ -246,37 +247,7 @@ class CryptoColor:
 
         rgb = colorsys.hls_to_rgb(hue, self._LIGHTNESS, sat)
 
-        return self.rgb_to_int(rgb)
-
-    def rgb_to_int(self, rgb):
-        """Convert a rgb tuple to an int.
-
-        Arguments:
-            rgb (tuple): Rgb color.
-
-        Returns:
-            (int): The return value is an rgb color.
-        """
-        r = int(rgb[0] * 255) << 16
-        g = int(rgb[1] * 255) << 8
-        b = int(rgb[2] * 255)
-
-        return (r | g | b)
-
-    def rgb_to_bgr(self, rgb):
-        """Convert a RGB -> BGR.
-
-        Arguments:
-            rgb (int): RGB color.
-
-        Returns:
-            (int): The return value is an BGR color.
-        """
-        r = (rgb & 0xFF0000) >> 16
-        g = (rgb & 0xFF00)
-        b = (rgb & 0xFF) << 16
-
-        return (b | g | r)
+        return ColorCore.rgb_to_int(rgb)
 
     def get_patterns_colors(self):
         """patterns_colors getter.
@@ -299,5 +270,5 @@ class CryptoColor:
         
         for insts in self._matches_colors.itervalues():
             for ea, color in insts.iteritems():
-                SetColor(ea, CIC_ITEM, self.rgb_to_bgr(color['new']))
+                SetColor(ea, CIC_ITEM, ColorCore.rgb_to_bgr(color['new']))
 
