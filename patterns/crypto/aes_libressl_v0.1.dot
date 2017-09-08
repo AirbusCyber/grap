@@ -34,7 +34,7 @@ c [cond="opcode is shr and arg2 is 0x18"]
 d [cond=true, lazyrepeat=true, repeat=*]
 e [cond="opcode is shr and arg2 is 0x10"]
 f [cond=true, lazyrepeat=true, repeat=*]
-g [cond="endbasicblock"]
+g [cond="basicblockend"]
 
 Ro -> A
 A -> B
@@ -85,7 +85,7 @@ F [cond="opcode beginswith j and nchildren == 2"]
 
 G [cond="opcode is xor"]
 H [cond=true, lazyrepeat=true, repeat=*]
-I [cond="endbasicblock"]
+I [cond="basicblockend"]
 
 K [cond=true, lazyrepeat=true, repeat=*]
 L [cond="opcode is 'and' and arg2 is 0x80808080", repeat=2]
