@@ -1,16 +1,16 @@
 digraph test44 {
 "A" [cond="opcode is xor", getid="A"]
 "B" [cond="opcode is xor", lazyrepeat=true, repeat=*]
-"C" [cond="endbasicblock"]
+"C" [cond="basicblockend"]
 
 "D" [cond="opcode is xor", lazyrepeat=true, repeat=*, getid="D"]
-"E" [cond="endbasicblock"]
+"E" [cond="basicblockend"]
 
 "F" [cond="opcode is xor", lazyrepeat=true, repeat=*, getid="F"]
-"f" [cond="endbasicblock"]
+"f" [cond="basicblockend"]
 
 "G" [cond="opcode is xor", lazyrepeat=true, repeat=*, getid="G"]
-"g" [cond="endbasicblock"]
+"g" [cond="basicblockend"]
 
 "A" -> "B"
 "B" -> "C"

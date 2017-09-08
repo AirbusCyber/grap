@@ -1,3 +1,3 @@
 digraph test45 {
-"A" [cond="endbasicblock"]
+"A" [cond="basicblockend"]
 }

@@ -936,7 +936,7 @@ CondNodeToken::CondNodeToken(std::string str){
     this->type = "OP";
     this->value = str;
   }
-  else if (str == "false" or str == "true" or str == "*" or str == "endbasicblock"){
+  else if (str == "false" or str == "true" or str == "*" or str == "endbasicblock"  or str == "basicblockend"){
     this->type = "BOOL";
     this->value = str;
   }
@@ -1182,7 +1182,7 @@ CondNode* CondNodeParser::factor(){
   else if (this->accept("BOOL")){
     cn = new CondNode();
 
-    if (this->current_token.value == "endbasicblock"){
+    if (this->current_token.value == "endbasicblock" or this->current_token.value == "basicblockend"){
       cn->is_end_basic_block = true;
     }
     else if (this->current_token.value == "true" or this->current_token.value == "*"){
