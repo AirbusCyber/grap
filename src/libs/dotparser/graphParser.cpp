@@ -29,6 +29,7 @@ GraphList *getGraphListFromFile (FILE * f) {
   yyscan_t scanner;
   YY_BUFFER_STATE state;
 
+  // TODO: fseek+ftell should NOT be used to compute file size (unreliable on regular files)
   fseek (f, 0, SEEK_END);
   size_t fsize = (size_t) ftell (f);
   fseek (f, 0, SEEK_SET);
@@ -82,6 +83,7 @@ graph_t *getGraphFromPath (const char *path) {
 }
 
 graph_t* popfreeFirstGraph(GraphList* gl){
+  // TODO: free the other graphs ? [1:]
   graph_t* gr;
   if (gl != NULL and gl->size >= 1){
     gr = gl->graphes[0]; 
