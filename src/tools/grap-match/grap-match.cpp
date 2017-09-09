@@ -5,7 +5,8 @@ char optionFuncs;
 char optionLabels;
 
 void printUsage() {
-  printf("Use grap-match to look for a pattern in a .dot test file.\n");
+  printf("Use grap-match to look for a pattern file (.dot) in a test file (.dot).\n");
+  printf("For standard usage please use the python wrapper (grap).\n");
   printf("Usage : ./grap-match [options] patternFile testFile\n");
   printf("Options are :\n");
   printf("        -h or --help: print this message\n");
@@ -149,7 +150,7 @@ int main(int argc, char *argv[]) {
     else {
       if (!learnOk) {
         pathPattern = std::string(argv[a]);
-        fpPattern = fopen(pathPattern.c_str(), "r");
+        fpPattern = fopen(pathPattern.c_str(), "rb");
 
         if (fpPattern == NULL) {
           std::cerr << "ERROR: Can't open pattern graph " << pathPattern << "." << std::endl;
@@ -159,7 +160,7 @@ int main(int argc, char *argv[]) {
       }
       else {
         std::string path = std::string(argv[a]);
-        FILE* fp = fopen(path.c_str(), "r");
+        FILE* fp = fopen(path.c_str(), "rb");
 
         if (fp == NULL) {
           std::cerr << "WARNING: Can't open test graph " << path << "." << std::endl;
