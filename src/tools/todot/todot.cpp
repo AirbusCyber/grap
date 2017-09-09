@@ -15,8 +15,8 @@ int main(int argc, char* argv[]){
   FILE* fpIn;
   FILE* fpOut;
 
-  fpIn = fopen(pathIn, "r");
-  fpOut = fopen(pathOut, "w");
+  fpIn = fopen(pathIn, "rb");
+  fpOut = fopen(pathOut, "wb");
 
   if (fpIn == NULL || fpOut == NULL){
     return 1;

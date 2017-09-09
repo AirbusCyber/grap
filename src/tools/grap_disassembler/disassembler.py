@@ -583,7 +583,7 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
         return None
 
     if pe_data is None:
-        pe_data = open(pe_path, "r").read()
+        pe_data = open(pe_path, "rb").read()
 
     try:
         pe = pefile.PE(data=pe_data)
@@ -645,7 +645,7 @@ def disassemble_elf(elf_data = None, elf_path = None, dot_path = None, print_lis
 
     from elftools.elf.elffile import ELFFile
     if elf_data is None:
-        elf_data = open(elf_path, "r").read()
+        elf_data = open(elf_path, "rb").read()
 
     elf = ELFFile(StringIO(elf_data))
 
@@ -691,7 +691,7 @@ def disassemble_raw(raw_data = None, raw_path = None, dot_path = None, print_lis
         return None
 
     if raw_data is None:
-        raw_data = open(raw_path, "r").read()
+        raw_data = open(raw_path, "rb").read()
 
     arch = CS_ARCH_X86
     mode = CS_MODE_64 if raw_64 else CS_MODE_32

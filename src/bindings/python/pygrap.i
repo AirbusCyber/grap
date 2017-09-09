@@ -46,7 +46,7 @@
 %inline %{	
 void graph_fprint(const char *filename, graph_t* graph) {
 
-  FILE *f = fopen(filename, "w");
+  FILE *f = fopen(filename, "wb");
   graph_fprint(f, graph);
   fclose(f);
 }
@@ -54,7 +54,7 @@ void graph_fprint(const char *filename, graph_t* graph) {
 graph_t* getGraphFromFile(const char *filename) {
 
   graph_t* gr = NULL;
-  FILE *f = fopen(filename, "r");
+  FILE *f = fopen(filename, "rb");
 
   if( f == NULL)
 	  return NULL;
