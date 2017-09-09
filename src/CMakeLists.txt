@@ -40,6 +40,8 @@ if(${MSVC})
   
   # Increase stack size
   set(CMAKE_EXE_LINKER_FLAGS "/STACK:1000000000")
+  set(CMAKE_CXX_FLAGS_RELEASE "/MT")
+  set(CMAKE_CXX_FLAGS_DEBUG "/MTd")
 else()
   # Less warnings in C in order to avoid warnings about flex/bison code
   set(CMAKE_CXX_FLAGS " -D__STDC_FORMAT_MACROS -std=gnu++11 -D_hypot=hypot -pedantic -Wall -Wno-write-strings -Wextra -Wcast-align -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Woverloaded-virtual -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Wno-unused")
