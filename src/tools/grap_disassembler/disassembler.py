@@ -3,7 +3,6 @@
 
 import re
 import sys
-import pefile
 import os
 import multiprocessing
 import signal
@@ -586,6 +585,7 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
         pe_data = open(pe_path, "rb").read()
 
     try:
+        import pefile
         pe = pefile.PE(data=pe_data)
     except Exception, e:
         if verbose:
