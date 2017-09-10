@@ -83,13 +83,19 @@ graph_t *getGraphFromPath (const char *path) {
 }
 
 graph_t* popfreeFirstGraph(GraphList* gl){
-  // TODO: free the other graphs ? [1:]
   graph_t* gr;
   if (gl != NULL and gl->size >= 1){
     gr = gl->graphes[0]; 
   }
   else{
     gr = nullptr; 
+  }
+  
+  if (gl != NULL){
+    vsize_t i;
+    for (i = 1; i < gl->size; i++){
+      graph_free(gl->graphes[i], true); 
+    }
   }
   
   if (gl != NULL){
