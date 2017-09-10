@@ -22,7 +22,7 @@ pip install pefile
 pip install pyelftools
 pip install capstone-windows
 ```
-Note that “`capstone-windows` package includes prebuilt Windows core of *Capstone*, so no external *Capstone* library is needed”.
+Note that `capstone-windows` package includes prebuilt Windows core of *Capstone*, so no external *Capstone* library is needed”.
 
 ## Boost
 
