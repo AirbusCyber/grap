@@ -14,7 +14,7 @@ You may also read:
 - [IDA.md](IDA.md): installation and usage instruction of the IDA plugin
 
 ## Requirements
-The following dependencies must be installed:
+Besides compilers (build-essential), the following dependencies must be installed:
 
 - cmake
 - bison
@@ -27,7 +27,8 @@ The following dependencies must be installed:
 - python-capstone
 - swig (version 3 or newer is mandatory)
 
-Please note that those were tested for the latest Ubuntu LTS (16.04) and may differ depending on your distribution.
+Please note that those were tested for the latest Ubuntu LTS (16.04) and the latest debian stable (9.1.0 - Strech).
+Packages may differ depending on your distribution.
 
 ## Build and install
 The following commands will build and install the project:
@@ -37,15 +38,18 @@ The following commands will build and install the project:
 - `sudo make install` will install grap into /usr/local/bin/
 
 ## Options
-Compilation options are chosen with cmake (`cmake -DTOOLS=0 ../src` or `cmake -DNOSECCOMP=1 ../src` for instance):
+Compilation options are chosen with cmake (`cmake -DNOSECCOMP=1 ../src` for instance):
 
 - TOOLS: build tools (grap-match, todot and test binaries), default
 - PYTHON_BINDING: build python bindings, default
 - NOSECCOMP: disable support of the grap-match binary for privilege drop through seccomp, not default
 
-Note that grap-match's use of seccomp restricts the number of system calls available to the binary for security purposes. 
-In particular the "open" syscall is unavailable after the initial argument parsing.
-You may want to disable this feature if it generates the "Bad system call" error but will lose the security provided.
+On GNU/Linux grap-match's use of seccomp restricts the number of system calls available to the binary for security purposes. 
+In particular the "open" syscall is mostly unavailable after the initial argument parsing.
+You may want to disable this feature if it generates the "Bad system call" or other errors but will lose the security provided.
+
+Note that seccomp is only enabled within the `grap-match` binary and its wrapper (grap and grap.py scripts), and *not* within the bindings.
+
 
 # Usage
 The tool can be launched by using the following command:
@@ -101,8 +105,25 @@ Some examples of pattern files and test files are given in the src/tests_graphs/
 For troubleshooting purposes you can test them all.
 
 - `./tests` will use the C++ library to test them against expected values, `./tests -h` gives information about each test.
-- `make test` will use the C++ library, the grap-match binary, grap-match.py and python bindings for disassembly and matching to test them. It needs bindings to be built and installed
+- `make test` will use `test_all.py` (in the build/ directory) and test the C++ library, the grap-match binary, grap-match.py and python bindings for disassembly and matching. It needs bindings to be built and installed
 - `grap` or `grap-match` can be used to test them individually
+
+`test_all.py` takes options:
+
+- -nt: no threads
+- -nc: no colors
+- -t tests_path, -gm grap_match_path, -gmpy grap_match_py_path, -g grap_path: specifies where those binaries and scripts are found
+- -v: verbose
+- -l log.txt: log output
+
+On GNU/Linux, once grap is installed you may call directly either `make test` or `test_all.py` with no options.
+
+On Windows, the following command is recommended:
+```
+test_all.py -l log.txt -nt -nc -t Release\tests.exe -gm Release\grap-match.exe -gmpy ..\src\tools\grap-match\grap-match.py -g ..\src\tools\grap\grap.py
+```
+
+It is normal and expected that some WARNING will show.
 
 More options for debug can be found in [doc/DEBUG.md](doc/DEBUG.md).
 
