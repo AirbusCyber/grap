@@ -1,3 +1,6 @@
+# Requirements
+You will need to have grap installed (see [WINDOWS.md](WINDOWS.md) for Windows, and [README.md](README.md) for GNU/Linux).
+
 # IDA plugin installation
 You need to copy the following file and folder into IDA's plugin folder.
 For instance on Windows:
