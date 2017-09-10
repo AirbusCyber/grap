@@ -1,11 +1,11 @@
-We recommand you to not compile grap yourself on Windows because it can be tedious (see [COMPILE_WINDOWS.md](doc/COMPILE_WINDOWS.md) if you wish to compile) .
+We recommand you to not compile grap yourself on Windows because it can be tedious (see [COMPILE_WINDOWS.md](doc/COMPILE_WINDOWS.md) if you wish to compile it yourself) .
 
 This document explains how to use pre-compiled version of grap and its bindings on Windows.
 
 #Requirements
 
 - If you only intendo to use the IDA plugin **no requirement is needed**.
-- If you want to use grap as a standalone tool, you will need to meet the python requirements from [COMPILE_WINDOWS.md](doc/COMPILE_WINDOWS.md) (python2.7, add it to PATH, with pip install pefile, pyelftools and capstone-windows).
+- If you want to use grap as a standalone tool, you will need to meet the **python2.7** requirements from [COMPILE_WINDOWS.md](doc/COMPILE_WINDOWS.md) (python2.7, add it to PATH, with pip install pefile, pyelftools and capstone-windows).
 
 # grap and python bindings
 You will find compiled files (windows_compiled_1_0_0.zip) in the downloads panel (https://bitbucket.org/cybertools/grap/downloads/) and:
