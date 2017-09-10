@@ -1,9 +1,11 @@
 # IDA plugin installation
-The IDA plugin is in the src/IDA/grap/ folder, you need to copy it into IDA's plugin folder.
+You need to copy the following file and folder into IDA's plugin folder.
 For instance on Windows:
 
 - grap.py into C:\Program Files (x86)\IDA\plugins\
 - idagrap/ into C:\Program Files (x86)\IDA\plugins\
+
+These files can be found either in the pre-compiled binaries (for windows see [WINDOWS.md](WINDOWS.md)) or in the repository (src/IDA/grap/).
 
 # Usage
 You can activate the plugin within IDA with the menu (Edit -> Plugins -> IDAgrap) or with Shift+G.
