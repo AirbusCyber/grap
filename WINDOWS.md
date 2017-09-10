@@ -8,7 +8,7 @@ This document explains how to use pre-compiled version of grap and its bindings 
 - If you want to use grap as a standalone tool, you will need to meet the **python2.7** requirements from [COMPILE_WINDOWS.md](doc/COMPILE_WINDOWS.md) (python2.7, add it to PATH, with pip install pefile, pyelftools and capstone-windows).
 
 # grap and python bindings
-You will find compiled files (windows_compiled_1_0_0.zip) in the downloads panel (https://bitbucket.org/cybertools/grap/downloads/) and:
+You will find compiled files (windows_compiled_1_0_0.zip) in the downloads panel (https://bitbucket.org/cybertools/grap/downloads/).
 
 - Extract the .zip file
 - Copy python\pygrap.py into C:\Python27\Lib\site-packages\
