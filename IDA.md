@@ -16,6 +16,9 @@ You can activate the plugin within IDA with the menu (Edit -> Plugins -> IDAgrap
 It opens a new tab with two panels.
 
 * The first panel is made for detection and has two buttons: one for launching detection, the other for coloring matched nodes.
+    * Some patterns are already available
+    * You can modify them and add your own in the folder C:\Program Files (x86)\IDA\plugins\idagrap\patterns\test\misc\files
+    
 * The second panel will assist the creation of new patterns within IDA:
     * Click "Load the control flow graph"
     * In IDA View (main panel), click right on the instruction you want to define as the root of your pattern , select "[grap] set root node"
