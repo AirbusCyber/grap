@@ -87,6 +87,10 @@ class GenericDisassembler:
             ]
         }[mode]
 
+        self.conditional_jmp_mnemonics = {'jz', 'je', 'jcxz', 'jecxz', 'jrcxz', 'jnz', 'jp', 'jpe', 'jnp', 'ja', 'jae', 'jb', 'jbe', 'jg', 'jge', 'jl', 'jle', 'js', 'jns', 'jo', 'jno', 'jecxz', 'loop', 'loopne', 'loope', 'jne'}
+        self.x86_32_registers = {'eax', 'ebx', 'ecx', 'edx', 'esi', 'edi', 'esp', 'ebp'}
+
+
     def _dis(self, data, offset, insts, bin_instance, iat_api=dict(), verbose=False, ifrom=None, from_pred=True):
         '''
             <insts> is a dict like {'offset': <Instruction>}
@@ -163,10 +167,7 @@ class GenericDisassembler:
                     pass
 
         # 2 children (next, then remote) - except call
-        elif inst.mnemonic in [
-            'jz', 'je', 'jcxz', 'jecxz', 'jrcxz', 'jnz', 'jp', 'jpe', 'jnp', 'ja', 'jae', 'jb', 'jbe',
-            'jg', 'jge', 'jl', 'jle', 'js', 'jns', 'jo', 'jno', 'jecxz', 'loop', 'loopne', 'loope',
-            'jne']:
+        elif inst.mnemonic in self.conditional_jmp_mnemonics :
             next_offset = inst.offset + inst.size
 
             try:
@@ -211,7 +212,7 @@ class GenericDisassembler:
 
                 if iat_va in iat_api:
                     inst.op_str = iat_api[iat_va]
-            elif inst.op_str in ['eax', 'ebx', 'ecx', 'edx', 'esi', 'edi', 'esp', 'ebp']:
+            elif inst.op_str in self.x86_32_registers :
                 pass
             else:
                 try:
@@ -424,28 +425,51 @@ class PEDisassembler(GenericDisassembler):
 
 
 class ELFDisassembler(GenericDisassembler):
-    def get_offset_from_rva(self, elf, rva):
+    def __init__(self, arch, mode, elf):
+        GenericDisassembler.__init__(self, arch, mode)
+
+        # We cache ELF properties for faster access
+        self.image_base_rva = None
+        for section in elf.iter_sections():
+            self.image_base_rva =  section['sh_addr'] - section['sh_offset']
+            break
+
+        self.n_segments = 0
+        self.seg_offset_low = []
+        self.seg_offset_high = []
+        self.seg_rva_low = []
+        self.seg_rva_high = []
+        self.seg_pvaddr = []
+        self.seg_poffset = []
+        self.seg_pvaddr_minus_poffset = []
         for segment in elf.iter_segments():
-            if segment['p_vaddr'] <= rva < segment['p_vaddr'] + segment['p_memsz']:
-                return segment['p_offset'] + (rva - segment['p_vaddr'])
+            self.n_segments += 1
+            self.seg_offset_low.append(segment['p_offset'])
+            self.seg_offset_high.append(segment['p_offset'] + segment['p_filesz'])
+            self.seg_rva_low.append(segment['p_vaddr'])
+            self.seg_rva_high.append(segment['p_vaddr'] + segment['p_memsz'])
+            self.seg_pvaddr_minus_poffset.append(segment['p_vaddr'] - segment['p_offset'])
+
+    def get_offset_from_rva(self, elf, rva):
+        for s in xrange(self.n_segments):
+            if self.seg_rva_low[s] <= rva < self.seg_rva_high[s]:
+                return rva - self.seg_pvaddr_minus_poffset[s]
         return None
 
     def get_offset_from_va(self, elf, va):
         return self.get_offset_from_rva(elf, va - self.get_image_base_rva(elf))
 
     def get_rva_from_offset(self, elf, offset):
-        for segment in elf.iter_segments():
-            if segment['p_offset'] <= offset < segment['p_offset'] + segment['p_filesz']:
-                return segment['p_vaddr'] + (offset - segment['p_offset'])
+        for s in xrange(self.n_segments):
+            if self.seg_offset_low[s] <= offset < self.seg_offset_high[s]:
+                return self.seg_pvaddr_minus_poffset[s] + offset
         return None
 
     def get_va_from_offset(self, elf, offset):
-        return self.get_rva_from_offset(elf, offset) + self.get_image_base_rva(elf)
+        return self.get_rva_from_offset(elf, offset) + self.image_base_rva
 
     def get_image_base_rva(self, elf):
-        for section in elf.iter_sections():
-            return section['sh_addr'] - section['sh_offset']
-        return None
+        return self.image_base_rva
 
     def _dis_exported_funcs(self, data, bin_instance, insts, verbose):
         """
@@ -671,7 +695,7 @@ def disassemble_elf(elf_data = None, elf_path = None, dot_path = None, print_lis
         print "Cannot retrieve entry point offset from RVA (0x%08X), exiting." % (elf.header.e_entry)
         sys.exit(1)
 
-    disass = ELFDisassembler(arch=arch, mode=mode)
+    disass = ELFDisassembler(arch=arch, mode=mode, elf=elf)
     insts = disass.dis(data=elf_data, offset=oep_offset, iat_api={}, bin_instance=elf, verbose=verbose)
 
     if dot_path is not None:
@@ -759,7 +783,7 @@ def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes
             arg_list.append((path, path + dot_path_suffix, print_listing, readable, verbose))
 
         original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
-        pool = multiprocessing.Pool(processes=n_processes)
+        pool = multiprocessing.Pool(n_processes)
         signal.signal(signal.SIGINT, original_sigint_handler)
 
         try:
@@ -773,9 +797,9 @@ def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes
             pool.close()
 
         for path in path_list:
-            dot_path = path + dot_path_suffix
-            if os.path.isfile(dot_path):
-                dot_path_list.append(dot_path)
+            dot_path_local = path + dot_path_suffix
+            if os.path.isfile(dot_path_local):
+                dot_path_list.append(dot_path_local)
     else:
         for path in path_list:
             r = disassemble_file(bin_path=path, dot_path=path+dot_path_suffix, print_listing=print_listing,
@@ -791,4 +815,4 @@ if __name__ == "__main__":
         sys.setrecursionlimit(1000000)
         bin_path = sys.argv[1]
         dot_path = bin_path + ".dot"
-        disassemble_file(bin_path=bin_path, dot_path=dot_path, verbose=True)
+        disassemble_file(bin_path=bin_path, dot_path=dot_path, verbose=False)
