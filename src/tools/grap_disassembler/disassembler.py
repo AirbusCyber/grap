@@ -791,10 +791,14 @@ def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes
 
     if path_list is not None and path_list != []:
         if multiprocess:
-            if timeout == 0:
-                timeout_sec = 31536000
+            if timeout.isdigit():
+                i = int(timeout)
+                if i == 0:
+                    timeout_sec = 31536000
+                else:
+                    timeout_sec = i
             else:
-                timeout_sec = int(timeout)
+                timeout_sec = 31536000
 
             for path in path_list:
                 arg_list.append((path, path + dot_path_suffix, print_listing, readable, verbose, timeout_sec))
