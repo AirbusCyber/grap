@@ -766,43 +766,65 @@ def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listin
 
 
 def disas_worker(arg):
-    disassemble_file(bin_path=arg[0], dot_path=arg[1], print_listing=arg[2], readable=arg[3], verbose=arg[4])
+    return disassemble_file(bin_path=arg[0], dot_path=arg[1], print_listing=arg[2], readable=arg[3], verbose=arg[4])
 
 
-def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes=4, print_listing=False, readable=False, raw=False, raw_64=False, verbose=False, use_existing=False):
+def timeout_worker(*arg):
+    # One thread to process this file, with a timeout
+    p = multiprocessing.dummy.Pool(1)
+    res = p.apply_async(disas_worker, arg)
+    try:
+        out = res.get(timeout=arg[0][5])
+        p.close()
+    except multiprocessing.TimeoutError:
+        print "WARNING: Disassembly timeout for", arg[0][0]
+        p.terminate()
+        p.close()
+        out = None
+
+    return out
+
+
+def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes=4, print_listing=False, readable=False, raw=False, raw_64=False, verbose=False, use_existing=False, timeout=0):
     dot_path_list = []
     arg_list = []
 
     if path_list is not None and path_list != []:
         if multiprocess:
+            if timeout == 0:
+                timeout_sec = 31536000
+            else:
+                timeout_sec = int(timeout)
+
             for path in path_list:
-                arg_list.append((path, path + dot_path_suffix, print_listing, readable, verbose))
+                arg_list.append((path, path + dot_path_suffix, print_listing, readable, verbose, timeout_sec))
 
             original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
-            pool = multiprocessing.Pool(processes=min(n_processes, len(arg_list)))
+
+            # 8 tasks per child max: regenerate workers to free "lost" memory
+            # TODO: make sure memory is freed when timeout is reached
+            pool = multiprocessing.Pool(processes=min(n_processes, len(arg_list)), maxtasksperchild=8)
             signal.signal(signal.SIGINT, original_sigint_handler)
+            ret = None
 
             try:
-                res = pool.map_async(disas_worker, arg_list)
+                res = pool.map_async(timeout_worker, arg_list, chunksize=1)
 
-                # without timeout (one year) SIGINT is ignored
-                res.get(timeout=31536000)
+                # Need timeout (one year) so SIGINT is not ignored
+                ret = res.get(timeout=31536000)
             except KeyboardInterrupt:
                 pool.terminate()
             else:
                 pool.close()
 
-            for path in path_list:
-                dot_path_local = path + dot_path_suffix
-                if os.path.isfile(dot_path_local):
-                    dot_path_list.append(dot_path_local)
+            if ret is not None:
+                dot_path_list = [p for p in ret if p is not None]
         else:
             for path in path_list:
                 r = disassemble_file(bin_path=path, dot_path=path+dot_path_suffix, print_listing=print_listing,
                                      readable=readable, raw=raw, raw_64=raw_64, verbose=verbose, use_existing=use_existing)
                 if r is not None:
                     dot_path_list.append(r)
-
     return dot_path_list
 
 

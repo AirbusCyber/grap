@@ -30,6 +30,7 @@ if __name__ == '__main__':
     parser.add_argument('-nm', '--print-no-matches', dest='print_no_matches', action="store_true", default=False, help='Don\'t print matched nodes (overrides getid fields)')
     parser.add_argument('-sa', '--show-all', dest='show_all', action="store_true", default=False, help='Show all tested (including not matching) files (not default when quiet, default otherwise)')
     parser.add_argument('-b', '--grap-match-path', dest='grap_match_path', help='Specify the path of the grap-match binary (default: /usr/local/bin/grap-match)')
+    parser.add_argument('-t', '--timeout', dest='timeout', default=120, help='Specify timeout (in seconds) for disassembly, assign 0 for no timeout (default: 120)')
     parser.add_argument('-q', '--quiet', dest='quiet', action="store_true", default=False, help='Quiet output')
     parser.add_argument('-v', '--verbose', dest='verbose', action="store_true", default=False, help='Verbose output')
     parser.add_argument('-d', '--debug', dest='debug', action="store_true", default=False, help='Debug output')
@@ -48,7 +49,9 @@ if __name__ == '__main__':
     dot_test_files = set()
     for test_path in args.test:
         try:
-            data = open(test_path, "rb").read()
+            f = open(test_path, "rb")
+            data = f.read(7)
+            f.close()
         except IOError:
             if os.path.isdir(test_path):
                 print("Skipping directory " + test_path)
@@ -74,7 +77,8 @@ if __name__ == '__main__':
                         printed_something = True
                     dot_test_files.add(dot_path)
                 else:
-                    if len(args.test) == 1:
+                    if len(args.test) == 1 and args.dot is not None:
+                        print "WARNING"
                         found_path = pygrap.disassemble_file(bin_path=test_path, dot_path=dot_path,
                                                                    readable=args.readable, verbose=args.verbose,
                                                                    raw=args.raw_disas, raw_64=args.raw_64)
@@ -83,11 +87,11 @@ if __name__ == '__main__':
                     else:
                         files_to_disassemble.add(test_path)
 
-    if len(args.test) > 1:
+    if len(args.test) > 1 or args.dot is None:
         files_to_disassemble = sorted(list(files_to_disassemble))
         disassembled_files = pygrap.disassemble_files(files_to_disassemble, ".dot", multiprocess=args.multithread,
                                                             n_processes=4, readable=args.readable, verbose=args.verbose,
-                                                            raw=args.raw_disas, raw_64=args.raw_64)
+                                                            raw=args.raw_disas, raw_64=args.raw_64, timeout=args.timeout)
         for path in disassembled_files:
             dot_test_files.add(path)
 
