@@ -18,7 +18,7 @@ except ImportError:
 
 
 class Instruction:
-    def __init__(self, id, offset, va, address, mnemonic, op_str, size, bytes):
+    def __init__(self, id, offset, va, address, mnemonic, op_str, size, bytes, cache_only):
         self.id = id
         self.offset = offset
         self.va = va
@@ -31,6 +31,7 @@ class Instruction:
         self.ito = list()    # VA of next instructions
         self.to_succ = None
         self.to_other = None
+        self.cache_only = cache_only 
 
     def add_ifrom(self, inst_offset):
         self.ifrom.append(inst_offset)
@@ -87,176 +88,159 @@ class GenericDisassembler:
             ]
         }[mode]
 
+    def linear_sweep_cache(self, data, offset, insts, bin_instance, verbose=False):
+        curr_offset = offset
+        try:
+            inst_va = self.get_va_from_offset(bin_instance, curr_offset)
+            instructions = self.capstone.disasm(data[offset:], inst_va)
+
+            curr_offset = offset
+            for i in instructions:
+                inst = Instruction(
+                    id=i.id,
+                    offset=curr_offset,
+                    va=inst_va,
+                    address=i.address,
+                    mnemonic=i.mnemonic,
+                    op_str=i.op_str,
+                    size=i.size,
+                    bytes=i.bytes,
+                    cache_only=True,
+                )
+
+                insts[curr_offset] = inst
+                curr_offset += i.size
+                inst_va += i.size
+
+        except Exception, e:
+            if verbose:
+                print "WARNING:", repr(e)
+
+        return insts
+
     def _dis(self, data, offset, insts, bin_instance, iat_api=dict(), verbose=False, ifrom=None, from_pred=True):
         '''
             <insts> is a dict like {'offset': <Instruction>}
         '''
 
-        if offset is None:
-            return insts
+        args_queue = []
+        args_queue.append((offset, ifrom, from_pred))
 
-        if offset in insts:
-            if ifrom:
-                insts[offset].add_ifrom(ifrom.offset)
-                insts[ifrom.offset].add_ito(insts[offset].offset, from_pred)
-            return insts
+        while args_queue != []:
+            offset, ifrom, from_pred = args_queue.pop(0)
 
-        try:
-            inst_va = self.get_va_from_offset(bin_instance, offset)
-        except Exception, e:
-            if verbose:
-                print "WARNING:", repr(e)
-            return insts
+            if offset is None:
+                continue
 
+            inst = None
+            if offset in insts:
+                inst = insts[offset]
+                if inst.cache_only:
+                    inst.cache_only = False
+                else:
+                    if ifrom:
+                        inst.add_ifrom(ifrom.offset)
+                        insts[ifrom.offset].add_ito(inst.offset, from_pred)
+                    continue
 
-        try:
-            i = self.capstone.disasm(data[offset:], inst_va, count=1).next()
-        except Exception, e:
-            if verbose:
-                print "WARNING:", repr(e)
-            return insts
-
-        inst = Instruction(
-            id=i.id,
-            offset=offset,
-            va=inst_va,
-            address=i.address,
-            mnemonic=i.mnemonic,
-            op_str=i.op_str,
-            size=i.size,
-            bytes=i.bytes,
-        )
-        insts[inst.offset] = inst
-
-        if ifrom:
-            insts[inst.offset].add_ifrom(ifrom.offset)
-            insts[ifrom.offset].add_ito(inst.offset, from_pred)
-
-        # No child
-        if inst.mnemonic in ['ret', 'retf']:
-            pass
-
-        # 1 remote child
-        elif inst.mnemonic in ['jmp', 'jmpf']:
-            if "word ptr [0x" in inst.op_str:
-                iat_va = int(inst.op_str.split('[')[1].split(']')[0], 16)
-
-                if iat_va in iat_api:
-                    inst.op_str = iat_api[iat_va]
-            else:
+            if inst is None:
                 try:
-                    remote_offset = self.get_offset_from_va(bin_instance, int(inst.op_str, 16))
-                    if remote_offset is not None:
-                        insts = self._dis(
-                            data=data,
-                            offset=remote_offset,
-                            iat_api=iat_api,
-                            bin_instance=bin_instance,
-                            insts=insts,
-                            ifrom=insts[inst.offset],
-                            from_pred=False,
-                            verbose=verbose
-                        )
+                    inst_va = self.get_va_from_offset(bin_instance, offset)
+                    i = self.capstone.disasm(data[offset:], inst_va, count=1).next()
+
+                    inst = Instruction(
+                        id=i.id,
+                        offset=offset,
+                        va=inst_va,
+                        address=i.address,
+                        mnemonic=i.mnemonic,
+                        op_str=i.op_str,
+                        size=i.size,
+                        bytes=i.bytes,
+                        cache_only=False,
+                    )
+                    insts[inst.offset] = inst
+
                 except Exception, e:
                     if verbose:
                         print "WARNING:", repr(e)
-                    pass
+                    continue
 
-        # 2 children (next, then remote) - except call
-        elif inst.mnemonic in [
-            'jz', 'je', 'jcxz', 'jecxz', 'jrcxz', 'jnz', 'jp', 'jpe', 'jnp', 'ja', 'jae', 'jb', 'jbe',
-            'jg', 'jge', 'jl', 'jle', 'js', 'jns', 'jo', 'jno', 'jecxz', 'loop', 'loopne', 'loope',
-            'jne']:
-            next_offset = inst.offset + inst.size
+            if ifrom:
+                insts[inst.offset].add_ifrom(ifrom.offset)
+                insts[ifrom.offset].add_ito(inst.offset, from_pred)
 
-            try:
-                remote_offset = self.get_offset_from_va(bin_instance, int(inst.op_str, 16))
-            except Exception, e:
-                if verbose:
-                    print "WARNING:", repr(e)
-                return insts
-
-            insts = self._dis(
-                data=data,
-                offset=next_offset,
-                iat_api=iat_api,
-                bin_instance=bin_instance,
-                insts=insts,
-                ifrom=insts[inst.offset],
-                from_pred=True,
-                verbose=verbose
-            )
-
-            insts = self._dis(
-                data=data,
-                offset=remote_offset,
-                iat_api=iat_api,
-                bin_instance=bin_instance,
-                insts=insts,
-                ifrom=insts[inst.offset],
-                from_pred=False,
-                verbose=verbose
-            )
-
-        # 2 children (next, then remote) - call
-        elif inst.mnemonic in ['call']:
-
-            next_offset = inst.offset + inst.size
-            remote_offset = None
-
-            # Call to Imported API (in IAT)
-            # dword ptr [0x........] or qword ptr [0x........]
-            if "word ptr [0x" in inst.op_str:
-                iat_va = int(inst.op_str.split('[')[1].split(']')[0], 16)
-
-                if iat_va in iat_api:
-                    inst.op_str = iat_api[iat_va]
-            elif inst.op_str in ['eax', 'ebx', 'ecx', 'edx', 'esi', 'edi', 'esp', 'ebp']:
+            # No child
+            if inst.mnemonic in ['ret', 'retf']:
                 pass
-            else:
+
+            # 1 remote child
+            elif inst.mnemonic in ['jmp', 'jmpf']:
+                if "word ptr [0x" in inst.op_str:
+                    iat_va = int(inst.op_str.split('[')[1].split(']')[0], 16)
+
+                    if iat_va in iat_api:
+                        inst.op_str = iat_api[iat_va]
+                else:
+                    try:
+                        remote_offset = self.get_offset_from_va(bin_instance, int(inst.op_str, 16))
+                        if remote_offset is not None:
+                            args_queue.insert(0, (remote_offset, insts[inst.offset], False))
+                    except Exception, e:
+                        if verbose:
+                            print "WARNING:", repr(e)
+                        pass
+
+            # 2 children (next, then remote) - except call
+            elif inst.mnemonic in [
+                'jz', 'je', 'jcxz', 'jecxz', 'jrcxz', 'jnz', 'jp', 'jpe', 'jnp', 'ja', 'jae', 'jb', 'jbe',
+                'jg', 'jge', 'jl', 'jle', 'js', 'jns', 'jo', 'jno', 'jecxz', 'loop', 'loopne', 'loope',
+                'jne']:
+                next_offset = inst.offset + inst.size
+
+                args_queue.insert(0, (next_offset, insts[inst.offset], True))
+
                 try:
                     remote_offset = self.get_offset_from_va(bin_instance, int(inst.op_str, 16))
-                except Exception as e:
+                except Exception, e:
                     if verbose:
                         print "WARNING:", repr(e)
+                    continue
+
+                args_queue.insert(1, (remote_offset, insts[inst.offset], False))
+
+            # 2 children (next, then remote) - call
+            elif inst.mnemonic in ['call']:
+
+                next_offset = inst.offset + inst.size
+                remote_offset = None
+
+                args_queue.insert(0, (next_offset, insts[inst.offset], True))
+
+                # Call to Imported API (in IAT)
+                # dword ptr [0x........] or qword ptr [0x........]
+                if "word ptr [0x" in inst.op_str:
+                    iat_va = int(inst.op_str.split('[')[1].split(']')[0], 16)
+
+                    if iat_va in iat_api:
+                        inst.op_str = iat_api[iat_va]
+                elif inst.op_str in ['eax', 'ebx', 'ecx', 'edx', 'esi', 'edi', 'esp', 'ebp']:
                     pass
+                else:
+                    try:
+                        remote_offset = self.get_offset_from_va(bin_instance, int(inst.op_str, 16))
+                    except Exception as e:
+                        if verbose:
+                            print "WARNING:", repr(e)
+                        pass
 
-            insts = self._dis(
-                data=data,
-                offset=next_offset,
-                iat_api=iat_api,
-                bin_instance=bin_instance,
-                insts=insts,
-                ifrom=insts[inst.offset],
-                from_pred=True,
-                verbose=verbose
-            )
+                if remote_offset:
+                    args_queue.insert(1, (remote_offset, insts[inst.offset], False))
 
-            if remote_offset:
-                insts = self._dis(
-                    data=data,
-                    offset=remote_offset,
-                    iat_api=iat_api,
-                    bin_instance=bin_instance,
-                    insts=insts,
-                    ifrom=insts[inst.offset],
-                    from_pred=False,
-                    verbose=verbose
-                )
-
-        # 1 child (next) - basic instruction
-        else:
-            next_offset = inst.offset + inst.size
-            insts = self._dis(
-                data=data,
-                offset=next_offset,
-                iat_api=iat_api,
-                bin_instance=bin_instance,
-                insts=insts,
-                ifrom=insts[inst.offset],
-                from_pred=True,
-                verbose=verbose
-            )
+            # 1 child (next) - basic instruction
+            else:
+                next_offset = inst.offset + inst.size
+                args_queue.insert(0, (next_offset, insts[inst.offset], True))
 
         return insts
 
@@ -266,7 +250,8 @@ class GenericDisassembler:
         for m in compiled_re.finditer(data):
             function_offset = m.start()
 
-            if function_offset not in insts:
+            inst = insts.get(function_offset, None)
+            if inst is None or inst.cache_only:
                 insts = self._dis(data=data, offset=function_offset, iat_api=iat_api, bin_instance=bin_instance, insts=insts, verbose=verbose)
         return insts
 
@@ -278,7 +263,7 @@ class GenericDisassembler:
         '''
 
         insts = dict()
-
+        insts = self.linear_sweep_cache(data=data, offset=offset, insts=insts, bin_instance=bin_instance, verbose=verbose)
         insts = self._dis(data=data, offset=offset, iat_api=iat_api, bin_instance=bin_instance, insts=insts, verbose=verbose)
 
         # Exploration of the exported functions
@@ -308,67 +293,69 @@ class GenericDisassembler:
         if displayable:
 
             for offset, inst in sorted(insts.iteritems()):
-                if inst.op_str == "":
-                    inst_str = "%s" % inst.mnemonic
-                else:
-                    inst_str = "%s %s" % (inst.mnemonic, inst.op_str)
+                if not inst.cache_only:
+                    if inst.op_str == "":
+                        inst_str = "%s" % inst.mnemonic
+                    else:
+                        inst_str = "%s %s" % (inst.mnemonic, inst.op_str)
 
-                if offset != oep_offset:
-                    nodes.write(('"%X" [label="%s", address="0x%X", inst="%s", '
-                                 'style="", shape=box, fillcolor="white"]\n') % (
-                        inst.va,
-                        "%016X: %s %s" % (inst.va, inst.mnemonic, inst.op_str),
-                        inst.va,
-                        inst_str
-                    ))
-                else:
-                    nodes.write(('"%X" [label="%s", address="0x%X", inst="%s", '
-                                 'style="", shape=box, fillcolor="white", root=true]\n') % (
-                        inst.va,
-                        "%016X: %s %s" % (inst.va, inst.mnemonic, inst.op_str),
-                        inst.va,
-                        inst_str
-                    ))
+                    if offset != oep_offset:
+                        nodes.write(('"%X" [label="%s", address="0x%X", inst="%s", '
+                                     'style="", shape=box, fillcolor="white"]\n') % (
+                            inst.va,
+                            "%016X: %s %s" % (inst.va, inst.mnemonic, inst.op_str),
+                            inst.va,
+                            inst_str
+                        ))
+                    else:
+                        nodes.write(('"%X" [label="%s", address="0x%X", inst="%s", '
+                                     'style="", shape=box, fillcolor="white", root=true]\n') % (
+                            inst.va,
+                            "%016X: %s %s" % (inst.va, inst.mnemonic, inst.op_str),
+                            inst.va,
+                            inst_str
+                        ))
 
-                if inst.to_succ is not None:
-                    edges.write(('"%X" -> "%X" [label=0, color=%s, child_number=1]\n') % (
-                        inst.va,
-                        insts[inst.to_succ].va,
-                        "black"
-                    ))
+                    if inst.to_succ is not None:
+                        edges.write(('"%X" -> "%X" [label=0, color=%s, child_number=1]\n') % (
+                            inst.va,
+                            insts[inst.to_succ].va,
+                            "black"
+                        ))
 
-                if inst.to_other is not None:
-                    edges.write(('"%X" -> "%X" [label=1, color=%s, child_number=2]\n') % (
-                        inst.va,
-                        insts[inst.to_other].va,
-                        "red"
-                    ))
+                    if inst.to_other is not None:
+                        edges.write(('"%X" -> "%X" [label=1, color=%s, child_number=2]\n') % (
+                            inst.va,
+                            insts[inst.to_other].va,
+                            "red"
+                        ))
         else:
 
             for offset, inst in sorted(insts.iteritems()):
-                if inst.op_str == "":
-                    inst_str = "%s" % inst.mnemonic
-                else:
-                    inst_str = "%s %s" % (inst.mnemonic, inst.op_str)
+                if not inst.cache_only:
+                    if inst.op_str == "":
+                        inst_str = "%s" % inst.mnemonic
+                    else:
+                        inst_str = "%s %s" % (inst.mnemonic, inst.op_str)
 
-                if offset != oep_offset:
-                    nodes.write(('"%X" [inst="%s", address="0x%X"]\n') % (
-                        inst.va,
-                        inst_str,
-                        inst.va
-                    ))
-                else:
-                    nodes.write(('"%X" [inst="%s", address="0x%X", root=true]\n') % (
-                        inst.va,
-                        inst_str,
-                        inst.va
-                    ))
+                    if offset != oep_offset:
+                        nodes.write(('"%X" [inst="%s", address="0x%X"]\n') % (
+                            inst.va,
+                            inst_str,
+                            inst.va
+                        ))
+                    else:
+                        nodes.write(('"%X" [inst="%s", address="0x%X", root=true]\n') % (
+                            inst.va,
+                            inst_str,
+                            inst.va
+                        ))
 
-                if inst.to_succ is not None:
-                    edges.write(('"%X" -> "%X" [child_number=1]\n') % (inst.va, insts[inst.to_succ].va))
+                    if inst.to_succ is not None:
+                        edges.write(('"%X" -> "%X" [child_number=1]\n') % (inst.va, insts[inst.to_succ].va))
 
-                if inst.to_other is not None:
-                    edges.write(('"%X" -> "%X" [child_number=2]\n') % (inst.va, insts[inst.to_other].va))
+                    if inst.to_other is not None:
+                        edges.write(('"%X" -> "%X" [child_number=2]\n') % (inst.va, insts[inst.to_other].va))
 
         dot.write(header)
         dot.write(nodes.getvalue())
@@ -414,7 +401,8 @@ class PEDisassembler(GenericDisassembler):
 
         if export_table is not None:
             for exp in export_table:
-                if exp not in insts:
+                inst = insts.get(exp, None)
+                if inst is None or inst.cache_only:
                     insts = self._dis(data=data,
                                  offset=exp.address,
                                  iat_api=iat_api,
@@ -468,7 +456,9 @@ class ELFDisassembler(GenericDisassembler):
                    info.st_info['bind'] == 'STB_GLOBAL':
 
                     # If this is a new non-empty function
-                    if info.st_value != 0 and info.st_value not in insts:
+
+                    inst = insts.get(info.st_value, None)
+                    if info.st_value != 0 and (inst is None or inst.cache_only):
 
                         offset = self.get_offset_from_rva(
                             bin_instance,
@@ -497,6 +487,7 @@ class ELFDisassembler(GenericDisassembler):
         '''
         insts = dict()
 
+        insts = self.linear_sweep_cache(data=data, offset=offset, insts=insts, bin_instance=bin_instance, verbose=verbose)
         insts = self._dis(data=data, offset=offset, bin_instance=bin_instance, insts=insts, verbose=verbose)
 
         # Function 'start' jumps on function 'main' with a dynamic jump. 'main' address is given in argument
@@ -759,7 +750,7 @@ def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes
             arg_list.append((path, path + dot_path_suffix, print_listing, readable, verbose))
 
         original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
-        pool = multiprocessing.Pool(processes=n_processes)
+        pool = multiprocessing.Pool(processes=min(n_processes, len(arg_list)))
         signal.signal(signal.SIGINT, original_sigint_handler)
 
         try:
@@ -791,4 +782,4 @@ if __name__ == "__main__":
         sys.setrecursionlimit(1000000)
         bin_path = sys.argv[1]
         dot_path = bin_path + ".dot"
-        disassemble_file(bin_path=bin_path, dot_path=dot_path, verbose=True)
+        disassemble_file(bin_path=bin_path, dot_path=dot_path, verbose=False)
