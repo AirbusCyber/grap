@@ -115,13 +115,9 @@ class GenericDisassembler:
                 insts[curr_offset] = inst
                 curr_offset += i.size
                 inst_va += i.size
-
-        try:
-            inst_va = self.get_va_from_offset(bin_instance, offset)
         except Exception, e:
             if verbose:
                 print "WARNING:", repr(e)
-            return insts
 
         return insts
 
@@ -204,22 +200,22 @@ class GenericDisassembler:
 
                 args_queue.insert(0, (next_offset, insts[inst.offset], True))
 
-            # Call to Imported API (in IAT)
-            # dword ptr [0x........] or qword ptr [0x........]
-            if "word ptr [0x" in inst.op_str:
-                iat_va = int(inst.op_str.split('[')[1].split(']')[0], 16)
+                # Call to Imported API (in IAT)
+                # dword ptr [0x........] or qword ptr [0x........]
+                if "word ptr [0x" in inst.op_str:
+                    iat_va = int(inst.op_str.split('[')[1].split(']')[0], 16)
 
-                if iat_va in iat_api:
-                    inst.op_str = iat_api[iat_va]
-            elif inst.op_str in ['eax', 'ebx', 'ecx', 'edx', 'esi', 'edi', 'esp', 'ebp']:
-                pass
-            else:
-                try:
-                    remote_offset = self.get_offset_from_va(bin_instance, int(inst.op_str, 16))
-                except Exception, e:
-                    if verbose:
-                        print "WARNING:", repr(e)
-                    continue
+                    if iat_va in iat_api:
+                        inst.op_str = iat_api[iat_va]
+                elif inst.op_str in ['eax', 'ebx', 'ecx', 'edx', 'esi', 'edi', 'esp', 'ebp']:
+                    pass
+                else:
+                    try:
+                        remote_offset = self.get_offset_from_va(bin_instance, int(inst.op_str, 16))
+                    except Exception, e:
+                        if verbose:
+                            print "WARNING:", repr(e)
+                        continue
 
                 args_queue.insert(1, (remote_offset, insts[inst.offset], False))
 
