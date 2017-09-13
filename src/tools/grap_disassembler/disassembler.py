@@ -91,7 +91,6 @@ class GenericDisassembler:
         self.conditional_jmp_mnemonics = {'jz', 'je', 'jcxz', 'jecxz', 'jrcxz', 'jnz', 'jp', 'jpe', 'jnp', 'ja', 'jae', 'jb', 'jbe', 'jg', 'jge', 'jl', 'jle', 'js', 'jns', 'jo', 'jno', 'jecxz', 'loop', 'loopne', 'loope', 'jne'}
         self.x86_32_registers = {'eax', 'ebx', 'ecx', 'edx', 'esi', 'edi', 'esp', 'ebp'}
 
-
     def linear_sweep_cache(self, data, offset, insts, bin_instance, verbose=False):
         curr_offset = offset
         try:
@@ -778,34 +777,35 @@ def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes
     dot_path_list = []
     arg_list = []
 
-    if multiprocess:
-        for path in path_list:
-            arg_list.append((path, path + dot_path_suffix, print_listing, readable, verbose))
+    if path_list is not None and path_list != []:
+        if multiprocess:
+            for path in path_list:
+                arg_list.append((path, path + dot_path_suffix, print_listing, readable, verbose))
 
-        original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
-        pool = multiprocessing.Pool(processes=min(n_processes, len(arg_list)))
-        signal.signal(signal.SIGINT, original_sigint_handler)
+            original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
+            pool = multiprocessing.Pool(processes=min(n_processes, len(arg_list)))
+            signal.signal(signal.SIGINT, original_sigint_handler)
 
-        try:
-            res = pool.map_async(disas_worker, arg_list)
+            try:
+                res = pool.map_async(disas_worker, arg_list)
 
-            # without timeout (one year) SIGINT is ignored
-            res.get(timeout=31536000)
-        except KeyboardInterrupt:
-            pool.terminate()
+                # without timeout (one year) SIGINT is ignored
+                res.get(timeout=31536000)
+            except KeyboardInterrupt:
+                pool.terminate()
+            else:
+                pool.close()
+
+            for path in path_list:
+                dot_path_local = path + dot_path_suffix
+                if os.path.isfile(dot_path_local):
+                    dot_path_list.append(dot_path_local)
         else:
-            pool.close()
-
-        for path in path_list:
-            dot_path_local = path + dot_path_suffix
-            if os.path.isfile(dot_path_local):
-                dot_path_list.append(dot_path_local)
-    else:
-        for path in path_list:
-            r = disassemble_file(bin_path=path, dot_path=path+dot_path_suffix, print_listing=print_listing,
-                                 readable=readable, raw=raw, raw_64=raw_64, verbose=verbose, use_existing=use_existing)
-            if r is not None:
-                dot_path_list.append(r)
+            for path in path_list:
+                r = disassemble_file(bin_path=path, dot_path=path+dot_path_suffix, print_listing=print_listing,
+                                     readable=readable, raw=raw, raw_64=raw_64, verbose=verbose, use_existing=use_existing)
+                if r is not None:
+                    dot_path_list.append(r)
 
     return dot_path_list
 
