@@ -18,8 +18,7 @@ except ImportError:
 
 
 class Instruction:
-    def __init__(self, id, offset, va, address, mnemonic, op_str, size, bytes, cache_only):
-        self.id = id
+    def __init__(self, offset, va, address, mnemonic, op_str, size, bytes, cache_only):
         self.offset = offset
         self.va = va
         self.address = address
@@ -90,34 +89,32 @@ class GenericDisassembler:
 
         self.conditional_jmp_mnemonics = {'jz', 'je', 'jcxz', 'jecxz', 'jrcxz', 'jnz', 'jp', 'jpe', 'jnp', 'ja', 'jae', 'jb', 'jbe', 'jg', 'jge', 'jl', 'jle', 'js', 'jns', 'jo', 'jno', 'jecxz', 'loop', 'loopne', 'loope', 'jne'}
         self.x86_32_registers = {'eax', 'ebx', 'ecx', 'edx', 'esi', 'edi', 'esp', 'ebp'}
+        self.max_instruction_size = 16
 
     def linear_sweep_cache(self, data, offset, insts, bin_instance, verbose=False):
         curr_offset = offset
         try:
             inst_va = self.get_va_from_offset(bin_instance, curr_offset)
-            instructions = self.capstone.disasm(data[offset:], inst_va)
+            instructions = self.capstone.disasm_lite(data[offset:], inst_va)
 
             curr_offset = offset
-            for i in instructions:
+            for (address, size, mnemonic, op_str) in instructions:
                 inst = Instruction(
-                    id=i.id,
                     offset=curr_offset,
                     va=inst_va,
-                    address=i.address,
-                    mnemonic=i.mnemonic,
-                    op_str=i.op_str,
-                    size=i.size,
-                    bytes=i.bytes,
+                    address=address,
+                    mnemonic=mnemonic,
+                    op_str=op_str,
+                    size=size,
+                    bytes=data[curr_offset:curr_offset+size],
                     cache_only=True,
                 )
 
                 insts[curr_offset] = inst
-                curr_offset += i.size
-                inst_va += i.size
+                curr_offset += size
+                inst_va += size
         except Exception, e:
-            if verbose:
-                print "WARNING:", repr(e)
-
+            print "WARNING:", repr(e)
         return insts
 
     def _dis(self, data, offset, insts, bin_instance, iat_api=dict(), verbose=False, ifrom=None, from_pred=True):
@@ -148,17 +145,16 @@ class GenericDisassembler:
             if inst is None:
                 try:
                     inst_va = self.get_va_from_offset(bin_instance, offset)
-                    i = self.capstone.disasm(data[offset:], inst_va, count=1).next()
+                    (address, size, mnemonic, op_str) = self.capstone.disasm_lite(data[offset:offset+self.max_instruction_size], inst_va, count=1).next()
 
                     inst = Instruction(
-                        id=i.id,
                         offset=offset,
                         va=inst_va,
-                        address=i.address,
-                        mnemonic=i.mnemonic,
-                        op_str=i.op_str,
-                        size=i.size,
-                        bytes=i.bytes,
+                        address=address,
+                        mnemonic=mnemonic,
+                        op_str=op_str,
+                        size=size,
+                        bytes=data[offset:offset+size],
                         cache_only=False,
                     )
                     insts[inst.offset] = inst
