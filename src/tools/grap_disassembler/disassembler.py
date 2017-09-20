@@ -766,7 +766,7 @@ def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listin
 
 
 def disas_worker(arg):
-    return disassemble_file(bin_path=arg[0], dot_path=arg[1], print_listing=arg[2], readable=arg[3], verbose=arg[4])
+    return disassemble_file(bin_path=arg[0], dot_path=arg[1], print_listing=arg[2], readable=arg[3], verbose=arg[4], raw=arg[5], raw_64=arg[6], use_existing=arg[7])
 
 
 def timeout_worker(*arg):
@@ -774,7 +774,7 @@ def timeout_worker(*arg):
     p = multiprocessing.dummy.Pool(1)
     res = p.apply_async(disas_worker, arg)
     try:
-        out = res.get(timeout=arg[0][5])
+        out = res.get(timeout=arg[0][-1])
         p.close()
     except multiprocessing.TimeoutError:
         print "WARNING: Disassembly timeout for", arg[0][0]
@@ -791,7 +791,7 @@ def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes
 
     if path_list is not None and path_list != []:
         if multiprocess:
-            if timeout.isdigit():
+            if isinstance(timeout, int) or timeout.isdigit():
                 i = int(timeout)
                 if i == 0:
                     timeout_sec = 31536000
@@ -801,7 +801,7 @@ def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes
                 timeout_sec = 31536000
 
             for path in path_list:
-                arg_list.append((path, path + dot_path_suffix, print_listing, readable, verbose, timeout_sec))
+                arg_list.append((path, path + dot_path_suffix, print_listing, readable, verbose, raw, raw_64, use_existing, timeout_sec))
 
             original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
 
