@@ -91,7 +91,7 @@ You may find additional pattern examples in two directories:
 - [examples/](examples/) contains patterns used against the Backspace malware (see [examples/backspace_samples.md](examples/backspace_samples.md) to obtain the binary samples).
 
 # Documentation
-You will find more documentation in the [doc/](doc/) folder, especially about the syntax of pattern and test graphs ([doc/graphs.pdf](doc/graphs.pdf)).
+You will find more documentation in the [doc/](doc/) folder. The syntax of pattern and test graphs is detailed in the file grap_graphs.pdf within the download section on BitBucket ([https://bitbucket.org/cybertools/grap/downloads/grap_graphs.pdf](https://bitbucket.org/cybertools/grap/downloads/grap_graphs.pdf)).
 
 The [examples/](examples/) folder contains a python file demonstrating how to use the python bindings to analyze Backspace samples.
 
