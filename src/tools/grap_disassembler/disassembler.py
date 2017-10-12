@@ -791,7 +791,7 @@ def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes
 
     if path_list is not None and path_list != []:
         if multiprocess:
-            if isinstance(timeout, int) or timeout.isdigit():
+            if isinstance(timeout, int) or (isinstance(timeout, str) and timeout.isdigit()):
                 i = int(timeout)
                 if i == 0:
                     timeout_sec = 31536000

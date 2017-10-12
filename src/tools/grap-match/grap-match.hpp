@@ -21,9 +21,9 @@ void drop_privileges();
 #endif
 
 int main(int argc, char *argv[]);
-typedef std::tuple <bool, bool, bool, bool, ParcoursNode*, string, Parcours*, std::pair<std::string, FILE*>, bool, bool, vsize_t> ArgsMatchPatternToTest;
+typedef std::tuple <bool, bool, bool, bool, bool, bool, ParcoursNode*, string, Parcours*, std::pair<std::string, FILE*>, bool, bool, vsize_t> ArgsMatchPatternToTest;
 void worker_queue(list< ArgsMatchPatternToTest >* args_queue, mutex* queue_mutex, mutex* cout_mutex, bool use_tree);
-void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll, bool checkLabels, string pathPattern, Parcours* pattern_parcours, string pathTest, FILE* fileTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, mutex* cout_mutex);
-void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll, bool checkLabels, ParcoursNode* tree, string pathPattern, Parcours* pattern_parcours, string pathTest, FILE* fileTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, mutex* cout_mutex);
+void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionDebug, bool optionShowAll, bool checkLabels, bool multipleTestFiles, string pathPattern, Parcours* pattern_parcours, string pathTest, FILE* fileTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, mutex* cout_mutex);
+void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionDebug, bool optionShowAll, bool checkLabels, bool multipleTestFiles, ParcoursNode* tree, string pathPattern, Parcours* pattern_parcours, string pathTest, FILE* fileTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, mutex* cout_mutex);
 
 #endif

@@ -104,6 +104,7 @@ int main(int argc, char *argv[]) {
   bool optionTree = false;
   bool optionSingleTraversal = false;
   bool optionShowAll = false;
+  bool multipleTestFiles = false;
 
   // Parsing options
   int a;
@@ -168,6 +169,9 @@ int main(int argc, char *argv[]) {
         else{
           testsInfo.push_back(std::pair<std::string, FILE*>(path, fp)); 
           scanOk = true;
+          if (testsInfo.size() >= 2){
+            multipleTestFiles = true;
+          }
         }
       }
     }
@@ -241,7 +245,7 @@ int main(int argc, char *argv[]) {
       std::cerr << "WARNING: Pattern graph is not connected." << std::endl;
     }
     
-    if (not optionQuiet){
+    if (optionDebug){
       std::cout << "Pattern graph (" << pathPattern << ") has " << (int) maxSiteSize <<   " nodes." << std::endl;
     }
   }
@@ -265,8 +269,8 @@ int main(int argc, char *argv[]) {
       }
     }
     
-    if (not optionQuiet){
-      std::cout << (int) n_patterns << " unique patterns added to tree." << std::endl;
+    if (optionVerbose){
+      std::cout << (int) n_patterns << " unique pattern(s) found." << std::endl << std::endl;
     }
     
     if (optionDebug){
@@ -280,7 +284,7 @@ int main(int argc, char *argv[]) {
   std::mutex* cout_mutex = new std::mutex();
   for (test_iterator = testsInfo.begin();  test_iterator != testsInfo.end(); test_iterator++){  
     std::pair<std::string, FILE*> testInfo = (std::pair<std::string, FILE*>) *test_iterator;
-    args_queue->push_back(std::make_tuple(optionVerbose, optionQuiet, optionShowAll, checkLabels, tree, pathPattern, pattern_parcours, testInfo, printNoMatches, printAllMatches, maxSiteSize));
+    args_queue->push_back(std::make_tuple(optionVerbose, optionQuiet, optionDebug, optionShowAll, checkLabels, multipleTestFiles, tree, pathPattern, pattern_parcours, testInfo, printNoMatches, printAllMatches, maxSiteSize));
   }
   
   if (optionThreads){
@@ -336,15 +340,15 @@ void worker_queue(std::list<ArgsMatchPatternToTest>* args_queue, std::mutex* que
     queue_mutex->unlock();
     
     if (found_next){
-      std::pair<std::string, FILE*> pair = std::get<7>(args);
+      std::pair<std::string, FILE*> pair = std::get<9>(args);
       std::string test_path = pair.first;
       FILE* test_file = pair.second;
       
       if (use_tree){
-        matchTreeToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<4>(args), std::get<5>(args), std::get<6>(args), test_path, test_file, std::get<8>(args), std::get<9>(args), std::get<10>(args), cout_mutex);
+        matchTreeToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<4>(args), std::get<5>(args), std::get<6>(args), std::get<7>(args), std::get<8>(args), test_path, test_file, std::get<10>(args), std::get<11>(args), std::get<12>(args), cout_mutex);
       }
       else{
-        matchPatternToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<5>(args), std::get<6>(args), test_path, test_file, std::get<8>(args), std::get<9>(args), std::get<10>(args), cout_mutex);
+        matchPatternToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<4>(args), std::get<5>(args), std::get<7>(args), std::get<8>(args), test_path, test_file, std::get<10>(args), std::get<11>(args), std::get<12>(args), cout_mutex);
       }
     }
     else{
@@ -353,15 +357,11 @@ void worker_queue(std::list<ArgsMatchPatternToTest>* args_queue, std::mutex* que
   }
 }
 
-void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll, bool checkLabels, string pathPattern, Parcours* pattern_parcours, string pathTest, FILE* fileTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, std::mutex* cout_mutex){
+void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionDebug, bool optionShowAll, bool checkLabels, bool multipleTestFiles, string pathPattern, Parcours* pattern_parcours, string pathTest, FILE* fileTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, std::mutex* cout_mutex){
   ostringstream out_stream;
   ostringstream err_stream;
   
-  if (not optionQuiet){
-    out_stream << std::endl; 
-  }
-  
-  if (optionVerbose){
+  if (optionDebug){
     out_stream << "Parsing test file." << endl; 
   }
   
@@ -380,7 +380,7 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll
   vsize_t n_test;
   n_test = test_graph->nodes.size;
   
-  if (optionVerbose){
+  if (optionDebug){
     out_stream << "Done." << endl; 
   }
   
@@ -389,9 +389,10 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll
   Parcours::RetourParcours rt = pattern_parcours->parcourir(test_graph, maxSiteSize, checkLabels, true, getids, printAllMatches);
   vsize_t count = rt.first;
 
-  if (not optionQuiet) {
-    out_stream << "Test graph (" << pathTest << ") has " << (int) test_graph->nodes.size <<  " nodes." << std::endl;
-    out_stream << (int) count << " traversal(s) possible in " << pathTest << "." << std::endl;
+  if (not optionQuiet){
+//     out_stream << "Test graph (" << pathTest << ") has " << (int) test_graph->nodes.size <<  " nodes." << std::endl;
+    out_stream << pathTest << " - " << (int) test_graph->nodes.size <<  " instructions" << std::endl;
+    out_stream << (int) count << " matche(s) in " << pathTest << std::endl;
   }
   else{
     if (count > 0 or optionShowAll){
@@ -402,12 +403,11 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll
   // Parse matches and print the extracted nodes
   std::list < std::map < string, std::list < node_t * >*>*>* list_gotten = rt.second;
   if (not list_gotten->empty()) {
-//     std::cout << "\nExtracted nodes:\n";
     std::list < std::map < string, std::list < node_t * >*>*>::iterator it;
 
     vsize_t i = 1;
     for (it = list_gotten->begin(); it != list_gotten->end(); it++) {
-      if (it != list_gotten->begin()) out_stream << std::endl;
+      out_stream << std::endl;
       out_stream << "Match " << std::dec << i << "\n";
 
       Match* match = *it;
@@ -444,15 +444,11 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll
   cout_mutex->unlock();
 }
 
-void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll, bool checkLabels, ParcoursNode* tree, string pathPattern, Parcours* pattern_parcours, string pathTest, FILE* fileTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, std::mutex* cout_mutex){
+void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionDebug, bool optionShowAll, bool checkLabels, bool multipleTestFiles, ParcoursNode* tree, string pathPattern, Parcours* pattern_parcours, string pathTest, FILE* fileTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, std::mutex* cout_mutex){
   ostringstream out_stream;
   ostringstream err_stream;
   
-  if (not optionQuiet){
-    out_stream << std::endl; 
-  }
-  
-  if (optionVerbose){
+  if (optionDebug){
     out_stream << "Parsing test file." << endl; 
   }
   
@@ -471,7 +467,7 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll, b
   vsize_t n_test;
   n_test = test_graph->nodes.size;
   
-  if (optionVerbose){
+  if (optionDebug){
     out_stream << "Done." << endl; 
   }
 
@@ -482,13 +478,16 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll, b
   PatternsMatches::iterator it_patternsmatches;
   
   if (not optionQuiet){
-    out_stream << "Test graph (" << pathTest << ") has " << (int) test_graph->nodes.size <<  " nodes." << std::endl;
-    out_stream << (int) count << " traversal(s) possible in " << pathTest;
+//     out_stream << "Test graph (" << pathTest << ") has " << (int) test_graph->nodes.size <<  " nodes." << std::endl;
+//     out_stream << "---" << std::endl;
+    out_stream << pathTest << " - " << (int) test_graph->nodes.size <<  " instructions" << std::endl;
     
     if (count == 0){
-      out_stream << "." << std::endl;
+      out_stream << (int) count << " match";
+      out_stream << std::endl;
     }
     else {
+      out_stream << (int) count << " matches";
       out_stream << ": ";
       for (it_patternsmatches = pattern_matches->begin(); it_patternsmatches != pattern_matches->end(); it_patternsmatches++){
         std::string leaf_name = it_patternsmatches->first;
@@ -545,7 +544,7 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll, b
             matches_out_stream << "Match " << std::dec << i << std::endl;
           }
           else {
-            matches_out_stream << leaf_name << ", " << "match " << std::dec << i << std::endl;
+            matches_out_stream << leaf_name << " - " << "match " << std::dec << i << std::endl;
           }
 
           Match::iterator it_match;
@@ -579,6 +578,10 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionShowAll, b
   
   freePatternsMatches(pattern_matches, true);
   graph_free(test_graph, true);
+  
+  if (multipleTestFiles and not optionQuiet){
+    out_stream << "---" << std::endl;
+  }
   
   cout_mutex->lock();
   std::cout << out_stream.str();
