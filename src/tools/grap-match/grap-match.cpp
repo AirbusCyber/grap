@@ -213,7 +213,7 @@ int main(int argc, char *argv[]) {
             
             char* buf = (char*) calloc_or_quit(7, sizeof(char));
             vsize_t read = fread(buf, 1, 7, fp);
-            if (read != 7 or (buf[0] != 'D' and buf[0] != 'D') or strncmp(buf+1, "igraph", 6) != 0){
+            if (read != 7 or (buf[0] != 'D' and buf[0] != 'd') or strncmp(buf+1, "igraph", 6) != 0){
               if (not optionQuiet) {
                 std::cerr << "WARNING: Test graph " << p << " is not a DOT file." << std::endl;
               }
