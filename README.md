@@ -20,6 +20,8 @@ Besides compilers (build-essential), the following dependencies must be installe
 - bison
 - flex 
 - libboost-regex-dev
+- libboost-system-dev
+- libboost-filesystem-dev
 - libseccomp-dev
 - python2.7-dev
 - python-pefile
