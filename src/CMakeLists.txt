@@ -66,7 +66,7 @@ else()
   set(Boost_USE_STATIC_LIBS OFF)
 endif()
 
-find_package(Boost REQUIRED COMPONENTS regex)
+find_package(Boost REQUIRED COMPONENTS regex system filesystem)
 
 include_directories(
   ./

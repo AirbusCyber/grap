@@ -12,7 +12,7 @@ GRAP_VERSION="1.0.0"
 if __name__ == '__main__':
     sys.setrecursionlimit(1000000)
 
-    parser = argparse.ArgumentParser(description='grap: look for a graph pattern in a PE/ELF binary or a .dot graph file',
+    parser = argparse.ArgumentParser(description='grap: look for a graph pattern in a PE/ELF/RAW binary or a .dot graph file',
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('--version', action='version', version=GRAP_VERSION)
 
@@ -34,6 +34,7 @@ if __name__ == '__main__':
     parser.add_argument('-q', '--quiet', dest='quiet', action="store_true", default=False, help='Quiet output')
     parser.add_argument('-v', '--verbose', dest='verbose', action="store_true", default=False, help='Verbose output')
     parser.add_argument('-d', '--debug', dest='debug', action="store_true", default=False, help='Debug output')
+    parser.add_argument('-p', '--pattern', dest='pattern_path', action="append", nargs=1, help='Include additional pattern file, can be used multiple times')
     args = parser.parse_args()
 
     printed_something = False
@@ -134,6 +135,12 @@ if __name__ == '__main__':
 
             if not args.multithread:
                 command.append("-nt")
+
+            print type(args.pattern_path)
+            print args.pattern_path
+            for p in args.pattern_path:
+                command.append("-p")
+                command.append(p[0])
 
             command.append(pattern_path)
 

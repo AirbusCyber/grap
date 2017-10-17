@@ -7,12 +7,13 @@ char optionLabels;
 void printUsage() {
   printf("Use grap-match to look for a pattern file (.dot) in a test file (.dot).\n");
   printf("For standard usage please use the python wrapper (grap).\n");
-  printf("Usage : ./grap-match [options] patternFile testFile\n");
+  printf("Usage : ./grap-match [options] patternFile [-p patternFile] testFile\n");
   printf("Options are :\n");
   printf("        -h or --help: print this message\n");
   printf("        -v or --verbose\n");
   printf("        -d or --debug\n");
   printf("        -q or --quiet\n");
+  printf("        -r or --recursive                 : analyzes test files recursively (testFile must be a directory)\n");
   printf("        -m or --print-all-matches         : always print matched nodes (overrides getid fields)\n");
   printf("        -nm or --print-no-matches         : never print matched nodes (overrides getid fields)\n");
   printf("        -nt or --no-thread                : don't multithread (defaut: 4 threads)\n");
@@ -20,6 +21,7 @@ void printUsage() {
   printf("        -st or --single-traversal         : use single traversal algorithm (default with one pattern)\n");
   printf("        -sa or --show-all                 : show all tested files (not default when quiet, default otherwise)\n");
   printf("        -t or --tree                      : use tree algorithm (default with multiple patterns)\n");
+  printf("        -p or --pattern                   : include additional pattern file, can be used multiple times\n");
 }
 
 #ifndef _WIN32
@@ -88,8 +90,8 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
-  FILE *fpPattern = NULL;
-  string pathPattern;
+  std::list<FILE*> filePatternList;
+  std::list<std::string> pathPatternList;
   FILE *fpTest = NULL;
   std::list<std::pair<std::string, FILE*>> testsInfo = std::list<std::pair<std::string, FILE*>>();
   bool learnOk = false;
@@ -105,6 +107,7 @@ int main(int argc, char *argv[]) {
   bool optionSingleTraversal = false;
   bool optionShowAll = false;
   bool multipleTestFiles = false;
+  bool optionRecursive = false;
 
   // Parsing options
   int a;
@@ -148,29 +151,86 @@ int main(int argc, char *argv[]) {
     else if (strcmp(argv[a], "-ncl") == 0 || strcmp(argv[a], "-ncs") == 0 || strcmp(argv[a], "--no-check-labels") == 0) {
       checkLabels = false;
     }
+    else if (strcmp(argv[a], "-r") == 0 || strcmp(argv[a], "--recursive") == 0) {
+      optionRecursive = true;
+    }
+    else if (strcmp(argv[a], "-p") == 0 || strcmp(argv[a], "--pattern") == 0) {
+      if (a + 1 < argc){
+        std::string s = std::string(argv[a+1]);
+        
+        FILE* fpPattern = fopen(s.c_str(), "rb");
+        if (fpPattern == NULL) {
+          std::cerr << "WARNING: Can't open pattern graph " << s << "." << std::endl;
+        }
+        else {
+          pathPatternList.push_back(s);
+          filePatternList.push_back(fpPattern);
+        }
+        
+        a++;
+      }
+      else {
+        std::cerr << "WARNING: -p or --pattern needs pattern path" << std::endl;
+      }
+    }
     else {
       if (!learnOk) {
-        pathPattern = std::string(argv[a]);
-        fpPattern = fopen(pathPattern.c_str(), "rb");
-
+        std::string s = std::string(argv[a]);
+        
+        FILE* fpPattern = fopen(s.c_str(), "rb");
         if (fpPattern == NULL) {
-          std::cerr << "ERROR: Can't open pattern graph " << pathPattern << "." << std::endl;
-          return 1;
+          std::cerr << "WARNING: Can't open pattern graph " << s << "." << std::endl;
         }
+        else {
+          pathPatternList.push_back(s); 
+          filePatternList.push_back(fpPattern); 
+        }
+        
         learnOk = true;
       }
       else {
         std::string path = std::string(argv[a]);
-        FILE* fp = fopen(path.c_str(), "rb");
-
-        if (fp == NULL) {
-          std::cerr << "WARNING: Can't open test graph " << path << "." << std::endl;
+        std::list<string> files;
+        
+        if (boost::filesystem::is_directory(path)){
+          if (optionRecursive){
+            files = list_files(path, true, true, ".dot");
+          }
+          else {
+            std::cerr << "WARNING: skipping directory " << path << std::endl;
+          }
         }
-        else{
-          testsInfo.push_back(std::pair<std::string, FILE*>(path, fp)); 
-          scanOk = true;
-          if (testsInfo.size() >= 2){
-            multipleTestFiles = true;
+        else {
+          files = std::list<string>();
+          files.push_back(path);
+        }
+        
+        if (not files.empty()){
+          std::list<string>::iterator it;
+          for (it = files.begin(); it != files.end(); it++){
+            string p = *it;
+            FILE* fp = fopen(p.c_str(), "rb");
+            
+            char* buf = (char*) calloc_or_quit(7, sizeof(char));
+            vsize_t read = fread(buf, 1, 7, fp);
+            if (read != 7 or (buf[0] != 'D' and buf[0] != 'D') or strncmp(buf+1, "igraph", 6) != 0){
+              if (not optionQuiet) {
+                std::cerr << "WARNING: Test graph " << p << " is not a DOT file." << std::endl;
+              }
+              continue;
+            }
+            fseek(fp, 0, SEEK_SET);
+
+            if (fp == NULL) {
+              std::cerr << "WARNING: Can't open test graph " << p << "." << std::endl;
+            }
+            else{
+              testsInfo.push_back(std::pair<std::string, FILE*>(p, fp)); 
+              scanOk = true;
+              if (testsInfo.size() >= 2){
+                multipleTestFiles = true;
+              }
+            }
           }
         }
       }
@@ -186,7 +246,7 @@ int main(int argc, char *argv[]) {
   #endif
   #endif
 
-  if (not learnOk or not scanOk) {
+  if (not learnOk or not scanOk or pathPatternList.empty()) {
     std::cerr << "ERROR: Missing pattern or test graph." << std::endl;
     printUsage();
     return 1;
@@ -202,14 +262,21 @@ int main(int argc, char *argv[]) {
       std::cout << "single traversal" << std::endl; 
     }
   }
-  
-  GraphList* pattern_graphs = getGraphListFromFile(fpPattern);
-  if (pattern_graphs == NULL or pattern_graphs->size == 0){
-    std::cerr <<  "ERROR: Pattern graph could not be opened or is empty, exiting." << std::endl;
-    return 1;
+
+  GraphCppList patternList;
+  std::list<FILE*>::iterator it;
+  for (it = filePatternList.begin(); it != filePatternList.end(); it++){
+    FILE* fp = *it;
+    GraphList* pattern_graphs = getGraphListFromFile(fp);
+    GraphCppList tmpPatternList = MakeGraphList(pattern_graphs);
+    patternList.insert(patternList.end(), tmpPatternList.begin(), tmpPatternList.end());
+    fclose(fp);
   }
   
-  fclose(fpPattern);
+  if (patternList.empty()){
+    std::cerr <<  "ERROR: No pattern graph could be imported, exiting." << std::endl;
+    return 1;
+  }
   
   graph_t* pattern_graph = nullptr;
   ParcoursNode* tree = nullptr;
@@ -217,11 +284,11 @@ int main(int argc, char *argv[]) {
   vsize_t maxSiteSize;
   
   if (not use_tree){
-    if (pattern_graphs->size >= 2){
+    if (patternList.size() >= 2){
       std::cerr << "WARNING: Only the first pattern will be processed with the single traversal algorithm." << std::endl;
     }
     
-    pattern_graph = popfreeFirstGraph(pattern_graphs);
+    pattern_graph = patternList.front();
     
     if (pattern_graph == NULL){
       std::cerr << "ERROR: No pattern found, exiting." << std::endl;
@@ -246,7 +313,7 @@ int main(int argc, char *argv[]) {
     }
     
     if (optionDebug){
-      std::cout << "Pattern graph (" << pathPattern << ") has " << (int) maxSiteSize <<   " nodes." << std::endl;
+      std::cout << "Pattern graph has " << (int) maxSiteSize <<   " nodes." << std::endl;
     }
   }
   else {
@@ -255,8 +322,9 @@ int main(int argc, char *argv[]) {
     vsize_t k;
     vsize_t n_patterns = 0;
     maxSiteSize = 0;
-    for (k = 0; k < pattern_graphs->size; k++){
-      graph_t* gr = pattern_graphs->graphes[k];
+    GraphCppList::iterator it_graph;
+    for (it_graph = patternList.begin(); it_graph != patternList.end(); it_graph++){
+      graph_t* gr = *it_graph;
       bool added = tree->addGraphFromNode(gr, gr->root, gr->nodes.count, checkLabels);
       if (added){
         n_patterns++;
@@ -284,7 +352,7 @@ int main(int argc, char *argv[]) {
   std::mutex* cout_mutex = new std::mutex();
   for (test_iterator = testsInfo.begin();  test_iterator != testsInfo.end(); test_iterator++){  
     std::pair<std::string, FILE*> testInfo = (std::pair<std::string, FILE*>) *test_iterator;
-    args_queue->push_back(std::make_tuple(optionVerbose, optionQuiet, optionDebug, optionShowAll, checkLabels, multipleTestFiles, tree, pathPattern, pattern_parcours, testInfo, printNoMatches, printAllMatches, maxSiteSize));
+    args_queue->push_back(std::make_tuple(optionVerbose, optionQuiet, optionDebug, optionShowAll, checkLabels, multipleTestFiles, tree, pattern_parcours, testInfo, printNoMatches, printAllMatches, maxSiteSize));
   }
   
   if (optionThreads){
@@ -312,7 +380,7 @@ int main(int argc, char *argv[]) {
   delete(queue_mutex);
   delete(cout_mutex);
   if (use_tree){
-    freeGraphList(pattern_graphs, true, true);
+    freeGraphList(patternList, true, true);
     tree->freeParcoursNode(); 
   }
   else{
@@ -325,6 +393,49 @@ int main(int argc, char *argv[]) {
   }
   
   return 0;
+}
+
+bool filter_path(boost::filesystem::path p, bool option_filter, string extension_filter){   
+  if (not boost::filesystem::is_directory(p)){
+    if (option_filter){
+      if (p.extension() == extension_filter){
+        return true;
+      }
+    }
+    else{
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+std::list<string> list_files(string path, bool recursive, bool option_filter, string extension_filter){
+  std::list<string> pathList;
+  
+  try {
+    if (recursive){
+      boost::filesystem::recursive_directory_iterator end, dir(path);
+      for (end; dir != end; dir++) {
+        if (filter_path(dir->path(), option_filter, extension_filter)){
+          pathList.push_back(dir->path().string());
+        }
+      }
+    }
+    else {
+      boost::filesystem::directory_iterator end, dir(path);
+      for (end; dir != end; dir++) {
+        if (filter_path(dir->path(), option_filter, extension_filter)){
+          pathList.push_back(dir->path().string());
+        }
+      }
+    }
+  }
+   catch(std::exception const& ex) {
+    std::cerr << "WARNING: an error occurred while listing directory " << path << std::endl;
+  } 
+  
+  return pathList;
 }
 
 void worker_queue(std::list<ArgsMatchPatternToTest>* args_queue, std::mutex* queue_mutex, std::mutex* cout_mutex, bool use_tree){
@@ -340,15 +451,15 @@ void worker_queue(std::list<ArgsMatchPatternToTest>* args_queue, std::mutex* que
     queue_mutex->unlock();
     
     if (found_next){
-      std::pair<std::string, FILE*> pair = std::get<9>(args);
+      std::pair<std::string, FILE*> pair = std::get<8>(args);
       std::string test_path = pair.first;
       FILE* test_file = pair.second;
       
       if (use_tree){
-        matchTreeToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<4>(args), std::get<5>(args), std::get<6>(args), std::get<7>(args), std::get<8>(args), test_path, test_file, std::get<10>(args), std::get<11>(args), std::get<12>(args), cout_mutex);
+        matchTreeToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<4>(args), std::get<5>(args), std::get<6>(args), std::get<7>(args), test_path, test_file, std::get<9>(args), std::get<10>(args), std::get<11>(args), cout_mutex);
       }
       else{
-        matchPatternToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<4>(args), std::get<5>(args), std::get<7>(args), std::get<8>(args), test_path, test_file, std::get<10>(args), std::get<11>(args), std::get<12>(args), cout_mutex);
+        matchPatternToTest(std::get<0>(args), std::get<1>(args), std::get<2>(args), std::get<3>(args), std::get<4>(args), std::get<5>(args), std::get<7>(args), test_path, test_file, std::get<9>(args), std::get<10>(args), std::get<11>(args), cout_mutex);
       }
     }
     else{
@@ -357,7 +468,7 @@ void worker_queue(std::list<ArgsMatchPatternToTest>* args_queue, std::mutex* que
   }
 }
 
-void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionDebug, bool optionShowAll, bool checkLabels, bool multipleTestFiles, string pathPattern, Parcours* pattern_parcours, string pathTest, FILE* fileTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, std::mutex* cout_mutex){
+void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionDebug, bool optionShowAll, bool checkLabels, bool multipleTestFiles, Parcours* pattern_parcours, string pathTest, FILE* fileTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, std::mutex* cout_mutex){
   ostringstream out_stream;
   ostringstream err_stream;
   
@@ -367,7 +478,9 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionDebug, 
   
   graph_t *test_graph = getGraphFromFile(fileTest);
   if (test_graph == NULL){
-    err_stream <<  "Test graph " << pathTest << " could not be opened, aborting.\n";
+    if (not optionQuiet){
+      err_stream <<  "Test graph " << pathTest << " could not be opened, aborting.\n";
+    }
     
     cout_mutex->lock();
     std::cout << out_stream.str();
@@ -390,7 +503,6 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionDebug, 
   vsize_t count = rt.first;
 
   if (not optionQuiet){
-//     out_stream << "Test graph (" << pathTest << ") has " << (int) test_graph->nodes.size <<  " nodes." << std::endl;
     out_stream << pathTest << " - " << (int) test_graph->nodes.size <<  " instructions" << std::endl;
     out_stream << (int) count << " matche(s) in " << pathTest << std::endl;
   }
@@ -444,7 +556,7 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionDebug, 
   cout_mutex->unlock();
 }
 
-void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionDebug, bool optionShowAll, bool checkLabels, bool multipleTestFiles, ParcoursNode* tree, string pathPattern, Parcours* pattern_parcours, string pathTest, FILE* fileTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, std::mutex* cout_mutex){
+void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionDebug, bool optionShowAll, bool checkLabels, bool multipleTestFiles, ParcoursNode* tree, Parcours* pattern_parcours, string pathTest, FILE* fileTest, bool printNoMatches, bool printAllMatches, vsize_t maxSiteSize, std::mutex* cout_mutex){
   ostringstream out_stream;
   ostringstream err_stream;
   
@@ -454,7 +566,9 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionDebug, boo
   
   graph_t *test_graph = getGraphFromFile(fileTest);
   if (test_graph == NULL){
-    err_stream <<  "Test graph " << pathTest << " could not be opened, aborting.\n";
+    if (not optionQuiet){
+      err_stream <<  "Test graph " << pathTest << " could not be opened, aborting.\n";
+    }
     
     cout_mutex->lock();
     std::cout << out_stream.str();
