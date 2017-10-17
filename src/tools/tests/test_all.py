@@ -324,8 +324,9 @@ def run_and_parse_command(verbose, i, command, expected_traversals, algo):
     found_traversals = None
     for l in lines:
         splitted = l.split(" ")
-        if len(splitted) >= 3 and splitted[1] == "traversal(s)" and splitted[2] == "possible":
+        if len(splitted) >= 2 and (splitted[1] == "traversal(s)" or splitted[1] == "matches:" or splitted[1] == 'matche(s)' or splitted[1] == 'match'):
             found_traversals = int(splitted[0])
+            break
 
     if found_traversals is None:
         if not verbose:
