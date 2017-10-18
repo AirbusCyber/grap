@@ -32,7 +32,7 @@ def main():
     parser.add_argument('-sa', '--show-all', dest='show_all', action="store_true", default=False, help='Show all tested (including not matching) files (not default when quiet, default otherwise)')
     parser.add_argument('-b', '--grap-match-path', dest='grap_match_path', help='Specify the path of the grap-match binary (default: /usr/local/bin/grap-match)')
     parser.add_argument('-t', '--timeout', dest='timeout', default=120, help='Specify timeout (in seconds) for disassembly, assign 0 for no timeout (default: 120)')
-    parser.add_argument('-q', '--quiet', dest='quiet', action="store_true", default=False, help='Quiet output')
+    parser.add_argument('-q', '--quiet', dest='quiet', action="store_true", default=False, help='Quiet output: one file per line with the number of disassembled instruction and matches')
     parser.add_argument('-v', '--verbose', dest='verbose', action="store_true", default=False, help='Verbose output')
     parser.add_argument('-d', '--debug', dest='debug', action="store_true", default=False, help='Debug output')
     parser.add_argument('-p', '--pattern', dest='pattern_path', action="append", nargs=1, help='Include additional pattern file, can be used multiple times')
