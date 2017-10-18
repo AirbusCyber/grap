@@ -13,7 +13,7 @@ void printUsage() {
   printf("        -v or --verbose\n");
   printf("        -d or --debug\n");
   printf("        -q or --quiet\n");
-  printf("        -r or --recursive                 : analyzes test files recursively (testFile must be a directory)\n");
+  printf("        -r or --recursive                 : analyzes .grapt files recursively (testFile must be a directory)\n");
   printf("        -m or --print-all-matches         : always print matched nodes (overrides getid fields)\n");
   printf("        -nm or --print-no-matches         : never print matched nodes (overrides getid fields)\n");
   printf("        -nt or --no-thread                : don't multithread (defaut: 4 threads)\n");
@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
         
         if (boost::filesystem::is_directory(path)){
           if (optionRecursive){
-            files = list_files(path, true, true, ".dot");
+            files = list_files(path, true, true, ".grapcfg");
           }
           else {
             std::cerr << "WARNING: skipping directory " << path << std::endl;
@@ -210,18 +210,8 @@ int main(int argc, char *argv[]) {
           for (it = files.begin(); it != files.end(); it++){
             string p = *it;
             FILE* fp = fopen(p.c_str(), "rb");
-            
-            char* buf = (char*) calloc_or_quit(7, sizeof(char));
-            vsize_t read = fread(buf, 1, 7, fp);
-            if (read != 7 or (buf[0] != 'D' and buf[0] != 'd') or strncmp(buf+1, "igraph", 6) != 0){
-              if (not optionQuiet) {
-                std::cerr << "WARNING: Test graph " << p << " is not a DOT file." << std::endl;
-              }
-              continue;
-            }
-            fseek(fp, 0, SEEK_SET);
 
-            if (fp == NULL) {
+            if (fp == nullptr) {
               std::cerr << "WARNING: Can't open test graph " << p << "." << std::endl;
             }
             else{
@@ -411,7 +401,7 @@ bool filter_path(boost::filesystem::path p, bool option_filter, string extension
 }
 
 std::list<string> list_files(string path, bool recursive, bool option_filter, string extension_filter){
-  std::list<string> pathList;
+  std::list<string> pathList = std::list<string>();
   
   try {
     if (recursive){
@@ -478,9 +468,7 @@ void matchPatternToTest(bool optionVerbose, bool optionQuiet, bool optionDebug, 
   
   graph_t *test_graph = getGraphFromFile(fileTest);
   if (test_graph == NULL){
-    if (not optionQuiet){
-      err_stream <<  "Test graph " << pathTest << " could not be opened, aborting.\n";
-    }
+    err_stream <<  "Test graph " << pathTest << " could not be opened, aborting.\n";
     
     cout_mutex->lock();
     std::cout << out_stream.str();
@@ -566,9 +554,7 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionDebug, boo
   
   graph_t *test_graph = getGraphFromFile(fileTest);
   if (test_graph == NULL){
-    if (not optionQuiet){
-      err_stream <<  "Test graph " << pathTest << " could not be opened, aborting.\n";
-    }
+    err_stream <<  "Test graph " << pathTest << " could not be opened, aborting.\n";
     
     cout_mutex->lock();
     std::cout << out_stream.str();
@@ -592,8 +578,6 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionDebug, boo
   PatternsMatches::iterator it_patternsmatches;
   
   if (not optionQuiet){
-//     out_stream << "Test graph (" << pathTest << ") has " << (int) test_graph->nodes.size <<  " nodes." << std::endl;
-//     out_stream << "---" << std::endl;
     out_stream << pathTest << " - " << (int) test_graph->nodes.size <<  " instructions" << std::endl;
     
     if (count == 0){
@@ -618,7 +602,7 @@ void matchTreeToTest(bool optionVerbose, bool optionQuiet, bool optionDebug, boo
   }
   else {
     if (count > 0 or optionShowAll){
-      out_stream << pathTest;
+      out_stream << pathTest << " (" << (int) test_graph->nodes.size << ")";
       if (count > 0){
         out_stream << " - ";
       }
