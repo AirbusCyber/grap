@@ -744,11 +744,11 @@ def disassemble_raw(raw_data = None, raw_path = None, dot_path = None, print_lis
     return True
 
 
-def disassemble_file(bin_data = None, dir=None, bin_path=None, dot_path=None, print_listing=False, readable=False, raw=False, raw_64=False, entrypoint=None, verbose=False, use_existing=False):
+def disassemble_file(bin_data = None, dir_path=None, bin_path=None, dot_path=None, print_listing=False, readable=False, raw=False, raw_64=False, entrypoint=None, verbose=False, use_existing=False):
     return_path = dot_path
-    if dir is not None:
+    if dir_path is not None:
         # Binary file comes from directly being recursively traversed, return dir path
-        return_path = dir
+        return_path = dir_path
 
     if use_existing and os.path.exists(dot_path):
         return return_path
@@ -776,11 +776,11 @@ def disassemble_file(bin_data = None, dir=None, bin_path=None, dot_path=None, pr
     else:
         if verbose:
             print("WARNING: Test file " + bin_path + " does not seem to be a PE/ELF or dot file. Use raw option if raw file.")
-        return None
+    return None
 
 
 def disas_worker(arg):
-    return disassemble_file(bin_path=arg[0], dir=arg[1], dot_path=arg[2], print_listing=arg[3], readable=arg[4], verbose=arg[5], raw=arg[6], raw_64=arg[7], use_existing=arg[8])
+    return disassemble_file(bin_path=arg[0], dir_path=arg[1], dot_path=arg[2], print_listing=arg[3], readable=arg[4], verbose=arg[5], raw=arg[6], raw_64=arg[7], use_existing=arg[8])
 
 
 def timeout_worker(*arg):

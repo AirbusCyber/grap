@@ -44,16 +44,17 @@ def main():
         sys.exit(0)
 
     test_paths = []
+    dot_test_files = set()
     for test_path in args.test:
         if os.path.isdir(test_path):
             if args.recursive:
+                dot_test_files.add(test_path)
                 test_paths += list_files_recursively(test_path)
         else:
             test_paths.append((test_path, None))
 
     files_to_disassemble = set()
-    dot_test_files = set()
-    for test_path, _ in test_paths:
+    for test_path, dir_arg_path in test_paths:
         try:
             f = open(test_path, "rb")
             data = f.read(7)
@@ -70,7 +71,8 @@ def main():
             continue
         else:
             if data[0:7].lower() == "digraph":
-                dot_test_files.add(test_path)
+                if dir_arg_path is None:
+                    dot_test_files.add(test_path)
             else:
                 if args.dot is None:
                     dot_path = test_path + ".grapcfg"
@@ -84,7 +86,8 @@ def main():
                     if args.verbose:
                         print("Skipping generation of existing " + dot_path)
                         printed_something = True
-                    dot_test_files.add(dot_path)
+                    if dir_arg_path is None:
+                        dot_test_files.add(dot_path)
                 else:
                     if len(args.test) == 1 and args.dot is not None:
                         found_path = pygrap.disassemble_file(bin_path=test_path, dot_path=dot_path,
@@ -93,7 +96,7 @@ def main():
                         if found_path is not None:
                             dot_test_files.add(dot_path)
                     else:
-                        files_to_disassemble.add((test_path, dir))
+                        files_to_disassemble.add((test_path, dir_arg_path))
 
     if len(test_paths) > 1 or args.dot is None:
         if args.dot is not None and not os.path.isdir(args.dot):
@@ -146,6 +149,9 @@ def main():
 
             if not args.multithread:
                 command.append("-nt")
+
+            if args.recursive:
+                command.append("-r")
 
             if args.pattern_path is not None:
                 for p in args.pattern_path:
