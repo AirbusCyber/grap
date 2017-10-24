@@ -37,7 +37,9 @@ Note that `capstone-windows` package includes prebuilt Windows core of *Capstone
 ## Boost
 
 Download the latest version of *Boost* for Windows (for example https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.zip at the time of writing).
+
 Extract it, then launch `bootstrap.bat` in boost_<version> directory with VS developper command prompt 64 bits (*x64 Native Tools Command Prompt for VS 2017*).
+
 Edit `project-config.jam` to configure compilation with your version of MSVC. You should change the folder to match your version, for instance:
 ```
 import option ;
@@ -46,7 +48,7 @@ using msvc : 14.1 : "C:\Program Files (x86)\Microsoft Visual Studio\2017\Communi
 
 option.set keep-going : false ;
 ```
-Open the *Developer Command Prompt for Visual Studio, and in the Boost directory (where `project-config.jam` is located), run 
+Within the VS developper command prompt 64 bits, in the Boost directory (where `project-config.jam` is located), run 
 ```
 b2 address-model=64 toolset=msvc-14.1 threading=multi runtime-link=static variant=release
 ```
@@ -96,11 +98,11 @@ You can verify that grap is working correctly by running those commands (refer t
 - `test.exe ../../src/tests_graphs`: simple test
 - `test_all.py -l log.txt -nt -nc -t Release\tests.exe -gm Release\grap-match.exe -gmpy ..\src\tools\grap-match\grap-match.py -g ..\src\tools\grap\grap.py`
 
-# Compile 32 bit version
+# Compile 32 bits version
 If you wish to compile the 32 bits version, it should be enough to:
 
-- Modify the boost compile option (**address-model=32** instead of **address-model=64**)
-- Modify the CMake command (**Visual Studio 15** instead of **Visual Studio 15 Wo,64**)
+- Modify the Boost compile option (**address-model=32** instead of **address-model=64**)
+- Modify the CMake command (**Visual Studio 15** instead of **Visual Studio 15 Win64**)
 
 # Troubleshooting
 ## Boost
