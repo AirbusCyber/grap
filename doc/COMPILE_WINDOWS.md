@@ -3,10 +3,19 @@ This document will guide you through the compilation of *grap* and its bindings 
 Alternatively you can use pre-compiled binaries (see [WINDOWS.md](../WINDOWS.md))
 
 # Requirements
-This guide is written for Windows 7 with Visual Studio 2017 (tested with Community Edition).
-Note that the VS installer is greedy, if you use a virtual machine please make sure it has at the very least 2 GB of RAM and 2 CPU available.
+This guide is written for Windows 7 (64 bits).
 
-The compilation of *grap* needs the following tools.
+Note that the Visual Studio Installer is greedy, if you use a virtual machine please make sure it has *at the very least 2 GB of RAM and 2 CPU* available.
+
+## Visual Studio
+We used Visual Studio 2017 - Community Edition with the following components installed:
+* .NET Framework 4.6.1 SDK
+* .NET Framework 4.6.1 targeting pack
+* C++ / CLI support
+* VC++ 2017 v141 toolset (x86, x64)
+* Visual C++ 2017 Redistributable Update
+* Visual C++ tools for CMake
+* Visual Studio C++ core features
 
 ## CMake
 
@@ -22,7 +31,7 @@ pip install pefile
 pip install pyelftools
 pip install capstone-windows
 ```
-Note that `capstone-windows` package includes prebuilt Windows core of *Capstone*, so no external *Capstone* library is needed‚Äù.
+Note that `capstone-windows` package includes prebuilt Windows core of *Capstone*, so no external *Capstone* library is neededî.
 
 ## Boost
 
