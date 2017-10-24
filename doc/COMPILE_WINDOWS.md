@@ -9,13 +9,14 @@ Note that the Visual Studio Installer is greedy, if you use a virtual machine pl
 
 ## Visual Studio
 We used Visual Studio 2017 - Community Edition with the following components installed:
-* .NET Framework 4.6.1 SDK
-* .NET Framework 4.6.1 targeting pack
-* C++ / CLI support
-* VC++ 2017 v141 toolset (x86, x64)
-* Visual C++ 2017 Redistributable Update
-* Visual C++ tools for CMake
-* Visual Studio C++ core features
+
+- .NET Framework 4.6.1 SDK
+- .NET Framework 4.6.1 targeting pack
+- C++ / CLI support
+- VC++ 2017 v141 toolset (x86, x64)
+- Visual C++ 2017 Redistributable Update
+- Visual C++ tools for CMake
+- Visual Studio C++ core features
 
 ## CMake
 
@@ -31,7 +32,7 @@ pip install pefile
 pip install pyelftools
 pip install capstone-windows
 ```
-Note that `capstone-windows` package includes prebuilt Windows core of *Capstone*, so no external *Capstone* library is needed”.
+Note that `capstone-windows` package includes prebuilt Windows core of *Capstone*, so no external *Capstone* library is neededï¿½.
 
 ## Boost
 
