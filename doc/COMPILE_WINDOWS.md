@@ -95,7 +95,7 @@ Please apply the instructions in [WINDOWS.md](../WINDOWS.md) to copy them to the
 # Tests
 You can verify that grap is working correctly by running those commands (refer to [README.md](../README.md) for more information):
 
-- `test.exe ../../src/tests_graphs`: simple test
+- `test.exe ..\..\src\tests_graphs`: simple test
 - `test_all.py -l log.txt -nt -nc -t Release\tests.exe -gm Release\grap-match.exe -gmpy ..\src\tools\grap-match\grap-match.py -g ..\src\tools\grap\grap.py`
 
 # Compile 32 bits version
