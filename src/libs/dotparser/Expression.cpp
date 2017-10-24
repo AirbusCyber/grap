@@ -40,6 +40,17 @@ void freeGraphList(GraphList* gl, bool freeGraphs, bool free_info){
   free(gl);
 }
 
+void freeGraphList(GraphCppList gl, bool freeGraphs, bool free_info){
+  if (freeGraphs){
+    vsize_t k;
+    GraphCppList::iterator it_graph;
+    for (it_graph = gl.begin(); it_graph != gl.end(); it_graph++){
+      graph_t* gr = *it_graph;
+      graph_free(gr, free_info); 
+    }
+  }
+}
+
 CoupleList *createEdgeList() {
   CoupleList *cl = (CoupleList *) malloc_or_quit(sizeof(CoupleList));
   cl->size = 0;

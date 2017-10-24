@@ -286,7 +286,7 @@ class GenericDisassembler:
 
     def export_to_dot(self, insts, oep_offset, displayable=True):
         '''
-            Export the intruction graph to .dot format
+            Export the intruction graph to DOT format
         '''
         nodes = StringIO()
         edges = StringIO()
@@ -595,6 +595,15 @@ class RawDisassembler(GenericDisassembler):
         return
 
 
+def write_to_file(path, data):
+    try:
+        f = open(path, "wb")
+        f.write(data)
+        f.close()
+    except:
+        print "WARNING: Could not write data to", path
+
+
 def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listing=False, readable=False, verbose=False):
     if pe_data is None and pe_path is None:
         print "ERROR: Missing PE path or data."
@@ -649,7 +658,7 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
 
     if dot_path is not None:
         dot = disass.export_to_dot(insts=insts, oep_offset=oep_offset, displayable=readable)
-        open(dot_path, "wb").write(dot)
+        write_to_file(dot_path, dot)
 
     if print_listing:
         disass.display(insts, offset_from=0)
@@ -695,7 +704,7 @@ def disassemble_elf(elf_data = None, elf_path = None, dot_path = None, print_lis
 
     if dot_path is not None:
         dot = disass.export_to_dot(insts=insts, oep_offset=oep_offset, displayable=readable)
-        open(dot_path, "w").write(dot)
+        write_to_file(dot_path, dot)
 
     if print_listing:
         disass.display(insts, offset_from=0)
@@ -727,7 +736,7 @@ def disassemble_raw(raw_data = None, raw_path = None, dot_path = None, print_lis
 
     if dot_path is not None:
         dot = disass.export_to_dot(insts=insts, oep_offset=oep_offset, displayable=readable)
-        open(dot_path, "wb").write(dot)
+        write_to_file(dot_path, dot)
 
     if print_listing:
         disass.display(insts, offset_from=0)
@@ -735,9 +744,14 @@ def disassemble_raw(raw_data = None, raw_path = None, dot_path = None, print_lis
     return True
 
 
-def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listing=False, readable=False, raw=False, raw_64=False, entrypoint=None, verbose=False, use_existing=False):
+def disassemble_file(bin_data = None, dir_path=None, bin_path=None, dot_path=None, print_listing=False, readable=False, raw=False, raw_64=False, entrypoint=None, verbose=False, use_existing=False):
+    return_path = dot_path
+    if dir_path is not None:
+        # Binary file comes from directly being recursively traversed, return dir path
+        return_path = dir_path
+
     if use_existing and os.path.exists(dot_path):
-        return dot_path
+        return return_path
 
     if verbose:
         print "Disassembling", bin_path
@@ -750,23 +764,23 @@ def disassemble_file(bin_data = None, bin_path=None, dot_path=None, print_listin
     if raw:
         if disassemble_raw(raw_data=bin_data, raw_path=bin_path, dot_path=dot_path, print_listing=print_listing,
                            readable=readable, raw_64=raw_64, entrypoint=entrypoint, verbose=verbose):
-            return dot_path
+            return return_path
     elif bin_data[0:2] == "MZ":
         if disassemble_pe(pe_data=bin_data, pe_path=bin_path, dot_path=dot_path, print_listing=print_listing,
                           readable=readable, verbose=verbose):
-            return dot_path
+            return return_path
     elif bin_data[0:4] == "\x7fELF":
         if disassemble_elf(elf_data=bin_data, elf_path=bin_path, dot_path=dot_path, print_listing=print_listing,
                            readable=readable, verbose=verbose):
-            return dot_path
+            return return_path
     else:
         if verbose:
             print("WARNING: Test file " + bin_path + " does not seem to be a PE/ELF or dot file. Use raw option if raw file.")
-        return None
+    return None
 
 
 def disas_worker(arg):
-    return disassemble_file(bin_path=arg[0], dot_path=arg[1], print_listing=arg[2], readable=arg[3], verbose=arg[4], raw=arg[5], raw_64=arg[6], use_existing=arg[7])
+    return disassemble_file(bin_path=arg[0], dir_path=arg[1], dot_path=arg[2], print_listing=arg[3], readable=arg[4], verbose=arg[5], raw=arg[6], raw_64=arg[7], use_existing=arg[8])
 
 
 def timeout_worker(*arg):
@@ -785,11 +799,11 @@ def timeout_worker(*arg):
     return out
 
 
-def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes=4, print_listing=False, readable=False, raw=False, raw_64=False, verbose=False, use_existing=False, timeout=0):
+def disassemble_files(path_dir_list, dot_path_suffix, dot_dir=None, multiprocess=True, n_processes=4, print_listing=False, readable=False, raw=False, raw_64=False, verbose=False, use_existing=False, timeout=0):
     dot_path_list = []
     arg_list = []
 
-    if path_list is not None and path_list != []:
+    if path_dir_list is not None and path_dir_list != []:
         if multiprocess:
             if isinstance(timeout, int) or (isinstance(timeout, str) and timeout.isdigit()):
                 i = int(timeout)
@@ -800,8 +814,12 @@ def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes
             else:
                 timeout_sec = 31536000
 
-            for path in path_list:
-                arg_list.append((path, path + dot_path_suffix, print_listing, readable, verbose, raw, raw_64, use_existing, timeout_sec))
+            for path, dir_arg_path in path_dir_list:
+                if dot_dir is None:
+                    dot_path = path + dot_path_suffix
+                else:
+                    dot_path = os.path.join(dot_dir, os.path.basename(path) + dot_path_suffix)
+                arg_list.append((path, dir_arg_path, dot_path, print_listing, readable, verbose, raw, raw_64, use_existing, timeout_sec))
 
             original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
 
@@ -824,7 +842,7 @@ def disassemble_files(path_list, dot_path_suffix, multiprocess=True, n_processes
             if ret is not None:
                 dot_path_list = [p for p in ret if p is not None]
         else:
-            for path in path_list:
+            for path, dir in path_list:
                 r = disassemble_file(bin_path=path, dot_path=path+dot_path_suffix, print_listing=print_listing,
                                      readable=readable, raw=raw, raw_64=raw_64, verbose=verbose, use_existing=use_existing)
                 if r is not None:
@@ -836,5 +854,5 @@ if __name__ == "__main__":
     if len(sys.argv) == 2:
         sys.setrecursionlimit(1000000)
         bin_path = sys.argv[1]
-        dot_path = bin_path + ".dot"
+        dot_path = bin_path + ".grapcfg"
         disassemble_file(bin_path=bin_path, dot_path=dot_path, verbose=False)
