@@ -24,7 +24,7 @@ Install the latest version of *CMake* available on their website https://cmake.o
 
 ## Python 2.7 + required packages
 
-Install the latest version of *Python* 2.7 (32-bit) available on their website https://www.python.org/downloads/windows/. During the installation wizard, enable the option to add *Python* to the PATH.
+Install the latest version of *Python* 2.7 (64-bit) available on their website https://www.python.org/downloads/windows/. During the installation wizard, enable the option to add *Python* to the PATH.
 
 Install the packages required by *grap* with these commands (in a command shell as an administrator):
 ```
