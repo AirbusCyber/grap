@@ -209,7 +209,7 @@ class CryptoIdentificationWidget(QMainWindow):
         """
         # Initialization
         self.signature_tree.clear()
-        self.signature_tree.setSortingEnabled(False)
+        self.signature_tree.setSortingEnabled(True)
         self.qtreewidgetitems_to_addresses = {}
       
 
@@ -230,10 +230,8 @@ class CryptoIdentificationWidget(QMainWindow):
                     patterns_info = self.cc.QTreeWidgetItem(algo_info)
                 else:
                     patterns_info = self.cc.QTreeWidgetItem(self.signature_tree)
-                patterns_info.setText(0, "%s (%d matches)" % (
-                    patterns.get_name(),
-                    len(found_patterns))
-                )
+                txt = "%s (%d matches)" % (patterns.get_name(), len(found_patterns))
+                patterns_info.setText(0, txt)
 
                 for match_dict_list in found_patterns:
                     if patterns._perform_analysis:
@@ -275,23 +273,23 @@ class CryptoIdentificationWidget(QMainWindow):
 
                                 # Add the start address of the match
                                 self.qtreewidgetitems_to_addresses[match_info] = match.get_start_address()
-#                                From IDA 6.9 (Qt5 instead of Qt4), setItemExpanded does not work, why ?                                
-#                                self.signature_tree.setItemExpanded(match_info, True)
+                                self.signature_tree.expandItem(match_info)
                             else:
                                 match_info = self.cc.QTreeWidgetItem(patterns_info)
                                 match_info.setText(0, "One pattern matched with no extracted node (no getid option)")
-#                                self.signature_tree.setItemExpanded(match_info, False)
-#                        if patterns._perform_analysis:
-#                            self.signature_tree.setItemExpanded(pattern_info, True)
-#                    if patterns._perform_analysis:
-#                        self.signature_tree.setItemExpanded(matches_info, True)
+                                self.signature_tree.collapseItem(match_info)
+                        if patterns._perform_analysis:
+                            self.signature_tree.expandItem(pattern_info)
+                    if patterns._perform_analysis:
+                        self.signature_tree.expandItem(matches_info)
                     
-#                if len(found_patterns) <= 5:
-#                    self.signature_tree.setItemExpanded(patterns_info, True)
-#                if patterns._perform_analysis:
-#                    self.signature_tree.setItemExpanded(algo_info, True)
+                if len(found_patterns) <= 5:
+                    self.signature_tree.expandItem(patterns_info)
+                if patterns._perform_analysis:
+                    self.signature_tree.expandItem(algo_info)
         
-        self.signature_tree.setSortingEnabled(True)
+        # Sort by first column, by ascending (usual) order
+        self.signature_tree.sortByColumn(0, 0)
         
     def _onSignatureTreeItemDoubleClicked(self, item, column):
         """Action for the double clicked.
