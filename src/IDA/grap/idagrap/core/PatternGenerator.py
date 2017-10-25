@@ -230,7 +230,7 @@ class PatternGenerator:
         patternStr = "digraph G {\n"
 
         for patternNodeId, patternNode in reversed(patternNodes.items()):
-            patternStr += "    {} [cond={}".format(patternNodeId, self._getConditionString(patternNode))
+            patternStr += "    {} [cond={}".format(hex(patternNodeId), self._getConditionString(patternNode))
             if patternNode.repeat is not None:
                 patternStr += ', repeat=' + str(patternNode.repeat) + ', lazyrepeat=true'
             patternStr += "]\n"
@@ -239,11 +239,11 @@ class PatternGenerator:
 
         for patternNodeId, patternNode in reversed(patternNodes.items()):
             if patternNode.child1 is not None:
-                patternStr += "    {} -> {} [childnumber={}]\n".format(patternNode.node_id,
-                                                                       patternNode.child1, 1)
+                patternStr += "    {} -> {} [childnumber={}]\n".format(hex(patternNode.node_id),
+                                                                       hex(patternNode.child1), 1)
             if patternNode.child2 is not None:
-                patternStr += "    {} -> {} [childnumber={}]\n".format(patternNode.node_id,
-                                                                       patternNode.child2, 2)
+                patternStr += "    {} -> {} [childnumber={}]\n".format(hex(patternNode.node_id),
+                                                                       hex(patternNode.child2), 2)
 
         patternStr += "}\n"
 
