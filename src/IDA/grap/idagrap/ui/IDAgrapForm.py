@@ -104,12 +104,13 @@ class IDAgrapForm(PluginForm):
         """
         Creates the form and brings it to the front.
         """
-        if idc.GetInputMD5() is None:
+        if idc.retrieve_input_file_md5() is None:
             return
         else:
             name = "{} {}".format(config['name'], config['version'])
-            options = PluginForm.FORM_CLOSE_LATER |\
-                      PluginForm.FORM_SAVE |\
-                      PluginForm.FORM_RESTORE
+			
+            options = PluginForm.WCLS_CLOSE_LATER |\
+                      PluginForm.WCLS_SAVE |\
+                      PluginForm.WOPN_RESTORE
 
             return PluginForm.Show(self, name, options=options)

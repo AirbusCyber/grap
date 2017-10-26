@@ -10,7 +10,7 @@ from idagrap.analysis.Analysis import PatternsAnalysis
 from idagrap.graph.Graph import CFG
 from idagrap.patterns.Modules import MODULES
 from idagrap.modules.Pattern import Pattern, Patterns, Match
-from idc import CIC_ITEM, GetColor, SetColor, DEFCOLOR
+from idc import CIC_ITEM, set_color, DEFCOLOR
 from pygrap import (NodeInfo, node_t, node_list_find)
 from idagrap.patterns.test.misc.ModulesTestMisc import get_test_misc
 
@@ -79,7 +79,7 @@ class PatternGenerator:
         self.resetColored()
 
     def colorNode(self, node, color):
-        SetColor(node, CIC_ITEM, ColorCore.rgb_to_bgr(color))
+        set_color(node, CIC_ITEM, ColorCore.rgb_to_bgr(color))
 
     def resetColored(self):
         if self.coloredNodes:

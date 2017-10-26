@@ -269,7 +269,7 @@ class CryptoIdentificationWidget(QMainWindow):
                                 else:
                                         match_info.setText(0, "0x%x in %s (%d instructions)" % (
                                         match.get_start_address(),
-                                        idc.GetFunctionName(match.get_start_address()),
+                                        idc.get_func_name(match.get_start_address()),
                                         match.get_num_insts()
                                         ))
 
@@ -302,5 +302,5 @@ class CryptoIdentificationWidget(QMainWindow):
         """
         # Jump to the match address
         if item in self.qtreewidgetitems_to_addresses:
-            idc.Jump(self.qtreewidgetitems_to_addresses[item])
+            idc.jumpto(self.qtreewidgetitems_to_addresses[item])
 

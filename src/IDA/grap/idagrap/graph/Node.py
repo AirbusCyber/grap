@@ -2,9 +2,8 @@
 
 from pygrap import NodeInfo, node_t
 
-from idaapi import isCode
+from idaapi import is_code, get_flags, get_entry_ordinal, get_entry, print_insn_mnem, print_operand, generate_disasm_line
 from idagrap.error.Exceptions import CodeException
-from idc import BeginEA, GetDisasm, GetFlags, GetMnem, GetOpnd
 
 
 class Node(node_t):
@@ -21,12 +20,18 @@ class Node(node_t):
     """
 
     def __init__(self, ea):
+        def str_or_none(a):
+            if a is None:
+                return ""
+            else:
+                return a
+	
         """Initialization function."""
         # Init the node structure
         node_t.__init__(self)
 
         # Check if it's a code instruction
-        if not isCode(GetFlags(ea)):
+        if not is_code(get_flags(ea)):
             raise CodeException
 
         #
@@ -35,23 +40,21 @@ class Node(node_t):
 
         # NodeInfo
         self.info = NodeInfo()
-        # Problem: GetDisasm also gives garbage ("push str; STRVALUE")
-        # self.info.inst_str = GetDisasm(ea)
         inst_elements = []
 
         # Parse opcode and arguments
-        self.info.opcode = GetMnem(ea)
+        self.info.opcode = print_insn_mnem(ea)
 
         nargs = 0
-        self.info.arg1 = GetOpnd(ea, 0)
+        self.info.arg1 = str_or_none(print_operand(ea, 0))
         if self.info.arg1 != "":
             inst_elements.append(self.info.arg1)
             nargs += 1
-        self.info.arg2 = GetOpnd(ea, 1)
+        self.info.arg2 = str_or_none(print_operand(ea, 1))
         if self.info.arg2 != "":
             inst_elements.append(self.info.arg2)
             nargs += 1
-        self.info.arg3 = GetOpnd(ea, 2)
+        self.info.arg3 = str_or_none(print_operand(ea, 2))
         if self.info.arg3 != "":
             inst_elements.append(self.info.arg3)
             nargs += 1
@@ -63,7 +66,8 @@ class Node(node_t):
             args_str = ""
         self.info.inst_str = self.info.opcode + args_str
 
-        if ea == BeginEA():
+        begin_ea = get_entry_ordinal(get_entry(-1))
+        if ea == begin_ea:
             self.info.is_root = True
         else:
             self.info.is_root = False
