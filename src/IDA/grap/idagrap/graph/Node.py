@@ -4,6 +4,7 @@ from pygrap import NodeInfo, node_t
 
 from idaapi import is_code, get_flags, get_entry_ordinal, get_entry, print_insn_mnem, print_operand, generate_disasm_line
 from idagrap.error.Exceptions import CodeException
+from idc import GetOpnd
 
 
 class Node(node_t):
@@ -42,19 +43,23 @@ class Node(node_t):
         self.info = NodeInfo()
         inst_elements = []
 
-        # Parse opcode and arguments
+        # Parse opcode and arguments        
         self.info.opcode = print_insn_mnem(ea)
 
         nargs = 0
-        self.info.arg1 = str_or_none(print_operand(ea, 0))
+        
+        #self.info.arg1 = str_or_none(print_operand(ea, 0))
+        self.info.arg1 = GetOpnd(ea, 0)
         if self.info.arg1 != "":
             inst_elements.append(self.info.arg1)
             nargs += 1
-        self.info.arg2 = str_or_none(print_operand(ea, 1))
+        #self.info.arg2 = str_or_none(print_operand(ea, 1))
+        self.info.arg2 = GetOpnd(ea, 1)
         if self.info.arg2 != "":
             inst_elements.append(self.info.arg2)
             nargs += 1
-        self.info.arg3 = str_or_none(print_operand(ea, 2))
+        #self.info.arg3 = str_or_none(print_operand(ea, 2))
+        self.info.arg3 = GetOpnd(ea, 2)
         if self.info.arg3 != "":
             inst_elements.append(self.info.arg3)
             nargs += 1
