@@ -2,9 +2,13 @@
 
 from pygrap import NodeInfo, node_t
 
-from idaapi import is_code, get_flags, get_entry_ordinal, get_entry, print_insn_mnem, generate_disasm_line
+try:
+    from idaapi import is_code, get_flags, get_entry_ordinal, get_entry, print_insn_mnem, generate_disasm_line
+    from idc import print_operand
+except:
+    from idaapi import isCode
+    from idc import BeginEA, GetDisasm, GetFlags, GetMnem, GetOpnd
 from idagrap.error.Exceptions import CodeException
-from idc import print_operand
 
 
 class Node(node_t):
@@ -26,7 +30,11 @@ class Node(node_t):
         node_t.__init__(self)
 
         # Check if it's a code instruction
-        if not is_code(get_flags(ea)):
+        try:
+            is_c = is_code(get_flags(ea))
+        except:
+            is_c = isCode(GetFlags(ea))
+        if not is_c:
             raise CodeException
 
         #
@@ -38,19 +46,31 @@ class Node(node_t):
         inst_elements = []
 
         # Parse opcode and arguments        
-        self.info.opcode = print_insn_mnem(ea)
+        try:
+            self.info.opcode = print_insn_mnem(ea)
+        except:
+            self.info.opcode = GetMnem(ea)
 
         nargs = 0
         
-        self.info.arg1 = print_operand(ea, 0)
+        try:
+            self.info.arg1 = print_operand(ea, 0)
+        except:
+            self.info.arg1 = GetOpnd(ea, 0)
         if self.info.arg1 != "":
             inst_elements.append(self.info.arg1)
             nargs += 1
-        self.info.arg2 = print_operand(ea, 1)
+        try:
+            self.info.arg2 = print_operand(ea, 1)
+        except:
+            self.info.arg2 = GetOpnd(ea, 1)
         if self.info.arg2 != "":
             inst_elements.append(self.info.arg2)
             nargs += 1
-        self.info.arg3 = print_operand(ea, 2)
+        try:
+            self.info.arg3 = print_operand(ea, 2)
+        except:
+            self.info.arg3 = GetOpnd(ea, 2)
         if self.info.arg3 != "":
             inst_elements.append(self.info.arg3)
             nargs += 1
@@ -62,7 +82,10 @@ class Node(node_t):
             args_str = ""
         self.info.inst_str = self.info.opcode + args_str
 
-        begin_ea = get_entry_ordinal(get_entry(-1))
+        try:
+            begin_ea = get_entry_ordinal(get_entry(-1))
+        except:
+            begin_ea = BeginEA()
         if ea == begin_ea:
             self.info.is_root = True
         else:

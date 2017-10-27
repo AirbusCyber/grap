@@ -12,7 +12,10 @@ from idagrap.graph.Graph import CFG
 from idagrap.patterns.Modules import MODULES
 from idagrap.ui.helpers import QtShim
 from idagrap.ui.IDAgrapForm import IDAgrapForm
-from idc import auto_wait
+try:
+    from idc import auto_wait
+except:
+    from idc import Wait
 
 # Initialization of useful objects for PySide/PyQt
 QtGui = QtShim.get_QtGui()
@@ -51,7 +54,10 @@ class IDAgrapPlugin(idaapi.plugin_t):
             arg: Plugin argument.
         """
         # Wait for the end of autoanalysis
-        auto_wait()
+        try:
+            auto_wait()
+        except:
+            Wait()
 
         # Create form
         form = IDAgrapForm()

@@ -112,31 +112,44 @@ class CFG:
         # 1 remote child
         elif inst.itype in JMPS:
             try:
-                self.dis(inst.ops[0].addr, False, n)
+                op = inst.ops[0]
+            except:
+                op = inst.Operands[0]
+        
+            try:
+                self.dis(op.addr, False, n)
             except Exception as e:
                 print "WARNING:", e
                 pass
 
         # 2 children (next, then remote) - except call
         elif inst.itype in CJMPS:
-
+            try:
+                op = inst.ops[0]
+            except:
+                op = inst.Operands[0]
+            
             # Next
             self.dis(inst.ea + inst.size, True, n)
 
             # Remote
-            self.dis(inst.ops[0].addr, False, n)
+            self.dis(op.addr, False, n)
 
         # 2 children (next, then remote) - call
         elif inst.itype in CALLS:
-
+            try:        
+                op = inst.ops[0]
+            except:
+                op = inst.Operands[0]
+            
             # Next
             # Catch the end of a noret function
             if not is_noret(inst.ea):
                 self.dis(inst.ea + inst.size, True, n)
 
             # Remote
-            if inst.ops[0].type in OP_MEM:
-                self.dis(inst.ops[0].addr, False, n)
+            if op.type in OP_MEM:
+                self.dis(op.addr, False, n)
 
         # 1 child (next) - basic instruction
         else:

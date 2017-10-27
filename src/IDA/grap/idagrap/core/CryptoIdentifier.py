@@ -9,7 +9,10 @@ from idagrap.analysis.Analysis import PatternsAnalysis
 from idagrap.graph.Graph import CFG
 from idagrap.patterns.Modules import MODULES
 from idagrap.modules.Pattern import Pattern, Patterns, Match
-from idc import CIC_ITEM, get_color, set_color
+try:
+    from idc import CIC_ITEM, get_color, set_color
+except:
+    from idc import CIC_ITEM, GetColor, SetColor
 from pygrap import graph_save_to_path, match_graph
 from idagrap.patterns.test.misc.ModulesTestMisc import get_test_misc
 
@@ -208,10 +211,14 @@ class CryptoColor:
 
                     if match_id not in self._matches_colors:
                         self._matches_colors[match_id] = {}
-
+                    
+                    try:
+                        c = get_color(node.info.address, CIC_ITEM)
+                    except:
+                        c = GetColor(node.info.address, CIC_ITEM)
                     self._matches_colors[match_id][node.info.address] = {
                         "new": self._patterns_colors[pattern_id],
-                        "old": get_color(node.info.address, CIC_ITEM)
+                        "old": c
                     }
 
     def xchg_colors(self):
@@ -273,5 +280,8 @@ class CryptoColor:
         
         for insts in self._matches_colors.itervalues():
             for ea, color in insts.iteritems():
-                set_color(ea, CIC_ITEM, ColorCore.rgb_to_bgr(color['new']))
+                try:
+                    set_color(ea, CIC_ITEM, ColorCore.rgb_to_bgr(color['new']))
+                except:
+                    SetColor(ea, CIC_ITEM, ColorCore.rgb_to_bgr(color['new']))
 
