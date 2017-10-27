@@ -72,11 +72,11 @@ class CryptoIdentifier:
         
         # Group
         for grp_name, grp in MODULES.iteritems():
-            print "Group: " + grp_name
+            #print "Group: " + grp_name
 
             # Group->Type
             for tp_name, tp in grp.iteritems():
-                print "\tType: " + tp_name
+                #print "\tType: " + tp_name
 
                 if grp_name == "Test" and tp_name == "Misc":
                     patterns_path_list = []
@@ -84,12 +84,15 @@ class CryptoIdentifier:
                         for patterns in algo.get_patterns():                            
                             for pattern in patterns.get_patterns():
                                 path = pattern.get_file()
-                                print "\t\tAdded patterns from " + path
+                                #print "\t\tAdded patterns from " + path
+                                print "Added patterns from " + path
                                 patterns_path_list.append(path)
                             
-                    print "\t\tMatching patterns against binary... this may take a few seconds"
+                    #print "\t\tMatching patterns against binary... this may take a few seconds"
+                    print "Matching patterns against binary... this may take a few seconds"
                     matches = match_graph(patterns_path_list, cfg.graph)
-                    print "\t\t", len(matches), "patterns found."
+                    #print "\t\t", len(matches), "patterns found."
+                    print len(matches), "patterns found."
                     for pattern_name in matches:
                         pattern = Pattern(name=pattern_name)
                         patterns_t = Patterns(patterns=[pattern], name=pattern_name, perform_analysis=False, matches=matches[pattern_name])

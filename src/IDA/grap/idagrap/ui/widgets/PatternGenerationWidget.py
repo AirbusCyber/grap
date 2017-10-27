@@ -181,19 +181,19 @@ class PatternGenerationWidget(QMainWindow):
         self.hooks.hook()
 
     def _onSetRootNode(self):
-        self.cc.PatternGenerator.setRootNode(idc.ScreenEA())
+        self.cc.PatternGenerator.setRootNode(idc.get_screen_ea())
 
         if self.real_time_option:
             self.text_widget.setText(self.cc.PatternGenerator.generate())
 
     def _onAddTargetNode(self):
-        self.cc.PatternGenerator.addTargetNode(idc.ScreenEA())
+        self.cc.PatternGenerator.addTargetNode(idc.get_screen_ea())
 
         if self.real_time_option:
             self.text_widget.setText(self.cc.PatternGenerator.generate())
 
     def _onRemoveTargetNode(self):
-        self.cc.PatternGenerator.removeTargetNode(idc.ScreenEA())
+        self.cc.PatternGenerator.removeTargetNode(idc.get_screen_ea())
 
         if self.real_time_option:
             self.text_widget.setText(self.cc.PatternGenerator.generate())
@@ -241,16 +241,16 @@ class PatternGenerationHooks(idaapi.UI_Hooks):
         idaapi.UI_Hooks.__init__(self)
         self.cc = cc
 
-    def populating_tform_popup(self, form, popup):
+    def populating_widget_popup(self, form, popup):
         pass
 
-    def finish_populating_tform_popup(self, form, popup):
-        if idaapi.get_tform_type(form) == idaapi.BWN_DISASM:
+    def finish_populating_widget_popup(self, form, popup):
+        if idaapi.get_widget_type(form) == idaapi.BWN_DISASM:
             # Add separator
             idaapi.attach_action_to_popup(form, popup, None, None)
 
             # Add actions
-            currentAddress = idc.ScreenEA()
+            currentAddress = idc.get_screen_ea()
 
             if currentAddress in [node.node_id for node in self.cc.PatternGenerator.targetNodes]:
                 idaapi.attach_action_to_popup(form, popup, "grap:pg:remove_target", None)
