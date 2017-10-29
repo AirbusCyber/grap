@@ -3,11 +3,11 @@
 from pygrap import NodeInfo, node_t
 
 try:
-    from idaapi import is_code, get_flags, get_entry_ordinal, get_entry, print_insn_mnem, generate_disasm_line
+    from idaapi import is_code, get_flags, print_insn_mnem, generate_disasm_line
     from idc import print_operand
 except:
     from idaapi import isCode
-    from idc import BeginEA, GetDisasm, GetFlags, GetMnem, GetOpnd
+    from idc import GetDisasm, GetFlags, GetMnem, GetOpnd
 from idagrap.error.Exceptions import CodeException
 
 
@@ -82,14 +82,8 @@ class Node(node_t):
             args_str = ""
         self.info.inst_str = self.info.opcode + args_str
 
-        try:
-            begin_ea = get_entry_ordinal(get_entry(-1))
-        except:
-            begin_ea = BeginEA()
-        if ea == begin_ea:
-            self.info.is_root = True
-        else:
-            self.info.is_root = False
+        # No node will be root but this is acceptable for CFGs
+        self.info.is_root = False
 
         self.info.address = ea
         self.info.has_address = True

@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # Inspired by IDAscope.
 
-
-import threading
-
 from pygrap import graph_free
 
 import idagrap.ui.helpers.QtShim as QtShim
@@ -161,9 +158,7 @@ class CryptoIdentificationWidget(QMainWindow):
         self.populateSignatureTree()
 
     def _onScanGraphBouttonClickedThread(self):
-        """Execute _onScanGraphBouttonClicked in a thread."""
-        thread = threading.Thread(target=self._onScanGraphBouttonClicked)
-        thread.start()
+        self._onScanGraphBouttonClicked()
 
     def _onScanGraphBouttonClicked(self):
         """

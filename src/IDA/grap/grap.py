@@ -2,7 +2,6 @@
 """This file is a part of the IDAgrap project."""
 
 import sys
-import threading
 
 from pygrap import graph_free
 

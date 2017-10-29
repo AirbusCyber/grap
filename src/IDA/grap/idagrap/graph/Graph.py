@@ -4,7 +4,12 @@ from pygrap import (graph_alloc, graph_free, graph_t, node_alloc,
                     node_copy, node_link, node_list_add, node_list_find,
                     update_children_fathers_number)
 
-from idaapi import get_root_filename, is_noret, get_entry_ordinal, get_entry
+from idaapi import get_root_filename, is_noret
+try:
+    from idaapi import get_entry_ordinal, get_entry
+except:
+    from idc import BeginEA
+
 from idagrap.config.Instruction import *
 from idagrap.error.Exceptions import CodeException
 from idagrap.graph.Node import *
@@ -36,9 +41,18 @@ class CFG:
     def extract(self):
         """Extract the control flow graph from the binary."""
         # Get the Entry Point
-        entry = idaapi.get_entry_ordinal(idaapi.get_entry(-1))
-
-        self.dis(ea=entry, is_child1=None, ifrom=None)
+        try:
+            entry = idaapi.get_entry_ordinal(idaapi.get_entry(-1))
+        except:
+            try:
+                entry = BeginEA()
+            except:
+                entry = None
+                
+        if entry is None:
+            print "WARNING: Could not determine entrypoint"
+        else:
+            self.dis(ea=entry, is_child1=None, ifrom=None)
 
         # Scan all the functions
         for ea in Functions():

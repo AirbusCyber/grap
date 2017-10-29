@@ -2,8 +2,6 @@
 # Inspired by IDAscope.
 
 
-import threading
-
 from pygrap import graph_free
 
 import idagrap.ui.helpers.QtShim as QtShim
@@ -208,9 +206,7 @@ class PatternGenerationWidget(QMainWindow):
             self.text_widget.setText(self.cc.PatternGenerator.generate())
 
     def _onLoadGraphButtonClickedThread(self):
-        """Execute _onLoadGraphBouttonClicked in a thread."""
-        thread = threading.Thread(target=self._onLoadGraphButtonClicked)
-        thread.start()
+        self._onLoadGraphButtonClicked()
 
     def _onLoadGraphButtonClicked(self):
         # Analyzing

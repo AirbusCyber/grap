@@ -2,7 +2,6 @@
 
 import colorsys
 import random
-import threading
 from collections import deque, OrderedDict
 from ColorCore import ColorCore
 
@@ -50,12 +49,7 @@ class PatternGenerator:
 
         Analyzing the graph for patterns.
         """
-        thread = threading.Thread(target=self._analyzing)
-        # Fixed the stack size to 10M
-        threading.stack_size(0x100000 * 10)
-        thread.start()
-        thread.join()
-
+        self._analyzing()
 
     def _analyzing(self):
 
