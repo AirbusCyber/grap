@@ -2,14 +2,16 @@
 
 import colorsys
 import random
-import threading
 from ColorCore import ColorCore
 
 from idagrap.analysis.Analysis import PatternsAnalysis
 from idagrap.graph.Graph import CFG
 from idagrap.patterns.Modules import MODULES
 from idagrap.modules.Pattern import Pattern, Patterns, Match
-from idc import CIC_ITEM, GetColor, SetColor
+try:
+    from idc import CIC_ITEM, get_color, set_color
+except:
+    from idc import CIC_ITEM, GetColor, SetColor
 from pygrap import graph_save_to_path, match_graph
 from idagrap.patterns.test.misc.ModulesTestMisc import get_test_misc
 
@@ -34,11 +36,7 @@ class CryptoIdentifier:
 
         Analyzing the graph for patterns.
         """
-        thread = threading.Thread(target=self._analyzing)
-        # Fixed the stack size to 10M
-        threading.stack_size(0x100000 * 10)
-        thread.start()
-        thread.join()
+        self._analyzing()
 
 
     def _analyzing(self):
@@ -59,6 +57,7 @@ class CryptoIdentifier:
         # Control flow graph extraction
         #
         print "[I] Creation of the Control Flow Graph (can take few seconds)"
+        
         # Get the CFG of the binary
         cfg.extract()
 
@@ -72,11 +71,11 @@ class CryptoIdentifier:
         
         # Group
         for grp_name, grp in MODULES.iteritems():
-            print "Group: " + grp_name
+            #print "Group: " + grp_name
 
             # Group->Type
             for tp_name, tp in grp.iteritems():
-                print "\tType: " + tp_name
+                #print "\tType: " + tp_name
 
                 if grp_name == "Test" and tp_name == "Misc":
                     patterns_path_list = []
@@ -84,12 +83,15 @@ class CryptoIdentifier:
                         for patterns in algo.get_patterns():                            
                             for pattern in patterns.get_patterns():
                                 path = pattern.get_file()
-                                print "\t\tAdded patterns from " + path
+                                #print "\t\tAdded patterns from " + path
+                                print "Added patterns from " + path
                                 patterns_path_list.append(path)
                             
-                    print "\t\tMatching patterns against binary... this may take a few seconds"
+                    #print "\t\tMatching patterns against binary... this may take a few seconds"
+                    print "Matching patterns against binary... this may take a few seconds"
                     matches = match_graph(patterns_path_list, cfg.graph)
-                    print "\t\t", len(matches), "patterns found."
+                    #print "\t\t", len(matches), "patterns found."
+                    print len(matches), "patterns found."
                     for pattern_name in matches:
                         pattern = Pattern(name=pattern_name)
                         patterns_t = Patterns(patterns=[pattern], name=pattern_name, perform_analysis=False, matches=matches[pattern_name])
@@ -205,10 +207,14 @@ class CryptoColor:
 
                     if match_id not in self._matches_colors:
                         self._matches_colors[match_id] = {}
-
+                    
+                    try:
+                        c = get_color(node.info.address, CIC_ITEM)
+                    except:
+                        c = GetColor(node.info.address, CIC_ITEM)
                     self._matches_colors[match_id][node.info.address] = {
                         "new": self._patterns_colors[pattern_id],
-                        "old": GetColor(node.info.address, CIC_ITEM)
+                        "old": c
                     }
 
     def xchg_colors(self):
@@ -270,5 +276,8 @@ class CryptoColor:
         
         for insts in self._matches_colors.itervalues():
             for ea, color in insts.iteritems():
-                SetColor(ea, CIC_ITEM, ColorCore.rgb_to_bgr(color['new']))
+                try:
+                    set_color(ea, CIC_ITEM, ColorCore.rgb_to_bgr(color['new']))
+                except:
+                    SetColor(ea, CIC_ITEM, ColorCore.rgb_to_bgr(color['new']))
 

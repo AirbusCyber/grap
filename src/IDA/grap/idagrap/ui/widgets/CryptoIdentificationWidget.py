@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # Inspired by IDAscope.
 
-
-import threading
-
 from pygrap import graph_free
 
 import idagrap.ui.helpers.QtShim as QtShim
@@ -161,9 +158,7 @@ class CryptoIdentificationWidget(QMainWindow):
         self.populateSignatureTree()
 
     def _onScanGraphBouttonClickedThread(self):
-        """Execute _onScanGraphBouttonClicked in a thread."""
-        thread = threading.Thread(target=self._onScanGraphBouttonClicked)
-        thread.start()
+        self._onScanGraphBouttonClicked()
 
     def _onScanGraphBouttonClicked(self):
         """
@@ -265,9 +260,14 @@ class CryptoIdentificationWidget(QMainWindow):
                                 if patterns._perform_analysis:
                                     matches_info.setText(0, "%s" % idc.GetFunctionName(match.get_start_address()))
                                 else:
+                                        try:
+                                            func_name = idc.get_func_name(match.get_start_address())
+                                        except:
+                                            func_name = idc.GetFunctionName(match.get_start_address())
+                                
                                         match_info.setText(0, "0x%x in %s (%d instructions)" % (
                                         match.get_start_address(),
-                                        idc.GetFunctionName(match.get_start_address()),
+                                        func_name,
                                         match.get_num_insts()
                                         ))
 
@@ -300,5 +300,8 @@ class CryptoIdentificationWidget(QMainWindow):
         """
         # Jump to the match address
         if item in self.qtreewidgetitems_to_addresses:
-            idc.Jump(self.qtreewidgetitems_to_addresses[item])
+            try:
+                idc.jumpto(self.qtreewidgetitems_to_addresses[item])
+            except:
+                idc.Jump(self.qtreewidgetitems_to_addresses[item])
 

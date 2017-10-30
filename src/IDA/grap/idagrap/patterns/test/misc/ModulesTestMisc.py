@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from os import listdir
-from os.path import abspath, dirname
+from os.path import abspath, dirname, sep
 
 from idagrap.modules.Module import ModuleTestMisc
 from idagrap.modules.Pattern import Pattern, Patterns
@@ -10,7 +10,7 @@ from idagrap.modules.Pattern import Pattern, Patterns
 def get_test_misc():
     # Definition----------------------------------------------------------------
     ROOT = dirname(abspath(__file__))
-    DIR = "/files"
+    DIR = sep + "files"
     FULL_PATH = ROOT + DIR
     EXT = ".dot"
 
@@ -20,7 +20,7 @@ def get_test_misc():
     # For all misc patterns
     for dot in listdir(FULL_PATH):
         if dot.endswith(EXT):
-            pattern = Pattern(f=FULL_PATH + "/" + dot,
+            pattern = Pattern(f=FULL_PATH + sep + dot,
                               name=dot,
                               description=dot + " pattern",
                               min_pattern=1,

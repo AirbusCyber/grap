@@ -2,9 +2,13 @@
 
 from pygrap import NodeInfo, node_t
 
-from idaapi import isCode
+try:
+    from idaapi import is_code, get_flags, print_insn_mnem, generate_disasm_line
+    from idc import print_operand
+except:
+    from idaapi import isCode
+    from idc import GetDisasm, GetFlags, GetMnem, GetOpnd
 from idagrap.error.Exceptions import CodeException
-from idc import BeginEA, GetDisasm, GetFlags, GetMnem, GetOpnd
 
 
 class Node(node_t):
@@ -26,7 +30,11 @@ class Node(node_t):
         node_t.__init__(self)
 
         # Check if it's a code instruction
-        if not isCode(GetFlags(ea)):
+        try:
+            is_c = is_code(get_flags(ea))
+        except:
+            is_c = isCode(GetFlags(ea))
+        if not is_c:
             raise CodeException
 
         #
@@ -35,23 +43,34 @@ class Node(node_t):
 
         # NodeInfo
         self.info = NodeInfo()
-        # Problem: GetDisasm also gives garbage ("push str; STRVALUE")
-        # self.info.inst_str = GetDisasm(ea)
         inst_elements = []
 
-        # Parse opcode and arguments
-        self.info.opcode = GetMnem(ea)
+        # Parse opcode and arguments        
+        try:
+            self.info.opcode = print_insn_mnem(ea)
+        except:
+            self.info.opcode = GetMnem(ea)
 
         nargs = 0
-        self.info.arg1 = GetOpnd(ea, 0)
+        
+        try:
+            self.info.arg1 = print_operand(ea, 0)
+        except:
+            self.info.arg1 = GetOpnd(ea, 0)
         if self.info.arg1 != "":
             inst_elements.append(self.info.arg1)
             nargs += 1
-        self.info.arg2 = GetOpnd(ea, 1)
+        try:
+            self.info.arg2 = print_operand(ea, 1)
+        except:
+            self.info.arg2 = GetOpnd(ea, 1)
         if self.info.arg2 != "":
             inst_elements.append(self.info.arg2)
             nargs += 1
-        self.info.arg3 = GetOpnd(ea, 2)
+        try:
+            self.info.arg3 = print_operand(ea, 2)
+        except:
+            self.info.arg3 = GetOpnd(ea, 2)
         if self.info.arg3 != "":
             inst_elements.append(self.info.arg3)
             nargs += 1
@@ -63,10 +82,8 @@ class Node(node_t):
             args_str = ""
         self.info.inst_str = self.info.opcode + args_str
 
-        if ea == BeginEA():
-            self.info.is_root = True
-        else:
-            self.info.is_root = False
+        # No node will be root but this is acceptable for CFGs
+        self.info.is_root = False
 
         self.info.address = ea
         self.info.has_address = True

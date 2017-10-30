@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
-from idc import GetFunctionName
+try:
+    from idaapi import get_func_name
+except:
+    from idaapi import GetFunctionName
 
 
 class PatternsAnalysis:
@@ -66,7 +69,12 @@ class PatternsAnalysis:
                         n2 = m2.get_match().values()[0][0]
 
                         # If they are in the same area (function)
-                        if GetFunctionName(n1.info.address) == GetFunctionName(n2.info.address):
+                        try:
+                            b = get_func_name(n1.info.address) == get_func_name(n2.info.address)
+                        except:
+                            b = GetFunctionName(n1.info.address) == GetFunctionName(n2.info.address)
+                        
+                        if b:
                             m1.add_link(m2)
 
     def filter_patterns(self):

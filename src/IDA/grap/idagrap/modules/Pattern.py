@@ -246,68 +246,7 @@ class Pattern:
             The return value is the `_max_pattern` attribute.
         """
         return self._max_pattern
-
-    def parcourir(self, graph, checklabels=True, countallmatches=True, getid=True, printallmatches=False):
-        """Search a pattern.
-
-        This method allows the search of an pattern in a graph.
-
-        Arguments:
-            graph (graph_t*): Graph in which we will look for the pattern.
-            checklabels (bool): Check or not the labels of the pattern
-                                                (default value: True).
-            countallmatches (bool): Count or not all the matches
-                                                (default value: True).
-            getid (bool): Get or not the ID (default value: True).
-        """
-        pattern_graph = getGraphFromFile(self._file)
-        graph_save_to_path("E:\p_"+pattern_graph.name+".dot", pattern_graph)
         
-        pattern_size = pattern_graph.nodes.size
-
-        parcours = parcoursGen(pattern_graph,
-                                   pattern_graph.root.list_id,
-                                   pattern_size)
-
-        rt = parcours.parcourir(graph, pattern_size,
-                                checklabels, countallmatches, getid, printallmatches)
-
-        set_gotten = rt.second
-
-        # Check if the list is empty
-        if len(self._matches) != 0:
-            del self._matches[:]
-
-        # Fill the matches list
-        if not set_gotten.empty():
-            for found_nodes in set_gotten:
-                self._matches.append(Match(found_nodes, self.get_id()))
-
-        # Free object
-        parcours.freeParcours(True)
-        graph_free(pattern_graph, True)
-
-    def print_parcours(self):
-        """Print the matches."""
-        if self._matches:
-            count = len(self._matches)
-
-            print "%d traversal(s) possible." % (count)
-            print "Pattern graph (%s)" % (self._name)
-
-            if count > 0:
-                print("\nExtracted nodes:")
-
-                for f_index, found_nodes in enumerate(self._matches, start=1):
-                    print("Match %d, UUID : %s\n" %
-                          (f_index, found_nodes.get_match_id()))
-
-                    found_nodes.print_parcours()
-
-                    print ""
-        else:
-            print "[E] Matches haven't been initialized"
-
 
 class Patterns():
     """Patterns class.

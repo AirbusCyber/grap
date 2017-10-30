@@ -2,8 +2,6 @@
 # Inspired by IDAscope.
 
 
-import threading
-
 from pygrap import graph_free
 
 import idagrap.ui.helpers.QtShim as QtShim
@@ -181,27 +179,34 @@ class PatternGenerationWidget(QMainWindow):
         self.hooks.hook()
 
     def _onSetRootNode(self):
-        self.cc.PatternGenerator.setRootNode(idc.ScreenEA())
+        try:
+            self.cc.PatternGenerator.setRootNode(idc.get_screen_ea())
+        except:
+            self.cc.PatternGenerator.setRootNode(idc.ScreenEA())
 
         if self.real_time_option:
             self.text_widget.setText(self.cc.PatternGenerator.generate())
 
     def _onAddTargetNode(self):
-        self.cc.PatternGenerator.addTargetNode(idc.ScreenEA())
+        try:
+            self.cc.PatternGenerator.addTargetNode(idc.get_screen_ea())
+        except:
+            self.cc.PatternGenerator.addTargetNode(idc.ScreenEA())
 
         if self.real_time_option:
             self.text_widget.setText(self.cc.PatternGenerator.generate())
 
     def _onRemoveTargetNode(self):
-        self.cc.PatternGenerator.removeTargetNode(idc.ScreenEA())
+        try:
+            self.cc.PatternGenerator.removeTargetNode(idc.get_screen_ea())
+        except:
+            self.cc.PatternGenerator.removeTargetNode(idc.ScreenEA())
 
         if self.real_time_option:
             self.text_widget.setText(self.cc.PatternGenerator.generate())
 
     def _onLoadGraphButtonClickedThread(self):
-        """Execute _onLoadGraphBouttonClicked in a thread."""
-        thread = threading.Thread(target=self._onLoadGraphButtonClicked)
-        thread.start()
+        self._onLoadGraphButtonClicked()
 
     def _onLoadGraphButtonClicked(self):
         # Analyzing
@@ -241,19 +246,33 @@ class PatternGenerationHooks(idaapi.UI_Hooks):
         idaapi.UI_Hooks.__init__(self)
         self.cc = cc
 
-    def populating_tform_popup(self, form, popup):
+    def populating_widget_popup(self, form, popup):
         pass
 
-    def finish_populating_tform_popup(self, form, popup):
-        if idaapi.get_tform_type(form) == idaapi.BWN_DISASM:
+    def finish_populating_widget_popup(self, form, popup):
+        try:
+            b = idaapi.get_widget_type(form) == idaapi.BWN_DISASM
+        except:
+            b = idaapi.get_tform_type(form) == idaapi.BWN_DISASM
+    
+        if b:
             # Add separator
             idaapi.attach_action_to_popup(form, popup, None, None)
 
             # Add actions
-            currentAddress = idc.ScreenEA()
+            try:
+                currentAddress = idc.get_screen_ea()
+            except:
+                currentAddress = idc.ScreenEA()
 
             if currentAddress in [node.node_id for node in self.cc.PatternGenerator.targetNodes]:
                 idaapi.attach_action_to_popup(form, popup, "grap:pg:remove_target", None)
             elif self.cc.PatternGenerator.rootNode is None or currentAddress != self.cc.PatternGenerator.rootNode.node_id:
                 idaapi.attach_action_to_popup(form, popup, "grap:pg:set_root", None)
                 idaapi.attach_action_to_popup(form, popup, "grap:pg:add_target", None)
+
+    def populating_tform_popup(self, form, popup):
+        self.populating_widget_popup(form, popup)
+
+    def finish_populating_tform_popup(self, form, popup):
+        self.finish_populating_widget_popup(form, popup)

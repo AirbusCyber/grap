@@ -5,11 +5,15 @@ from pygrap import (graph_alloc, graph_free, graph_t, node_alloc,
                     update_children_fathers_number)
 
 from idaapi import get_root_filename, is_noret
+try:
+    from idaapi import get_entry_ordinal, get_entry
+except:
+    from idc import BeginEA
+
 from idagrap.config.Instruction import *
 from idagrap.error.Exceptions import CodeException
 from idagrap.graph.Node import *
 from idautils import DecodeInstruction, Functions
-from idc import BeginEA
 
 
 class CFG:
@@ -37,9 +41,18 @@ class CFG:
     def extract(self):
         """Extract the control flow graph from the binary."""
         # Get the Entry Point
-        entry = BeginEA()
-
-        self.dis(ea=entry, is_child1=None, ifrom=None)
+        try:
+            entry = idaapi.get_entry_ordinal(idaapi.get_entry(-1))
+        except:
+            try:
+                entry = BeginEA()
+            except:
+                entry = None
+                
+        if entry is None:
+            print "WARNING: Could not determine entrypoint"
+        else:
+            self.dis(ea=entry, is_child1=None, ifrom=None)
 
         # Scan all the functions
         for ea in Functions():
@@ -73,9 +86,10 @@ class CFG:
 
         try:
             n = Node(ea)
-        except CodeException:
+        except CodeException as e:
             return
-        except:
+        except Exception as e:
+            print "WARNING:", e
             return
 
         # If the node exists
@@ -90,7 +104,8 @@ class CFG:
         # Get the instruction
         try:
             inst = DecodeInstruction(ea)
-        except:
+        except Exception as e:
+            print "WARNING:", e
             return
 
         if not inst:
@@ -111,30 +126,44 @@ class CFG:
         # 1 remote child
         elif inst.itype in JMPS:
             try:
-                self.dis(inst.Operands[0].addr, False, n)
+                op = inst.ops[0]
             except:
+                op = inst.Operands[0]
+        
+            try:
+                self.dis(op.addr, False, n)
+            except Exception as e:
+                print "WARNING:", e
                 pass
 
         # 2 children (next, then remote) - except call
         elif inst.itype in CJMPS:
-
+            try:
+                op = inst.ops[0]
+            except:
+                op = inst.Operands[0]
+            
             # Next
             self.dis(inst.ea + inst.size, True, n)
 
             # Remote
-            self.dis(inst.Operands[0].addr, False, n)
+            self.dis(op.addr, False, n)
 
         # 2 children (next, then remote) - call
         elif inst.itype in CALLS:
-
+            try:        
+                op = inst.ops[0]
+            except:
+                op = inst.Operands[0]
+            
             # Next
             # Catch the end of a noret function
             if not is_noret(inst.ea):
                 self.dis(inst.ea + inst.size, True, n)
 
             # Remote
-            if inst.Operands[0].type in OP_MEM:
-                self.dis(inst.Operands[0].addr, False, n)
+            if op.type in OP_MEM:
+                self.dis(op.addr, False, n)
 
         # 1 child (next) - basic instruction
         else:

@@ -323,7 +323,7 @@ def run_and_parse_command(verbose, i, command, expected_traversals, algo):
     lines = out.split("\n")
     found_traversals = None
     for l in lines:
-        splitted = l.split(" ")
+        splitted = l.replace('\r', '').split(" ")
         if len(splitted) >= 2 and (splitted[1] == "traversal(s)" or splitted[1] == "matches:" or splitted[1] == 'matche(s)' or splitted[1] == 'match'):
             found_traversals = int(splitted[0])
             break
