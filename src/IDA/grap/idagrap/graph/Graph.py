@@ -4,7 +4,7 @@ from pygrap import (graph_alloc, graph_free, graph_t, node_alloc,
                     node_copy, node_link, node_list_add, node_list_find,
                     update_children_fathers_number)
 
-from idaapi import get_root_filename, is_noret
+from idaapi import get_root_filename, is_noret, get_inf_structure
 try:
     from idaapi import get_entry_ordinal, get_entry
 except:
@@ -14,7 +14,7 @@ from idagrap.config.Instruction import *
 from idagrap.error.Exceptions import CodeException
 from idagrap.graph.Node import *
 from idautils import DecodeInstruction, Functions
-
+import capstone
 
 class CFG:
     """Control Flow Graph Class.
@@ -37,17 +37,32 @@ class CFG:
             graph = graph_alloc(0)
 
         self.graph = graph
+        self.info = None
+        self.capstone = None
 
     def extract(self):
         """Extract the control flow graph from the binary."""
+        # Initialize binary info
+        self.info = get_inf_structure()
+        
+        # Initialize Capstone
+        if self.info.is_64bit():
+            mode = capstone.CS_MODE_64
+        else:
+            mode = capstone.CS_MODE_32
+        self.capstone = capstone.Cs(capstone.CS_ARCH_X86, mode)
+        
         # Get the Entry Point
+        entry = None
         try:
-            entry = idaapi.get_entry_ordinal(idaapi.get_entry(-1))
+            start_ea = self.info.start_ea
+            if start_ea != 0xffffffff:
+                entry = start_ea
         except:
             try:
                 entry = BeginEA()
             except:
-                entry = None
+                pass
                 
         if entry is None:
             print "WARNING: Could not determine entrypoint"
@@ -85,7 +100,7 @@ class CFG:
         node_list = self.graph.nodes
 
         try:
-            n = Node(ea)
+            n = Node(ea, self.info, self.capstone)
         except CodeException as e:
             return
         except Exception as e:

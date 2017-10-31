@@ -3,7 +3,7 @@
 from pygrap import NodeInfo, node_t
 
 try:
-    from idaapi import is_code, get_flags, print_insn_mnem, generate_disasm_line
+    from idaapi import is_code, get_flags, print_insn_mnem, generate_disasm_line, create_insn
     from idc import print_operand
 except:
     from idaapi import isCode
@@ -24,7 +24,7 @@ class Node(node_t):
         CodeException: If the ``ea`` is not a code instruction.
     """
 
-    def __init__(self, ea):
+    def __init__(self, ea, info, cs):
         """Initialization function."""
         # Init the node structure
         node_t.__init__(self)
@@ -44,6 +44,9 @@ class Node(node_t):
         # NodeInfo
         self.info = NodeInfo()
         inst_elements = []
+        
+        inst = create_insn(ea)
+        print ea, hex(ea), inst, hex(inst)
 
         # Parse opcode and arguments        
         try:
