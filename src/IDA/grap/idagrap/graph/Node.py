@@ -4,11 +4,12 @@ from pygrap import NodeInfo, node_t
 
 try:
     from idaapi import is_code, get_flags, print_insn_mnem, generate_disasm_line, create_insn
-    from idc import print_operand
+    from idc import print_operand, get_bytes
 except:
     from idaapi import isCode
-    from idc import GetDisasm, GetFlags, GetMnem, GetOpnd
+    from idc import GetDisasm, GetFlags, GetMnem, GetOpnd, GetManyBytes, MakeCode
 from idagrap.error.Exceptions import CodeException
+import capstone
 
 
 class Node(node_t):
@@ -45,46 +46,33 @@ class Node(node_t):
         self.info = NodeInfo()
         inst_elements = []
         
-        inst = create_insn(ea)
-        print ea, hex(ea), inst, hex(inst)
-
-        # Parse opcode and arguments        
         try:
-            self.info.opcode = print_insn_mnem(ea)
+            size = create_insn(ea)
+            bytes = get_bytes(ea, size)
         except:
-            self.info.opcode = GetMnem(ea)
-
-        nargs = 0
+            size = MakeCode(ea)
+            bytes = GetManyBytes(ea, size)
         
-        try:
-            self.info.arg1 = print_operand(ea, 0)
-        except:
-            self.info.arg1 = GetOpnd(ea, 0)
-        if self.info.arg1 != "":
-            inst_elements.append(self.info.arg1)
-            nargs += 1
-        try:
-            self.info.arg2 = print_operand(ea, 1)
-        except:
-            self.info.arg2 = GetOpnd(ea, 1)
-        if self.info.arg2 != "":
-            inst_elements.append(self.info.arg2)
-            nargs += 1
-        try:
-            self.info.arg3 = print_operand(ea, 2)
-        except:
-            self.info.arg3 = GetOpnd(ea, 2)
-        if self.info.arg3 != "":
-            inst_elements.append(self.info.arg3)
-            nargs += 1
-        self.info.nargs = nargs
+        
 
-        if len(inst_elements) >= 1:
-            args_str = " "  + ", ".join(inst_elements)
-        else:
-            args_str = ""
-        self.info.inst_str = self.info.opcode + args_str
+        #s = hex(ea) + "\n"
+        #f = open("E:\\hex.txt", "a")
+        #f.write(s)
+        #f.close()
 
+
+        (address, size, mnemonic, op_str) = cs.disasm_lite(bytes, ea, count=1).next()
+        self.info.opcode = mnemonic.encode("ascii", "ignore")
+
+        op_str_ascci = op_str.encode("ascii", "ignore")
+        splitted = op_str_ascci.split(", ")
+        if len(splitted) >= 1:
+            self.info.arg1 = splitted[0]
+            if len(splitted) >= 2:
+                self.info.arg2 = splitted[1]
+                if len(splitted) >= 3:
+                    self.info.arg3 = splitted[2]
+        
         # No node will be root but this is acceptable for CFGs
         self.info.is_root = False
 

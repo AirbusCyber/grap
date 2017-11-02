@@ -12,14 +12,19 @@ def get_test_misc():
     ROOT = dirname(abspath(__file__))
     DIR = sep + "files"
     FULL_PATH = ROOT + DIR
-    EXT = ".dot"
+    EXT = [".grapp", ".dot"]
 
     # Tuple of stream ciphers
     TEST_MISC = []
 
     # For all misc patterns
     for dot in listdir(FULL_PATH):
-        if dot.endswith(EXT):
+        ext_ok = False
+        for e in EXT:
+            if dot.endswith(e):
+                ext_ok = True
+                break
+        if ext_ok:
             pattern = Pattern(f=FULL_PATH + sep + dot,
                               name=dot,
                               description=dot + " pattern",

@@ -88,7 +88,7 @@ class CFG:
         # Allocate a new graph
         self.graph = graph_alloc(0)
 
-    def dis(self, ea, is_child1, ifrom=None):
+    def dis(self, ea, is_child1 = False, ifrom=None):
         """Disassemble the current address and fill the nodes list.
 
         Args:
@@ -98,90 +98,95 @@ class CFG:
         """
 
         node_list = self.graph.nodes
+        args_queue = []
+        args_queue.append((ea, is_child1, ifrom))
 
-        try:
-            n = Node(ea, self.info, self.capstone)
-        except CodeException as e:
-            return
-        except Exception as e:
-            print "WARNING:", e
-            return
+        while args_queue != []:
+            ea, is_child1, ifrom = args_queue.pop(0)
+            
+            try:
+                n = Node(ea, self.info, self.capstone)
+            except CodeException as e:
+                continue
+            except Exception as e:
+                print "WARNING:", e
+                continue
 
-        # If the node exists
-        if node_list_find(node_list, n.getid()):
+            # If the node exists
+            if node_list_find(node_list, n.getid()):
+                if ifrom and is_child1 is not None:
+                    # Link the father and the child
+                    node_link(node_list_find(node_list, ifrom.getid()),
+                              node_list_find(node_list, n.getid()), False,
+                              is_child1)
+                continue
+
+            # Get the instruction
+            try:
+                inst = DecodeInstruction(ea)
+            except Exception as e:
+                print "WARNING:", e
+                continue
+
+            if not inst:
+                continue
+
+            # Add the node
+            node_list_add(node_list, node_copy(node_alloc(), n))
+
             if ifrom and is_child1 is not None:
-                # Link the father and the child
                 node_link(node_list_find(node_list, ifrom.getid()),
                           node_list_find(node_list, n.getid()), False,
                           is_child1)
-            return
 
-        # Get the instruction
-        try:
-            inst = DecodeInstruction(ea)
-        except Exception as e:
-            print "WARNING:", e
-            return
-
-        if not inst:
-            return
-
-        # Add the node
-        node_list_add(node_list, node_copy(node_alloc(), n))
-
-        if ifrom and is_child1 is not None:
-            node_link(node_list_find(node_list, ifrom.getid()),
-                      node_list_find(node_list, n.getid()), False,
-                      is_child1)
-
-        # No child
-        if inst.itype in RETS:
-            pass
-
-        # 1 remote child
-        elif inst.itype in JMPS:
-            try:
-                op = inst.ops[0]
-            except:
-                op = inst.Operands[0]
-        
-            try:
-                self.dis(op.addr, False, n)
-            except Exception as e:
-                print "WARNING:", e
+            # No child
+            if inst.itype in RETS:
                 pass
 
-        # 2 children (next, then remote) - except call
-        elif inst.itype in CJMPS:
-            try:
-                op = inst.ops[0]
-            except:
-                op = inst.Operands[0]
+            # 1 remote child
+            elif inst.itype in JMPS:
+                try:
+                    op = inst.ops[0]
+                except:
+                    op = inst.Operands[0]
             
-            # Next
-            self.dis(inst.ea + inst.size, True, n)
+                try:
+                    args_queue.insert(0, (op.addr, False, n))
+                except Exception as e:
+                    print "WARNING:", e
+                    pass
 
-            # Remote
-            self.dis(op.addr, False, n)
+            # 2 children (next, then remote) - except call
+            elif inst.itype in CJMPS:
+                try:
+                    op = inst.ops[0]
+                except:
+                    op = inst.Operands[0]
+                
+                # Next
+                args_queue.insert(0, (inst.ea + inst.size, True, n))
 
-        # 2 children (next, then remote) - call
-        elif inst.itype in CALLS:
-            try:        
-                op = inst.ops[0]
-            except:
-                op = inst.Operands[0]
-            
-            # Next
-            # Catch the end of a noret function
-            if not is_noret(inst.ea):
-                self.dis(inst.ea + inst.size, True, n)
+                # Remote
+                args_queue.insert(0, (op.addr, False, n))
 
-            # Remote
-            if op.type in OP_MEM:
-                self.dis(op.addr, False, n)
+            # 2 children (next, then remote) - call
+            elif inst.itype in CALLS:
+                try:        
+                    op = inst.ops[0]
+                except:
+                    op = inst.Operands[0]
+                
+                # Next
+                # Catch the end of a noret function
+                if not is_noret(inst.ea):
+                    args_queue.insert(0, (inst.ea + inst.size, True, n))
 
-        # 1 child (next) - basic instruction
-        else:
-            self.dis(inst.ea + inst.size, True, n)
+                # Remote
+                if op.type in OP_MEM:
+                    args_queue.insert(0, (op.addr, False, n))
+
+            # 1 child (next) - basic instruction
+            else:
+                args_queue.insert(0, (inst.ea + inst.size, True, n))
 
         return

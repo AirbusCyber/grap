@@ -453,3 +453,14 @@ def get_Signal():
     except ImportError:
         import PyQt5.QtCore as QtCore
         return QtCore.pyqtSignal
+
+        
+def get_QFileDialog():
+    """QFileDialog getter."""
+
+    try:
+        import PySide.QtCore as QtCore
+        return QtCore.QFileDialog
+    except ImportError:
+        import PyQt5.QtWidgets as QtWidgets
+        return QtWidgets.QFileDialog

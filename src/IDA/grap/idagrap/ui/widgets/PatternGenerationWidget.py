@@ -73,6 +73,9 @@ class PatternGenerationWidget(QMainWindow):
 
         self._createResetAction()
         self.toolbar.addAction(self.resetAction)
+        
+        self._createSaveAction()
+        self.toolbar.addAction(self.saveAction)
 
     def _createTextWidget(self):
         self.text_widget = self.cc.QTextEdit()
@@ -154,6 +157,16 @@ class PatternGenerationWidget(QMainWindow):
         )
 
         self.resetAction.triggered.connect(self._onResetButtonClicked)
+        
+    def _createSaveAction(self):
+        # Action
+        self.saveAction = self.cc.QAction(
+            self.cc.QIcon(config['icons_path'] + "icons8-add-file.png"),
+            "Save the pattern to disk",
+            self
+        )
+
+        self.saveAction.triggered.connect(self._onSaveButtonClicked)
 
     def _createContextActions(self):
         actions = [
@@ -179,10 +192,10 @@ class PatternGenerationWidget(QMainWindow):
         self.hooks.hook()
 
     def _onSetRootNode(self):
-        try:
-            self.cc.PatternGenerator.setRootNode(idc.get_screen_ea())
-        except:
-            self.cc.PatternGenerator.setRootNode(idc.ScreenEA())
+        #try:
+        self.cc.PatternGenerator.setRootNode(idc.get_screen_ea())
+        #except:
+        #    self.cc.PatternGenerator.setRootNode(idc.ScreenEA())
 
         if self.real_time_option:
             self.text_widget.setText(self.cc.PatternGenerator.generate())
@@ -226,6 +239,33 @@ class PatternGenerationWidget(QMainWindow):
         print "[I] Reset pattern"
         self.cc.PatternGenerator.resetPattern()
         self.text_widget.clear()
+        
+    def _onSaveButtonClicked(self):
+        print "[I] Saving pattern"
+        options = self.cc.QFileDialog.Options()
+        #options |= self.cc.QFileDialog.DontUseNativeDialog
+        filename, _ = self.cc.QFileDialog.getSaveFileName(self, "Choose name of save file (.dot and .grapp will be parsed as patterns)", "C:\\Program Files\\IDA 7.0\\plugins\\idagrap\\patterns\\test\\misc\\files\\generated.grapp", "Grap pattern (*.grapp)", options=options)
+        #filename = "C:\\Program Files\\IDA 7.0\\plugins\\idagrap\\patterns\\test\\misc\\files\\generated.grapp"
+        if filename:            
+            #import subprocess            
+            #import base64
+            #import sys
+            
+            #print sys.executable
+            #save_to_disk = "python C:\\Program Files\\IDA 7.0\\plugins\\idagrap\\utils\\save_to_disk.py"
+            #path = base64.b64encode(filename)
+            #text = base64.b64encode(self.text_widget.toPlainText())
+            #params = base64.encode(filename) + " " + base64.encode(self.text_widget.getText())
+            #subprocess.call([save_to_disk])
+            #subprocess.call(['runas', '/user:Administrator', sys.executable, save_to_disk, path, text])
+            #shell.ShellExecuteEx(lpVerb='runas', lpFile="C:\\Program Files\\IDA 7.0\\plugins\\idagrap\\utils\\save_to_disk.py", lpParameters=params)
+            try:
+                f = open(filename, "wb")
+                f.write(self.text_widget.toPlainText())
+                f.close()
+                print "[I] Saved pattern to", filename
+            except Exception as e:
+                print "WARNING:", e
 
 
 class PatternGenerationHandler(idaapi.action_handler_t):

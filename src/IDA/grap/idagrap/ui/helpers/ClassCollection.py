@@ -82,6 +82,7 @@ class ClassCollection():
         self.QApplication = self.QtShim.get_QApplication()
         self.QStyleOptionSlider = self.QtShim.get_QStyleOptionSlider()
         self.QTabWidget = self.QtShim.get_QTabWidget()
+        self.QFileDialog = self.QtShim.get_QFileDialog()
         self.DescendingOrder = self.QtShim.get_DescendingOrder()
 
         # IDAgrap
