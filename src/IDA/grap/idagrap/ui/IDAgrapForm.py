@@ -8,6 +8,7 @@ from idagrap.config.General import config
 from .helpers.ClassCollection import ClassCollection
 from .widgets.CryptoIdentificationWidget import CryptoIdentificationWidget
 from .widgets.PatternGenerationWidget import PatternGenerationWidget
+from .widgets.AboutWidget import AboutWidget
 
 
 class IDAgrapForm(PluginForm):
@@ -57,6 +58,7 @@ class IDAgrapForm(PluginForm):
         # Initialization of the widgets
         self.idagrap_widgets.append(CryptoIdentificationWidget(self))
         self.idagrap_widgets.append(PatternGenerationWidget(self))
+        self.idagrap_widgets.append(AboutWidget(self))
         self.setupIDAgrapForm()
 
         print "[\\] end widgets"

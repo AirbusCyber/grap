@@ -24,7 +24,7 @@ class PatternGenerationWidget(QMainWindow):
         # Enable access to shared IDAscope modules
         self.parent = parent
         self.name = "Pattern Generation"
-        self.icon = self.cc.QIcon(config['icons_path'] + "crypto.png")
+        self.icon = self.cc.QIcon(config['icons_path'] + "icons8-plus.png")
         self.color = False
 
         # This widget relies on the crypto identifier
@@ -151,7 +151,7 @@ class PatternGenerationWidget(QMainWindow):
     def _createResetAction(self):
         # Action
         self.resetAction = self.cc.QAction(
-            self.cc.QIcon(config['icons_path'] + "reset.png"),
+            self.cc.QIcon(config['icons_path'] + "icons8-delete.png"),
             "Reset the pattern",
             self
         )

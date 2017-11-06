@@ -1,0 +1,31 @@
+<h1>grap TODO_GRAPVERSION</h1>
+grap matches graph patterns within binaries.
+It comes as a stand-alone CLI application (with a Capstone-based disassembler), as python bindings and as this IDA plugin.
+<br />
+<a href="https://bitbucket.org/cybertools/grap/">https://bitbucket.org/cybertools/grap/</a>
+
+<h2>Pattern Search</h2>
+<ul>
+	<li>Within the <b>Pattern Search</b> tab, you can match existing patterns against the state of the binary being analyzed</li>
+	<li>Since the Control Flow Graph (CFG) is created from the current IDA database, you might want to do it again later in the analysis process</li>
+</ul>
+
+<h2>Pattern Generation</h2>
+<ul>
+	<li>Within the <b>Pattern Generation</b> tab, first parse the CFG with the "Load CFG" button</li>
+	<li>Then, within IDA View, add a root node and target nodes (with a right click)</li>
+	<li>Click on "Generate a pattern" to see the pattern within the plugin view</li>
+	<li>You can save this pattern to a file and match from the <b>Pattern Search</b> tab</li>
+</ul>
+
+<h1>Credits</h1>
+grap is an open source project being mostly developped by Airbus - CyberSecurity (<a href="https://airbus-cyber-security.com/">https://airbus-cyber-security.com/</a>).
+
+<h2>License</h2>
+grap is licensed under the MIT license. The full license text can be found in the file src/LICENSE on the repository.
+<h2>Icons</h2>
+The icons named icons8-* (see the ui/icons/ folder) in the IDA plugin:
+<ul>
+	<li>come from icons8: <a href="https://icons8.com/">https://icons8.com/</a>,</li>
+	<li>are licensed under CC BY-ND - Creative Commons with attribution and no derivatives, see the full license here: <a href="https://creativecommons.org/licenses/by-nd/3.0/">https://creativecommons.org/licenses/by-nd/3.0/</a>.</li>
+</ul>
