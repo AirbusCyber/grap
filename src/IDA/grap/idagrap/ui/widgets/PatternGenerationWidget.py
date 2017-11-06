@@ -197,19 +197,19 @@ class PatternGenerationWidget(QMainWindow):
         self.hooks.hook()
 
     def _onSetRootNode(self):
-        #try:
-        self.cc.PatternGenerator.setRootNode(idc.get_screen_ea())
-        #except:
-        #    self.cc.PatternGenerator.setRootNode(idc.ScreenEA())
+        try:
+            self.cc.PatternGenerator.setRootNode(idc.get_screen_ea())
+        except:
+            self.cc.PatternGenerator.setRootNode(idc.ScreenEA())
 
         if self.real_time_option:
             self.text_widget.setText(self.cc.PatternGenerator.generate(auto=True))
 
     def _onAddTargetNode(self):
-        #try:
-        self.cc.PatternGenerator.addTargetNode(idc.get_screen_ea())
-        #except:
-        #    self.cc.PatternGenerator.addTargetNode(idc.ScreenEA())
+        try:
+            self.cc.PatternGenerator.addTargetNode(idc.get_screen_ea())
+        except:
+            self.cc.PatternGenerator.addTargetNode(idc.ScreenEA())
 
         if self.real_time_option:
             self.text_widget.setText(self.cc.PatternGenerator.generate(auto=True))
