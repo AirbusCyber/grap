@@ -45,34 +45,33 @@ class Node(node_t):
         # NodeInfo
         self.info = NodeInfo()
         inst_elements = []
-        
+
         try:
             size = create_insn(ea)
             bytes = get_bytes(ea, size)
         except:
             size = MakeCode(ea)
             bytes = GetManyBytes(ea, size)
-        
-        
-
-        #s = hex(ea) + "\n"
-        #f = open("E:\\hex.txt", "a")
-        #f.write(s)
-        #f.close()
-
 
         (address, size, mnemonic, op_str) = cs.disasm_lite(bytes, ea, count=1).next()
         self.info.opcode = mnemonic.encode("ascii", "ignore")
 
         op_str_ascci = op_str.encode("ascii", "ignore")
+        self.info.inst_str = self.info.opcode + " " + op_str_ascci
+
         splitted = op_str_ascci.split(", ")
+        self.info.nargs = 0
+
         if len(splitted) >= 1:
             self.info.arg1 = splitted[0]
+            self.info.nargs += 1
             if len(splitted) >= 2:
                 self.info.arg2 = splitted[1]
+                self.info.nargs += 1
                 if len(splitted) >= 3:
                     self.info.arg3 = splitted[2]
-        
+                    self.info.nargs += 1
+
         # No node will be root but this is acceptable for CFGs
         self.info.is_root = False
 
