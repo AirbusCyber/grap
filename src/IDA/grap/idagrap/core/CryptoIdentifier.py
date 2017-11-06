@@ -89,7 +89,7 @@ class CryptoIdentifier:
                             
                     #print "\t\tMatching patterns against binary... this may take a few seconds"
                     print "Matching patterns against binary... this may take a few seconds"
-                    matches = match_graph(patterns_path_list, cfg.graph)
+                    matches = match_graph(patterns_path_list, cfg.graph, print_all_matches=True)
                     #print "\t\t", len(matches), "patterns found."
                     print len(matches), "patterns found."
                     for pattern_name in matches:

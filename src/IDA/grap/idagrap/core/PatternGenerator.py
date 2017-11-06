@@ -35,9 +35,9 @@ class PatternGenerator:
 
         self.coloredNodes = set()
         self.defaultColor = DEFCOLOR
-        self.rootColor = 0xcc2efa
-        self.targetColor = 0x31b404
-        self.nodeColor = 0xffcc99
+        self.rootColor = 0xeebafd#0xcc2efa
+        self.targetColor = 0xaae198#0x31b404
+        self.nodeColor = 0xffd6ad #0xffcc99
 
         self.generic_arguments_option = False
         self.lighten_memory_ops_option = False
@@ -114,32 +114,37 @@ class PatternGenerator:
     def addTargetNode(self, targetNodeAddress):
         targetNode = node_list_find(self.graph.graph.nodes, targetNodeAddress)
         if not targetNode:
-            raise Exception("Invalid target node")
+            print "WARNING: Node not found in CFG (is it reachable from a function or from the entrypoint ?)"
+            return
 
         if targetNode in self.targetNodes:
-            raise Exception("Node already used")
+            print "WARNING: Target node already in use"
+            return
 
         self.targetNodes.append(targetNode)
         self.coloredNodes.add(targetNodeAddress)
         self.colorNode(targetNodeAddress, self.targetColor)
 
-        print "Add target node {}".format(hex(targetNode.node_id))
+        print "Added target node {}".format(hex(targetNode.node_id))
 
     def removeTargetNode(self, targetNodeAddress):
         self.targetNodes = [node for node in self.targetNodes if node.node_id != targetNodeAddress]
 
         self.resetColored()
 
-    def generate(self):
+    def generate(self, auto=False):
         if self.rootNode is None:
-            raise Exception("Impossible to generate pattern without a root node")
+            print "WARNING: Missing the root node. Make sure to first \"Load the CFG\", then define the root node and target nodes (right click in IDA View) before you \"Generate a pattern\"."
+            return
 
         if len(self.targetNodes) == 0:
-            raise Exception("Impossible to generate pattern without some target nodes")
+            if not auto:
+                print "WARNING: Missing target node(s). Make sure to first \"Load the CFG\", then define the root node and target nodes (right click in IDA View) before you \"Generate a pattern\"."
+            return
 
         queue = deque()
         targetNodes = set([i.node_id for i in self.targetNodes])
-        foundNodes = []
+        foundNodes = set()
         coloring = set()
         previous = {}
 
@@ -152,30 +157,31 @@ class PatternGenerator:
             for child in self._getChildren(node):
                 if child.node_id not in coloring:
                     if child.node_id in targetNodes:
-                        foundNodes.append(child.node_id)
+                        foundNodes.add(child.node_id)
 
                     coloring.add(child.node_id)
                     queue.appendleft(child)
                     previous[child.node_id] = node.node_id
 
         if len(foundNodes) != len(targetNodes):
-            raise Exception("Can not reach all target nodes from the root.")
+            print "WARNING: Can not reach all target nodes from the root."
 
         # Generate the nodes and edges of the pattern
         patternNodes = OrderedDict()
         patternEdges = []
 
-        for finalNode in reversed(self.targetNodes):
+        for finalNode in reversed([s for s in self.targetNodes if s.node_id in foundNodes]):
             node_id = finalNode.node_id
 
             while node_id != self.rootNode.node_id:
                 if node_id not in patternNodes:
                     self.coloredNodes.add(node_id)
-                    if node_id != self.rootNode.node_id and node_id not in targetNodes:
+                    if node_id != self.rootNode.node_id and node_id not in foundNodes:
                         self.colorNode(node_id, self.nodeColor)
 
                     patternNodes[node_id] = PatternGeneratorNode.fromNodeId(self.graph.graph.nodes, node_id)
                     previous_id = previous[node_id]
+                    
                     patternEdges.append((previous_id, node_id))
                     node_id = previous_id
                 else:
@@ -184,11 +190,21 @@ class PatternGenerator:
         patternNodes[self.rootNode.node_id] = PatternGeneratorNode.fromNodeId(self.graph.graph.nodes,
                                                                               self.rootNode.node_id)
 
+        # Add edges between adjacent colored nodes
+        for node_id in self.coloredNodes:
+            node = node_list_find(self.graph.graph.nodes, node_id)
+            children = self._getChildren(node)
+            for c in children:
+                child_id = c.node_id
+                if child_id in self.coloredNodes:
+                    patternEdges.append((node_id, child_id))
+                                        
+        # Create the pattern graph's edges from patternEdges
         for patternEdge in patternEdges:
-            childNumber = self._getChildNumber(patternEdge[0], patternEdge[1])
-            if childNumber == 1:
+            numbers = self._getChildNumbers(patternEdge[0], patternEdge[1])
+            if 1 in numbers:
                 patternNodes[patternEdge[0]].child1 = patternEdge[1]
-            elif childNumber == 2:
+            if 2 in numbers:
                 patternNodes[patternEdge[0]].child2 = patternEdge[1]
 
         # Transformations
@@ -287,15 +303,15 @@ class PatternGenerator:
 
         return children
 
-    def _getChildNumber(self, parentId, childId):
+    def _getChildNumbers(self, parentId, childId):
         parentNode = node_list_find(self.graph.graph.nodes, parentId)
 
+        numbers = []
         if parentNode.has_child1 and parentNode.child1.node_id == childId:
-            return 1
-        elif parentNode.has_child2 and parentNode.child2.node_id == childId:
-            return 2
-        else:
-            return None
+            numbers.append(1)
+        if parentNode.has_child2 and parentNode.child2.node_id == childId:
+            numbers.append(2)
+        return numbers
 
 
 class PatternGeneratorNode:

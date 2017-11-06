@@ -9,6 +9,7 @@ import idc
 import idaapi
 from idagrap.config.General import config
 from idagrap.patterns.Modules import MODULES
+import os
 
 QMainWindow = QtShim.get_QMainWindow()
 
@@ -34,7 +35,7 @@ class PatternGenerationWidget(QMainWindow):
 
         self.actionsDefined = False
 
-        self.real_time_option = False
+        self.real_time_option = True
 
     def _createGui(self):
         """
@@ -79,12 +80,17 @@ class PatternGenerationWidget(QMainWindow):
 
     def _createTextWidget(self):
         self.text_widget = self.cc.QTextEdit()
-        self.text_widget.setReadOnly(True)
+        self.text_widget.setReadOnly(False)
         self.text_widget.setFontFamily("Monospace")
 
     def _createOptionsWidgets(self):
         self.options_widgets = []
 
+        real_time_check = self.cc.QCheckBox("Automatically update the pattern")
+        real_time_check.setChecked(True)
+        real_time_check.stateChanged.connect(self._real_time_check_option_trigger)
+        self.options_widgets.append(real_time_check)
+        
         generic_arguments_check = self.cc.QCheckBox("Generic arguments")
         generic_arguments_check.stateChanged.connect(self._generic_arguments_option_trigger)
         self.options_widgets.append(generic_arguments_check)
@@ -100,10 +106,6 @@ class PatternGenerationWidget(QMainWindow):
         factorize_check = self.cc.QCheckBox("Factorize")
         factorize_check.stateChanged.connect(self._factorize_check_option_trigger)
         self.options_widgets.append(factorize_check)
-
-        real_time_check = self.cc.QCheckBox("Real time")
-        real_time_check.stateChanged.connect(self._real_time_check_option_trigger)
-        self.options_widgets.append(real_time_check)
 
     def _generic_arguments_option_trigger(self, state):
         self.cc.PatternGenerator.generic_arguments_option = (state == 2)
@@ -123,7 +125,9 @@ class PatternGenerationWidget(QMainWindow):
 
     def _real_time_check_option_trigger(self, state):
         self.real_time_option = (state == 2)
-        self.text_widget.setText(self.cc.PatternGenerator.generate())
+        if self.real_time_option:
+            self.text_widget.setText(self.cc.PatternGenerator.generate())
+        self.generateAction.setEnabled(not self.real_time_option)
 
     def _createLoadGraphAction(self):
         """
@@ -131,8 +135,8 @@ class PatternGenerationWidget(QMainWindow):
         """
         # Action
         self.loadGraphAction = self.cc.QAction(
-            self.cc.QIcon(config['icons_path'] + "scan_graph.png"),
-            "Load the control flow graph (might take some time)",
+            self.cc.QIcon(config['icons_path'] + "icons8-fingerprint-scan.png"),
+            "Load the Control Flow Graph (might take some time)",
             self
         )
 
@@ -141,10 +145,11 @@ class PatternGenerationWidget(QMainWindow):
     def _createGenerateAction(self):
         # Action
         self.generateAction = self.cc.QAction(
-            self.cc.QIcon(config['icons_path'] + "generate.png"),
-            "Generate a pattern",
+            self.cc.QIcon(config['icons_path'] + "icons8-workflow.png"),
+            "Generate a pattern (enabled only if you disable the \"Auto update\" option)",
             self
         )
+        self.generateAction.setEnabled(False)
 
         self.generateAction.triggered.connect(self._onGenerateButtonClicked)
 
@@ -198,16 +203,16 @@ class PatternGenerationWidget(QMainWindow):
         #    self.cc.PatternGenerator.setRootNode(idc.ScreenEA())
 
         if self.real_time_option:
-            self.text_widget.setText(self.cc.PatternGenerator.generate())
+            self.text_widget.setText(self.cc.PatternGenerator.generate(auto=True))
 
     def _onAddTargetNode(self):
-        try:
-            self.cc.PatternGenerator.addTargetNode(idc.get_screen_ea())
-        except:
-            self.cc.PatternGenerator.addTargetNode(idc.ScreenEA())
+        #try:
+        self.cc.PatternGenerator.addTargetNode(idc.get_screen_ea())
+        #except:
+        #    self.cc.PatternGenerator.addTargetNode(idc.ScreenEA())
 
         if self.real_time_option:
-            self.text_widget.setText(self.cc.PatternGenerator.generate())
+            self.text_widget.setText(self.cc.PatternGenerator.generate(auto=True))
 
     def _onRemoveTargetNode(self):
         try:
@@ -216,7 +221,7 @@ class PatternGenerationWidget(QMainWindow):
             self.cc.PatternGenerator.removeTargetNode(idc.ScreenEA())
 
         if self.real_time_option:
-            self.text_widget.setText(self.cc.PatternGenerator.generate())
+            self.text_widget.setText(self.cc.PatternGenerator.generate(auto=True))
 
     def _onLoadGraphButtonClickedThread(self):
         self._onLoadGraphButtonClicked()
@@ -229,11 +234,13 @@ class PatternGenerationWidget(QMainWindow):
         if not self.actionsDefined:
             self._createContextActions()
             self._updateContextMenus()
+            
+        # UI information
+        print "[I] CFG loaded. You can now define your pattern's root node and target nodes (right click on an instruction in IDA View)."
 
     def _onGenerateButtonClicked(self):
         print "[I] Generation of pattern"
         self.text_widget.setText(self.cc.PatternGenerator.generate())
-        print "[I] Generation done"
 
     def _onResetButtonClicked(self):
         print "[I] Reset pattern"
@@ -241,29 +248,28 @@ class PatternGenerationWidget(QMainWindow):
         self.text_widget.clear()
         
     def _onSaveButtonClicked(self):
+        pattern_text = self.text_widget.toPlainText()
+        
+        if len(pattern_text.strip()) == 0:
+            print "WARNING: Pattern is empty."
+            return
+    
         print "[I] Saving pattern"
         options = self.cc.QFileDialog.Options()
         #options |= self.cc.QFileDialog.DontUseNativeDialog
-        filename, _ = self.cc.QFileDialog.getSaveFileName(self, "Choose name of save file (.dot and .grapp will be parsed as patterns)", "C:\\Program Files\\IDA 7.0\\plugins\\idagrap\\patterns\\test\\misc\\files\\generated.grapp", "Grap pattern (*.grapp)", options=options)
-        #filename = "C:\\Program Files\\IDA 7.0\\plugins\\idagrap\\patterns\\test\\misc\\files\\generated.grapp"
-        if filename:            
-            #import subprocess            
-            #import base64
-            #import sys
+        
+        if "user_patterns_path" in config:
+            default_path = config["user_patterns_path"]
+        else:
+            default_path = config["patterns_path"] + os.path.sep + "test"+ os.path.sep + "misc" + os.path.sep + "files"
+        default_filename = default_path + os.path.sep + "generated.grapp"
             
-            #print sys.executable
-            #save_to_disk = "python C:\\Program Files\\IDA 7.0\\plugins\\idagrap\\utils\\save_to_disk.py"
-            #path = base64.b64encode(filename)
-            #text = base64.b64encode(self.text_widget.toPlainText())
-            #params = base64.encode(filename) + " " + base64.encode(self.text_widget.getText())
-            #subprocess.call([save_to_disk])
-            #subprocess.call(['runas', '/user:Administrator', sys.executable, save_to_disk, path, text])
-            #shell.ShellExecuteEx(lpVerb='runas', lpFile="C:\\Program Files\\IDA 7.0\\plugins\\idagrap\\utils\\save_to_disk.py", lpParameters=params)
+        filename, _ = self.cc.QFileDialog.getSaveFileName(self, "Save pattern file (.grapp files in %APPDATA%\IDAgrap\patterns will be parsed as patterns)", default_filename, "Grap pattern (*.grapp)", options=options)
+        if filename:            
             try:
                 f = open(filename, "wb")
-                f.write(self.text_widget.toPlainText())
+                f.write(pattern_text)
                 f.close()
-                print "[I] Saved pattern to", filename
             except Exception as e:
                 print "WARNING:", e
 

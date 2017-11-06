@@ -90,8 +90,8 @@ class CryptoIdentificationWidget(QMainWindow):
         """
         # Action
         self.scanGraphAction = self.cc.QAction(
-            self.cc.QIcon(config['icons_path'] + "scan_graph.png"),
-            "Generating and scanning the control flow graph(might take some time)",
+            self.cc.QIcon(config['icons_path'] + "icons8-fingerprint-scan.png"),
+            "Load the Control Flow Graph and match it against patterns (might take some time)",
             self
         )
 
@@ -103,8 +103,8 @@ class CryptoIdentificationWidget(QMainWindow):
         """
         # Action
         self.coloringAction = self.cc.QAction(
-            self.cc.QIcon(config['icons_path'] + "coloring.png"),
-            "Coloring matches",
+            self.cc.QIcon(config['icons_path'] + "icons8-color-palette.png"),
+            "Color matches",
             self
         )
 

@@ -16,6 +16,18 @@ config = {
     "name": "IDAgrap"
 }
 
+try:
+    if os.name == "nt":
+        appdata_path = os.getenv("APPDATA")
+        user_grap_path = appdata_path + os.path.sep + "IDAgrap"
+        if not os.path.exists(user_grap_path):
+            os.makedirs(user_grap_path)
+        config["user_patterns_path"] = user_grap_path + os.path.sep + "patterns"
+        if not os.path.exists(config["user_patterns_path"]):
+            os.makedirs(config["user_patterns_path"])
+except Exception as e:
+    print "WARNING:", e
+
 # Patterns Definitions
 MIN_THRESHOLD = 0.0
 MAX_THRESHOLD = 1.0

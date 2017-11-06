@@ -30,7 +30,7 @@ class IDAgrapForm(PluginForm):
 
         self.idagrap_widgets = []
         self.cc = ClassCollection()
-        self.icon = self.cc.QIcon(config['icons_path'] + "circle.png")
+        self.icon = self.cc.QIcon(config['icons_path'] + "icons8-mind-map.png")
 
     def print_banner(self):
         """Print the banner."""
@@ -115,7 +115,7 @@ class IDAgrapForm(PluginForm):
         if input_md5 is None:
             return
         else:
-            name = "{} {}".format(config['name'], config['version'])
+            name = "{}".format(config['name'])
 			
             try:
                 options = PluginForm.WCLS_CLOSE_LATER |\
