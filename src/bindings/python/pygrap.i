@@ -119,14 +119,14 @@ def compute_tree(pattern_graphs):
     return tree, max_site_size, n_patterns
 
 
-def match_tree(tree, max_site_size, test_graph):
-    rt = tree.parcourir(test_graph, max_site_size, True, True, False)
+def match_tree(tree, max_site_size, test_graph, print_all_matches=False):
+    rt = tree.parcourir(test_graph, max_site_size, True, True, print_all_matches)
 
     pattern_matches = rt[1]
     return pattern_matches
 
 
-def match_graph(pattern_arg, test_arg):
+def match_graph(pattern_arg, test_arg, print_all_matches=False):
     if type(pattern_arg) is list:
         pattern_arg_list = pattern_arg
     else:
@@ -167,7 +167,7 @@ def match_graph(pattern_arg, test_arg):
         return None
 
     tree, max_site_size, n_patterns = compute_tree(pattern_graph_list)
-    matches = match_tree(tree, max_site_size, test_graph)
+    matches = match_tree(tree, max_site_size, test_graph, print_all_matches)
 
     if isinstance(test_arg, basestring):
         freeGraphList(pattern_graphs_ptr, True, True)
