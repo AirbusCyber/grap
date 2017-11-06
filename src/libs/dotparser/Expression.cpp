@@ -370,12 +370,24 @@ node_t *updateNode(OptionList * ol, node_t * n) {
     n->info->has_maxRepeat = false;
   }
   
-  if ((not cond_filled) and n->info->inst_str != ""){
-    n->condition = new CondNode();
-    n->condition->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-    n->condition->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
-    n->condition->comparison = ComparisonFunEnum::str_beginswith;
-    cond_filled = true;
+  if ((not cond_filled)){
+    if (n->info->inst_str != ""){
+      n->condition = new CondNode();
+      n->condition->pattern_field = (void* NodeInfo::*) &NodeInfo::inst_str;
+      n->condition->test_field = (void* NodeInfo::*) &NodeInfo::inst_str;
+      n->condition->comparison = ComparisonFunEnum::str_beginswith;
+      cond_filled = true;
+    }
+    else {
+      CondNode *cn_true = new CondNode();
+      cn_true->comparison = ComparisonFunEnum::bool_true;
+      std::list<CondNode*>* not_child = new std::list<CondNode*>();
+      not_child->push_front(cn_true);
+      cn_true->add_pointer_usage();
+      n->condition = new CondNode(not_child, UnOpEnum::logic_not);
+      
+      cond_filled = true;
+    }
   }
   
   if (not n->info->has_address){
