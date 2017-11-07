@@ -12,33 +12,34 @@ GRAP_VERSION="1.0.0"
 def main():
     sys.setrecursionlimit(1000000)
 
-    parser = argparse.ArgumentParser(description='grap: look for a graph pattern in a PE/ELF/RAW binary or a .dot graph file',
+    parser = argparse.ArgumentParser(description='grap: look for a graph pattern (.grapp) in a PE/ELF/RAW binary or a .grapcfg (DOT) graph file',
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('--version', action='version', version=GRAP_VERSION)
 
-    parser.add_argument(dest='pattern',  help='Pattern file (.dot) to look for')
+    parser.add_argument(dest='pattern',  help='Pattern file (.grapp) or directory (.grapp files are recursively added)')
     parser.add_argument(dest='test', nargs="+", help='Test file(s) to analyse')
 
+    parser.add_argument('-p', '--pattern', dest='pattern_path', action="append", nargs=1, help='Include additional pattern file or directory, can be used multiple times')
     parser.add_argument('-r', '--recursive', dest='recursive', action="store_true", default=False, help='Analyzes test files recursively (test must be a directory)')
-    parser.add_argument('-f', '--force', dest='force', action="store_true", default=False, help='Force re-generation of existing .dot file')
+    parser.add_argument('-f', '--force', dest='force', action="store_true", default=False, help='Force re-generation of existing .grapcfg file')
     parser.add_argument('--raw', dest='raw_disas', action="store_true", default=False, help='Disassemble raw file')
     parser.add_argument('-r64', '--raw-64', dest='raw_64', action="store_true", default=False, help='Disassemble raw file with x86_64 (not default)')
     parser.add_argument('-od', '--only-disassemble', dest='only_disassemble', action="store_true", default=False, help='Disassemble files and exit (no matching)')
-    parser.add_argument('-o', '--dot-output', dest='dot', help='Specify exported DOT file name (when there is only one test file) or directory')
-    parser.add_argument('-er', '--readable', dest='readable', action="store_true", default=False, help='Export .dot in displayable format (with xdot)')
+    parser.add_argument('-o', '--cfg-output', dest='dot', help='Specify exported .grapcfg (DOT) file name (when there is only one test file) or directory')
+    parser.add_argument('-er', '--readable', dest='readable', action="store_true", default=False, help='Export .grapcfg in displayable format (with xdot)')
+    parser.add_argument('-t', '--timeout', dest='timeout', default=120, help='Specify timeout (in seconds) for disassembly, assign 0 for no timeout (default: 120)')
     parser.add_argument('-nt', '--no-threads', dest='multithread', action="store_false", default=True, help='No multiprocesses nor multithreads')
     parser.add_argument('-m', '--print-all-matches', dest='print_all_matches', action="store_true", default=False, help='Print all matched nodes (overrides getid fields)')
     parser.add_argument('-nm', '--print-no-matches', dest='print_no_matches', action="store_true", default=False, help='Don\'t print matched nodes (overrides getid fields)')
     parser.add_argument('-sa', '--show-all', dest='show_all', action="store_true", default=False, help='Show all tested (including not matching) files (not default when quiet, default otherwise)')
     parser.add_argument('-b', '--grap-match-path', dest='grap_match_path', help='Specify the path of the grap-match binary (default: /usr/local/bin/grap-match)')
-    parser.add_argument('-t', '--timeout', dest='timeout', default=120, help='Specify timeout (in seconds) for disassembly, assign 0 for no timeout (default: 120)')
     parser.add_argument('-q', '--quiet', dest='quiet', action="store_true", default=False, help='Quiet output: one file per line with the number of disassembled instruction and matches')
     parser.add_argument('-v', '--verbose', dest='verbose', action="store_true", default=False, help='Verbose output')
     parser.add_argument('-d', '--debug', dest='debug', action="store_true", default=False, help='Debug output')
-    parser.add_argument('-p', '--pattern', dest='pattern_path', action="append", nargs=1, help='Include additional pattern file, can be used multiple times')
     args = parser.parse_args()
 
     printed_something = False
+    pattern_paths = []
 
     if args.pattern is None or args.test is None:
         sys.exit(0)
@@ -111,16 +112,17 @@ def main():
             dot_test_files.add(path)
 
     if args.pattern is None or os.path.exists(args.pattern):
-        pattern_path = args.pattern
+        pattern_paths += compute_pattern_paths(args.pattern)
     else:
-        pattern_path = pygrap.get_dot_path_from_string(args.pattern)
+        generated_pattern_path = pygrap.get_dot_path_from_string(args.pattern)
+        pattern_paths += compute_pattern_paths(generated_pattern_path)
 
         if args.verbose:
             print "Inferred pattern path written:", pattern_path
 
     dot_test_files = sorted(list(dot_test_files))
     if not args.only_disassemble:
-        if pattern_path is not None and len(dot_test_files) >= 1:
+        if len(pattern_paths) >= 1 and len(dot_test_files) >= 1:
             if printed_something or args.verbose:
                 print("")
 
@@ -153,12 +155,16 @@ def main():
             if args.recursive:
                 command.append("-r")
 
+            command.append(pattern_paths[0])
+            for p in pattern_paths[1:]:
+                command.append("-p")
+                command.append(p)
+
             if args.pattern_path is not None:
                 for p in args.pattern_path:
-                    command.append("-p")
-                    command.append(p[0])
-
-            command.append(pattern_path)
+                    for l in compute_pattern_paths(p[0]):
+                        command.append("-p")
+                        command.append(l)
 
             for test_path in dot_test_files:
                 command.append(test_path)
@@ -180,6 +186,13 @@ def main():
         else:
             if not args.quiet:
                 print("Missing pattern or test file.")
+
+
+def compute_pattern_paths(path):
+    if os.path.isdir(path):
+        return [e[0] for e in list_files_recursively(path, option_filter=True, extension_filter=".grapp")]
+    else:
+        return [path]
 
 
 def list_files_recursively(path, option_filter=False, extension_filter=""):
