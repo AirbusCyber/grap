@@ -123,8 +123,21 @@ bool MotParcours::sameSymbol(MotParcours *m, bool checkLabels)
 {
   // TODO: etre plus malin avec les comparaisons (ne prendre que les champs de
   // condition en compte dans la comparaison des infos ?)
-  return (not checkLabels) or (this->info->equals(m->info)
-                              and this->condition->equals(m->condition));
+  
+  if (not checkLabels){
+    return true; 
+  }
+  
+  if (this->has_symbol == m->has_symbol){
+    if (this->has_symbol) {
+      return this->info->equals(m->info) and this->condition->equals(m->condition);
+    }
+    else {
+      return this->info->equals(m->info);
+    }
+  }
+  
+  return false;
 }
 
 bool MotParcours::sameRepeatAndCF(MotParcours * m) {  

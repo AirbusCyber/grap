@@ -677,6 +677,8 @@ bool CondNode::evaluate(NodeInfo* patternInfo, NodeInfo* testInfo, node_t* testN
 }
 
 bool CondNode::equals(CondNode* cn){
+  RELEASE_ASSERT(cn != nullptr);
+  
   vsize_t nc = this->children->size();
   if (nc != cn->children->size()) return false;
   if (this->has_fixed_pattern_info != cn->has_fixed_pattern_info or (this->has_fixed_pattern_info and (this->fixed_pattern_info != cn->fixed_pattern_info))) return false;
