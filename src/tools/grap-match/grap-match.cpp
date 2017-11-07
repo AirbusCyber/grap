@@ -5,7 +5,7 @@ char optionFuncs;
 char optionLabels;
 
 void printUsage() {
-  printf("Use grap-match to look for a pattern file (.dot) in a test file (.dot).\n");
+  printf("Use grap-match to look for a pattern file (.grapp) in a test file (.grapcfg).\n");
   printf("For standard usage please use the python wrapper (grap).\n");
   printf("Usage : ./grap-match [options] patternFile [-p patternFile] testFile\n");
   printf("Options are :\n");
