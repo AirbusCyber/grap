@@ -15,7 +15,7 @@ You will find compiled files (windows_compiled_1_0_0.zip) in the downloads panel
 - Copy python\_pygrap.pyd into C:\Python27\Lib\site-packages\
 
 # grap-match.exe and grap.py
-You may use the compiled grap-match.exe and grap.py with the -nt option (multi-threading does not work on Windows for now, please update the path to match your setup):
+You may use the compiled grap-match.exe and grap.py with the -nt option since multi-threading does not work on Windows for now (please update the path to match your setup):
 
 - grap-match.exe (in binaries\ folder) may be directly used within a cmd.exe prompt:
 ```
