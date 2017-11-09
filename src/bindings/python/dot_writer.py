@@ -131,9 +131,9 @@ def convert_export_str_to_dot(str_in, dot_file, pattern_name):
     write_dot(dot_file, pattern_name, nodes, edges)
 
 
-def get_dot_path_from_string(str_in):
-    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".dot")
-    convert_export_str_to_dot(str_in, tmp_file, "tmp")
+def get_dot_path_from_string(str_in, pattern_name="tmp"):
+    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".grapp")
+    convert_export_str_to_dot(str_in, tmp_file, pattern_name)
     tmp_file.flush()
     tmp_file.close()
 

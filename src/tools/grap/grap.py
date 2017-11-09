@@ -116,14 +116,22 @@ def main():
         for path in disassembled_files:
             dot_test_files.add(path)
 
-    if args.pattern is None or os.path.exists(args.pattern):
-        pattern_paths += compute_pattern_paths(args.pattern)
+    # Handling patterns (path or string that looks like a traversal)
+    if args.pattern_path is not None:
+        pattern_strings = [args.pattern] + [e[0] for e in args.pattern_path]
     else:
-        generated_pattern_path = pygrap.get_dot_path_from_string(args.pattern)
-        pattern_paths += compute_pattern_paths(generated_pattern_path)
+        pattern_strings = [args.pattern]
+    counter = 0
+    for p in pattern_strings:
+        if os.path.exists(p):
+            pattern_paths += compute_pattern_paths(p)
+        else:
+            generated_pattern_path = pygrap.get_dot_path_from_string(p, pattern_name="tmp"+str(counter))
+            pattern_paths += compute_pattern_paths(generated_pattern_path)
 
-        if args.verbose:
-            print "Inferred pattern path written:", pattern_path
+            if args.verbose:
+                print "Inferred pattern path written:", generated_pattern_path
+            counter += 1
 
     dot_test_files = sorted(list(dot_test_files))
     if not args.only_disassemble:
@@ -167,12 +175,6 @@ def main():
             for p in pattern_paths[1:]:
                 command.append("-p")
                 command.append(p)
-
-            if args.pattern_path is not None:
-                for p in args.pattern_path:
-                    for l in compute_pattern_paths(p[0]):
-                        command.append("-p")
-                        command.append(l)
 
             if args.dot is not None:
                 command.append(args.dot)
