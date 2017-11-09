@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import sys
 import os
 import pygrap
@@ -16,21 +18,21 @@ def main():
     elif len(sys.argv) <= 2:
         verbose = False
         bin_path = sys.argv[1]
-        dot_path = sys.argv[1] + ".dot"
+        dot_path = sys.argv[1] + ".grapcfg"
     else:
         verbose = True
         bin_path = sys.argv[2]
-        dot_path = sys.argv[2] + ".dot"
+        dot_path = sys.argv[2] + ".grapcfg"
 
     if len(sys.argv) == 2 and (sys.argv[1] == "-h" or sys.argv[1] == "--help"):
         print_usage()
         sys.exit(1)
 
-    if bin_path[-4:] == ".dot":
-        print "The argument should be a binary and not a .dot file"
+    if bin_path[-8:] == ".grapcfg":
+        print "The argument should be a binary and not a .grapcfg file"
         sys.exit(1)
 
-    # use_existing specifies wether an existing dot file should be used unchanged or overwritter
+    # use_existing specifies wether an existing dot file should be used unchanged or overwritten
     pygrap.disassemble_file(bin_path=bin_path, dot_path=dot_path, use_existing=True)
 
     test_graph = pygrap.getGraphFromPath(dot_path)
@@ -42,7 +44,7 @@ def main():
         print "Error: binary or dot file doesn't exist, exiting."
         sys.exit(1)
 
-    pattern_decrypt = "backspace_decrypt_algos.dot"
+    pattern_decrypt = "backspace_decrypt_algos.grapp"
     matches_decrypt = pygrap.match_graph(pattern_decrypt, test_graph)
 
     if len(matches_decrypt) >= 2:
