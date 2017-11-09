@@ -2,7 +2,7 @@ We recommand you to not compile grap yourself on Windows because it can be tedio
 
 This document explains how to use pre-compiled version of grap and its bindings on Windows.
 
-#Requirements
+# Requirements
 
 - If you only intend to use the IDA plugin, you will only need to install capstone: within a cmd.exe admin prompt, run `pip install capstone-windows` (you might need to change directory to where pip is, for instance C:\python27-x64\Scripts)
 - If you want to use grap as a standalone tool, you will need also need pefile and pyelftools (install them with pip)
@@ -15,7 +15,7 @@ You will find compiled files (windows_compiled_1_0_0.zip) in the downloads panel
 - Copy python\_pygrap.pyd into C:\Python27\Lib\site-packages\
 
 # grap-match.exe and grap.py
-You may use the compiled grap-match.exe and grap.py with the -nt option (multi-threading does not work on Windows for now, please update the path to match your setup):
+You may use the compiled grap-match.exe and grap.py with the -nt option since multi-threading does not work on Windows for now (please update the path to match your setup):
 
 - grap-match.exe (in binaries\ folder) may be directly used within a cmd.exe prompt:
 ```
