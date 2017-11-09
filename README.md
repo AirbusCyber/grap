@@ -56,20 +56,35 @@ Note that seccomp is only enabled within the `grap-match` binary and its wrapper
 # Usage
 The tool can be launched by using the following command:
 
-`$ grap [options] pattern_path.grapp test_paths`
+`$ grap [options] pattern test_paths`
 
 Below are a few examples of supported options:
 
 - `grap -h`: describes supported options
-- `grap patterns/basic_block_loop.grapp -o ls.grapcfg /bin/ls`: disassemble ls into ls.dot and looks for basic block loops
+
+One can let grap infer a pattern from a string. Only few options are supported but this is useful for prototyping:
+
+- `grap "opcode is xor and arg1 contains '['" (test.exe)`: look for a xor with a memory write
+- `grap -v "sub->xor->sub" (test.exe)`: -v will output the path of the inferred pattern
+
+Choose how the binaries are disassembled
+
 - `grap -od (pattern.grapp) (samples/*)`: disassemble files with no attempt at matching
+- `grap -f (pattern.grapp) (test.exe)`: force re-disassembling the binary, then matches it against pattern.dot
+- `grap --raw (pattern.grapp) (test.bin)`: disassembling raw file (use --raw-64 for 64 bits binaries)
+
+Control the verbosity of the output:
+
 - `grap -q -sa (pattern.grapp) (samples/*.grapcfg)`: match disassembled files, show matching and non matching files, one per line
 - `grap -m (pattern.grapp) (test.grapcfg)`: show all matched nodes
-- `grap -f (pattern.grapp) (test.exe)`: force re-disassembling the binary, then matches it against pattern.dot
+
+Choose where the disassembled file(s) (.grapcfg) are written; match multiple files against multiple patterns:
+
+- `grap patterns/basic_block_loop.grapp -o ls.grapcfg /bin/ls`: disassemble ls into ls.dot and looks for basic block loops
 - `grap (pattern1.grapp) -p (pattern2.grapp) (test.exe)`: match against multiple pattern files
 - `grap -r -q patterns/ /bin/ -o /tmp/` : disassemble all files from /bin/ into /tmp/ and matches them against all .grapp patterns from patterns/ (recursive option -r applies to /bin/, not to patterns/)
 
-Note that you can only pass one pattern file as argument but this file may contain multiple pattern graphs.
+Note that pattern files can contain multiple pattern graphs.
 
 # Pattern examples
 The following pattern detects a decryption loop consisting of a xor followed by sub found in a Backspace sample:
@@ -89,13 +104,15 @@ E -> A [childnumber=2]
 }
 ```
 
+Note that pattern files can contain multiple pattern graphs.
+
 You may find additional pattern examples in two directories:
 
 - [patterns/](patterns/) contains a few patterns that can be useful on any binary such as a pattern to detect short loops or to detect a loop on basic blocks,
 - [examples/](examples/) contains patterns used against the Backspace malware (see [examples/backspace_samples.md](examples/backspace_samples.md) to obtain the binary samples).
 
 # Documentation
-You will find more documentation in the [doc/](doc/) folder. The syntax of pattern and test graphs is detailed in the file grap\_graphs.pdf within the download section on BitBucket ([https://bitbucket.org/cybertools/grap/downloads/grap_graphs.pdf](https://bitbucket.org/cybertools/grap/downloads/grap_graphs.pdf)).
+You will find more documentation in the [doc/](doc/) folder. The syntax of pattern and test graphs is detailed in the file grap\_graphs.pdf within the release section.
 
 The [examples/](examples/) folder contains a python file demonstrating how to use the python bindings to analyze Backspace samples.
 
