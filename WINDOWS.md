@@ -7,12 +7,11 @@ This document explains how to use pre-compiled version of grap and its bindings 
 - If you only intend to use the IDA plugin, you will only need to install capstone: within a cmd.exe admin prompt, run `pip install capstone-windows` (you might need to change directory to where pip is, for instance C:\python27-x64\Scripts)
 - If you want to use grap as a standalone tool, you will need also need pefile and pyelftools (install them with pip)
 
-# grap and python bindings
-You will find compiled files (windows_compiled_1_0_0.zip) in the downloads panel (https://bitbucket.org/cybertools/grap/downloads/).
+# grap, python bindings and IDA plugin
+You will find compiled files (grap_1-1-0_ida700_windows.zip for instance) in the release panel. You can find release information (README.txt and SHA256SUM) in the [releases/] folder.
 
 - Extract the .zip file
-- Copy python\pygrap.py into C:\Python27\Lib\site-packages\
-- Copy python\_pygrap.pyd into C:\Python27\Lib\site-packages\
+- Follow the instructions in the README.txt (you will need to copy 4 files / folders)
 
 # grap-match.exe and grap.py
 You may use the compiled grap-match.exe and grap.py with the -nt option since multi-threading does not work on Windows for now (please update the path to match your setup):
@@ -26,6 +25,5 @@ E:\windows_compiled_1_0_0\binaries\grap-match.exe -nt pattern.dot test.dot
 python E:\windows_compiled_1_0_0\binaries\grap.py -nt -b E:\windows_compiled_1_0_0\binaries\grap-match.exe pattern.dot test.dot
 ```
 
-
 # IDA plugin
-Read [IDA.md](IDA.md) for installation and usage instruction of the IDA plugin.
+Read [IDA.md](IDA.md) for addtionnal usage instruction of the IDA plugin.
