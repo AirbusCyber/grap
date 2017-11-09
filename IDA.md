@@ -8,7 +8,7 @@ For instance for IDA 7 on Windows:
 - grap.py into C:\Program Files\IDA 7.0\plugins\
 - idagrap/ into C:\Program Files\IDA 7.0\plugins\
 
-These files can be found either in the pre-compiled binaries or in the repository (src/IDA/grap/)[src/IDA/grap/].
+These files can be found either in the pre-compiled binaries or in the repository [src/IDA/grap/](src/IDA/grap/).
 
 # Usage
 You can activate the plugin within IDA with the menu (Edit -> Plugins -> IDAgrap) or with Shift+G.
