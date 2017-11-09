@@ -42,6 +42,8 @@ def main():
     pattern_paths = []
 
     if args.pattern is None or args.test is None:
+        if args.verbose:
+            print "ERROR: Missing pattern and test path."
         sys.exit(0)
 
     test_paths = []
@@ -51,6 +53,9 @@ def main():
             if args.recursive:
                 dot_test_files.add(test_path)
                 test_paths += list_files_recursively(test_path)
+            else:
+                if args.verbose:
+                    print "WARNING: Skipping directory", test_path
         else:
             test_paths.append((test_path, None))
 
@@ -62,9 +67,9 @@ def main():
             f.close()
         except IOError:
             if os.path.isdir(test_path):
-                print("Skipping directory " + test_path)
+                print("WARNING: Skipping directory " + test_path)
             elif not os.path.isfile(test_path):
-                print("Skipping " + test_path + " (not found).")
+                print("WARNING: Skipping " + test_path + " (not found).")
             continue
 
         if data is None:
@@ -90,7 +95,7 @@ def main():
                     if dir_arg_path is None:
                         dot_test_files.add(dot_path)
                 else:
-                    if len(args.test) == 1 and args.dot is not None:
+                    if len(test_paths) == 1 and args.dot is not None:
                         found_path = pygrap.disassemble_file(bin_path=test_path, dot_path=dot_path,
                                                                    readable=args.readable, verbose=args.verbose,
                                                                    raw=args.raw_disas, raw_64=args.raw_64)
@@ -152,7 +157,10 @@ def main():
             if not args.multithread:
                 command.append("-nt")
 
-            if args.recursive:
+            if args.recursive and args.dot is None:
+                # When specifying .grapcfg folder (args.dot):
+                # - All disassembled files are put flatly (no subfolder) in the folder
+                # - So grap-match should not try to match on subfolders
                 command.append("-r")
 
             command.append(pattern_paths[0])
@@ -166,8 +174,11 @@ def main():
                         command.append("-p")
                         command.append(l)
 
-            for test_path in dot_test_files:
-                command.append(test_path)
+            if args.dot is not None:
+                command.append(args.dot)
+            else:
+                for test_path in dot_test_files:
+                    command.append(test_path)
 
             if args.verbose or args.debug:
                 print(" ".join(command))
@@ -185,7 +196,7 @@ def main():
                 sys.exit(exitcode)
         else:
             if not args.quiet:
-                print("Missing pattern or test file.")
+                print("ERROR: Missing pattern or test file.")
 
 
 def compute_pattern_paths(path):

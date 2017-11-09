@@ -34,6 +34,7 @@ void drop_initial_privileges(){
   ctx = seccomp_init(SCMP_ACT_KILL); 
 
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(open), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(getdents), 0);
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(close), 0);
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit), 0);
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit_group), 0);
@@ -124,7 +125,11 @@ int main(int argc, char *argv[]) {
       optionQuiet = true;
     }
     else if (strcmp(argv[a], "-d") == 0 || strcmp(argv[a], "--debug") == 0) {
+      #ifdef DEBUG
       optionDebug = true;
+      #else
+      std::cerr << "WARNING: Debug option only available when compiled in debug mode, ignored." << std::endl;
+      #endif
     }
     else if (strcmp(argv[a], "-ncl") == 0 || strcmp(argv[a], "-ncs") == 0 || strcmp(argv[a], "--no-check-labels") == 0) {
       checkLabels = false;
@@ -198,7 +203,7 @@ int main(int argc, char *argv[]) {
             files = list_files(path, true, true, ".grapcfg");
           }
           else {
-            std::cerr << "WARNING: skipping directory " << path << std::endl;
+            files = list_files(path, false, true, ".grapcfg");
           }
         }
         else {
@@ -386,7 +391,7 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-bool filter_path(boost::filesystem::path p, bool option_filter, string extension_filter){   
+bool filter_path(boost::filesystem::path p, bool option_filter, string extension_filter){  
   if (not boost::filesystem::is_directory(p)){
     if (option_filter){
       if (p.extension() == extension_filter){
@@ -397,7 +402,7 @@ bool filter_path(boost::filesystem::path p, bool option_filter, string extension
       return true;
     }
   }
-  
+
   return false;
 }
 
@@ -408,6 +413,20 @@ std::list<string> list_files(string path, bool recursive, bool option_filter, st
     if (recursive){
       boost::filesystem::recursive_directory_iterator end, dir(path);
       for (end; dir != end; dir++) {
+        #ifndef _WIN32
+        // Try to avoid being denied a dir open on linux
+        // TODO: make it work better and avoid race condition (how to do that with boost ?)
+        if (boost::filesystem::is_directory(dir->path())){
+          DIR* dir_test = opendir(dir->path().string().c_str());
+          if (dir_test != NULL) {
+            closedir (dir_test);
+          }
+          else {
+            dir.no_push(); 
+          }
+        }
+        #endif
+        
         if (filter_path(dir->path(), option_filter, extension_filter)){
           pathList.push_back(dir->path().string());
         }
