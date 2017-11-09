@@ -67,7 +67,7 @@ Below are a few examples of supported options:
 - `grap -m (pattern.grapp) (test.grapcfg)`: show all matched nodes
 - `grap -f (pattern.grapp) (test.exe)`: force re-disassembling the binary, then matches it against pattern.dot
 - `grap (pattern1.grapp) -p (pattern2.grapp) (test.exe)`: match against multiple pattern files
-- `grap -r -q patterns/ /bin/ -o /tmp/` : disassemble all files from /bin/ into /tmp/ and matches them against all .grapp patterns from patterns/
+- `grap -r -q patterns/ /bin/ -o /tmp/` : disassemble all files from /bin/ into /tmp/ and matches them against all .grapp patterns from patterns/ (recursive option -r applies to /bin/, not to patterns/)
 
 Note that you can only pass one pattern file as argument but this file may contain multiple pattern graphs.
 
