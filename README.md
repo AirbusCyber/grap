@@ -69,7 +69,7 @@ One can let grap infer a pattern from a string. Only few options are supported b
 
 Choose how the binaries are disassembled
 
-- `grap -od (pattern.grapp) (samples/*)`: disassemble files with no attempt at matching
+- `grap -od (pattern.grapp) samples/*`: disassemble files in folder samples/ with no attempt at matching
 - `grap -f (pattern.grapp) (test.exe)`: force re-disassembling the binary, then matches it against pattern.dot
 - `grap --raw (pattern.grapp) (test.bin)`: disassembling raw file (use --raw-64 for 64 bits binaries)
 
