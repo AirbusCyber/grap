@@ -70,7 +70,7 @@ One can let grap infer a pattern from a string. Only few options are supported b
 Choose how the binaries are disassembled
 
 - `grap -od (pattern.grapp) samples/*`: disassemble files in folder samples/ with no attempt at matching
-- `grap -f (pattern.grapp) (test.exe)`: force re-disassembling the binary, then matches it against pattern.dot
+- `grap -f (pattern.grapp) (test.exe)`: force re-disassembling the binary, then matches it against pattern.grapp
 - `grap --raw (pattern.grapp) (test.bin)`: disassembling raw file (use --raw-64 for 64 bits binaries)
 
 Control the verbosity of the output:
@@ -80,7 +80,7 @@ Control the verbosity of the output:
 
 Choose where the disassembled file(s) (.grapcfg) are written; match multiple files against multiple patterns:
 
-- `grap patterns/basic_block_loop.grapp -o ls.grapcfg /bin/ls`: disassemble ls into ls.dot and looks for basic block loops
+- `grap patterns/basic_block_loop.grapp -o ls.grapcfg /bin/ls`: disassemble ls into ls.grapp and looks for basic block loops
 - `grap (pattern1.grapp) -p (pattern2.grapp) (test.exe)`: match against multiple pattern files
 - `grap -r -q patterns/ /bin/ -o /tmp/` : disassemble all files from /bin/ into /tmp/ and matches them against all .grapp patterns from patterns/ (recursive option -r applies to /bin/, not to patterns/)
 
