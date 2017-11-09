@@ -7,6 +7,7 @@ import idagrap.ui.helpers.QtShim as QtShim
 import idc
 from idagrap.config.General import config
 from idagrap.patterns.Modules import MODULES
+import threading
 
 QMainWindow = QtShim.get_QMainWindow()
 
@@ -158,7 +159,9 @@ class CryptoIdentificationWidget(QMainWindow):
         self.populateSignatureTree()
 
     def _onScanGraphBouttonClickedThread(self):
-        self._onScanGraphBouttonClicked()
+        """Execute _onScanGraphBouttonClicked in a thread."""
+        thread = threading.Thread(target=self._onScanGraphBouttonClicked)
+        thread.start()
 
     def _onScanGraphBouttonClicked(self):
         """

@@ -2,6 +2,7 @@
 
 import colorsys
 import random
+import threading
 from ColorCore import ColorCore
 
 from idagrap.analysis.Analysis import PatternsAnalysis
@@ -36,7 +37,11 @@ class CryptoIdentifier:
 
         Analyzing the graph for patterns.
         """
-        self._analyzing()
+        thread = threading.Thread(target=self._analyzing)
+        # Fixed the stack size to 10M
+        threading.stack_size(0x100000 * 10)
+        thread.start()
+        thread.join()
 
 
     def _analyzing(self):
@@ -57,7 +62,6 @@ class CryptoIdentifier:
         # Control flow graph extraction
         #
         print "[I] Creation of the Control Flow Graph (can take few seconds)"
-        
         # Get the CFG of the binary
         cfg.extract()
 
