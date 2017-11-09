@@ -61,11 +61,11 @@ The tool can be launched by using the following command:
 Below are a few examples of supported options:
 
 - `grap -h`: describes supported options
-- `grap patterns/basic_block_loop.dot -o ls.dot /bin/ls`: disassemble ls into ls.dot and looks for basic block loops
-- `grap -od (pattern.dot) (samples/*)`: disassemble files with no attempt at matching
-- `grap -q -sa (pattern.dot) (samples/*.dot)`: match disassembled files, show matching and non matching files, one per line
-- `grap -m (pattern.dot) (test.dot)`: show all matched nodes
-- `grap -f (pattern.dot) (test.exe)`: force re-disassembling the binary, then matches it against pattern.dot
+- `grap patterns/basic_block_loop.grapp -o ls.grapcfg /bin/ls`: disassemble ls into ls.dot and looks for basic block loops
+- `grap -od (pattern.grapp) (samples/*)`: disassemble files with no attempt at matching
+- `grap -q -sa (pattern.grapp) (samples/*.grapcfg)`: match disassembled files, show matching and non matching files, one per line
+- `grap -m (pattern.grapp) (test.grapcfg)`: show all matched nodes
+- `grap -f (pattern.grapp) (test.exe)`: force re-disassembling the binary, then matches it against pattern.dot
 
 Note that you can only pass one pattern file as argument but this file may contain multiple pattern graphs.
 
