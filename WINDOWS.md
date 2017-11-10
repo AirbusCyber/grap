@@ -8,7 +8,7 @@ This document explains how to use pre-compiled version of grap and its bindings 
 - If you want to use grap as a standalone tool, you will need also need pefile and pyelftools (install them with pip)
 
 # grap, python bindings and IDA plugin
-You will find compiled files (grap\_1-1-0\_ida700\_windows.zip for instance) in the release panel. You can find release information (README.txt and SHA256SUM) in the [releases/](releases/) folder.
+You will find compiled files (grap\_1-1-0\_ida700\_windows.zip for instance) in the release panel. You can find release information (SHA256SUM) in the [releases/](releases/) folder.
 
 - Extract the .zip file
 - Follow the instructions in the README.txt (you will need to copy 4 files / folders)
