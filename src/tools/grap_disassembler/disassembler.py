@@ -627,6 +627,10 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
 
     oep_rva = pe.OPTIONAL_HEADER.AddressOfEntryPoint
     code_section = pe.get_section_by_rva(oep_rva)
+    if code_section is None:
+        print "ERROR: pefile could not find code section."
+        return None
+
     oep_offset = oep_rva - code_section.VirtualAddress + code_section.PointerToRawData
 
     iat_dict = dict()
