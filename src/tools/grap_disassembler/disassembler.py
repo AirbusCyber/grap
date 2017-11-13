@@ -700,8 +700,8 @@ def disassemble_elf(elf_data = None, elf_path = None, dot_path = None, print_lis
     oep_offset = get_offset_from_rva(elf, oep_rva)
 
     if oep_offset is None:
-        print "Cannot retrieve entry point offset from RVA (0x%08X), exiting." % (elf.header.e_entry)
-        sys.exit(1)
+        print "ERROR: Cannot retrieve entry point offset from RVA (0x%08X)." % (elf.header.e_entry)
+        return None
 
     disass = ELFDisassembler(arch=arch, mode=mode, elf=elf)
     insts = disass.dis(data=elf_data, offset=oep_offset, iat_api={}, bin_instance=elf, verbose=verbose)
@@ -748,13 +748,13 @@ def disassemble_raw(raw_data = None, raw_path = None, dot_path = None, print_lis
     return True
 
 
-def disassemble_file(bin_data = None, dir_path=None, bin_path=None, dot_path=None, print_listing=False, readable=False, raw=False, raw_64=False, entrypoint=None, verbose=False, use_existing=False):
+def disassemble_file(bin_data = None, dir_path=None, bin_path=None, dot_path=None, print_listing=False, readable=False, raw=False, raw_64=False, entrypoint=None, verbose=False, use_existing=False, skip_disassembly=False):
     return_path = dot_path
     if dir_path is not None:
         # Binary file comes from directly being recursively traversed, return dir path
         return_path = dir_path
 
-    if use_existing and os.path.exists(dot_path):
+    if skip_disassembly or (use_existing and os.path.exists(dot_path)):
         return return_path
 
     if verbose:
@@ -784,7 +784,7 @@ def disassemble_file(bin_data = None, dir_path=None, bin_path=None, dot_path=Non
 
 
 def disas_worker(arg):
-    return disassemble_file(bin_path=arg[0], dir_path=arg[1], dot_path=arg[2], print_listing=arg[3], readable=arg[4], verbose=arg[5], raw=arg[6], raw_64=arg[7], use_existing=arg[8])
+    return disassemble_file(bin_path=arg[0], dir_path=arg[1], dot_path=arg[2], print_listing=arg[3], readable=arg[4], verbose=arg[5], raw=arg[6], raw_64=arg[7], use_existing=arg[8], skip_disassembly=arg[9])
 
 
 def timeout_worker(*arg):
@@ -803,7 +803,7 @@ def timeout_worker(*arg):
     return out
 
 
-def disassemble_files(path_dir_list, dot_path_suffix, dot_dir=None, multiprocess=True, n_processes=4, print_listing=False, readable=False, raw=False, raw_64=False, verbose=False, use_existing=False, timeout=0):
+def disassemble_files(path_dir_list, dot_path_suffix, dot_dir=None, multiprocess=True, n_processes=4, print_listing=False, readable=False, raw=False, raw_64=False, verbose=False, use_existing=False, timeout=0, skip_disassembly=False):
     dot_path_list = []
     arg_list = []
 
@@ -823,7 +823,7 @@ def disassemble_files(path_dir_list, dot_path_suffix, dot_dir=None, multiprocess
                     dot_path = path + dot_path_suffix
                 else:
                     dot_path = os.path.join(dot_dir, os.path.basename(path) + dot_path_suffix)
-                arg_list.append((path, dir_arg_path, dot_path, print_listing, readable, verbose, raw, raw_64, use_existing, timeout_sec))
+                arg_list.append((path, dir_arg_path, dot_path, print_listing, readable, verbose, raw, raw_64, use_existing, skip_disassembly, timeout_sec))
 
             original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
 
@@ -846,9 +846,10 @@ def disassemble_files(path_dir_list, dot_path_suffix, dot_dir=None, multiprocess
             if ret is not None:
                 dot_path_list = [p for p in ret if p is not None]
         else:
-            for path, dir in path_list:
-                r = disassemble_file(bin_path=path, dot_path=path+dot_path_suffix, print_listing=print_listing,
-                                     readable=readable, raw=raw, raw_64=raw_64, verbose=verbose, use_existing=use_existing)
+            for path, dir_path in path_dir_list:
+                r = disassemble_file(bin_path=path, dir_path=dir_path, dot_path=path+dot_path_suffix,
+                                     print_listing=print_listing, readable=readable, raw=raw, raw_64=raw_64,
+                                     verbose=verbose, use_existing=use_existing, skip_disassembly=skip_disassembly)
                 if r is not None:
                     dot_path_list.append(r)
     return dot_path_list

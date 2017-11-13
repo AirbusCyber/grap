@@ -219,7 +219,11 @@ int main(int argc, char *argv[]) {
             FILE* fp = fopen(p.c_str(), "rb");
 
             if (fp == nullptr) {
-              std::cerr << "WARNING: Can't open test graph " << p << "." << std::endl;
+              std::cerr << "WARNING: Can't open test graph " << p << std::endl;
+              if (testsInfo.size() >= 1024){
+                // TODO Reorganize (with seccomp) to open files later
+                std::cerr << "HINT: You might need to increase the maximum number of file descriptors per process (ulimit -n)" << std::endl;
+              }
             }
             else{
               testsInfo.push_back(std::pair<std::string, FILE*>(p, fp)); 

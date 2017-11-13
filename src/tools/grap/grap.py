@@ -24,7 +24,8 @@ def main():
     parser.add_argument('-f', '--force', dest='force', action="store_true", default=False, help='Force re-generation of existing .grapcfg file')
     parser.add_argument('--raw', dest='raw_disas', action="store_true", default=False, help='Disassemble raw file')
     parser.add_argument('-r64', '--raw-64', dest='raw_64', action="store_true", default=False, help='Disassemble raw file with x86_64 (not default)')
-    parser.add_argument('-od', '--only-disassemble', dest='only_disassemble', action="store_true", default=False, help='Disassemble files and exit (no matching)')
+    parser.add_argument('-od', '--only-disassembly', dest='only_disassembly', action="store_true", default=False, help='Disassemble files and exit (no matching)')
+    parser.add_argument('-nd', '--no-disassembly', dest='no_disassembly', action="store_true", default=False, help='Skip file disassembly (will only match on .grapcfg files)')
     parser.add_argument('-o', '--cfg-output', dest='dot', help='Specify exported .grapcfg (DOT) file name (when there is only one test file) or directory')
     parser.add_argument('-er', '--readable', dest='readable', action="store_true", default=False, help='Export .grapcfg in displayable format (with xdot)')
     parser.add_argument('-t', '--timeout', dest='timeout', default=120, help='Specify timeout (in seconds) for disassembly, assign 0 for no timeout (default: 120)')
@@ -67,13 +68,16 @@ def main():
             f.close()
         except IOError:
             if os.path.isdir(test_path):
-                print("WARNING: Skipping directory " + test_path)
+                if args.verbose:
+                    print("WARNING: Skipping directory " + test_path)
             elif not os.path.isfile(test_path):
-                print("WARNING: Skipping " + test_path + " (not found).")
+                if args.verbose:
+                    print("WARNING: Skipping " + test_path + " (not found).")
             continue
 
         if data is None:
-            print("WARNING: Can't open test file " + test_path)
+            if args.verbose:
+                print("WARNING: Test file could not be opened or is empty: " + test_path)
             continue
         else:
             if data[0:7].lower() == "digraph":
@@ -90,7 +94,7 @@ def main():
 
                 if os.path.exists(dot_path) and not args.force:
                     if args.verbose:
-                        print("Skipping generation of existing " + dot_path)
+                        print("WARNING: Skipping generation of existing " + dot_path)
                         printed_something = True
                     if dir_arg_path is None:
                         dot_test_files.add(dot_path)
@@ -110,9 +114,11 @@ def main():
             sys.exit(0)
 
         files_to_disassemble = sorted(list(files_to_disassemble), key=lambda tup: tup[0])
-        disassembled_files = pygrap.disassemble_files(files_to_disassemble, ".grapcfg", dot_dir=args.dot, multiprocess=args.multithread,
+        disassembled_files = pygrap.disassemble_files(files_to_disassemble, ".grapcfg", dot_dir=args.dot,
+                                                            multiprocess=args.multithread and not args.no_disassembly,
                                                             n_processes=4, readable=args.readable, verbose=args.verbose,
-                                                            raw=args.raw_disas, raw_64=args.raw_64, timeout=args.timeout)
+                                                            raw=args.raw_disas, raw_64=args.raw_64, timeout=args.timeout,
+                                                            skip_disassembly = args.no_disassembly)
         for path in disassembled_files:
             dot_test_files.add(path)
 
@@ -134,7 +140,7 @@ def main():
             counter += 1
 
     dot_test_files = sorted(list(dot_test_files))
-    if not args.only_disassemble:
+    if not args.only_disassembly:
         if len(pattern_paths) >= 1 and len(dot_test_files) >= 1:
             if printed_something or args.verbose:
                 print("")
