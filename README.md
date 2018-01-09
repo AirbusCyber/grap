@@ -32,6 +32,10 @@ Besides compilers (build-essential), the following dependencies must be installe
 Please note that those were tested for the latest Ubuntu LTS (16.04) and the latest debian stable (9.1.0 - Strech).
 Packages may differ depending on your distribution.
 
+```
+sudo apt-get install cmake bison flex libboost-regex-dev libboost-system-dev libboost-filesystem-dev libseccomp-dev python2.7-dev python-pyelftools python-capstone swig
+```
+
 ## Build and install
 The following commands will build and install the project:
 
