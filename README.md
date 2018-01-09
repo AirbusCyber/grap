@@ -30,9 +30,8 @@ Besides compilers (build-essential), the following dependencies must be installe
 - swig (version 3 or newer is mandatory)
 
 Thus on Ubuntu / Debian, this should work :
-```
 sudo apt-get install build-essential cmake bison flex libboost-regex-dev libboost-system-dev libboost-filesystem-dev libseccomp-dev python2.7-dev python-pefile python-pyelftools python-capstone swig
-```
+
 
 Please note that those were tested for the latest Ubuntu LTS (16.04) and the latest debian stable (9.1.0 - Strech).
 Packages may differ depending on your distribution.
