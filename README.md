@@ -44,7 +44,7 @@ The following commands will build and install the project:
 - `cmake ../src/; make` will build with cmake and make
 - `sudo make install` will install grap into /usr/local/bin/
 
-## Options
+## Compilation options
 Compilation options are chosen with cmake (`cmake -DNOSECCOMP=1 ../src` for instance):
 
 - TOOLS: build tools (grap-match, todot and test binaries), default
