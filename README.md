@@ -72,7 +72,7 @@ One can let grap infer a pattern from a string. Only few options are supported b
 - `grap "opcode is xor and arg1 contains '['" (test.exe)`: look for a xor with a memory write
 - `grap -v "sub->xor->sub" (test.exe)`: -v will output the path of the inferred pattern
 
-Choose how the binaries are disassembled
+Choose how the binaries are disassembled:
 
 - `grap -od (pattern.grapp) samples/*`: disassemble files in folder samples/ with no attempt at matching
 - `grap -f (pattern.grapp) (test.exe)`: force re-disassembling the binary, then matches it against pattern.grapp
@@ -88,8 +88,6 @@ Choose where the disassembled file(s) (.grapcfg) are written; match multiple fil
 - `grap patterns/basic_block_loop.grapp -o ls.grapcfg /bin/ls`: disassemble ls into ls.grapp and looks for basic block loops
 - `grap (pattern1.grapp) -p (pattern2.grapp) (test.exe)`: match against multiple pattern files
 - `grap -r -q patterns/ /bin/ -o /tmp/` : disassemble all files from /bin/ into /tmp/ and matches them against all .grapp patterns from patterns/ (recursive option -r applies to /bin/, not to patterns/)
-
-Note that pattern files can contain multiple pattern graphs.
 
 # Pattern examples
 The following pattern detects a decryption loop consisting of a xor followed by sub found in a Backspace sample:
