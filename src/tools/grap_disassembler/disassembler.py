@@ -525,8 +525,14 @@ class ELFDisassembler(GenericDisassembler):
         .text:0000000000XXX8A6                 mov     rcx, offset init ; init
         .text:0000000000XXX8AD                 mov     rdi, offset main ; main
         .text:0000000000XXX8B4                 call    ___libc_start_main
-        '''
 
+        Note that the 'mov' can also be 'lea':
+            lea rdi, [rip + 0x3baa]
+            lea rdi, [rip + 0x3b33]
+            lea rdi, [rip - 0x1106]
+            call    cs:__libc_start_main_ptr
+        '''
+        
         for offset, inst in sorted(insts.iteritems()):
             # mov     r8, offset fini ; fini
             i1 = inst
@@ -547,14 +553,39 @@ class ELFDisassembler(GenericDisassembler):
             if len(i3.ito) != 1:
                 continue
             i4 = insts[i3.ito[0]]
+        
 
-            if i1.mnemonic != "mov" or i2.mnemonic != "mov" or i3.mnemonic != "mov" or i4.mnemonic != "call":
+            all_mov = i1.mnemonic == "mov" and i2.mnemonic == "mov" and i3.mnemonic == "mov"
+            all_lea = i1.mnemonic == "lea" and i2.mnemonic == "lea" and i3.mnemonic == "lea"
+            if (all_mov or all_lea) and i4.mnemonic == "call":
+                pass
+            else:
                 continue
 
             try:
-                rva_fini = int(i1.op_str.split(", 0x")[1], 16)
-                rva_init = int(i2.op_str.split(", 0x")[1], 16)
-                rva_main = int(i3.op_str.split(", 0x")[1], 16)
+                if all_mov:
+                    rva_fini = int(i1.op_str.split(", 0x")[1], 16)
+                    rva_init = int(i2.op_str.split(", 0x")[1], 16)
+                    rva_main = int(i3.op_str.split(", 0x")[1], 16)
+                else:
+                    # Then all_lea
+                    if "+" in i1.op_str:
+                        rva_fini = i2.address + int(i1.op_str.split("+ 0x")[1][:-1], 16)
+                    else:
+                        # "-" in i1.op_str:
+                        rva_fini = i2.address - int(i1.op_str.split("- 0x")[1][:-1], 16)
+
+                    if "+" in i2.op_str:
+                        rva_init = i3.address + int(i2.op_str.split("+ 0x")[1][:-1], 16)
+                    else:
+                        # "-" in i2.op_str:
+                        rva_init = i3.address - int(i2.op_str.split("- 0x")[1][:-1], 16)
+
+                    if "+" in i3.op_str:
+                        rva_main = i4.address + int(i3.op_str.split("+ 0x")[1][:-1], 16)
+                    else:
+                        # "-" in i3.op_str:
+                        rva_main = i4.address - int(i3.op_str.split("- 0x")[1][:-1], 16)
 
                 insts = self._dis(data=data, offset=self.get_offset_from_rva(bin_instance, rva_fini), bin_instance=bin_instance, insts=insts, verbose=verbose)
                 insts = self._dis(data=data, offset=self.get_offset_from_rva(bin_instance, rva_init), bin_instance=bin_instance, insts=insts, verbose=verbose)
