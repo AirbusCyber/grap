@@ -78,12 +78,14 @@ class GenericDisassembler:
         self.capstone = Cs(self.arch, self.mode)
 
         self.prologues = {
+            # Triple backslash (\\\) are needed to escape bytes in the compiled regex
             CS_MODE_32: [
-                "\x55\x89\xE5",  # push ebp & mov ebp, esp
-                "\x55\x8B\xEC",  # push ebp & mov ebp, esp
+                "\\\x55\\\x89\\\xE5",  # push ebp & mov ebp, esp
+                "\\\x55\\\x8B\\\xEC",  # push ebp & mov ebp, esp
+                "\\\x55\\\x8b\\\x6c\\\x24",  # push ebp & mov ebp, [esp+?]
             ],
             CS_MODE_64: [
-                "\x55\x48\x89\xE5",  # push rbp & mov rbp, rsp
+                "\\\x55\\\x48\\\x89\\\xE5",  # push rbp & mov rbp, rsp
             ]
         }[mode]
 
