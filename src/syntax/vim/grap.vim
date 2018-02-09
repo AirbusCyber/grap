@@ -37,8 +37,7 @@ syn region   condArg transparent matchgroup=dotType start="cond\(ition\)\= *= *\
 syn region   condArgArg start="'" end="'"
 
 " Comments
-syn region   dotComment start="//" end="$" contains=dotComment,dotTodo
-syn region   dotComment start="/\*" end="\*/" contains=dotComment,dotTodo
+syn region   dotComment start="^//" end="$" contains=dotComment,dotTodo
 syn keyword  dotTodo contained TODO FIXME XXX
 
 " Strings
