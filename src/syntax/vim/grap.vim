@@ -76,13 +76,15 @@ syn keyword  dotType childnumber child_number
 
 syn keyword  condKeywords instruction inst opcode address addr contained
 syn keyword  condKeywords nargs arg1 arg2 arg3 nfathers nchildren contained
-syn keyword  condStringOperators is beginswith regex bacblockend contained
+syn keyword  condStringOperators is beginswith regex contained
 syn keyword  condProperty basicblockend contained
 syn match  condStringOperators "contains" contained
 syn match  condNumberOperators ">" contained
 syn match  condNumberOperators ">=" contained
 syn match  condNumberOperators "<" contained
 syn match  condNumberOperators "<=" contained
+syn match  condNumberOperators "==" contained
+syn match  condNumberOperators "!=" contained
 syn keyword  condBoolOperators true not and or contained
 
 " Shared attributes (graphs, nodes, edges)
