@@ -9,6 +9,7 @@ import idc
 import idaapi
 from idagrap.config.General import config
 from idagrap.patterns.Modules import MODULES
+import idagrap.ui.helpers.QtGrapSyntax as syntax
 import os
 
 QMainWindow = QtShim.get_QMainWindow()
@@ -82,6 +83,7 @@ class PatternGenerationWidget(QMainWindow):
         self.text_widget = self.cc.QTextEdit()
         self.text_widget.setReadOnly(False)
         self.text_widget.setFontFamily("Monospace")
+        self.highlight = syntax.PythonHighlighter(self.text_widget.document())
 
     def _createOptionsWidgets(self):
         self.options_widgets = []
