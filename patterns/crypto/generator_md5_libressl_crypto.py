@@ -1,6 +1,6 @@
 #!/bin/python3
 
-def generate_node(instructions, name, previous=None, repeat=False, lazyrepeat=False, minrepeat=None, maxrepeat=None):
+def generate_node(instructions, name, previous=None, repeat=False, lazyrepeat=False, minrepeat=None, maxrepeat=None, getid=None):
     condition = ''
     
     if len(instructions) == 1:
@@ -26,6 +26,9 @@ def generate_node(instructions, name, previous=None, repeat=False, lazyrepeat=Fa
         
     if lazyrepeat is True:
         node_d += ' lazyrepeat=true'
+
+    if getid is not None:
+        node_d += ' getid="{}"'.format(getid)
             
     node_d += ']'
     
@@ -41,13 +44,14 @@ def concat_nodes(nodes, node):
 
 def generate_md5_round0_and_1(compact=False):
     nodes = ('', '')
+    getid = 'md5_heuristic' if compact else 'LibreSSL_md5_full'
     
     previous = None
     
     for i in range(32 if not compact else 16):
         round_label = 'Round{}_{}_'.format(0 if i < 16 else 1,  i % 16)
         
-        nodes = concat_nodes(nodes,  generate_node(['xor'], round_label + '0', previous))
+        nodes = concat_nodes(nodes,  generate_node(['xor'], round_label + '0', previous, getid=(getid if i == 0 else None)))
         nodes = concat_nodes(nodes,  generate_node(['mov', 'lea'], round_label + '0a', round_label + '0', '*', True))
         nodes = concat_nodes(nodes,  generate_node(['and'], round_label + '1', round_label + '0a'))
         nodes = concat_nodes(nodes,  generate_node(['mov', 'lea'], round_label + '1a', round_label + '1', '*', True))

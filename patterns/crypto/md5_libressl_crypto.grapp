@@ -1,5 +1,5 @@
 digraph md5_crypto_full{
-Round0_0_0 [cond="opcode is 'xor'"]
+Round0_0_0 [cond="opcode is 'xor'" getid="LibreSSL_md5_full"]
 Round0_0_0a [cond="(opcode is 'mov') or (opcode is 'lea')" repeat=* lazyrepeat=true]
 Round0_0_1 [cond="opcode is 'and'"]
 Round0_0_1a [cond="(opcode is 'mov') or (opcode is 'lea')" repeat=* lazyrepeat=true]
@@ -1091,7 +1091,7 @@ Round3_15_r -> Round3_15_g
 
 
 digraph md5_crypto_heuristic{
-Round0_0_0 [cond="opcode is 'xor'"]
+Round0_0_0 [cond="opcode is 'xor'" getid="md5_heuristic"]
 Round0_0_0a [cond="(opcode is 'mov') or (opcode is 'lea')" repeat=* lazyrepeat=true]
 Round0_0_1 [cond="opcode is 'and'"]
 Round0_0_1a [cond="(opcode is 'mov') or (opcode is 'lea')" repeat=* lazyrepeat=true]
