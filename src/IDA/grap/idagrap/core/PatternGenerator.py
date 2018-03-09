@@ -137,11 +137,6 @@ class PatternGenerator:
             print "WARNING: Missing the root node. Make sure to first \"Load the CFG\", then define the root node and target nodes (right click in IDA View) before you \"Generate a pattern\"."
             return
 
-        if len(self.targetNodes) == 0:
-            if not auto:
-                print "WARNING: Missing target node(s). Make sure to first \"Load the CFG\", then define the root node and target nodes (right click in IDA View) before you \"Generate a pattern\"."
-            return
-
         queue = deque()
         targetNodes = set([i.node_id for i in self.targetNodes])
         foundNodes = set()
