@@ -44,6 +44,9 @@ class PatternGenerationWidget(QMainWindow):
         """
         # Toolbar
         self._createToolbar()
+        
+        # Quick pattern text
+        self._createQuickPatternTextWidget()
 
         # Text pattern
         self._createTextWidget()
@@ -57,6 +60,11 @@ class PatternGenerationWidget(QMainWindow):
         for options_widget in self.options_widgets:
             generation_layout.addWidget(options_widget)
 
+        hbox = self.cc.QHBoxLayout()
+        hbox.addWidget(self.text_qp_widget)
+        hbox.addWidget(self.toolbar_qp)
+        generation_layout.addLayout(hbox)
+        
         generation_layout.addWidget(self.text_widget)
 
         self.central_widget.setLayout(generation_layout)
@@ -78,6 +86,15 @@ class PatternGenerationWidget(QMainWindow):
         
         self._createSaveAction()
         self.toolbar.addAction(self.saveAction)
+        
+    def _createQuickPatternTextWidget(self):
+        self.text_qp_widget = self.cc.QLineEdit()
+        self.text_qp_widget.setReadOnly(False)
+        
+        self.toolbar_qp = self.addToolBar('Pattern Generation Toolbar')
+        self._createGenerateQuickPatternAction()
+        self.toolbar_qp.addAction(self.generateQuickPatternAction)
+        self.text_qp_widget.returnPressed.connect(self._onGenerateQuickPatternButtonClicked)
 
     def _createTextWidget(self):
         self.text_widget = self.cc.QTextEdit()
@@ -88,26 +105,26 @@ class PatternGenerationWidget(QMainWindow):
     def _createOptionsWidgets(self):
         self.options_widgets = []
 
-        real_time_check = self.cc.QCheckBox("Automatically update the pattern")
-        real_time_check.setChecked(True)
-        real_time_check.stateChanged.connect(self._real_time_check_option_trigger)
-        self.options_widgets.append(real_time_check)
+        self.real_time_check = self.cc.QCheckBox("Automatically update the pattern")
+        self.real_time_check.setChecked(True)
+        self.real_time_check.stateChanged.connect(self._real_time_check_option_trigger)
+        self.options_widgets.append(self.real_time_check)
         
-        generic_arguments_check = self.cc.QCheckBox("Generic arguments")
-        generic_arguments_check.stateChanged.connect(self._generic_arguments_option_trigger)
-        self.options_widgets.append(generic_arguments_check)
+        self.generic_arguments_check = self.cc.QCheckBox("Generic arguments")
+        self.generic_arguments_check.stateChanged.connect(self._generic_arguments_option_trigger)
+        self.options_widgets.append(self.generic_arguments_check)
 
-        lighten_memory_ops_check = self.cc.QCheckBox("Lighten memory handling operations")
-        lighten_memory_ops_check.stateChanged.connect(self._lighten_memory_ops_option_trigger)
-        self.options_widgets.append(lighten_memory_ops_check)
+        self.lighten_memory_ops_check = self.cc.QCheckBox("Lighten memory handling operations")
+        self.lighten_memory_ops_check.stateChanged.connect(self._lighten_memory_ops_option_trigger)
+        self.options_widgets.append(self.lighten_memory_ops_check)
 
-        std_jmp_check = self.cc.QCheckBox("Standardize jump operations")
-        std_jmp_check.stateChanged.connect(self._std_jmp_check_option_trigger)
-        self.options_widgets.append(std_jmp_check)
+        self.std_jmp_check = self.cc.QCheckBox("Standardize jump operations")
+        self.std_jmp_check.stateChanged.connect(self._std_jmp_check_option_trigger)
+        self.options_widgets.append(self.std_jmp_check)
 
-        factorize_check = self.cc.QCheckBox("Factorize")
-        factorize_check.stateChanged.connect(self._factorize_check_option_trigger)
-        self.options_widgets.append(factorize_check)
+        self.factorize_check = self.cc.QCheckBox("Factorize")
+        self.factorize_check.stateChanged.connect(self._factorize_check_option_trigger)
+        self.options_widgets.append(self.factorize_check)
 
     def _generic_arguments_option_trigger(self, state):
         self.cc.PatternGenerator.generic_arguments_option = (state == 2)
@@ -154,6 +171,16 @@ class PatternGenerationWidget(QMainWindow):
         self.generateAction.setEnabled(False)
 
         self.generateAction.triggered.connect(self._onGenerateButtonClicked)
+        
+    def _createGenerateQuickPatternAction(self):
+        # Action
+        self.generateQuickPatternAction = self.cc.QAction(
+            self.cc.QIcon(config['icons_path'] + "icons8-workflow.png"),
+            "Generate a pattern from this short pattern field (for instance: xor->add->xor)",
+            self
+        )
+
+        self.generateQuickPatternAction.triggered.connect(self._onGenerateQuickPatternButtonClicked)
 
     def _createResetAction(self):
         # Action
@@ -206,6 +233,7 @@ class PatternGenerationWidget(QMainWindow):
 
         if self.real_time_option:
             self.text_widget.setText(self.cc.PatternGenerator.generate(auto=True))
+            self._enable_options()
 
     def _onAddTargetNode(self):
         try:
@@ -215,6 +243,7 @@ class PatternGenerationWidget(QMainWindow):
 
         if self.real_time_option:
             self.text_widget.setText(self.cc.PatternGenerator.generate(auto=True))
+            self._enable_options()
 
     def _onRemoveTargetNode(self):
         try:
@@ -224,6 +253,7 @@ class PatternGenerationWidget(QMainWindow):
 
         if self.real_time_option:
             self.text_widget.setText(self.cc.PatternGenerator.generate(auto=True))
+            self._enable_options()
 
     def _onLoadGraphButtonClickedThread(self):
         self._onLoadGraphButtonClicked()
@@ -240,14 +270,21 @@ class PatternGenerationWidget(QMainWindow):
         # UI information
         print "[I] CFG loaded. You can now define your pattern's root node and target nodes (right click on an instruction in IDA View)."
 
+    def _onGenerateQuickPatternButtonClicked(self):
+        print "[I] Generation of quick pattern"
+        self.text_widget.setText(self.cc.PatternGenerator.generate_quick_pattern(self.text_qp_widget.text()))
+        self._disable_options()
+        
     def _onGenerateButtonClicked(self):
         print "[I] Generation of pattern"
         self.text_widget.setText(self.cc.PatternGenerator.generate())
+        self._enable_options()
 
     def _onResetButtonClicked(self):
         print "[I] Reset pattern"
         self.cc.PatternGenerator.resetPattern()
         self.text_widget.clear()
+        self._enable_options()
         
     def _onSaveButtonClicked(self):
         pattern_text = self.text_widget.toPlainText()
@@ -274,6 +311,18 @@ class PatternGenerationWidget(QMainWindow):
                 f.close()
             except Exception as e:
                 print "WARNING:", e
+                
+    def _disable_options(self):    
+        self.generic_arguments_check.setEnabled(False)
+        self.lighten_memory_ops_check.setEnabled(False)
+        self.std_jmp_check.setEnabled(False)
+        self.factorize_check.setEnabled(False)
+
+    def _enable_options(self):    
+        self.generic_arguments_check.setEnabled(True)
+        self.lighten_memory_ops_check.setEnabled(True)
+        self.std_jmp_check.setEnabled(True)
+        self.factorize_check.setEnabled(True)
 
 
 class PatternGenerationHandler(idaapi.action_handler_t):

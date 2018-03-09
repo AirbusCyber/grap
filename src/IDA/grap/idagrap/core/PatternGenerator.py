@@ -15,7 +15,8 @@ except:
     from idc import CIC_ITEM, GetColor, SetColor, DEFCOLOR
 from pygrap import (NodeInfo, node_t, node_list_find)
 from idagrap.patterns.test.misc.ModulesTestMisc import get_test_misc
-
+import pygrap
+import StringIO
 
 class PatternGenerator:
     """Cryptographic identifier.
@@ -131,7 +132,12 @@ class PatternGenerator:
         self.targetNodes = [node for node in self.targetNodes if node.node_id != targetNodeAddress]
 
         self.resetColored()
-
+    
+    def generate_quick_pattern(self, qp_str):
+        sio = StringIO.StringIO()
+        pygrap.convert_export_str_to_dot(qp_str, sio, "quick_pattern")
+        return sio.getvalue()
+        
     def generate(self, auto=False):
         if self.rootNode is None:
             print "WARNING: Missing the root node. Make sure to first \"Load the CFG\", then define the root node and target nodes (right click in IDA View) before you \"Generate a pattern\"."
