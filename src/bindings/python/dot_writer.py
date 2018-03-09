@@ -25,7 +25,7 @@ class Node:
             matches = compiled_re.findall(cond_str)
             if len(matches) >= 1:
                 return cond_str
-        elif cond_str.lower() == "true" or cond_str == "*":
+        elif cond_str.lower() == "true" or cond_str == "*" or cond_str == "":
             return "true"
 
 #       Will match regex with cond_str
@@ -143,7 +143,7 @@ def get_dot_path_from_string(str_in, pattern_name="tmp"):
 def main():
     if len(sys.argv) >= 2:
         str_in = sys.argv[1]
-        get_dot_path_from_string(str_in)
+        return get_dot_path_from_string(str_in)
 
 if __name__ == "__main__":
-    main()
+    print main()
