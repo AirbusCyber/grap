@@ -27,13 +27,16 @@ class PatternGenerator:
     _analyzed_patterns: (PatternsAnalysis list): Hold the analyzed patterns.
     """
 
-    def __init__(self):
+    def __init__(self, graph):
         """Initialization"""
 
-        self.graph = CFG()
+        self.graph = graph
         self.rootNode = None
         self.targetNodes = []
-
+        
+        # Associates address/node_id to match_type (match_default, match_full, match_opcode_arg1, match_opcode_arg2, match_opcode, match_wildcard)
+        self.targetNodeType = dict() 
+        
         self.coloredNodes = set()
         self.defaultColor = DEFCOLOR
         self.rootColor = 0xeebafd#0xcc2efa
@@ -51,25 +54,27 @@ class PatternGenerator:
         Analyzing the graph for patterns.
         """
         self._analyzing()
-
-    def _analyzing(self):
-
-        cfg = self.graph
-
-        #
-        # Clear
-        #
-        # Clear the graph
-        if cfg.graph:
-            cfg.clear_graph()
-
-        #
-        # Control flow graph extraction
-        #
-        print "[I] Creation of the Control Flow Graph (can take few seconds)"
-        # Get the CFG of the binary
-        cfg.extract()
-
+        
+    def preview_match(self, address, base_text, type):
+        appended_text = ""
+        
+        node = node_list_find(self.graph.graph.nodes, address)
+        if node:
+            if type in ["match_full", "match_opcode", "match_opcode_arg1", "match_opcode_arg2"]:
+                appended_text = ": " + node.info.opcode
+                added_arg1 = False
+                if type in ["match_full", "match_opcode_arg1"] and node.info.nargs >= 1:
+                    appended_text += " " + node.info.arg1
+                    added_arg1 = True
+                if type in ["match_full", "match_opcode_arg2"] and node.info.nargs >= 2:
+                    if not added_arg1:
+                        appended_text += " *"
+                    appended_text += ", " + node.info.arg2
+                elif type in ["match_opcode_arg1"] and node.info.nargs >= 2:
+                    appended_text += ", *"
+        
+        return base_text + appended_text
+    
     def resetPattern(self):
         self.rootNode = None
         self.targetNodes = []
@@ -128,9 +133,17 @@ class PatternGenerator:
 
         print "Added target node {}".format(hex(targetNode.node_id))
 
+    def setMatchType(self, targetNodeAddress, type):
+        self.targetNodeType[targetNodeAddress] = type
+        
+    def typeIsDefault(self, node_id):
+        if node_id not in self.targetNodeType:
+            return True
+        else:
+            return self.targetNodeType[node_id] == "match_default"
+        
     def removeTargetNode(self, targetNodeAddress):
         self.targetNodes = [node for node in self.targetNodes if node.node_id != targetNodeAddress]
-
         self.resetColored()
     
     def generate_quick_pattern(self, qp_str):
@@ -209,15 +222,26 @@ class PatternGenerator:
                 patternNodes[patternEdge[0]].child2 = patternEdge[1]
 
         # Transformations
+        for patternNodeId, patternNode in patternNodes.items():
+            if self.typeIsDefault(patternNodeId):
+                if self.generic_arguments_option:
+                    patternNode.arg1 = None
+                    patternNode.arg2 = None
+                    patternNode.arg3 = None
 
-        for _, patternNode in patternNodes.items():
-            if self.generic_arguments_option:
-                patternNode.arg1 = None
-                patternNode.arg2 = None
-                patternNode.arg3 = None
-
-            if self.lighten_memory_ops_option:
-                if patternNode.opcode in ["lea", "push", "pop"] or patternNode.opcode.startswith("mov"):
+                if self.lighten_memory_ops_option:
+                    if patternNode.opcode in ["lea", "push", "pop"] or patternNode.opcode.startswith("mov"):
+                        patternNode.opcode = None
+            else:
+                type = self.targetNodeType[patternNodeId]
+                
+                if type in ["match_wildcard", "match_opcode", "match_opcode_arg2"]:
+                    patternNode.arg1 = None
+                    patternNode.arg3 = None
+                if type in ["match_wildcard", "match_opcode", "match_opcode_arg1"]:
+                    patternNode.arg2 = None
+                    patternNode.arg3 = None
+                if type in ["match_wildcard"]:
                     patternNode.opcode = None
 
         if self.factorize_option:
@@ -246,19 +270,24 @@ class PatternGenerator:
 
         patternStr = "digraph G {\n"
 
-        for patternNodeId, patternNode in reversed(patternNodes.items()):
-            patternStr += "    {} [cond={}".format(hex(patternNodeId), self._getConditionString(patternNode))
+        for patternNodeId, patternNode in sorted(patternNodes.items()):
+            patternStr += "    {} [cond={}".format(hex(patternNodeId), self._getConditionString(patternNode, patternNodeId))
             if patternNode.repeat is not None:
                 patternStr += ', repeat=' + str(patternNode.repeat) + ', lazyrepeat=true'
             patternStr += "]\n"
-
-        patternStr += "\n"
-
+        
+        first_child = True
         for patternNodeId, patternNode in reversed(patternNodes.items()):
             if patternNode.child1 is not None:
+                if first_child:
+                    patternStr += "\n"
+                    first_child = False
                 patternStr += "    {} -> {} [childnumber={}]\n".format(hex(patternNode.node_id),
                                                                        hex(patternNode.child1), 1)
             if patternNode.child2 is not None:
+                if first_child:
+                    patternStr += "\n"
+                    first_child = False
                 patternStr += "    {} -> {} [childnumber={}]\n".format(hex(patternNode.node_id),
                                                                        hex(patternNode.child2), 2)
 
@@ -266,30 +295,40 @@ class PatternGenerator:
 
         return patternStr
 
-    def _getConditionString(self, node):
-        if self.std_jmp_option:
-            if node.children_nb > 1:
-                return "\"nchildren == " + str(node.children_nb) + "\""
+    def _getConditionString(self, node, node_id):
+        if node_id not in self.targetNodeType:
+            type = "match_default"
+        else:
+            type = self.targetNodeType[node_id]
+        
+        if type == "match_default":
+            if self.std_jmp_option:
+                if node.children_nb > 1:
+                    return "\"nchildren == " + str(node.children_nb) + "\""
 
-        if node.opcode is None:
+            if node.opcode is None:
+                return "true"
+        elif type == "match_wildcard":
             return "true"
-
+        
+        # Case: match_default with no quick option, match_opcode, match_opcode_arg1, match_opcode_arg2, match_full or any other value
         s = "opcode is '"
         s += node.opcode
         s += "'"
 
-        for argNb in range(1, 4):
-            arg = None
+        if type != "match_opcode":
+            for argNb in range(1, 4):
+                arg = None
 
-            if argNb == 1:
-                arg = node.arg1
-            elif argNb == 2:
-                arg = node.arg2
-            elif argNb == 3:
-                arg = node.arg3
+                if argNb == 1 and type in ["match_default", "match_opcode_arg1", "match_full"]:
+                    arg = node.arg1
+                elif argNb == 2 and type in ["match_default", "match_opcode_arg2", "match_full"]:
+                    arg = node.arg2
+                elif argNb == 3 and type in ["match_default", "match_full"]:
+                    arg = node.arg3
 
-            if arg is not None:
-                s += " and arg" + str(argNb) + " is '" + str(arg) + "'"
+                if arg is not None:
+                    s += " and arg" + str(argNb) + " is '" + str(arg) + "'"
 
         return "\"" + s + "\""
 

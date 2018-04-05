@@ -22,7 +22,7 @@ class PatternGenerationWidget(QMainWindow):
         self.cc = parent.cc
         self.cc.QMainWindow.__init__(self)
         print "[|] loading PatternGenerationWidget"
-
+        
         # Enable access to shared IDAscope modules
         self.parent = parent
         self.name = "Pattern Generation"
@@ -35,8 +35,9 @@ class PatternGenerationWidget(QMainWindow):
         self._createGui()
 
         self.actionsDefined = False
-
         self.real_time_option = True
+        
+        
 
     def _createGui(self):
         """
@@ -68,12 +69,19 @@ class PatternGenerationWidget(QMainWindow):
         generation_layout.addWidget(self.text_widget)
 
         self.central_widget.setLayout(generation_layout)
-
+        
+    def showEvent(self, QShowEvent):
+        # Update the UI if the graph is defined
+        if not self.actionsDefined and self.cc.PatternGenerator.graph.graph:
+            self._createContextActions()
+            self._updateContextMenus()
+    
     def _createToolbar(self):
         """
         Creates the toolbar, containing buttons to control the widget.
         """
         self.toolbar = self.addToolBar('Pattern Generation Toolbar')
+        self.toolbar.setMovable(False)
 
         self._createLoadGraphAction()
         self.toolbar.addAction(self.loadGraphAction)
@@ -146,6 +154,7 @@ class PatternGenerationWidget(QMainWindow):
         self.real_time_option = (state == 2)
         if self.real_time_option:
             self.text_widget.setText(self.cc.PatternGenerator.generate())
+            self._enable_options()
         self.generateAction.setEnabled(not self.real_time_option)
 
     def _createLoadGraphAction(self):
@@ -155,7 +164,7 @@ class PatternGenerationWidget(QMainWindow):
         # Action
         self.loadGraphAction = self.cc.QAction(
             self.cc.QIcon(config['icons_path'] + "icons8-fingerprint-scan.png"),
-            "Load the Control Flow Graph (might take some time)",
+            "Load the Control Flow Graph from IDA (might take some time)",
             self
         )
 
@@ -202,19 +211,36 @@ class PatternGenerationWidget(QMainWindow):
 
         self.saveAction.triggered.connect(self._onSaveButtonClicked)
 
-    def _createContextActions(self):
+    def _createContextActions(self): 
         actions = [
-            ("grap:pg:set_root", self.cc.QIcon(), "[grap] Set root node", self._onSetRootNode),
-            ("grap:pg:add_target", self.cc.QIcon(), "[grap] Add target node", self._onAddTargetNode),
-            ("grap:pg:remove_target", self.cc.QIcon(), "[grap] Remove target node", self._onRemoveTargetNode)
+            ("grap:pg:set_root", None, "[grap] Set root node", self._onSetRootNode),
+            ("grap:pg:add_target", None, "[grap] Add target node", self._onAddTargetNode),
+            ("grap:pg:match_default", config['icons_path'] + "icons8-asterisk-24.png", "[grap] Default match (apply options)", self._onSetMatchDefault),
+            ("grap:pg:match_full", None, "[grap] Full match", self._onSetMatchFull),
+            ("grap:pg:match_opcode_arg1", None, "[grap] Opcode+arg1", self._onSetMatchOpcodeArg1),
+            ("grap:pg:match_opcode_arg2", None, "[grap] Opcode+arg2", self._onSetMatchOpcodeArg2),
+            ("grap:pg:match_opcode", None, "[grap] Opcode", self._onSetMatchOpcode),
+            ("grap:pg:match_wildcard", None, "[grap] Wildcard: *", self._onSetMatchWildcard),
+            ("grap:pg:remove_target", config['icons_path'] + "icons8-delete.png", "[grap] Remove target node", self._onRemoveTargetNode)
         ]
 
-        for actionId, icon, text, method in (a for a in actions):
-            # Describe the action
-            action_desc = idaapi.action_desc_t(
-                actionId,  # The action name. This acts like an ID and must be unique
-                text,  # The action text.
-                PatternGenerationHandler(method))  # The action handler.
+        for actionId, icon_path, text, method in (a for a in actions):
+            if icon_path is not None and icon_path != "":
+                icon_number = idaapi.load_custom_icon(icon_path)
+                # Describe the action
+                action_desc = idaapi.action_desc_t(
+                    actionId,  # The action name. This acts like an ID and must be unique
+                    text,  # The action text.
+                    PatternGenerationHandler(method), # The action handler.
+                    None,
+                    None,
+                    icon_number)  
+            else:
+                # Describe the action
+                action_desc = idaapi.action_desc_t(
+                    actionId,  # The action name. This acts like an ID and must be unique
+                    text,  # The action text.
+                    PatternGenerationHandler(method)) # The action handler.  
 
             # Register the action
             idaapi.register_action(action_desc)
@@ -224,6 +250,11 @@ class PatternGenerationWidget(QMainWindow):
     def _updateContextMenus(self):
         self.hooks = PatternGenerationHooks(self.cc)
         self.hooks.hook()
+        
+    def _render_if_real_time(self):
+        if self.real_time_option:
+            self.text_widget.setText(self.cc.PatternGenerator.generate(auto=True))
+            self._enable_options()
 
     def _onSetRootNode(self):
         try:
@@ -231,9 +262,7 @@ class PatternGenerationWidget(QMainWindow):
         except:
             self.cc.PatternGenerator.setRootNode(idc.ScreenEA())
 
-        if self.real_time_option:
-            self.text_widget.setText(self.cc.PatternGenerator.generate(auto=True))
-            self._enable_options()
+        self._render_if_real_time()
 
     def _onAddTargetNode(self):
         try:
@@ -241,26 +270,57 @@ class PatternGenerationWidget(QMainWindow):
         except:
             self.cc.PatternGenerator.addTargetNode(idc.ScreenEA())
 
-        if self.real_time_option:
-            self.text_widget.setText(self.cc.PatternGenerator.generate(auto=True))
-            self._enable_options()
+        self._render_if_real_time()
+    
+    def setMatchType(self, type):
+        try:
+            selection, begin, end = idaapi.read_selection()
+            if selection:
+                for ea in range(begin, end+1):
+                    self.cc.PatternGenerator.setMatchType(ea, type)
+            else:
+                self.cc.PatternGenerator.setMatchType(idc.get_screen_ea(), type)  
+        except:
+            self.cc.PatternGenerator.setMatchType(idc.ScreenEA(), type)
 
+        self._render_if_real_time() 
+    
+    def _onSetMatchDefault(self):
+        self.setMatchType("match_default")
+    
+    def _onSetMatchFull(self):
+        self.setMatchType("match_full")
+        
+    def _onSetMatchOpcodeArg1(self):
+        self.setMatchType("match_opcode_arg1")
+        
+    def _onSetMatchOpcodeArg2(self):
+        self.setMatchType("match_opcode_arg2")
+        
+    def _onSetMatchOpcode(self):
+        self.setMatchType("match_opcode")
+        
+    def _onSetMatchWildcard(self):
+        self.setMatchType("match_wildcard") 
+     
     def _onRemoveTargetNode(self):
         try:
             self.cc.PatternGenerator.removeTargetNode(idc.get_screen_ea())
         except:
             self.cc.PatternGenerator.removeTargetNode(idc.ScreenEA())
 
-        if self.real_time_option:
-            self.text_widget.setText(self.cc.PatternGenerator.generate(auto=True))
-            self._enable_options()
+        self._render_if_real_time()
 
     def _onLoadGraphButtonClickedThread(self):
         self._onLoadGraphButtonClicked()
 
     def _onLoadGraphButtonClicked(self):
+        existing = False
+        if self.cc.PatternGenerator.graph.graph:
+            existing = True
+    
         # Analyzing
-        self.cc.PatternGenerator.analyzing()
+        self.cc.PatternGenerator.graph.force_extract()
 
         # Update the UI
         if not self.actionsDefined:
@@ -268,11 +328,15 @@ class PatternGenerationWidget(QMainWindow):
             self._updateContextMenus()
             
         # UI information
-        print "[I] CFG loaded. You can now define your pattern's root node and target nodes (right click on an instruction in IDA View)."
+        if existing:
+            print "[I] CFG updated. You can now define your pattern's root node and target nodes (right click on an instruction in IDA View)."
+        else:
+            print "[I] CFG loaded. You can now define your pattern's root node and target nodes (right click on an instruction in IDA View)."
 
     def _onGenerateQuickPatternButtonClicked(self):
         print "[I] Generation of quick pattern"
         self.text_widget.setText(self.cc.PatternGenerator.generate_quick_pattern(self.text_qp_widget.text()))
+        self.generateAction.setEnabled(True)
         self._disable_options()
         
     def _onGenerateButtonClicked(self):
@@ -301,9 +365,20 @@ class PatternGenerationWidget(QMainWindow):
             default_path = config["user_patterns_path"]
         else:
             default_path = config["patterns_path"] + os.path.sep + "test"+ os.path.sep + "misc" + os.path.sep + "files"
-        default_filename = default_path + os.path.sep + "generated.grapp"
+        lines = pattern_text.split("\n")
+        
+        default_filename = "generated"
+        if len(lines) >= 1:
+            l = lines[0]
+            s = l.strip().split(" ")
+            if len(s) >= 2:
+                fn = s[1]
+                if len(fn) >= 1:
+                    default_filename = s[1]
             
-        filename, _ = self.cc.QFileDialog.getSaveFileName(self, "Save pattern file (.grapp files in %APPDATA%\IDAgrap\patterns will be parsed as patterns)", default_filename, "Grap pattern (*.grapp)", options=options)
+        default_filepath = default_path + os.path.sep + default_filename + ".grapp"
+            
+        filename, _ = self.cc.QFileDialog.getSaveFileName(self, "Save pattern file (.grapp files in %APPDATA%\IDAgrap\patterns will be parsed as patterns)", default_filepath, "Grap pattern (*.grapp)", options=options)
         if filename:            
             try:
                 f = open(filename, "wb")
@@ -312,13 +387,15 @@ class PatternGenerationWidget(QMainWindow):
             except Exception as e:
                 print "WARNING:", e
                 
-    def _disable_options(self):    
+    def _disable_options(self):
+        self.real_time_check.setEnabled(False)
         self.generic_arguments_check.setEnabled(False)
         self.lighten_memory_ops_check.setEnabled(False)
         self.std_jmp_check.setEnabled(False)
         self.factorize_check.setEnabled(False)
 
     def _enable_options(self):    
+        self.real_time_check.setEnabled(True)
         self.generic_arguments_check.setEnabled(True)
         self.lighten_memory_ops_check.setEnabled(True)
         self.std_jmp_check.setEnabled(True)
@@ -342,6 +419,7 @@ class PatternGenerationHooks(idaapi.UI_Hooks):
     def __init__(self, cc):
         idaapi.UI_Hooks.__init__(self)
         self.cc = cc
+        self.selected_icon_number = idaapi.load_custom_icon(config['icons_path'] + "icons8-asterisk-24.png")
 
     def populating_widget_popup(self, form, popup):
         pass
@@ -362,8 +440,29 @@ class PatternGenerationHooks(idaapi.UI_Hooks):
             except:
                 currentAddress = idc.ScreenEA()
 
-            if currentAddress in [node.node_id for node in self.cc.PatternGenerator.targetNodes]:
+            #if currentAddress in [node.node_id for node in self.cc.PatternGenerator.targetNodes]:
+            if currentAddress in self.cc.PatternGenerator.coloredNodes:
+                idaapi.attach_action_to_popup(form, popup, "grap:pg:match_default", None)
+                idaapi.attach_action_to_popup(form, popup, "grap:pg:match_full", None)
+                idaapi.update_action_label("grap:pg:match_full", self.cc.PatternGenerator.preview_match(currentAddress, "[grap] Full match", "match_full"))
+                idaapi.attach_action_to_popup(form, popup, "grap:pg:match_opcode_arg1", None)
+                idaapi.update_action_label("grap:pg:match_opcode_arg1", self.cc.PatternGenerator.preview_match(currentAddress, "[grap] Opcode+arg1", "match_opcode_arg1"))
+                idaapi.attach_action_to_popup(form, popup, "grap:pg:match_opcode_arg2", None)
+                idaapi.update_action_label("grap:pg:match_opcode_arg2", self.cc.PatternGenerator.preview_match(currentAddress, "[grap] Opcode+arg2", "match_opcode_arg2"))
+                idaapi.attach_action_to_popup(form, popup, "grap:pg:match_opcode", None)
+                idaapi.update_action_label("grap:pg:match_opcode", self.cc.PatternGenerator.preview_match(currentAddress, "[grap] Opcode", "match_opcode"))
+                idaapi.attach_action_to_popup(form, popup, "grap:pg:match_wildcard", None)
                 idaapi.attach_action_to_popup(form, popup, "grap:pg:remove_target", None)
+                
+                for type in ["match_default", "match_full", "match_opcode_arg1", "match_opcode_arg2", "match_opcode", "match_wildcard"]:
+                    idaapi.update_action_icon("grap:pg:"+type, -1)
+                
+                if currentAddress not in self.cc.PatternGenerator.targetNodeType:
+                    type = "match_default"
+                else:
+                    type = self.cc.PatternGenerator.targetNodeType[currentAddress]
+                idaapi.update_action_icon("grap:pg:"+type, self.selected_icon_number)
+                    
             elif self.cc.PatternGenerator.rootNode is None or currentAddress != self.cc.PatternGenerator.rootNode.node_id:
                 idaapi.attach_action_to_popup(form, popup, "grap:pg:set_root", None)
                 idaapi.attach_action_to_popup(form, popup, "grap:pg:add_target", None)

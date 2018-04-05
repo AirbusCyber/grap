@@ -77,11 +77,14 @@ class CryptoIdentificationWidget(QMainWindow):
         Creates the toolbar, containing buttons to control the widget.
         """
         self._createScanGraphAction()
+        self._createMatchGraphAction()
         self._createColoringAction()
 
         self.toolbar = self.addToolBar('Crypto Identification Toolbar')
+        self.toolbar.setMovable(False)
 
         self.toolbar.addAction(self.scanGraphAction)
+        self.toolbar.addAction(self.matchGraphAction)
         self.toolbar.addAction(self.coloringAction)
 
     def _createScanGraphAction(self):
@@ -91,11 +94,24 @@ class CryptoIdentificationWidget(QMainWindow):
         # Action
         self.scanGraphAction = self.cc.QAction(
             self.cc.QIcon(config['icons_path'] + "icons8-fingerprint-scan.png"),
-            "Load the Control Flow Graph and match it against patterns (might take some time)",
+            "Load the Control Flow Graph from IDA (might take some time)",
             self
         )
 
         self.scanGraphAction.triggered.connect(self._onScanGraphBouttonClickedThread)
+        
+    def _createMatchGraphAction(self):
+        """
+        Create an action for the match button of the toolbar and connect it.
+        """
+        # Action
+        self.matchGraphAction = self.cc.QAction(
+            self.cc.QIcon(config['icons_path'] + "icons8-search.png"),
+            "Match the CFG against patterns",
+            self
+        )
+
+        self.matchGraphAction.triggered.connect(self._onMatchGraphBouttonClickedThread)
 
     def _createColoringAction(self):
         """
@@ -159,8 +175,25 @@ class CryptoIdentificationWidget(QMainWindow):
 
     def _onScanGraphBouttonClickedThread(self):
         self._onScanGraphBouttonClicked()
+        
+    def _onMatchGraphBouttonClickedThread(self):
+        self._onMatchGraphBouttonClicked()
 
     def _onScanGraphBouttonClicked(self):
+        """
+        The logic of the scan button from the toolbar.
+        Uses the scanning functions of in CryptoIdentifier and updates the
+        elements displaying the results.
+        """
+        #
+        # Crypto Widget
+        #
+
+        # Analyzing
+        self.cc.CryptoIdentifier.graph.force_extract()
+            
+            
+    def _onMatchGraphBouttonClicked(self):
         """
         The logic of the scan button from the toolbar.
         Uses the scanning functions of in CryptoIdentifier and updates the
@@ -180,6 +213,7 @@ class CryptoIdentificationWidget(QMainWindow):
             self._activateColoringBoutton()
         else:
             self.populateSignatureTree()
+            
 
     def _createSignatureWidget(self):
         """

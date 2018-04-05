@@ -31,6 +31,7 @@
 import QtShim as QtShim
 from idagrap.core.CryptoIdentifier import CryptoColor, CryptoIdentifier
 from idagrap.core.PatternGenerator import PatternGenerator
+from idagrap.graph.Graph import CFG
 
 
 class ClassCollection():
@@ -86,7 +87,8 @@ class ClassCollection():
         self.DescendingOrder = self.QtShim.get_DescendingOrder()
 
         # IDAgrap
-        self.CryptoIdentifier = CryptoIdentifier()
+        graph = CFG()
+        self.CryptoIdentifier = CryptoIdentifier(graph)
         self.CryptoColor = CryptoColor()
         
-        self.PatternGenerator = PatternGenerator()
+        self.PatternGenerator = PatternGenerator(graph)

@@ -33,15 +33,31 @@ class CFG:
             graph (graph_t) = The graph graph.
         """
         # Set attributes
-        if not graph:
-            graph = graph_alloc(0)
-
         self.graph = graph
         self.info = None
         self.capstone = None
+        
+    def force_extract(self):
+        #
+        # Clear
+        #
+        
+        # Clear the graph
+        if self.graph:
+            self.clear_graph()
+
+        #
+        # Control flow graph extraction
+        #
+        print "[I] Creation of the Control Flow Graph (can take few seconds)"
+        # Get the CFG of the binary
+        self.extract()
 
     def extract(self):
         """Extract the control flow graph from the binary."""
+        # Allocate a new graph
+        self.graph = graph_alloc(0)
+        
         # Initialize binary info
         self.info = get_inf_structure()
         
@@ -84,9 +100,9 @@ class CFG:
         # Remove the old graph.
         if self.graph:
             graph_free(self.graph, True)
-
-        # Allocate a new graph
-        self.graph = graph_alloc(0)
+            
+        self.graph = None
+        
 
     def dis(self, ea, is_child1 = False, ifrom=None):
         """Disassemble the current address and fill the nodes list.

@@ -25,10 +25,10 @@ class CryptoIdentifier:
     _analyzed_patterns: (PatternsAnalysis list): Hold the analyzed patterns.
     """
 
-    def __init__(self):
+    def __init__(self, graph):
         """Initialization"""
 
-        self.graph = CFG()
+        self.graph = graph
         self._analyzed_patterns = []
 
     def analyzing(self):
@@ -43,23 +43,18 @@ class CryptoIdentifier:
 
         cfg = self.graph
 
-        #
-        # Clear
-        #
-        # Clear the graph
-        if cfg.graph:
-            cfg.clear_graph()
-
         # Clear the list
         del self._analyzed_patterns[:]
 
         #
         # Control flow graph extraction
         #
-        print "[I] Creation of the Control Flow Graph (can take few seconds)"
         
-        # Get the CFG of the binary
-        cfg.extract()
+        if not cfg.graph:
+            print "[I] Creation of the Control Flow Graph (can take few seconds)"
+            
+            # Get the CFG of the binary
+            cfg.extract()
 
         #
         # Pattern searching
