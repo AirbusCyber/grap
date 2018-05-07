@@ -212,10 +212,12 @@ graph_t *createGraph() {
 }
 
 graph_t *addNodeToGraph(node_t * n, graph_t * g) {
-  node_list_add(&g->nodes, n);
+  if (n != nullptr){
+    node_list_add(&g->nodes, n);
 
-  if (g->nodes.size == 1 || n->info->is_root)
-    g->root = n;
+    if (g->nodes.size == 1 || n->info->is_root)
+      g->root = n;
+  }
   
   return g;
 }
@@ -237,6 +239,10 @@ char *removeQuotes(char *s) {
 }
 
 node_t *updateNode(OptionList * ol, node_t * n) {
+  if (n == nullptr){
+    return nullptr;
+  }
+  
   size_t i;
   char hasMinRepeat = 0;
   char hasMaxRepeat = 0;
