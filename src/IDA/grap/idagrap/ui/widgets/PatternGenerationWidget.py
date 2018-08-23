@@ -368,7 +368,7 @@ class PatternGenerationWidget(QMainWindow):
                         self.cc.PatternGenerator.wantedName = str(s[1])
         
     def _onSaveButtonClicked(self):
-        updateWantedName()
+        self.updateWantedName()
         pattern_text = self.text_widget.toPlainText()
         
         if len(pattern_text.strip()) == 0:
