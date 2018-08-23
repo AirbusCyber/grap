@@ -19,12 +19,10 @@ import pygrap
 import StringIO
 
 class PatternGenerator:
-    """Cryptographic identifier.
+    """PatternGenerator
 
-    This class aims to organize the identification of cryptography.
+    This class regroups functionality on defining and generating DOT pattern from selected nodes.
 
-    graph (CFG): Control flow graph.
-    _analyzed_patterns: (PatternsAnalysis list): Hold the analyzed patterns.
     """
 
     def __init__(self, graph):
@@ -32,6 +30,7 @@ class PatternGenerator:
 
         self.graph = graph
         self.rootNode = None
+        self.wantedName = "generated"
         self.targetNodes = []
         
         # Associates address/node_id to match_type (match_default, match_full, match_opcode_arg1, match_opcode_arg2, match_opcode, match_wildcard)
@@ -145,6 +144,16 @@ class PatternGenerator:
     def removeTargetNode(self, targetNodeAddress):
         self.targetNodes = [node for node in self.targetNodes if node.node_id != targetNodeAddress]
         self.resetColored()
+
+    def updateWantedName(self, patternText):
+        if len(lines) >= 1:
+            l = lines[0]
+            s = l.strip().split(" ")
+            if len(s) >= 2:
+                if "graph" in s[0].lower():
+                    fn = s[1]
+                    if len(fn) >= 1:
+                        self.cc.PatternGenerator.wantedName = str(s[1])
     
     def generate_quick_pattern(self, qp_str):
         sio = StringIO.StringIO()
@@ -268,7 +277,7 @@ class PatternGenerator:
 
         # End of transformations
 
-        patternStr = "digraph G {\n"
+        patternStr = "digraph " + self.wantedName + " {\n"
 
         for patternNodeId, patternNode in sorted(patternNodes.items()):
             patternStr += "    {} [cond={}".format(hex(patternNodeId), self._getConditionString(patternNode, patternNodeId))
