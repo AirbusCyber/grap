@@ -1,0 +1,14 @@
+digraph G {
+0 [inst = "zero", opcode="zero", root=true]
+A [inst = "xor"]
+B [inst = "xor"]
+C [inst = "xor"]
+D [inst = "xor"]
+E [inst = "ahah", opcode="ahah"]
+0 -> A [childnumber=1]
+A -> B [childnumber=1]
+B -> C [childnumber=1]
+C -> D [childnumber=1]
+D -> E [childnumber=1]
+E -> D [childnumber=2]
+}

@@ -228,6 +228,14 @@ CondNode* computeCond(node_t* n){
       child = n->child2;
     }
 
+    if (child->fathers_nb >= 2){
+      // Case: The child has 2 or more fathers
+      // Thus the end of the basic block will be reached before the child
+      // Thus the lazyrepeat is useless (it will try to repeat until the end of the basic block), we remove it
+      n->info->lazyRepeat = false;
+      return n->condition;
+    }
+    
     std::list<CondNode*>* not_child = new std::list<CondNode*>();
     not_child->push_front(child->condition);
     child->condition->add_pointer_usage();

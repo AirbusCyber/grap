@@ -1,0 +1,10 @@
+digraph G {
+0 [cond="opcode is zero"]
+A [cond=true, repeat="*", lazyrepeat=true]
+D [cond=true]
+E [cond="opcode is ahah"]
+0 -> A [childnumber=1]
+A -> D [childnumber=1]
+D -> E [childnumber=1]
+E -> D [childnumber=2]
+}

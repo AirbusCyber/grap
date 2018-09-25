@@ -109,6 +109,8 @@ void printDescription()
   std::cout << "Test 43: [manual] edge wildcard on loop\n";
   std::cout << "Test 44: [manual] end basic blocks test (all cases match)\n";
   std::cout << "Test 45: [manual] end basic blocks test (count)\n";
+  std::cout << "Test 46: [manual] lazyrepeat option is expected to be ignored "
+                "when not followed by others instructions within basic block\n";
 }
 
 #ifdef _WIN32
