@@ -136,24 +136,24 @@ class PatternGenerationWidget(QMainWindow):
 
     def _generic_arguments_option_trigger(self, state):
         self.cc.PatternGenerator.generic_arguments_option = (state == 2)
-        self.text_widget.setText(self.cc.PatternGenerator.generate())
+        self._render()
 
     def _lighten_memory_ops_option_trigger(self, state):
         self.cc.PatternGenerator.lighten_memory_ops_option = (state == 2)
-        self.text_widget.setText(self.cc.PatternGenerator.generate())
+        self._render()
 
     def _std_jmp_check_option_trigger(self, state):
         self.cc.PatternGenerator.std_jmp_option = (state == 2)
-        self.text_widget.setText(self.cc.PatternGenerator.generate())
+        self._render()
 
     def _factorize_check_option_trigger(self, state):
         self.cc.PatternGenerator.factorize_option = (state == 2)
-        self.text_widget.setText(self.cc.PatternGenerator.generate())
+        self._render()
 
     def _real_time_check_option_trigger(self, state):
         self.real_time_option = (state == 2)
         if self.real_time_option:
-            self.text_widget.setText(self.cc.PatternGenerator.generate())
+            self._render()
             self._enable_options()
         self.generateAction.setEnabled(not self.real_time_option)
 
@@ -250,10 +250,14 @@ class PatternGenerationWidget(QMainWindow):
     def _updateContextMenus(self):
         self.hooks = PatternGenerationHooks(self.cc)
         self.hooks.hook()
+
+    def _render(self):
+        self.updateWantedName()
+        self.text_widget.setText(self.cc.PatternGenerator.generate(auto=True))
         
     def _render_if_real_time(self):
         if self.real_time_option:
-            self.text_widget.setText(self.cc.PatternGenerator.generate(auto=True))
+            self._render()
             self._enable_options()
 
     def _onSetRootNode(self):
@@ -341,7 +345,7 @@ class PatternGenerationWidget(QMainWindow):
         
     def _onGenerateButtonClicked(self):
         print "[I] Generation of pattern"
-        self.text_widget.setText(self.cc.PatternGenerator.generate())
+        self._render()
         self._enable_options()
 
     def _onResetButtonClicked(self):
@@ -349,8 +353,22 @@ class PatternGenerationWidget(QMainWindow):
         self.cc.PatternGenerator.resetPattern()
         self.text_widget.clear()
         self._enable_options()
+
+    def updateWantedName(self):
+        pattern_text = self.text_widget.toPlainText()
+        lines = pattern_text.split("\n")
+
+        if len(lines) >= 1:
+            l = lines[0]
+            s = l.strip().split(" ")
+            if len(s) >= 2:
+                if "graph" in s[0].lower():
+                    fn = s[1]
+                    if len(fn) >= 1:
+                        self.cc.PatternGenerator.wantedName = str(s[1])
         
     def _onSaveButtonClicked(self):
+        self.updateWantedName()
         pattern_text = self.text_widget.toPlainText()
         
         if len(pattern_text.strip()) == 0:
@@ -365,18 +383,8 @@ class PatternGenerationWidget(QMainWindow):
             default_path = config["user_patterns_path"]
         else:
             default_path = config["patterns_path"] + os.path.sep + "test"+ os.path.sep + "misc" + os.path.sep + "files"
-        lines = pattern_text.split("\n")
         
-        default_filename = "generated"
-        if len(lines) >= 1:
-            l = lines[0]
-            s = l.strip().split(" ")
-            if len(s) >= 2:
-                fn = s[1]
-                if len(fn) >= 1:
-                    default_filename = s[1]
-            
-        default_filepath = default_path + os.path.sep + default_filename + ".grapp"
+        default_filepath = default_path + os.path.sep + self.cc.PatternGenerator.wantedName + ".grapp"
             
         filename, _ = self.cc.QFileDialog.getSaveFileName(self, "Save pattern file (.grapp files in %APPDATA%\IDAgrap\patterns will be parsed as patterns)", default_filepath, "Grap pattern (*.grapp)", options=options)
         if filename:            

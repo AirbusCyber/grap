@@ -19,12 +19,10 @@ import pygrap
 import StringIO
 
 class PatternGenerator:
-    """Cryptographic identifier.
+    """PatternGenerator
 
-    This class aims to organize the identification of cryptography.
+    This class regroups functionality on defining and generating DOT pattern from selected nodes.
 
-    graph (CFG): Control flow graph.
-    _analyzed_patterns: (PatternsAnalysis list): Hold the analyzed patterns.
     """
 
     def __init__(self, graph):
@@ -32,6 +30,7 @@ class PatternGenerator:
 
         self.graph = graph
         self.rootNode = None
+        self.wantedName = "generated"
         self.targetNodes = []
         
         # Associates address/node_id to match_type (match_default, match_full, match_opcode_arg1, match_opcode_arg2, match_opcode, match_wildcard)
@@ -55,22 +54,22 @@ class PatternGenerator:
         """
         self._analyzing()
         
-    def preview_match(self, address, base_text, type):
+    def preview_match(self, address, base_text, match_type):
         appended_text = ""
         
         node = node_list_find(self.graph.graph.nodes, address)
         if node:
-            if type in ["match_full", "match_opcode", "match_opcode_arg1", "match_opcode_arg2"]:
+            if match_type in ["match_full", "match_opcode", "match_opcode_arg1", "match_opcode_arg2"]:
                 appended_text = ": " + node.info.opcode
                 added_arg1 = False
-                if type in ["match_full", "match_opcode_arg1"] and node.info.nargs >= 1:
+                if match_type in ["match_full", "match_opcode_arg1"] and node.info.nargs >= 1:
                     appended_text += " " + node.info.arg1
                     added_arg1 = True
-                if type in ["match_full", "match_opcode_arg2"] and node.info.nargs >= 2:
+                if match_type in ["match_full", "match_opcode_arg2"] and node.info.nargs >= 2:
                     if not added_arg1:
                         appended_text += " *"
                     appended_text += ", " + node.info.arg2
-                elif type in ["match_opcode_arg1"] and node.info.nargs >= 2:
+                elif match_type in ["match_opcode_arg1"] and node.info.nargs >= 2:
                     appended_text += ", *"
         
         return base_text + appended_text
@@ -133,8 +132,8 @@ class PatternGenerator:
 
         print "Added target node {}".format(hex(targetNode.node_id))
 
-    def setMatchType(self, targetNodeAddress, type):
-        self.targetNodeType[targetNodeAddress] = type
+    def setMatchType(self, targetNodeAddress, match_type):
+        self.targetNodeType[targetNodeAddress] = match_type
         
     def typeIsDefault(self, node_id):
         if node_id not in self.targetNodeType:
@@ -145,6 +144,16 @@ class PatternGenerator:
     def removeTargetNode(self, targetNodeAddress):
         self.targetNodes = [node for node in self.targetNodes if node.node_id != targetNodeAddress]
         self.resetColored()
+
+    def updateWantedName(self, patternText):
+        if len(lines) >= 1:
+            l = lines[0]
+            s = l.strip().split(" ")
+            if len(s) >= 2:
+                if "graph" in s[0].lower():
+                    fn = s[1]
+                    if len(fn) >= 1:
+                        self.cc.PatternGenerator.wantedName = str(s[1])
     
     def generate_quick_pattern(self, qp_str):
         sio = StringIO.StringIO()
@@ -233,15 +242,15 @@ class PatternGenerator:
                     if patternNode.opcode in ["lea", "push", "pop"] or patternNode.opcode.startswith("mov"):
                         patternNode.opcode = None
             else:
-                type = self.targetNodeType[patternNodeId]
+                match_type = self.targetNodeType[patternNodeId]
                 
-                if type in ["match_wildcard", "match_opcode", "match_opcode_arg2"]:
+                if match_type in ["match_wildcard", "match_opcode", "match_opcode_arg2"]:
                     patternNode.arg1 = None
                     patternNode.arg3 = None
-                if type in ["match_wildcard", "match_opcode", "match_opcode_arg1"]:
+                if match_type in ["match_wildcard", "match_opcode", "match_opcode_arg1"]:
                     patternNode.arg2 = None
                     patternNode.arg3 = None
-                if type in ["match_wildcard"]:
+                if match_type in ["match_wildcard"]:
                     patternNode.opcode = None
 
         if self.factorize_option:
@@ -254,6 +263,9 @@ class PatternGenerator:
                         break
 
                     child = patternNodes[patternNode.child1]
+                    if child.fathers_nb != 1:
+                        break
+
                     if (patternNode.opcode is not None or child.opcode is not None) and (patternNode.opcode != child.opcode or patternNode.arg1 != child.arg1 or patternNode.arg2 != child.arg2 or patternNode.arg3 != child.arg3):
                         break
 
@@ -268,7 +280,7 @@ class PatternGenerator:
 
         # End of transformations
 
-        patternStr = "digraph G {\n"
+        patternStr = "digraph " + self.wantedName + " {\n"
 
         for patternNodeId, patternNode in sorted(patternNodes.items()):
             patternStr += "    {} [cond={}".format(hex(patternNodeId), self._getConditionString(patternNode, patternNodeId))
@@ -297,18 +309,18 @@ class PatternGenerator:
 
     def _getConditionString(self, node, node_id):
         if node_id not in self.targetNodeType:
-            type = "match_default"
+            match_type = "match_default"
         else:
-            type = self.targetNodeType[node_id]
+            match_type = self.targetNodeType[node_id]
         
-        if type == "match_default":
+        if match_type == "match_default":
             if self.std_jmp_option:
                 if node.children_nb > 1:
                     return "\"nchildren == " + str(node.children_nb) + "\""
 
             if node.opcode is None:
                 return "true"
-        elif type == "match_wildcard":
+        elif match_type == "match_wildcard":
             return "true"
         
         # Case: match_default with no quick option, match_opcode, match_opcode_arg1, match_opcode_arg2, match_full or any other value
@@ -316,15 +328,15 @@ class PatternGenerator:
         s += node.opcode
         s += "'"
 
-        if type != "match_opcode":
+        if match_type != "match_opcode":
             for argNb in range(1, 4):
                 arg = None
 
-                if argNb == 1 and type in ["match_default", "match_opcode_arg1", "match_full"]:
+                if argNb == 1 and match_type in ["match_default", "match_opcode_arg1", "match_full"]:
                     arg = node.arg1
-                elif argNb == 2 and type in ["match_default", "match_opcode_arg2", "match_full"]:
+                elif argNb == 2 and match_type in ["match_default", "match_opcode_arg2", "match_full"]:
                     arg = node.arg2
-                elif argNb == 3 and type in ["match_default", "match_full"]:
+                elif argNb == 3 and match_type in ["match_default", "match_full"]:
                     arg = node.arg3
 
                 if arg is not None:
@@ -355,7 +367,7 @@ class PatternGenerator:
 
 
 class PatternGeneratorNode:
-    def __init__(self, node_id, opcode, arg1, arg2, arg3, child1, child2, children_nb, repeat=None):
+    def __init__(self, node_id, opcode, arg1, arg2, arg3, child1, child2, children_nb, fathers_nb, repeat=None):
         self.node_id = node_id
 
         self.opcode = opcode
@@ -366,6 +378,7 @@ class PatternGeneratorNode:
         self.child1 = child1
         self.child2 = child2
         self.children_nb = children_nb
+        self.fathers_nb = fathers_nb
 
         self.repeat = repeat
 
@@ -374,4 +387,4 @@ class PatternGeneratorNode:
         node = node_list_find(graph, nodeId)
 
         return PatternGeneratorNode(nodeId, node.info.opcode, node.info.arg1, node.info.arg2, node.info.arg3,
-                                    None, None, node.children_nb)
+                                    None, None, node.children_nb, node.fathers_nb)
