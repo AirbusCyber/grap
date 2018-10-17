@@ -832,7 +832,7 @@ void CondNode::add_pointer_usage(){
   }
 }
 
-bool CondNode::freeCondition(CondNode* cn, bool b1, bool b2){
+bool CondNode::freeCondition(CondNode* cn){
   if (cn == NULL){
     return false;
   }
@@ -847,7 +847,7 @@ bool CondNode::freeCondition(CondNode* cn, bool b1, bool b2){
   std::list<CondNode*>::iterator it = children->begin();
 
   while(it != cn->children->end()){
-    CondNode::freeCondition(*it, b1, b2);
+    CondNode::freeCondition(*it);
     it++;
   }
 

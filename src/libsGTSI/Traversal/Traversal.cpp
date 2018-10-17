@@ -233,6 +233,7 @@ CondNode* computeCond(node_t* n){
       // Thus the end of the basic block will be reached before the child
       // Thus the lazyrepeat is useless (it will try to repeat until the end of the basic block), we remove it
       n->info->lazyRepeat = false;
+      n->condition->add_pointer_usage();
       return n->condition;
     }
     
@@ -831,7 +832,7 @@ void Parcours::freeParcours(bool free_mots)
     vsize_t i;
     for (i = 0; i < this->size; i++){
       if (this->mots[i] != NULL){
-        CondNode::freeCondition(this->mots[i]->condition, true, true);
+        CondNode::freeCondition(this->mots[i]->condition);
         delete this->mots[i];
       }
     }
@@ -995,7 +996,7 @@ bool ParcoursNode::addParcours(Parcours * p, vsize_t index, bool checkLabels) {
       
       if (f->mot->equals(mm, checkLabels)) {
         found = true;
-        CondNode::freeCondition(mm->condition, true, true);
+        CondNode::freeCondition(mm->condition);
         delete(mm);
         if (f->addParcours(p, index + 1, checkLabels)){
           r = true;
@@ -1400,7 +1401,7 @@ void ParcoursNode::freeParcoursNode()
   }
   
   if (this->mot != NULL){
-    if (CondNode::freeCondition(this->mot->condition, true, true)){
+    if (CondNode::freeCondition(this->mot->condition)){
       delete this->mot;
     }
   }

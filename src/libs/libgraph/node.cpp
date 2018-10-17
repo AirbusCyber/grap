@@ -36,7 +36,7 @@ void node_free (node_t * node, bool free_info) {
     delete(node->info);
     node->info = NULL;
     if (node->condition != NULL){
-      CondNode::freeCondition(node->condition, true, true);
+      CondNode::freeCondition(node->condition);
     }
   }
   

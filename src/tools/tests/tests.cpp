@@ -348,7 +348,7 @@ vsize_t test_NodeInfo(){
   r = cn->evaluate(np, nt);
   error_number += print_leaf_result(not r, "!= ", true);
   
-  CondNode::freeCondition(cn, true, false);
+  CondNode::freeCondition(cn);
   
   
   std::cout << "Testing bool_test_true: ";
@@ -364,7 +364,7 @@ vsize_t test_NodeInfo(){
   r = cn->evaluate(np, nt);
   error_number += print_leaf_result(not r, "!= ", true);
   
-  CondNode::freeCondition(cn, true, false);
+  CondNode::freeCondition(cn);
   
   
   std::cout << "Testing str_equals: ";
@@ -382,7 +382,7 @@ vsize_t test_NodeInfo(){
   r = cn->evaluate(np, nt);
   error_number += print_leaf_result(not r, "!= ", true);
   
-  CondNode::freeCondition(cn, true, false);
+  CondNode::freeCondition(cn);
   
   
   std::cout << "Testing uint8_equals: ";
@@ -400,7 +400,7 @@ vsize_t test_NodeInfo(){
   r = cn->evaluate(np, nt);
   error_number += print_leaf_result(not r, "!= ", true);
 
-  CondNode::freeCondition(cn, true, false);
+  CondNode::freeCondition(cn);
   
   
   // Shoud return true iff pattern >= test
@@ -423,7 +423,7 @@ vsize_t test_NodeInfo(){
   r = cn->evaluate(np, nt);
   error_number += print_leaf_result(r, "> ", true);
 
-  CondNode::freeCondition(cn, true, false);
+  CondNode::freeCondition(cn);
   
   
   std::cout << "Testing vsizet_equals: ";
@@ -491,11 +491,11 @@ vsize_t test_NodeInfo(){
   r = cn_and->evaluate(np, nt);
   error_number += print_leaf_result(not r, "3 ", true);
   
-  CondNode::freeCondition(cn, true, true);
-  CondNode::freeCondition(cn_not, true, true);
-  CondNode::freeCondition(cn_not2, true, true);
-  CondNode::freeCondition(cn_or, true, true);
-  CondNode::freeCondition(cn_and, true, true);
+  CondNode::freeCondition(cn);
+  CondNode::freeCondition(cn_not);
+  CondNode::freeCondition(cn_not2);
+  CondNode::freeCondition(cn_or);
+  CondNode::freeCondition(cn_and);
   
   delete(np);
   delete(nt);
