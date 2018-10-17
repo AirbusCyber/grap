@@ -67,13 +67,36 @@ void drop_privileges(){
   
   // release: SCMP_ACT_KILL
   // use SCMP_ACT_TRAP or SCMP_ACT_TRACE(0) for debug
-  ctx = seccomp_init(SCMP_ACT_ALLOW); 
+  ctx = seccomp_init(SCMP_ACT_KILL); 
 
   // libc requires an open in _int_free to /proc/sys/vm/overcommit_memory with flags==0x80000 (O_CLOEXEC)
-  seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(open), 1, SCMP_A1(SCMP_CMP_NE, 0x80000));
-  seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(openat), 2, SCMP_A1(SCMP_CMP_NE, 0x80000));
-  seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(prctl), 0);
-  seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(seccomp), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(open), 1, SCMP_A1(SCMP_CMP_EQ, 0x80000));
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(openat), 1, SCMP_A2(SCMP_CMP_EQ, 0x80000));
+  
+  // For readiblity, the rest of the list is the same as in drop_initial_privileges
+  // Commented lines are forbidden syscalls, others are allowed (SCMP_ACT_ALLOW)
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(getdents), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(close), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit_group), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(writev), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(munmap), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mmap), 0);
+//   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(stat), 0);
+//   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(lstat), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(fstat), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mprotect), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(lseek), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(brk), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(clone), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(futex), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(set_robust_list), 0);
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(madvise), 0);
+//   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mremap), 0);
+//   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(prctl), 0);
+//   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(seccomp), 0);
   
   int r = seccomp_load(ctx);
   RELEASE_ASSERT(r == 0);
