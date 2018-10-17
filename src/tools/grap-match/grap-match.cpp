@@ -71,6 +71,7 @@ void drop_privileges(){
 
   // libc requires an open in _int_free to /proc/sys/vm/overcommit_memory with flags==0x80000 (O_CLOEXEC)
   seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(open), 1, SCMP_A1(SCMP_CMP_NE, 0x80000));
+  seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(openat), 2, SCMP_A1(SCMP_CMP_NE, 0x80000));
   seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(prctl), 0);
   seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(seccomp), 0);
   
