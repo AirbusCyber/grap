@@ -6,7 +6,7 @@ import sys
 import os
 import multiprocessing
 import signal
-from cStringIO import StringIO
+import cStringIO
 
 try:
     from capstone import Cs
@@ -290,9 +290,9 @@ class GenericDisassembler:
         '''
             Export the intruction graph to DOT format
         '''
-        nodes = StringIO()
-        edges = StringIO()
-        dot = StringIO()
+        nodes = cStringIO.StringIO()
+        edges = cStringIO.StringIO()
+        dot = cStringIO.StringIO()
 
         header = "digraph G {\n"
         footer = "}"
@@ -712,7 +712,7 @@ def disassemble_elf(elf_data = None, elf_path = None, dot_path = None, print_lis
     if elf_data is None:
         elf_data = open(elf_path, "rb").read()
 
-    elf = ELFFile(StringIO(elf_data))
+    elf = ELFFile(cStringIO.StringIO(elf_data))
 
     arch = CS_ARCH_X86
     mode = CS_MODE_64 if elf.elfclass == 64 else CS_MODE_32

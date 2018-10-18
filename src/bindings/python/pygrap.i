@@ -77,6 +77,7 @@ graph_t* getGraphFromFile(const char *filename) {
 %template(GraphCppList) std::list<graph_t *>;
 
 %pythoncode "dot_writer.py"
+%pythoncode "ida_helper.py"
 %pythoncode "../../tools/grap_disassembler/disassembler.py"
 
 %pythoncode %{
@@ -180,61 +181,68 @@ def match_graph(pattern_arg, test_arg, print_all_matches=False):
 
 
 def matches_tostring(matches, getids=True):
+    if matches is None:
+        print "ERROR: matches is None"
+        return ""
+
     s = ""
     count = len(matches)
     
-    s += "Matched: "
-    first = True
-    for pattern_name in matches:
-        match_list = matches[pattern_name]
-        n_matches = match_list.size()
-        if not first:
-            s += ", "
-        first = False
-
-        s += pattern_name + " (" + str(n_matches) + ") "
-    s += "\n"
-      
-    # Parse matches and print the extracted nodes
-    if getids and len(matches) > 0:
+    if count == 0:
+        s += "Matched none."
+    else:
+        s += "Matched: "
         first = True
         for pattern_name in matches:
             match_list = matches[pattern_name]
-
-            if not first and not match_list.empty():
-                s += "\n"
+            n_matches = match_list.size()
+            if not first:
+                s += ", "
             first = False
-  
-            i = 1
-            first2 = True
-            for match in match_list:
-                if not first2 and not match.empty():
-                    s += "\n"
-                first2 = False
-                
-                if not match.empty():
-                    if pattern_name == "":
-                        s += "Match " + str(i) + "\n"
-                    else:
-                        s += pattern_name + ", " + "match " + str(i) + "\n"
 
-                    for it_match in match:
-                        node_list = match[it_match]
+            s += pattern_name + " (" + str(n_matches) + ") "
+        s += "\n"
+          
+        # Parse matches and print the extracted nodes
+        if getids and len(matches) > 0:
+            first = True
+            for pattern_name in matches:
+                match_list = matches[pattern_name]
+
+                if not first and not match_list.empty():
+                    s += "\n"
+                first = False
   
-                        if not node_list.empty():
-                            k = 0
-                            for n in node_list:
-                                s += it_match
-                                if node_list.size() > 1:
-                                    s += str(k)
-                                
-                                s += ": "
-                                if n.info.has_address:
-                                    s += hex(n.info.address) + ", "
-                                s += n.info.inst_str
-                                s += "\n"
-                                k += 1
-                i += 1
+                i = 1
+                first2 = True
+                for match in match_list:
+                    if not first2 and not match.empty():
+                        s += "\n"
+                    first2 = False
+                    
+                    if not match.empty():
+                        if pattern_name == "":
+                            s += "Match " + str(i) + "\n"
+                        else:
+                            s += pattern_name + ", " + "match " + str(i) + "\n"
+
+                        for it_match in match:
+                            node_list = match[it_match]
+  
+                            if not node_list.empty():
+                                k = 0
+                                for n in node_list:
+                                    s += it_match
+                                    if node_list.size() > 1:
+                                        s += str(k)
+                                    
+                                    s += ": "
+                                    if n.info.has_address:
+                                        s += hex(n.info.address) + ", "
+                                    s += n.info.inst_str
+                                    s += "\n"
+                                    k += 1
+                    i += 1
     return s
 %}
 
