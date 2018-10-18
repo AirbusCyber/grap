@@ -33,7 +33,7 @@ class PatternGenerator:
         self.wantedName = "generated"
         self.targetNodes = []
         
-        # Associates address/node_id to match_type (match_default, match_full, match_opcode_arg1, match_opcode_arg2, match_opcode, match_wildcard)
+        # Associates address/node_id to match_type (match_default, match_full, match_opcode_arg1, match_opcode_arg2, match_opcode_arg3, match_opcode, match_wildcard)
         self.targetNodeType = dict() 
         
         self.coloredNodes = set()
@@ -59,18 +59,23 @@ class PatternGenerator:
         
         node = node_list_find(self.graph.graph.nodes, address)
         if node:
-            if match_type in ["match_full", "match_opcode", "match_opcode_arg1", "match_opcode_arg2"]:
+            if match_type in ["match_full", "match_opcode", "match_opcode_arg1", "match_opcode_arg2", "match_opcode_arg3"]:
                 appended_text = ": " + node.info.opcode
-                added_arg1 = False
-                if match_type in ["match_full", "match_opcode_arg1"] and node.info.nargs >= 1:
-                    appended_text += " " + node.info.arg1
-                    added_arg1 = True
-                if match_type in ["match_full", "match_opcode_arg2"] and node.info.nargs >= 2:
-                    if not added_arg1:
+                if match_type in ["match_full", "match_opcode_arg1", "match_opcode_arg2", "match_opcode_arg3"]:
+                    if match_type in ["match_full", "match_opcode_arg1"] and node.info.nargs >= 1:
+                        appended_text += " " + node.info.arg1
+                    elif node.info.nargs >= 1:
                         appended_text += " *"
-                    appended_text += ", " + node.info.arg2
-                elif match_type in ["match_opcode_arg1"] and node.info.nargs >= 2:
-                    appended_text += ", *"
+
+                    if match_type in ["match_full", "match_opcode_arg2"] and node.info.nargs >= 2:
+                        appended_text += ", " + node.info.arg2
+                    elif node.info.nargs >= 2:
+                        appended_text += ", *"
+
+                    if match_type in ["match_full", "match_opcode_arg3"] and node.info.nargs >= 3:
+                        appended_text += ", " + node.info.arg3
+                    elif node.info.nargs >= 3:
+                        appended_text += ", *"
         
         return base_text + appended_text
     
@@ -244,6 +249,9 @@ class PatternGenerator:
             else:
                 match_type = self.targetNodeType[patternNodeId]
                 
+                if match_type in ["match_wildcard", "match_opcode", "match_opcode_arg3"]:
+                    patternNode.arg1 = None
+                    patternNode.arg2 = None
                 if match_type in ["match_wildcard", "match_opcode", "match_opcode_arg2"]:
                     patternNode.arg1 = None
                     patternNode.arg3 = None
@@ -336,7 +344,7 @@ class PatternGenerator:
                     arg = node.arg1
                 elif argNb == 2 and match_type in ["match_default", "match_opcode_arg2", "match_full"]:
                     arg = node.arg2
-                elif argNb == 3 and match_type in ["match_default", "match_full"]:
+                elif argNb == 3 and match_type in ["match_default", "match_opcode_arg3", "match_full"]:
                     arg = node.arg3
 
                 if arg is not None:

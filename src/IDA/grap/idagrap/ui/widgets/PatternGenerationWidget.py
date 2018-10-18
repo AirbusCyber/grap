@@ -219,6 +219,7 @@ class PatternGenerationWidget(QMainWindow):
             ("grap:pg:match_full", None, "[grap] Full match", self._onSetMatchFull),
             ("grap:pg:match_opcode_arg1", None, "[grap] Opcode+arg1", self._onSetMatchOpcodeArg1),
             ("grap:pg:match_opcode_arg2", None, "[grap] Opcode+arg2", self._onSetMatchOpcodeArg2),
+            ("grap:pg:match_opcode_arg3", None, "[grap] Opcode+arg3", self._onSetMatchOpcodeArg3),
             ("grap:pg:match_opcode", None, "[grap] Opcode", self._onSetMatchOpcode),
             ("grap:pg:match_wildcard", None, "[grap] Wildcard: *", self._onSetMatchWildcard),
             ("grap:pg:remove_target", config['icons_path'] + "icons8-delete.png", "[grap] Remove target node", self._onRemoveTargetNode)
@@ -300,6 +301,9 @@ class PatternGenerationWidget(QMainWindow):
         
     def _onSetMatchOpcodeArg2(self):
         self.setMatchType("match_opcode_arg2")
+        
+    def _onSetMatchOpcodeArg3(self):
+        self.setMatchType("match_opcode_arg3")
         
     def _onSetMatchOpcode(self):
         self.setMatchType("match_opcode")
@@ -457,12 +461,14 @@ class PatternGenerationHooks(idaapi.UI_Hooks):
                 idaapi.update_action_label("grap:pg:match_opcode_arg1", self.cc.PatternGenerator.preview_match(currentAddress, "[grap] Opcode+arg1", "match_opcode_arg1"))
                 idaapi.attach_action_to_popup(form, popup, "grap:pg:match_opcode_arg2", None)
                 idaapi.update_action_label("grap:pg:match_opcode_arg2", self.cc.PatternGenerator.preview_match(currentAddress, "[grap] Opcode+arg2", "match_opcode_arg2"))
+                idaapi.attach_action_to_popup(form, popup, "grap:pg:match_opcode_arg3", None)
+                idaapi.update_action_label("grap:pg:match_opcode_arg3", self.cc.PatternGenerator.preview_match(currentAddress, "[grap] Opcode+arg3", "match_opcode_arg3"))
                 idaapi.attach_action_to_popup(form, popup, "grap:pg:match_opcode", None)
                 idaapi.update_action_label("grap:pg:match_opcode", self.cc.PatternGenerator.preview_match(currentAddress, "[grap] Opcode", "match_opcode"))
                 idaapi.attach_action_to_popup(form, popup, "grap:pg:match_wildcard", None)
                 idaapi.attach_action_to_popup(form, popup, "grap:pg:remove_target", None)
                 
-                for type in ["match_default", "match_full", "match_opcode_arg1", "match_opcode_arg2", "match_opcode", "match_wildcard"]:
+                for type in ["match_default", "match_full", "match_opcode_arg1", "match_opcode_arg2", "match_opcode_arg3", "match_opcode", "match_wildcard"]:
                     idaapi.update_action_icon("grap:pg:"+type, -1)
                 
                 if currentAddress not in self.cc.PatternGenerator.targetNodeType:
