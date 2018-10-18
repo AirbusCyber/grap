@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from os import listdir
+import os
 from os.path import abspath, dirname, sep
 
 from idagrap.modules.Module import ModuleTestMisc
@@ -22,14 +22,15 @@ def get_test_misc():
 
     # For all misc patterns
     for p in FULL_PATHS:
-        for dot in listdir(p):
+        rec_listdir = [(os.path.join(dp, f), f) for dp, dn, fn in os.walk(p) for f in fn]
+        for dotpath, dot in rec_listdir:
             ext_ok = False
             for e in EXT:
                 if dot.endswith(e):
                     ext_ok = True
                     break
             if ext_ok:
-                pattern = Pattern(f=p + sep + dot,
+                pattern = Pattern(f=dotpath,
                                   name=dot,
                                   description=dot + " pattern",
                                   min_pattern=1,
