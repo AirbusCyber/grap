@@ -131,9 +131,9 @@ def convert_export_str_to_dot(str_in, dot_file, pattern_name):
     write_dot(dot_file, pattern_name, nodes, edges)
 
 
-def quick_pattern(str_in, name="quick_pattern"):
+def quick_pattern(str_in, pattern_name="quick_pattern"):
     sio = StringIO.StringIO()
-    convert_export_str_to_dot(str_in, sio, name)
+    convert_export_str_to_dot(str_in, sio, pattern_name)
     return sio.getvalue()
 
 def get_dot_path_from_string(str_in, pattern_name="tmp"):
