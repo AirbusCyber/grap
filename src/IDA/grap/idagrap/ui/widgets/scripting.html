@@ -1,0 +1,62 @@
+<h1>IDAPython scripting</h1>
+
+Additionally to the plugin's graphical interface you can use python bindings.
+
+<h2>Command line examples</h2>
+This will match the current binary against a short pattern:
+<blockquote>
+import pygrap<br />
+m=pygrap.ida_quick_match("sub->xor->sub")
+</blockquote>
+
+Options are:
+<ul>
+	<li>print_matches: print found matches (default: True)</li>
+	<li>getids: print matched instructions (default: True)</li>
+	<li>print_pattern: print full pattern inferred from string (default: False)</li>
+	<li>pattern_name: name of the quick pattern (default: quick_pattern)</li>
+</ul>
+
+The following line outputs a full pattern from a more complex quick pattern:
+<blockquote>
+pygrap.quick_pattern("opcode is push->opcode is push and arg1 is esi->opcode is call and arg1 is edi->opcode is mov and arg2 is eax", pattern_name="getprocaddress_resolve")
+</blockquote>
+
+<h2>Script examples</h2>
+<h3>Rename variables where functions imported with getProcAddress are stored</h3>
+
+<blockquote>
+import pygrap <br/>
+<br/>
+pattern = """<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;digraph getprocaddress_resolve {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"1" [cond="opcode is 'push'", getid="push1"]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"2" [cond="opcode is 'push' and arg1 is 'esi'", getid="push2"]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"3" [cond="opcode is 'call' and arg1 is 'edi'", getid="call"]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"4" [cond="opcode is 'mov' and arg2 is 'eax'", getid="mov"]<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"1" -> "2" [childnumber=1]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"2" -> "3" [childnumber=1]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"3" -> "4" [childnumber=1]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+"""<br/>
+<br/>
+matches = pygrap.ida_match(pattern, print_matches=False)<br/>
+for m in matches["getprocaddress_resolve"]:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;p1_arg = m["push1"][0].info.arg1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;str = get_strlit_contents(int(p1_arg,16))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;rn_addr = int(m["mov"][0].info.arg1.split("[")[1][:-1], 16)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;print hex(rn_addr), str<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;MakeName(rn_addr, str)
+</blockquote>
+
+A few remarks:
+<ul>
+	<li></li>
+	<li></li>
+	<li></li>
+	<li></li>
+</ul>
+
+
+<h3>Comment matching instructions</h3>

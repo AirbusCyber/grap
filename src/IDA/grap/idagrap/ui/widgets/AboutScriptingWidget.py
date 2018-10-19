@@ -11,18 +11,18 @@ from idagrap.patterns.Modules import MODULES
 QMainWindow = QtShim.get_QMainWindow()
 
 
-class  AboutWidget(QMainWindow):
+class  AboutScriptingWidget(QMainWindow):
     def __init__(self, parent):
         """Initialization."""
         # Initialization
         self.cc = parent.cc
         self.cc.QMainWindow.__init__(self)
-        #print "[|] loading AboutWidget"
+        #print "[|] loading AboutScriptingWidget"
 
         # Enable access to shared IDAscope modules
         self.parent = parent
-        self.name = "About"
-        self.icon = self.cc.QIcon(config['icons_path'] + "icons8-info.png")
+        self.name = "Scripting"
+        self.icon = self.cc.QIcon(config['icons_path'] + "icons8-python-50.png")
         self.color = False
 
         # This widget relies on the crypto identifier
@@ -51,8 +51,8 @@ class  AboutWidget(QMainWindow):
         self.text_widget.setFontFamily("Monospace")
         
         
-        html_text = open(config['about_path'], "rb").read()
+        html_text = open(config['scripting_path'], "rb").read()
         if html_text is not None:
             self.text_widget.setHtml(html_text.replace("TODO_GRAPVERSION", config["version"]))
         else:
-            self.text_widget.setText("Error: about.html not found")
+            self.text_widget.setText("Error: scripting.html not found")

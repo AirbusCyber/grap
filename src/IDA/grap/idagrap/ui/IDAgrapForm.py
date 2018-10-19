@@ -9,6 +9,7 @@ from .helpers.ClassCollection import ClassCollection
 from .widgets.CryptoIdentificationWidget import CryptoIdentificationWidget
 from .widgets.PatternGenerationWidget import PatternGenerationWidget
 from .widgets.AboutWidget import AboutWidget
+from .widgets.AboutScriptingWidget import AboutScriptingWidget
 
 
 class IDAgrapForm(PluginForm):
@@ -42,8 +43,6 @@ class IDAgrapForm(PluginForm):
         banner += "   _\\::\\ \\__\\:\\ \\ \\ \\\\:: __  \\ \\\\:\\\\_  _\\/ \\: __ `\\ \\\\:: __  \\ \\\\: ___\\/ \n"
         banner += "  /__\\::\\__/\\\\:\\/.:| |\\:.\\ \\  \\ \\\\:\\_\\ \\ \\  \\ \\ `\\ \\ \\\\:.\\ \\  \\ \\\\ \\ \\   \n"
         banner += "  \\________\\/ \\____/_/ \\__\\/\\__\\/ \\_____\\/   \\_\\/ \\_\\/ \\__\\/\\__\\/ \\_\\/   \n\n"
-        banner += "{:~^72}\n".format('')
-        banner += "{:^72}\n".format('Airbus Defence & Space')
         banner += "{:#^72}\n".format('')
 
         print banner
@@ -53,15 +52,16 @@ class IDAgrapForm(PluginForm):
         Setup IDAgrap widgets.
         """
 
-        print "[/] setting up widgets..."
+        #print "[/] setting up widgets..."
 
         # Initialization of the widgets
         self.idagrap_widgets.append(CryptoIdentificationWidget(self))
         self.idagrap_widgets.append(PatternGenerationWidget(self))
+        self.idagrap_widgets.append(AboutScriptingWidget(self))
         self.idagrap_widgets.append(AboutWidget(self))
         self.setupIDAgrapForm()
 
-        print "[\\] end widgets"
+        #print "[\\] end widgets"
 
     def setupIDAgrapForm(self):
         """

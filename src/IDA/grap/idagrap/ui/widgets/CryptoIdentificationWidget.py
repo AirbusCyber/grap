@@ -39,7 +39,7 @@ class CryptoIdentificationWidget(QMainWindow):
         # Initialization
         self.cc = parent.cc
         self.cc.QMainWindow.__init__(self)
-        print "[|] loading CryptoIdentificationWidget"
+        #print "[|] loading CryptoIdentificationWidget"
 
         # Enable access to shared IDAscope modules
         self.parent = parent

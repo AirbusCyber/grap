@@ -21,7 +21,7 @@ class PatternGenerationWidget(QMainWindow):
         # Initialization
         self.cc = parent.cc
         self.cc.QMainWindow.__init__(self)
-        print "[|] loading PatternGenerationWidget"
+        # print "[|] loading PatternGenerationWidget"
         
         # Enable access to shared IDAscope modules
         self.parent = parent

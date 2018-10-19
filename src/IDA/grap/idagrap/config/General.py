@@ -12,6 +12,7 @@ config = {
     "patterns_path": ROOT + os.path.sep + ".." + os.path.sep + "patterns" + os.path.sep,
     "icons_path": ROOT + os.path.sep + ".." + os.path.sep + "ui" + os.path.sep + "icons" + os.path.sep,
     "about_path": ROOT + os.path.sep + ".." + os.path.sep + "ui" + os.path.sep + "widgets" + os.path.sep + "about.html",
+    "scripting_path": ROOT + os.path.sep + ".." + os.path.sep + "ui" + os.path.sep + "widgets" + os.path.sep + "scripting.html",
     "version": "1.1.0",
     "name": "IDAgrap"
 }
