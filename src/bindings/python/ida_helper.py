@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import imp
 
 def ida_get_cfg_raw():
     if "idaapi" not in sys.modules:
