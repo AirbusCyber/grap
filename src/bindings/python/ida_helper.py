@@ -4,7 +4,10 @@
 import sys
 import imp
 
-def ida_get_cfg_raw():
+cfg = None
+is_cfg_from_idagrap = False
+
+def ida_get_cfg_raw(existing_cfg=None):
     if "idaapi" not in sys.modules:
         print "ERROR: idaapi not loaded"
         return None
@@ -17,19 +20,24 @@ def ida_get_cfg_raw():
         w = idaapi.PluginForm.FormToPyQtWidget(tw)
         pgw=w.findChild(idagrap.ui.widgets.PatternGenerationWidget.PatternGenerationWidget)
         cfg = pgw.cc.PatternGenerator.graph
-        return cfg
+        return cfg, True
     else:
-        # Load grap and creates new CFG object
-        fp, pathname, description = imp.find_module("grap")
-        _mod = imp.load_module("grap", fp, pathname, description)
-        cfg = _mod.CFG()
-        return cfg
+        # If necessary, load grap and creates new CFG object
+        if existing_cfg is None:
+            fp, pathname, description = imp.find_module("grap")
+            _mod = imp.load_module("grap", fp, pathname, description)
+            cfg = _mod.CFG()
+            return cfg, False
+        return existing_cfg, False
 
 
 def ida_get_cfg():
+    global cfg, is_cfg_from_idagrap
+
     if "idaapi" in sys.modules:
         # Within IDA
-        cfg = ida_get_cfg_raw()
+        if cfg is None or not is_cfg_from_idagrap:
+            cfg, is_cfg_from_idagrap = ida_get_cfg_raw(cfg)
         if not cfg.graph:
             cfg.extract()
         return cfg
