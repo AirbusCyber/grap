@@ -45,15 +45,15 @@ def ida_get_cfg():
         print "ERROR: idaapi not loaded"
         return None
 
-def ida_match(pattern_str, getids=True, print_matches=True):
+def ida_match(pattern_arg, getids=True, print_matches=True):
     cfg = ida_get_cfg()
-    if pattern_str != "" and cfg is not None:
-        matches = match_graph(pattern_str, cfg.graph)
+    if (type(pattern_arg) is list or (type(pattern_arg) is str and pattern_arg != "")) and cfg is not None:
+        matches = match_graph(pattern_arg, cfg.graph)
         if print_matches:
             print matches_tostring(matches, getids)
         return matches
     else:
-        print "ERROR: pattern_str == "" or cfg is None"
+        print "ERROR: pattern_arg is empty string or not a list, or cfg is None"
         return None
 
 

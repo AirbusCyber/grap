@@ -244,5 +244,43 @@ def matches_tostring(matches, getids=True):
                                     k += 1
                     i += 1
     return s
+
+
+def parse_int_hex(s):
+    if s.isdigit():
+        return int(s)
+    elif "0x" in s:
+        try:
+            return int(s, 16)
+        except:
+            return None
+    return None
+
+
+def parse_first_indirect(s):
+    if "+" in s or "-" in s or "[" not in s:
+        return None
+
+    for w in s.split(" "):
+        if "[" in w and "]" in w:
+            w_splitted = w.split("[")[1]
+            if "]" in w_splitted:
+                w_splitted2 = w_splitted.split("]")[0]
+                int_p = parse_int_hex(w_splitted2)
+                if int_p is not None:
+                    return int_p
+    return None
+    
+
+def parse_first_immediate(s):
+    if "+" in s or "-" in s:
+        return None 
+
+    for w in s.split(" "):
+        int_p = parse_int_hex(w)
+        if int_p is not None:
+            return int_p
+    return None
+
 %}
 

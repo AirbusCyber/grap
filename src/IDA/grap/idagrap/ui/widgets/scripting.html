@@ -4,10 +4,19 @@ Additionally to the plugin's graphical interface you can use python bindings.
 
 <h2>Command line examples</h2>
 This will match the current binary against a short pattern:
+
+<blockquote>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pygrap</span>
+<span class="n">m</span><span class="o">=</span><span class="n">pygrap</span><span class="o">.</span><span class="n">ida_quick_match</span><span class="p">(</span><span class="s2">&quot;sub-&gt;xor&quot;</span><span class="p">)</span> 
+</pre></div>
+</blockquote>
+
+<!-- black and white version
 <blockquote>
 import pygrap<br />
-m=pygrap.ida_quick_match("sub->xor->sub")
+m=pygrap.ida_quick_match("sub->xor")
 </blockquote>
+-->
 
 Options are:
 <ul>
@@ -18,13 +27,154 @@ Options are:
 </ul>
 
 The following line outputs a full pattern from a more complex quick pattern:
+
+<blockquote>
+<div class="highlight"><pre><span></span><span class="n">pygrap</span><span class="o">.</span><span class="n">quick_pattern</span><span class="p">(</span><span class="s2">&quot;opcode is push-&gt;opcode is push and arg1 is esi-&gt;opcode is call and arg1 is edi-&gt;opcode is mov and arg2 is eax&quot;</span><span class="p">,</span> <span class="n">pattern_name</span><span class="o">=</span><span class="s2">&quot;getprocaddress_resolve&quot;</span><span class="p">)</span> 
+</pre></div>
+</blockquote>
+
+<!-- black and white version
 <blockquote>
 pygrap.quick_pattern("opcode is push->opcode is push and arg1 is esi->opcode is call and arg1 is edi->opcode is mov and arg2 is eax", pattern_name="getprocaddress_resolve")
 </blockquote>
+-->
 
 <h2>Script examples</h2>
+<h3>Color matching instructions</h3>
+
+This script colors in red matching instructions for two small patterns ("sub->xor" and "ror->mov").
+
+<!-- Generated with pygments: pygmentize -f html ex1.py -->
+<!-- ex1.py
+import pygrap 
+
+pattern1 = pygrap.quick_pattern("sub->xor", pattern_name="sub_xor")
+pattern2 = pygrap.quick_pattern("ror->mov", pattern_name="ror_mov")
+matches = pygrap.ida_match([pattern1, pattern2], print_matches=False)
+
+for pattern_name in matches:
+    for match in matches[pattern_name]:
+        print "Coloring", pattern_name, "match at address", hex(match["1"][0].info.address)
+        for getid in match:
+            for inst in match[getid]:
+                addr = inst.info.address
+                set_color(addr, CIC_ITEM, 0x7280fa)
+-->
+
+<blockquote>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pygrap</span> 
+
+<span class="n">pattern1</span> <span class="o">=</span> <span class="n">pygrap</span><span class="o">.</span><span class="n">quick_pattern</span><span class="p">(</span><span class="s2">&quot;sub-&gt;xor&quot;</span><span class="p">,</span> <span class="n">pattern_name</span><span class="o">=</span><span class="s2">&quot;sub_xor&quot;</span><span class="p">)</span>
+<span class="n">pattern2</span> <span class="o">=</span> <span class="n">pygrap</span><span class="o">.</span><span class="n">quick_pattern</span><span class="p">(</span><span class="s2">&quot;ror-&gt;mov&quot;</span><span class="p">,</span> <span class="n">pattern_name</span><span class="o">=</span><span class="s2">&quot;ror_mov&quot;</span><span class="p">)</span>
+<span class="n">matches</span> <span class="o">=</span> <span class="n">pygrap</span><span class="o">.</span><span class="n">ida_match</span><span class="p">([</span><span class="n">pattern1</span><span class="p">,</span> <span class="n">pattern2</span><span class="p">],</span> <span class="n">print_matches</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">pattern_name</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">[</span><span class="n">pattern_name</span><span class="p">]:</span>
+        <span class="k">print</span> <span class="s2">&quot;Coloring&quot;</span><span class="p">,</span> <span class="n">pattern_name</span><span class="p">,</span> <span class="s2">&quot;match at address&quot;</span><span class="p">,</span> <span class="nb">hex</span><span class="p">(</span><span class="n">match</span><span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
+        <span class="k">for</span> <span class="nb">getid</span> <span class="ow">in</span> <span class="n">match</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">inst</span> <span class="ow">in</span> <span class="n">match</span><span class="p">[</span><span class="nb">getid</span><span class="p">]:</span>
+                <span class="n">addr</span> <span class="o">=</span> <span class="n">inst</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">address</span>
+                <span class="n">set_color</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="n">CIC_ITEM</span><span class="p">,</span> <span class="mh">0x7280fa</span><span class="p">)</span>
+</pre></div>
+</blockquote>	
+
+<!-- black and white version
+<blockquote>
+import pygrap <br />
+<br />
+pattern1 = pygrap.quick_pattern("sub->xor", pattern_name="sub_xor")<br />
+pattern2 = pygrap.quick_pattern("ror->mov", pattern_name="ror_mov")<br />
+matches = pygrap.ida_match([pattern1, pattern2], print_matches=False)<br />
+<br />
+for pattern_name in matches:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;for match in matches[pattern_name]:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print "Coloring", pattern_name, "match at address", hex(match["1"][0].info.address)<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for getid in match:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for inst in match[getid]:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;addr = inst.info.address<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set_color(addr, CIC_ITEM, 0x7280fa)<br />
+</blockquote>
+-->
+
 <h3>Rename variables where functions imported with getProcAddress are stored</h3>
 
+We have the following assembly pattern (disassembled by IDA) that resolves a dynamic import with getProcAddress:
+<ul>
+	<li>mov edi, ds:GetProcAddress</li>
+	<li>push offset ProcName ; "Py_DontWriteBytecodeFlag"</li>
+	<li>push esi</li>
+	<li>call edi ; GetProcAddress</li>
+	<li>mov dword_138D84C, eax</li>
+</ul>
+
+For reference, the following is the same assembly code disassembled by Capstone, so this is what you can match with grap:
+<ul>
+	<li>mov edi, dword [0x138100c]</li>
+	<li>push 0x1384638</li>
+	<li>push esi</li>
+	<li>call edi</li>
+	<li>mov dword [0x138d84c], eax</li>
+</ul>
+
+We want to rename the variable (dword_138D84C) where the address of the imported function ("Py_DontWriteBytecodeFlag") is stored.
+
+<!-- Generated with pygments: pygmentize -f html ex2.py -->
+<!-- ex2.py
+import pygrap 
+
+pattern = """
+    digraph getprocaddress_resolve {
+    "1" [cond="opcode is 'push'", getid="push1"]
+    "2" [cond="opcode is 'push' and arg1 is 'esi'", getid="push2"]
+    "3" [cond="opcode is 'call' and arg1 is 'edi'", getid="call"]
+    "4" [cond="opcode is 'mov' and arg2 is 'eax'", getid="mov"]
+
+    "1" -> "2" [childnumber=1]
+    "2" -> "3" [childnumber=1]
+    "3" -> "4" [childnumber=1]
+    }
+"""
+
+matches = pygrap.ida_match(pattern, print_matches=False)
+for m in matches["getprocaddress_resolve"]:
+    push1_arg_str = m["push1"][0].info.arg1
+    push1_arg_int = pygrap.parse_first_immediate(push1_arg_str)
+    func_name = get_strlit_contents(push1_arg_int)
+    mov_arg1 = m["mov"][0].info.arg1
+    var_addr = pygrap.parse_first_indirect(mov_arg1)
+    MakeName(var_addr, func_name)
+    print "Function", func_name, "imported to", hex(var_addr), "- variable renamed."
+-->
+
+<blockquote>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pygrap</span> 
+
+<span class="n">pattern</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    digraph getprocaddress_resolve {</span>
+<span class="s2">    &quot;1&quot; [cond=&quot;opcode is &#39;push&#39;&quot;, getid=&quot;push1&quot;]</span>
+<span class="s2">    &quot;2&quot; [cond=&quot;opcode is &#39;push&#39; and arg1 is &#39;esi&#39;&quot;, getid=&quot;push2&quot;]</span>
+<span class="s2">    &quot;3&quot; [cond=&quot;opcode is &#39;call&#39; and arg1 is &#39;edi&#39;&quot;, getid=&quot;call&quot;]</span>
+<span class="s2">    &quot;4&quot; [cond=&quot;opcode is &#39;mov&#39; and arg2 is &#39;eax&#39;&quot;, getid=&quot;mov&quot;]</span>
+
+<span class="s2">    &quot;1&quot; -&gt; &quot;2&quot; [childnumber=1]</span>
+<span class="s2">    &quot;2&quot; -&gt; &quot;3&quot; [childnumber=1]</span>
+<span class="s2">    &quot;3&quot; -&gt; &quot;4&quot; [childnumber=1]</span>
+<span class="s2">    }</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">matches</span> <span class="o">=</span> <span class="n">pygrap</span><span class="o">.</span><span class="n">ida_match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">print_matches</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">[</span><span class="s2">&quot;getprocaddress_resolve&quot;</span><span class="p">]:</span>
+    <span class="n">push1_arg_str</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;push1&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">arg1</span>
+    <span class="n">push1_arg_int</span> <span class="o">=</span> <span class="n">pygrap</span><span class="o">.</span><span class="n">parse_first_immediate</span><span class="p">(</span><span class="n">push1_arg_str</span><span class="p">)</span>
+    <span class="n">func_name</span> <span class="o">=</span> <span class="n">get_strlit_contents</span><span class="p">(</span><span class="n">push1_arg_int</span><span class="p">)</span>
+    <span class="n">mov_arg1</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;mov&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">arg1</span>
+    <span class="n">var_addr</span> <span class="o">=</span> <span class="n">pygrap</span><span class="o">.</span><span class="n">parse_first_indirect</span><span class="p">(</span><span class="n">mov_arg1</span><span class="p">)</span>
+    <span class="n">MakeName</span><span class="p">(</span><span class="n">var_addr</span><span class="p">,</span> <span class="n">func_name</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s2">&quot;Function&quot;</span><span class="p">,</span> <span class="n">func_name</span><span class="p">,</span> <span class="s2">&quot;imported to&quot;</span><span class="p">,</span> <span class="nb">hex</span><span class="p">(</span><span class="n">var_addr</span><span class="p">),</span> <span class="s2">&quot;- variable renamed.&quot;</span> 
+</pre></div>
+</blockquote>
+
+<!-- black and white version
 <blockquote>
 import pygrap <br/>
 <br/>
@@ -43,20 +193,30 @@ pattern = """<br/>
 <br/>
 matches = pygrap.ida_match(pattern, print_matches=False)<br/>
 for m in matches["getprocaddress_resolve"]:<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;p1_arg = m["push1"][0].info.arg1<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;str = get_strlit_contents(int(p1_arg,16))<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;rn_addr = int(m["mov"][0].info.arg1.split("[")[1][:-1], 16)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;print hex(rn_addr), str<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;MakeName(rn_addr, str)
+&nbsp;&nbsp;&nbsp;&nbsp;push1_arg_str = m["push1"][0].info.arg1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;push1_arg_int = pygrap.parse_first_immediate(push1_arg_str)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;func_name = get_strlit_contents(push1_arg_int)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;mov_arg1 = m["mov"][0].info.arg1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;var_addr = pygrap.parse_first_indirect(mov_arg1)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;MakeName(var_addr, func_name)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;print "Function", func_name, "imported to", hex(var_addr), "- variable renamed."
 </blockquote>
+-->
 
 A few remarks:
 <ul>
-	<li></li>
-	<li></li>
-	<li></li>
+	<li>Instructions and arguments (..info.arg1 for instance) are stored as string</li>
+	<li>Functions pygrap.parse_first_immediate and pygrap.parse_first_indirect are helpers:
+		<ul>
+			<li>pygrap.parse_first_immediate("byte 0x11") returns integer 17</li>
+			<li>pygrap.parse_first_indirect("dword [0x138100c]") returns integer 20451340</li>
+			<li>pygrap.parse_first_immediate("eax+0x11") returns None</li>
+			<li>pygrap.parse_first_immediate("[esi+0x138500]") returns None</li>
+			<li>You might still need to manually parse the strings in other situations</li>
+		</ul>
+	</li>
+	<li>There is no way in grap to match an imported function such as GetProcAddress by its name</li>
 	<li></li>
 </ul>
 
 
-<h3>Comment matching instructions</h3>

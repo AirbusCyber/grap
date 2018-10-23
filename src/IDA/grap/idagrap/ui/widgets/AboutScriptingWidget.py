@@ -50,7 +50,10 @@ class  AboutScriptingWidget(QMainWindow):
         self.text_widget.setReadOnly(True)
         self.text_widget.setFontFamily("Monospace")
         
-        
+        css_text = open(config['pygmentize_css_path'], "rb").read()
+        if css_text is not None:
+            self.text_widget.document().setDefaultStyleSheet(css_text)
+
         html_text = open(config['scripting_path'], "rb").read()
         if html_text is not None:
             self.text_widget.setHtml(html_text.replace("TODO_GRAPVERSION", config["version"]))
