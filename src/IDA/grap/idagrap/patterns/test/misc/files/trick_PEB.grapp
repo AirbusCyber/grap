@@ -1,0 +1,3 @@
+digraph trick_PEB {
+    0x2000b [cond="opcode is 'mov' and arg2 contains 'dword ptr fs:' and arg2 contains '0x30'"]
+}

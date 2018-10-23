@@ -1,0 +1,6 @@
+digraph trick_call5 {
+    call [cond="opcode is 'call'"]
+    child [cond=true]
+    call -> child [childnumber=1]
+    call -> child [childnumber=2]
+}

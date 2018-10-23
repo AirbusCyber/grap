@@ -1,0 +1,6 @@
+digraph trick_pushret {
+    0x2032a [cond="opcode is 'push'"]
+    0x2032b [cond="opcode beginswith 'ret'"]
+
+    0x2032a -> 0x2032b [childnumber=1]
+}
