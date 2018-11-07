@@ -1,0 +1,20 @@
+New features:
+ - IDA pattern generation: possible to chose granularity for condition (opcode, opcode with arg1...) of each pattern node
+ - IDA pattern generation: added quick pattern generation
+ - IDA: Easier access and documentation of this python bindings
+ - CLI: -nd option (no disassembly)
+
+New patterns:
+ - MD5 LibreSSL
+ - Tricks patterns:
+   - PEB handling (fs:[30])
+   - push ret
+   - call +5
+
+Various improvements and bugfixes:
+ - MISC: added vim syntax files for grap
+ - grap-match: updated seccomp filter against Ubuntu 18.04 LTS
+ - Disassembly: improved disassembly for ELF files
+ - Disassembly: improved function detection (prologues)
+ - IDA pattern generation: fixed multiple issues with lazyrepeat
+
