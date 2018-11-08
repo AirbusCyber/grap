@@ -22,7 +22,7 @@ def get_test_misc():
 
     # For all misc patterns
     for p in FULL_PATHS:
-        rec_listdir = [(os.path.join(dp, f), f) for dp, dn, fn in os.walk(p) for f in fn]
+        rec_listdir = [(os.path.join(dp, f), f) for dp, dn, fn in os.walk(p, followlinks=True) for f in fn]
         for dotpath, dot in rec_listdir:
             ext_ok = False
             for e in EXT:
