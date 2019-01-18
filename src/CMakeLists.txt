@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(grap)
 CMAKE_POLICY(SET CMP0015 NEW)
-set (GRAP_VERSION "1.2.0")
+set (GRAP_VERSION "1.2.1")
 
 # Default build type: Release
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)

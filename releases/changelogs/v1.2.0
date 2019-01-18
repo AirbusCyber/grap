@@ -1,7 +1,7 @@
 New features:
  - IDA pattern generation: possible to chose granularity for condition (opcode, opcode with arg1...) of each pattern node
  - IDA pattern generation: added quick pattern generation
- - IDA: Easier access and documentation of this python bindings
+ - IDA: Easier access and documentation of the python bindings
  - CLI: -nd option (no disassembly)
 
 New patterns:

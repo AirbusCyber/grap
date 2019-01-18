@@ -98,6 +98,8 @@ for pattern_name in matches:<br />
 
 <h3>Rename variables where functions imported with getProcAddress are stored</h3>
 
+This example renames functions imported with getProcAddress in binaries created with PyInstaller (for instance: 53854221c6c1fa513d6ecf83385518dbd8b0afefd9661f6ad831a5acf33c0f8e in function sub_402830).
+
 We have the following assembly pattern (disassembled by IDA) that resolves a dynamic import with getProcAddress:
 <ul>
 	<li>mov edi, ds:GetProcAddress</li>
@@ -136,18 +138,19 @@ pattern = """
 """
 
 matches = pygrap.ida_match(pattern, print_matches=False)
-for m in matches["getprocaddress_resolve"]:
-    push1_arg_str = m["push1"][0].info.arg1
-    push1_arg_int = pygrap.parse_first_immediate(push1_arg_str)
-    func_name = get_strlit_contents(push1_arg_int)
-    mov_arg1 = m["mov"][0].info.arg1
-    var_addr = pygrap.parse_first_indirect(mov_arg1)
-    MakeName(var_addr, func_name)
-    print "Function", func_name, "imported to", hex(var_addr), "- variable renamed."
+if "getprocaddress_resolve" in matches:
+    for m in matches["getprocaddress_resolve"]:
+        push1_arg_str = m["push1"][0].info.arg1
+        push1_arg_int = pygrap.parse_first_immediate(push1_arg_str)
+        func_name = get_strlit_contents(push1_arg_int)
+        mov_arg1 = m["mov"][0].info.arg1
+        var_addr = pygrap.parse_first_indirect(mov_arg1)
+        MakeName(var_addr, func_name)
+        print "Function", func_name, "imported to", hex(var_addr), "- variable renamed."
 -->
 
 <blockquote>
-<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pygrap</span> 
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">pygrap</span> 
 
 <span class="n">pattern</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">    digraph getprocaddress_resolve {</span>
@@ -163,15 +166,16 @@ for m in matches["getprocaddress_resolve"]:
 <span class="s2">&quot;&quot;&quot;</span>
 
 <span class="n">matches</span> <span class="o">=</span> <span class="n">pygrap</span><span class="o">.</span><span class="n">ida_match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">print_matches</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">[</span><span class="s2">&quot;getprocaddress_resolve&quot;</span><span class="p">]:</span>
-    <span class="n">push1_arg_str</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;push1&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">arg1</span>
-    <span class="n">push1_arg_int</span> <span class="o">=</span> <span class="n">pygrap</span><span class="o">.</span><span class="n">parse_first_immediate</span><span class="p">(</span><span class="n">push1_arg_str</span><span class="p">)</span>
-    <span class="n">func_name</span> <span class="o">=</span> <span class="n">get_strlit_contents</span><span class="p">(</span><span class="n">push1_arg_int</span><span class="p">)</span>
-    <span class="n">mov_arg1</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;mov&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">arg1</span>
-    <span class="n">var_addr</span> <span class="o">=</span> <span class="n">pygrap</span><span class="o">.</span><span class="n">parse_first_indirect</span><span class="p">(</span><span class="n">mov_arg1</span><span class="p">)</span>
-    <span class="n">MakeName</span><span class="p">(</span><span class="n">var_addr</span><span class="p">,</span> <span class="n">func_name</span><span class="p">)</span>
-    <span class="k">print</span> <span class="s2">&quot;Function&quot;</span><span class="p">,</span> <span class="n">func_name</span><span class="p">,</span> <span class="s2">&quot;imported to&quot;</span><span class="p">,</span> <span class="nb">hex</span><span class="p">(</span><span class="n">var_addr</span><span class="p">),</span> <span class="s2">&quot;- variable renamed.&quot;</span> 
-</pre></div>
+<span class="k">if</span> <span class="s2">&quot;getprocaddress_resolve&quot;</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">[</span><span class="s2">&quot;getprocaddress_resolve&quot;</span><span class="p">]:</span>
+        <span class="n">push1_arg_str</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;push1&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">arg1</span>
+        <span class="n">push1_arg_int</span> <span class="o">=</span> <span class="n">pygrap</span><span class="o">.</span><span class="n">parse_first_immediate</span><span class="p">(</span><span class="n">push1_arg_str</span><span class="p">)</span>
+        <span class="n">func_name</span> <span class="o">=</span> <span class="n">get_strlit_contents</span><span class="p">(</span><span class="n">push1_arg_int</span><span class="p">)</span>
+        <span class="n">mov_arg1</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;mov&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">arg1</span>
+        <span class="n">var_addr</span> <span class="o">=</span> <span class="n">pygrap</span><span class="o">.</span><span class="n">parse_first_indirect</span><span class="p">(</span><span class="n">mov_arg1</span><span class="p">)</span>
+        <span class="n">MakeName</span><span class="p">(</span><span class="n">var_addr</span><span class="p">,</span> <span class="n">func_name</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s2">&quot;Function&quot;</span><span class="p">,</span> <span class="n">func_name</span><span class="p">,</span> <span class="s2">&quot;imported to&quot;</span><span class="p">,</span> <span class="nb">hex</span><span class="p">(</span><span class="n">var_addr</span><span class="p">),</span> <span class="s2">&quot;- variable renamed.&quot;</span>
+	</pre></div>
 </blockquote>
 
 <!-- black and white version
