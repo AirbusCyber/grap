@@ -8,9 +8,9 @@ Disclaimer:
 - Download them only if you know what you are doing
 - Do not execute them on a (non sandboxed) machine
 
-You can find them here: [https://drive.google.com/open?id=0B7tZ-FlDxlt8NnVaTVU5T2NINmc](https://drive.google.com/open?id=0B7tZ-FlDxlt8NnVaTVU5T2NINmc).
+You can find them here: [https://drive.google.com/open?id=1jmMsjOFUsez2gsAc9S6MF7MPKkry4qgL](https://drive.google.com/open?id=1jmMsjOFUsez2gsAc9S6MF7MPKkry4qgL).
 
-The .zip password is: infected
+The .zip password is: PonaeR4oihei
 
 # MD5 list
 
