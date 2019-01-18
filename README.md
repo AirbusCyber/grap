@@ -53,7 +53,8 @@ Compilation options are chosen with cmake (`cmake -DNOSECCOMP=1 ../src` for inst
 
 On GNU/Linux grap-match's use of seccomp restricts the number of system calls available to the binary for security purposes. 
 In particular the "open" syscall is mostly unavailable after the initial argument parsing.
-You may want to disable this feature if it generates the "Bad system call" or other errors but will lose the security provided.
+
+**You may want to disable this feature (by setting NOSECCOMP) if it generates the "Bad system call" or other errors** but will lose the security provided.
 
 Note that seccomp is only enabled within the `grap-match` binary and its wrapper (grap and grap.py scripts), and **not** within the bindings.
 
