@@ -9,9 +9,9 @@
 
 #include "boost/filesystem.hpp"
 #include <iostream>
-#include <dirent.h>
 
 #ifndef _WIN32
+  #include <dirent.h>
   #include <seccomp.h>
 #endif
 
