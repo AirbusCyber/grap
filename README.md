@@ -1,6 +1,5 @@
-[https://github.com/quoscient/grap](https://github.com/quoscient/grap)
-
 # grap: define and match graph patterns within binaries
+## [https://github.com/quoscient/grap](https://github.com/quoscient/grap)
 grap takes patterns and binary files, uses a Casptone-based disassembler to obtain the control flow graphs from the binaries, then matches the patterns against them.
 
 Patterns are user-defined graphs with instruction conditions ("opcode is xor and arg1 is eax") and repetition conditions (3 identical instructions, basic blocks...).
@@ -36,7 +35,7 @@ Thus on Ubuntu / Debian, this should work :
 sudo apt-get install build-essential cmake bison flex libboost-regex-dev libboost-system-dev libboost-filesystem-dev libseccomp-dev python2.7-dev python-pefile python-pyelftools python-capstone swig
 ```
 
-Please note that those were tested for the latest Ubuntu LTS (18.04) and the latest debian stable (9.1.0 - Strech).
+Please note that those were tested for the latest Ubuntu LTS (18.04.1) and the latest debian stable (9.1.0 - Strech).
 Packages may differ depending on your distribution.
 
 ## Build and install
