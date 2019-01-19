@@ -1,5 +1,5 @@
 # Build types
-The default build type is "Release", the others can be obtained through cmake options (such as `cmake -DCMAKE_BUILD_TYPE=Debug -DNOSECCOMP=1 ../src`):
+The default build type is "Release", the others can be obtained through cmake options (such as `cmake -DCMAKE_BUILD_TYPE=Debug -DSECCOMP=0 ../src`):
 
 - Release: best performance, default
 - Debug: with debug information and address sanitizer

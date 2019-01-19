@@ -18,7 +18,7 @@
 void printUsage();
 
 #ifndef _WIN32
-#ifndef NOSECCOMP
+#ifdef SECCOMP
 void drop_initial_privileges();
 void drop_privileges();
 #endif

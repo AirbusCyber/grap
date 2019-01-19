@@ -18,7 +18,7 @@
 char optionFuncs;
 
 #ifndef _WIN32
-#ifndef NOSECCOMP
+#ifdef SECCOMP
 void drop_privileges();
 #endif
 #endif

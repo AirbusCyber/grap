@@ -25,7 +25,7 @@ void printUsage() {
 }
 
 #ifndef _WIN32
-#ifndef NOSECCOMP
+#ifdef SECCOMP
 void drop_initial_privileges(){
   scmp_filter_ctx ctx;
   
@@ -106,7 +106,7 @@ void drop_privileges(){
 
 int main(int argc, char *argv[]) {
   #ifndef _WIN32
-  #ifndef NOSECCOMP
+  #ifdef SECCOMP
     drop_initial_privileges();
   #endif
   #endif
@@ -264,7 +264,7 @@ int main(int argc, char *argv[]) {
   }
   
   #ifndef _WIN32
-  #ifndef NOSECCOMP
+  #ifdef SECCOMP
     if (optionVerbose){
       std::cout << "Dropping privileges (seccomp)." << std::endl;
     }

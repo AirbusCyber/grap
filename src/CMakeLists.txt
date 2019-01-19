@@ -11,9 +11,9 @@ endif()
 
 
 # Options
-set (NOSECCOMP OFF CACHE BOOL "NoSeccomp")
-if(${NOSECCOMP})
-  add_definitions(-DNOSECCOMP)
+set (SECCOMP OFF CACHE BOOL "Seccomp")
+if(${SECCOMP})
+  add_definitions(-DSECCOMP)
 endif()
 
 # Cmake Modules-------------------------------------------------------------

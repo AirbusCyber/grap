@@ -128,7 +128,7 @@ string Color_Off = "\x1b[0m";
 bool debug = false;
 
 #ifndef _WIN32
-#ifndef NOSECCOMP
+#ifdef SECCOMP
 void drop_privileges(){
   scmp_filter_ctx ctx;
   
@@ -161,7 +161,7 @@ void drop_privileges(){
 
 int main(int argc, char *argv[]) {
   #ifndef _WIN32
-  #ifndef NOSECCOMP
+  #ifdef SECCOMP
   drop_privileges();
   #endif
   #endif
