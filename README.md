@@ -103,7 +103,7 @@ You may find additional pattern examples in two directories:
 - [examples/](examples/) contains patterns used against the Backspace malware (see [examples/backspace_samples.md](examples/backspace_samples.md) to obtain the binary samples).
 
 # Documentation
-You will find more documentation in the [doc/](doc/) folder. The syntax of pattern and test graphs is detailed in the file grap\_graphs.pdf within the release section.
+You will find more documentation in the [doc/](doc/) folder. The syntax of pattern and test graphs is detailed in the file [grap\_graphs.pdf](https://github.com/quoscient/grap/releases/download/v1.1.0/grap_graphs.pdf) within the release section.
 
 The [examples/](examples/) folder contains a python file demonstrating how to use the python bindings to analyze Backspace samples.
 
