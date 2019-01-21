@@ -115,8 +115,13 @@ def main():
             # Work on matches with immediate arguments such as:
             # PUSH (between 2 and 5) with hex arguments (for instance: 9, 0x12 or 0x4012a3)
             # CALL entrypoint
-            if len(m["push"][-2].info.arg1) == 1 or "0x" in m["push"][-2].info.arg1:
-                str_tuple.append((int(m["push"][-2].info.arg1, 16), int(m["push"][-1].info.arg1, 16)))
+
+            push1_arg_int = pygrap.parse_first_immediate(m["push"][-2].info.arg1)
+            push2_arg_int = pygrap.parse_first_immediate(m["push"][-1].info.arg1)
+
+            if push1_arg_int is not None and push2_arg_int is not None:
+                str_tuple.append((push1_arg_int, push2_arg_int))
+
 
         decrypted_strings = decrypt_strings(algorithm_name, str_tuple, bin_path)
 
