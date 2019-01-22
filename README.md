@@ -8,7 +8,7 @@ grap is available as a standalone tool with a disassembler and python bindings, 
 
 ### Create and match patterns directly from IDA
 
-![](https://github.com/yaps8/yaps8.github.io/raw/master/grap/figures/ida_demo_v1_2_1.gif)
+![Create and match patterns directly from IDA](https://github.com/yaps8/yaps8.github.io/raw/master/grap/figures/ida_create_pattern_v1_2_1.png)
 
 
 # Installation
