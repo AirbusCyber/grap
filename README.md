@@ -6,7 +6,7 @@ Patterns are user-defined graphs with instruction conditions ("opcode is xor and
 
 grap is available as a standalone tool with a disassembler and python bindings, and as an IDA plugin which takes advantage of the disassembly done by IDA and the reverser.
 
-### Create and match patterns directly from IDA
+### Create patterns interactively from IDA
 
 ![Create and match patterns directly from IDA](https://github.com/yaps8/yaps8.github.io/raw/master/grap/figures/ida_create_pattern_v1_2_1.png)
 
