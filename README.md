@@ -121,7 +121,7 @@ You will find more documentation in the [doc/](doc/) folder:
 - [doc/COMPILE_OPTIONS.md](doc/COMPILE_OPTIONS.md)
 - [doc/DEBUG.md](doc/DEBUG.md)
 - [doc/TESTS.md](doc/TESTS.md)
-- [doc/syntax_highlighting](doc/syntax_highlighting)
+- [doc/syntax_highlighting.md](doc/syntax_highlighting.md)
 
 The syntax of pattern and test graphs is detailed in the file [grap\_graphs.pdf](https://github.com/quoscient/grap/releases/download/v1.1.0/grap_graphs.pdf) within the release section:
 
