@@ -24,7 +24,7 @@ This document describes how to build and install grap on a Linux distribution.
 
 You may also read:
 
-- [WINDOWS.md](WINDOWS.md): building (optional) and installing grap on Windows
+- [WINDOWS.md](WINDOWS.md): installing grap on Windows
 - [IDA.md](IDA.md): installation and usage instruction of the IDA plugin
 
 ## Requirements
