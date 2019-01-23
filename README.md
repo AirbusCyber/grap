@@ -115,6 +115,12 @@ You may find additional pattern examples in two directories:
 - [patterns/](patterns/) contains a few patterns that can be useful on any binary such as a pattern to detect short loops or to detect a loop on basic blocks,
 - [examples/](examples/) contains patterns used against the Backspace malware (see [examples/backspace_samples.md](examples/backspace_samples.md) to obtain the binary samples).
 
+# Python binding examples
+Examples of python bindings usage:
+
+- Python file demonstrating how to use bindings to analyze Backspace samples: [examples/analyze_backspace.py](examples/analyze_backspace.py)
+- Other examples are integrated within the IDA plugin, you can see them [here](https://yaps8.github.io/grap/html/scripting_css.html) (raw html file: [src/IDA/grap/idagrap/ui/widgets/scripting.html](src/IDA/grap/idagrap/ui/widgets/scripting.html)
+
 # Documentation
 You will find more documentation in the [doc/](doc/) folder:
 
@@ -124,8 +130,6 @@ You will find more documentation in the [doc/](doc/) folder:
 - [doc/syntax_highlighting.md](doc/syntax_highlighting.md)
 
 The syntax of pattern and test graphs is detailed in the file [grap\_graphs.pdf](https://github.com/quoscient/grap/releases/download/v1.1.0/grap_graphs.pdf) within the release section:
-
-The [examples/](examples/) folder contains a python file demonstrating how to use the python bindings to analyze Backspace samples.
 
 # License
 grap is licensed under the MIT license. The full license text can be found in [LICENSE](LICENSE).
