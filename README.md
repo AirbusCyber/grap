@@ -116,41 +116,16 @@ You may find additional pattern examples in two directories:
 - [examples/](examples/) contains patterns used against the Backspace malware (see [examples/backspace_samples.md](examples/backspace_samples.md) to obtain the binary samples).
 
 # Documentation
-You will find more documentation in the [doc/](doc/) folder. The syntax of pattern and test graphs is detailed in the file [grap\_graphs.pdf](https://github.com/quoscient/grap/releases/download/v1.1.0/grap_graphs.pdf) within the release section.
+You will find more documentation in the [doc/](doc/) folder:
+
+- [doc/COMPILE_OPTIONS.md](doc/COMPILE_OPTIONS.md)
+- [doc/DEBUG.md](doc/DEBUG.md)
+- [doc/TESTS.md](doc/TESTS.md)
+- [doc/syntax_highlighting](doc/syntax_highlighting)
+
+The syntax of pattern and test graphs is detailed in the file [grap\_graphs.pdf](https://github.com/quoscient/grap/releases/download/v1.1.0/grap_graphs.pdf) within the release section:
 
 The [examples/](examples/) folder contains a python file demonstrating how to use the python bindings to analyze Backspace samples.
-
-# Tests
-Note that grap is a python script that will:
-
-- Use the python disassembler to create DOT files from binaries
-- Call the installed C++ binary grap-match to match patterns to the DOT files
-
-Some examples of pattern files and test files are given in the src/tests_graphs/ directory.
-For troubleshooting purposes you can test them all.
-
-- `./tests` will use the C++ library to test them against expected values, `./tests -h` gives information about each test.
-- `make test` will use `test_all.py` (in the build/ directory) and test the C++ library, the grap-match binary, grap-match.py and python bindings for disassembly and matching. It needs bindings to be built and installed
-- `grap` or `grap-match` can be used to test them individually
-
-`test_all.py` takes options:
-
-- -nt: no threads
-- -nc: no colors
-- -t tests_path, -gm grap_match_path, -gmpy grap_match_py_path, -g grap_path: specifies where those binaries and scripts are found
-- -v: verbose
-- -l log.txt: log output
-
-On GNU/Linux, once grap is installed you may call directly either `make test` or `test_all.py` with no options.
-
-On Windows, the following command is recommended:
-```
-test_all.py -l log.txt -nt -nc -t Release\tests.exe -gm Release\grap-match.exe -gmpy ..\src\tools\grap-match\grap-match.py -g ..\src\tools\grap\grap.py
-```
-
-It is normal and expected that some WARNING will show.
-
-More options for debug can be found in [doc/DEBUG.md](doc/DEBUG.md).
 
 # License
 grap is licensed under the MIT license. The full license text can be found in [LICENSE](LICENSE).
