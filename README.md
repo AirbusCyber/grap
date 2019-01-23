@@ -119,7 +119,7 @@ You may find additional pattern examples in two directories:
 Examples of python bindings usage:
 
 - Python file demonstrating how to use bindings to analyze Backspace samples: [examples/analyze_backspace.py](examples/analyze_backspace.py)
-- Examples of IDApython scripting are integrated within the IDA plugin, you can see them [here](https://yaps8.github.io/grap/html/scripting_css.html) (raw html file: [src/IDA/grap/idagrap/ui/widgets/scripting.html](src/IDA/grap/idagrap/ui/widgets/scripting.html)
+- Examples of IDApython scripting are integrated within the IDA plugin, you can see them here: [https://yaps8.github.io/grap/html/scripting_css.html](https://yaps8.github.io/grap/html/scripting_css.html)
 
 # Documentation
 You will find more documentation in the [doc/](doc/) folder:
