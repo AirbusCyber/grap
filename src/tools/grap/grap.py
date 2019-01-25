@@ -19,7 +19,7 @@ def main():
     parser.add_argument(dest='pattern',  help='Pattern file (.grapp) or directory (.grapp files are recursively added)')
     parser.add_argument(dest='test', nargs="+", help='Test file(s) to analyse')
 
-    parser.add_argument('-p', '--pattern', dest='pattern_path', action="append", nargs=1, help='Include additional pattern file or directory, can be used multiple times')
+    parser.add_argument('-p', '--pattern', dest='pattern_path', action="append", nargs=1, help='Include additional pattern file or directory (recursively), can be used multiple times')
     parser.add_argument('-r', '--recursive', dest='recursive', action="store_true", default=False, help='Analyzes test files recursively (test must be a directory)')
     parser.add_argument('-f', '--force', dest='force', action="store_true", default=False, help='Force re-generation of existing .grapcfg file')
     parser.add_argument('--raw', dest='raw_disas', action="store_true", default=False, help='Disassemble raw file')
@@ -34,7 +34,7 @@ def main():
     parser.add_argument('-nm', '--print-no-matches', dest='print_no_matches', action="store_true", default=False, help='Don\'t print matched nodes (overrides getid fields)')
     parser.add_argument('-sa', '--show-all', dest='show_all', action="store_true", default=False, help='Show all tested (including not matching) files (not default when quiet, default otherwise)')
     parser.add_argument('-b', '--grap-match-path', dest='grap_match_path', help='Specify the path of the grap-match binary (default: /usr/local/bin/grap-match)')
-    parser.add_argument('-q', '--quiet', dest='quiet', action="store_true", default=False, help='Quiet output: one file per line with the number of disassembled instruction and matches')
+    parser.add_argument('-q', '--quiet', dest='quiet', action="store_true", default=False, help='Quiet output: one matching file per line with the number of disassembled instruction and matches')
     parser.add_argument('-v', '--verbose', dest='verbose', action="store_true", default=False, help='Verbose output')
     parser.add_argument('-d', '--debug', dest='debug', action="store_true", default=False, help='Debug output')
     args = parser.parse_args()
@@ -44,7 +44,7 @@ def main():
 
     if args.pattern is None or args.test is None:
         if args.verbose:
-            print "ERROR: Missing pattern and test path."
+            print "ERROR: Missing pattern or test path."
         sys.exit(0)
 
     test_paths = []
@@ -127,6 +127,7 @@ def main():
         pattern_strings = [args.pattern] + [e[0] for e in args.pattern_path]
     else:
         pattern_strings = [args.pattern]
+        
     counter = 0
     for p in pattern_strings:
         if os.path.exists(p):
