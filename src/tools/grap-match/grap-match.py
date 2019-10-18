@@ -48,8 +48,8 @@ def main():
         tree, max_site_size, n_patterns = compute_tree(pattern_graphs, args)
 
     if args.verbosity >= 2:
-        print "Grap tree:"
-        print tree.toDot()
+        print("Grap tree:")
+        print(tree.toDot())
 
     first = True
     for test_path in args.testFile:
@@ -64,7 +64,7 @@ def main():
 
         if not first:
             if not args.quiet:
-                print ""
+                print("")
         first = False
 
         if args.singletraversal:
@@ -86,20 +86,20 @@ def match_single_traversal(pattern_graph, n_test, test_path, test_graph, args):
     n_pattern = pattern_graph.nodes.size
   
     if not args.quiet:
-        print("Pattern graph (%s) has %d nodes." % (args.patternFile, n_pattern))
+        print(("Pattern graph (%s) has %d nodes." % (args.patternFile, n_pattern)))
   
     parcours = parcoursGen(pattern_graph, pattern_graph.root.list_id, n_pattern)
     if args.verbosity >= 2:
-        print("Pattern Parcours is:\n" + parcours.toString() + "\n")
+        print(("Pattern Parcours is:\n" + parcours.toString() + "\n"))
   
     rt = parcours.parcourir(test_graph, n_pattern, args.checklabels, True, not args.quiet, False)
     count = rt[0]
 
     if not args.quiet:
-        print("\nTest graph (%s) has %d nodes." % (test_path, n_test))
-        print("%d traversal(s) possible in %s." % (count, test_path))
+        print(("\nTest graph (%s) has %d nodes." % (test_path, n_test)))
+        print(("%d traversal(s) possible in %s." % (count, test_path)))
     elif count >= 1:
-        print("%s %d" % (test_path, count))
+        print(("%s %d" % (test_path, count)))
 
     list_gotten = rt.second
 
@@ -108,9 +108,9 @@ def match_single_traversal(pattern_graph, n_test, test_path, test_graph, args):
 
         # For each match
         for f_index, found_nodes in enumerate(list_gotten, start=1):
-            print("Match %d" % f_index)
+            print(("Match %d" % f_index))
 
-            for getid, node_list in found_nodes.iteritems():
+            for getid, node_list in found_nodes.items():
                 if not node_list.empty():
                     for n_index, node in enumerate(node_list):
                         s = str(getid)
@@ -124,7 +124,7 @@ def match_single_traversal(pattern_graph, n_test, test_path, test_graph, args):
                             s += hex(node.info.address) + ", "
 
                         s += node.info.inst_str
-                        print s
+                        print(s)
 
     parcours.freeParcours(True);
     del list_gotten
@@ -146,8 +146,8 @@ def compute_tree(pattern_graphs, args):
             print("WARNING: One duplicate pattern was not added.")
 
     if not args.quiet:
-        print n_patterns, "unique patterns added to tree."
-        print ""
+        print(n_patterns, "unique patterns added to tree.")
+        print("")
 
     return tree, max_site_size, n_patterns
 
@@ -160,26 +160,26 @@ def match_tree(tree, max_site_size, test_path, test_graph, args):
     pattern_matches = rt[1]
     
     if not args.quiet:
-        print "Test graph (" + test_path + ") has", test_graph.nodes.size, "nodes."
-        print count, "traversal(s) possible in", test_path,
+        print("Test graph (" + test_path + ") has", test_graph.nodes.size, "nodes.")
+        print(count, "traversal(s) possible in", test_path, end=' ')
         
         if count == 0:
-            print "."
+            print(".")
         else:
-            print ": ",
+            print(": ", end=' ')
             first = True
             for pattern_name in pattern_matches:
                 match_list = pattern_matches[pattern_name]
                 n_matches = match_list.size()
                 if not first:
-                    print ", ",
+                    print(", ", end=' ')
                 first = False
   
-                print pattern_name, "(" + str(n_matches) + ")",
-            print ""
+                print(pattern_name, "(" + str(n_matches) + ")", end=' ')
+            print("")
     else:
         if count > 0:
-            print test_path + " - ",
+            print(test_path + " - ", end=' ')
             
             first = True
             for pattern_name in pattern_matches:
@@ -187,12 +187,12 @@ def match_tree(tree, max_site_size, test_path, test_graph, args):
                 n_matches = match_list.size()
                 
                 if not first:
-                    print ", ",
+                    print(", ", end=' ')
                 first = False
                 
-                print pattern_name, "(" + str(n_matches) + ")",
+                print(pattern_name, "(" + str(n_matches) + ")", end=' ')
             
-            print ""
+            print("")
       
     # Parse matches and print the extracted nodes
     if getids and len(pattern_matches) > 0:
@@ -201,21 +201,21 @@ def match_tree(tree, max_site_size, test_path, test_graph, args):
             match_list = pattern_matches[pattern_name]
 
             if not first and not match_list.empty():
-                print ""
+                print("")
             first = False
   
             i = 1
             first2 = True
             for match in match_list:
                 if not first2 and not match.empty():
-                    print ""
+                    print("")
                 first2 = False
                 
                 if not match.empty():
                     if pattern_name == "":
-                        print "Match", str(i)
+                        print("Match", str(i))
                     else:
-                        print pattern_name + ", " + "match " +str(i)
+                        print(pattern_name + ", " + "match " +str(i))
 
                     for it_match in match:
                         node_list = match[it_match]
@@ -223,15 +223,15 @@ def match_tree(tree, max_site_size, test_path, test_graph, args):
                         if not node_list.empty():
                             k = 0
                             for n in node_list:
-                                print it_match,
+                                print(it_match, end=' ')
                                 if node_list.size() > 1:
-                                    print k,
+                                    print(k, end=' ')
                                 
-                                print ": ",
+                                print(": ", end=' ')
                                 if n.info.has_address:
-                                    print hex(n.info.address) + ", ",
-                                print n.info.inst_str,
-                                print ""
+                                    print(hex(n.info.address) + ", ", end=' ')
+                                print(n.info.inst_str, end=' ')
+                                print("")
                                 k += 1
                 i += 1
     

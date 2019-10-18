@@ -49,7 +49,7 @@ class CFG:
         #
         # Control flow graph extraction
         #
-        print "[I] Creation of the Control Flow Graph (can take few seconds)"
+        print("[I] Creation of the Control Flow Graph (can take few seconds)")
         # Get the CFG of the binary
         self.extract()
 
@@ -81,7 +81,7 @@ class CFG:
                 pass
                 
         if entry is None:
-            print "WARNING: Could not determine entrypoint"
+            print("WARNING: Could not determine entrypoint")
         else:
             self.dis(ea=entry, is_child1=None, ifrom=None)
 
@@ -92,8 +92,8 @@ class CFG:
         update_children_fathers_number(self.graph)
 
         # Information
-        print "%s graph has %d nodes" % (get_root_filename(),
-                                         self.graph.nodes.size)
+        print("%s graph has %d nodes" % (get_root_filename(),
+                                         self.graph.nodes.size))
 
     def clear_graph(self):
         """Clear the graph."""
@@ -124,9 +124,9 @@ class CFG:
                 n = Node(ea, self.info, self.capstone)
             except CodeException as e:
                 continue
-            except Exception as e:
-                print "WARNING:", e
-                continue
+            #except Exception as e:
+            #    print("WARNING:", e)
+            #    continue
 
             # If the node exists
             if node_list_find(node_list, n.getid()):
@@ -141,7 +141,7 @@ class CFG:
             try:
                 inst = DecodeInstruction(ea)
             except Exception as e:
-                print "WARNING:", e
+                print("WARNING:", e)
                 continue
 
             if not inst:
@@ -169,7 +169,7 @@ class CFG:
                 try:
                     args_queue.insert(0, (op.addr, False, n))
                 except Exception as e:
-                    print "WARNING:", e
+                    print("WARNING:", e)
                     pass
 
             # 2 children (next, then remote) - except call

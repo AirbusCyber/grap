@@ -151,12 +151,12 @@ class CryptoIdentificationWidget(QMainWindow):
             # If there is 1 or more matches
             if len(found_patterns) > 0:
                 for match_dict_list in found_patterns:
-                    for pattern_id, match_dicts in match_dict_list.iteritems():
+                    for pattern_id, match_dicts in match_dict_list.items():
 
                         if pattern_id not in pcolors:
                             self.cc.CryptoColor.add_pattern(pattern_id)
 
-                        for match in match_dicts.itervalues():
+                        for match in iter(match_dicts.values()):
                             self.cc.CryptoColor.add_match(match)
 
         # Highlight matches
@@ -239,7 +239,7 @@ class CryptoIdentificationWidget(QMainWindow):
         # Initialization
         self.signature_tree.clear()
         self.signature_tree.setSortingEnabled(True)
-        self.qtreewidgetitems_to_addresses = {}
+        self.qtreewidgetitems_to_addresses = dict()
       
 
         # For each analyzed patterns
@@ -266,7 +266,7 @@ class CryptoIdentificationWidget(QMainWindow):
                     if patterns._perform_analysis:
                         matches_info = self.cc.QTreeWidgetItem(patterns_info)
 
-                    for pattern_id, match_dicts in match_dict_list.iteritems():
+                    for pattern_id, match_dicts in match_dict_list.items():
                         if patterns._perform_analysis:
                             pattern_info = self.cc.QTreeWidgetItem(matches_info)
                             pattern_info.setText(0, "%s (%d matches)" % (
@@ -277,7 +277,7 @@ class CryptoIdentificationWidget(QMainWindow):
                             if pattern_id in colors:
                                 pattern_info.setForeground(0, self.cc.QBrush(self.cc.QColor(colors[pattern_id])))
 
-                        for match in match_dicts.itervalues():
+                        for match in iter(match_dicts.values()):
                             if match.get_start_address() is not None:
                                 if patterns._perform_analysis:
                                     match_info = self.cc.QTreeWidgetItem(pattern_info)
@@ -306,7 +306,8 @@ class CryptoIdentificationWidget(QMainWindow):
                                         ))
 
                                 # Add the start address of the match
-                                self.qtreewidgetitems_to_addresses[match_info] = match.get_start_address()
+                                match_info.setData(0, 0, hex(match.get_start_address()))
+                                match_info.setData(1, 0, True)
                                 self.signature_tree.expandItem(match_info)
                             else:
                                 match_info = self.cc.QTreeWidgetItem(patterns_info)
@@ -333,9 +334,8 @@ class CryptoIdentificationWidget(QMainWindow):
             column (int): Selected column.
         """
         # Jump to the match address
-        if item in self.qtreewidgetitems_to_addresses:
-            try:
-                idc.jumpto(self.qtreewidgetitems_to_addresses[item])
-            except:
-                idc.Jump(self.qtreewidgetitems_to_addresses[item])
+
+        if item.data(1, 0):
+            addr = int(item.data(0, 0), 16)
+            idc.jumpto(addr)
 

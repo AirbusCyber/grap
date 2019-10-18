@@ -6,7 +6,7 @@ import sys
 import os
 import multiprocessing
 import signal
-import cStringIO
+import io
 
 try:
     from capstone import Cs
@@ -14,7 +14,7 @@ try:
     from capstone import CS_MODE_32
     from capstone import CS_MODE_64
 except ImportError:
-    print "Warning: Capstone not found"
+    print("Warning: Capstone not found")
 
 
 class Instruction:
@@ -80,12 +80,12 @@ class GenericDisassembler:
         self.prologues = {
             # Triple backslash (\\\) are needed to escape bytes in the compiled regex
             CS_MODE_32: [
-                "\\\x55\\\x89\\\xE5",  # push ebp & mov ebp, esp
-                "\\\x55\\\x8B\\\xEC",  # push ebp & mov ebp, esp
-                "\\\x55\\\x8b\\\x6c\\\x24",  # push ebp & mov ebp, [esp+?]
+                b"\x55\x89\xE5",  # push ebp & mov ebp, esp
+                b"\x55\x8B\xEC",  # push ebp & mov ebp, esp
+                b"\x55\x8b\x6c\x24",  # push ebp & mov ebp, [esp+?]
             ],
             CS_MODE_64: [
-                "\\\x55\\\x48\\\x89\\\xE5",  # push rbp & mov rbp, rsp
+                b"\x55\x48\x89\xE5",  # push rbp & mov rbp, rsp
             ]
         }[mode]
 
@@ -115,8 +115,8 @@ class GenericDisassembler:
                 insts[curr_offset] = inst
                 curr_offset += size
                 inst_va += size
-        except Exception, e:
-            print "WARNING:", repr(e)
+        except Exception as e:
+            print("WARNING:", repr(e))
         return insts
 
     def _dis(self, data, offset, insts, bin_instance, iat_api=dict(), verbose=False, ifrom=None, from_pred=True):
@@ -147,7 +147,7 @@ class GenericDisassembler:
             if inst is None:
                 try:
                     inst_va = self.get_va_from_offset(bin_instance, offset)
-                    (address, size, mnemonic, op_str) = self.capstone.disasm_lite(data[offset:offset+self.max_instruction_size], inst_va, count=1).next()
+                    (address, size, mnemonic, op_str) = next(self.capstone.disasm_lite(data[offset:offset+self.max_instruction_size], inst_va, count=1))
 
                     inst = Instruction(
                         offset=offset,
@@ -161,9 +161,9 @@ class GenericDisassembler:
                     )
                     insts[inst.offset] = inst
 
-                except Exception, e:
+                except Exception as e:
                     if verbose:
-                        print "WARNING:", repr(e)
+                        print("WARNING:", repr(e))
                     continue
 
             if ifrom:
@@ -186,9 +186,9 @@ class GenericDisassembler:
                         remote_offset = self.get_offset_from_va(bin_instance, int(inst.op_str, 16))
                         if remote_offset is not None:
                             args_queue.insert(0, (remote_offset, insts[inst.offset], False))
-                    except Exception, e:
+                    except Exception as e:
                         if verbose:
-                            print "WARNING:", repr(e)
+                            print("WARNING:", repr(e))
                         pass
 
             # 2 children (next, then remote) - except call
@@ -209,9 +209,9 @@ class GenericDisassembler:
                 else:
                     try:
                         remote_offset = self.get_offset_from_va(bin_instance, int(inst.op_str, 16))
-                    except Exception, e:
+                    except Exception as e:
                         if verbose:
-                            print "WARNING:", repr(e)
+                            print("WARNING:", repr(e))
                         continue
 
                 args_queue.insert(1, (remote_offset, insts[inst.offset], False))
@@ -238,7 +238,7 @@ class GenericDisassembler:
                         remote_offset = self.get_offset_from_va(bin_instance, int(inst.op_str, 16))
                     except Exception as e:
                         if verbose:
-                            print "WARNING:", repr(e)
+                            print("WARNING:", repr(e))
                         pass
 
                 if remote_offset:
@@ -252,7 +252,7 @@ class GenericDisassembler:
         return insts
 
     def dis_prologues(self, data, bin_instance, iat_api, insts, verbose):
-        prologues_re = "|".join(self.prologues)
+        prologues_re = "|".encode().join(self.prologues)
         compiled_re = re.compile(prologues_re)
         for m in compiled_re.finditer(data):
             function_offset = m.start()
@@ -282,24 +282,24 @@ class GenericDisassembler:
         return insts
 
     def display(self, insts, offset_from=0):
-        for offset, inst in sorted(insts.iteritems()):
+        for offset, inst in sorted(insts.items()):
             if offset >= offset_from:
-                print inst
+                print(inst)
 
     def export_to_dot(self, insts, oep_offset, displayable=True):
         '''
             Export the intruction graph to DOT format
         '''
-        nodes = cStringIO.StringIO()
-        edges = cStringIO.StringIO()
-        dot = cStringIO.StringIO()
+        nodes = io.StringIO()
+        edges = io.StringIO()
+        dot = io.StringIO()
 
         header = "digraph G {\n"
         footer = "}"
 
         if displayable:
 
-            for offset, inst in sorted(insts.iteritems()):
+            for offset, inst in sorted(insts.items()):
                 if not inst.cache_only:
                     if inst.op_str == "":
                         inst_str = "%s" % inst.mnemonic
@@ -338,7 +338,7 @@ class GenericDisassembler:
                         ))
         else:
 
-            for offset, inst in sorted(insts.iteritems()):
+            for offset, inst in sorted(insts.items()):
                 if not inst.cache_only:
                     if inst.op_str == "":
                         inst_str = "%s" % inst.mnemonic
@@ -401,9 +401,9 @@ class PEDisassembler(GenericDisassembler):
         # Export table
         try:
             export_table = bin_instance.DIRECTORY_ENTRY_EXPORT.symbols
-        except Exception, e:
+        except Exception as e:
             if verbose:
-                print "WARNING:", repr(e)
+                print("WARNING:", repr(e))
             export_table = None
 
         if export_table is not None:
@@ -445,7 +445,7 @@ class ELFDisassembler(GenericDisassembler):
             self.seg_pvaddr_minus_poffset.append(segment['p_vaddr'] - segment['p_offset'])
 
     def get_offset_from_rva(self, elf, rva):
-        for s in xrange(self.n_segments):
+        for s in range(self.n_segments):
             if self.seg_rva_low[s] <= rva < self.seg_rva_high[s]:
                 return rva - self.seg_pvaddr_minus_poffset[s]
         return None
@@ -454,7 +454,7 @@ class ELFDisassembler(GenericDisassembler):
         return self.get_offset_from_rva(elf, va - self.get_image_base_rva(elf))
 
     def get_rva_from_offset(self, elf, offset):
-        for s in xrange(self.n_segments):
+        for s in range(self.n_segments):
             if self.seg_offset_low[s] <= offset < self.seg_offset_high[s]:
                 return self.seg_pvaddr_minus_poffset[s] + offset
         return None
@@ -496,11 +496,11 @@ class ELFDisassembler(GenericDisassembler):
                         )
 
                         if verbose:
-                            print 'Func %s found at offset 0x%08X, RVA: 0x%08X' % (
+                            print('Func %s found at offset 0x%08X, RVA: 0x%08X' % (
                                 sym.name,
                                 offset,
                                 info.st_value
-                            )
+                            ))
 
                         insts = self._dis(data=data,
                                      offset=offset,
@@ -535,7 +535,7 @@ class ELFDisassembler(GenericDisassembler):
             call    cs:__libc_start_main_ptr
         '''
         
-        for offset, inst in sorted(insts.iteritems()):
+        for offset, inst in sorted(insts.items()):
             # mov     r8, offset fini ; fini
             i1 = inst
 
@@ -594,9 +594,9 @@ class ELFDisassembler(GenericDisassembler):
                 insts = self._dis(data=data, offset=self.get_offset_from_rva(bin_instance, rva_main), bin_instance=bin_instance, insts=insts, verbose=verbose)
 
                 break
-            except Exception, e:
+            except Exception as e:
                 if verbose:
-                    print "WARNING:", repr(e)
+                    print("WARNING:", repr(e))
                 continue
 
         # Exploration of the exported functions
@@ -630,16 +630,16 @@ class RawDisassembler(GenericDisassembler):
 
 def write_to_file(path, data):
     try:
-        f = open(path, "wb")
+        f = open(path, "w")
         f.write(data)
         f.close()
     except:
-        print "WARNING: Could not write data to", path
+        print("WARNING: Could not write data to", path)
 
 
 def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listing=False, readable=False, verbose=False):
     if pe_data is None and pe_path is None:
-        print "ERROR: Missing PE path or data."
+        print("ERROR: Missing PE path or data.")
         return None
 
     if pe_data is None:
@@ -648,10 +648,10 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
     try:
         import pefile
         pe = pefile.PE(data=pe_data)
-    except Exception, e:
+    except Exception as e:
         if verbose:
-            print "WARNING:", repr(e)
-        print "ERROR: pefile could not parse PE."
+            print("WARNING:", repr(e))
+        print("ERROR: pefile could not parse PE.")
         return None
 
     arch = CS_ARCH_X86
@@ -661,7 +661,7 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
     oep_rva = pe.OPTIONAL_HEADER.AddressOfEntryPoint
     code_section = pe.get_section_by_rva(oep_rva)
     if code_section is None:
-        print "ERROR: pefile could not find code section."
+        print("ERROR: pefile could not find code section.")
         return None
 
     oep_offset = oep_rva - code_section.VirtualAddress + code_section.PointerToRawData
@@ -670,9 +670,9 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
 
     try:
         import_table = pe.DIRECTORY_ENTRY_IMPORT.symbols
-    except Exception, e:
+    except Exception as e:
         if verbose:
-            print "WARNING:", repr(e)
+            print("WARNING:", repr(e))
         import_table = None
 
     if import_table is not None:
@@ -705,14 +705,14 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
 
 def disassemble_elf(elf_data = None, elf_path = None, dot_path = None, print_listing=False, readable=False, verbose=False):
     if elf_path is None:
-        print "ERROR: Missing ELF path."
+        print("ERROR: Missing ELF path.")
         return None
 
     from elftools.elf.elffile import ELFFile
     if elf_data is None:
         elf_data = open(elf_path, "rb").read()
 
-    elf = ELFFile(cStringIO.StringIO(elf_data))
+    elf = ELFFile(io.BytesIO(elf_data))
 
     arch = CS_ARCH_X86
     mode = CS_MODE_64 if elf.elfclass == 64 else CS_MODE_32
@@ -724,16 +724,16 @@ def disassemble_elf(elf_data = None, elf_path = None, dot_path = None, print_lis
             try:
                 if section['sh_addr'] <= oep_rva < section['sh_addr'] + section['sh_size']:
                     return section['sh_offset'] + (oep_rva - section['sh_addr'])
-            except Exception, e:
+            except Exception as e:
                 if verbose:
-                    print "WARNING:", repr(e)
+                    print("WARNING:", repr(e))
                 continue
         return None
 
     oep_offset = get_offset_from_rva(elf, oep_rva)
 
     if oep_offset is None:
-        print "ERROR: Cannot retrieve entry point offset from RVA (0x%08X)." % (elf.header.e_entry)
+        print("ERROR: Cannot retrieve entry point offset from RVA (0x%08X)." % (elf.header.e_entry))
         return None
 
     disass = ELFDisassembler(arch=arch, mode=mode, elf=elf)
@@ -752,7 +752,7 @@ def disassemble_elf(elf_data = None, elf_path = None, dot_path = None, print_lis
 def disassemble_raw(raw_data = None, raw_path = None, dot_path = None, print_listing=False, readable=False,
                     raw_64=False, entrypoint=None, verbose=False):
     if raw_data is None and raw_path is None:
-        print "ERROR: Missing PE path or data."
+        print("ERROR: Missing PE path or data.")
         return None
 
     if raw_data is None:
@@ -791,7 +791,7 @@ def disassemble_file(bin_data = None, dir_path=None, bin_path=None, dot_path=Non
         return return_path
 
     if verbose:
-        print "Disassembling", bin_path
+        print("Disassembling", bin_path)
 
     if bin_data is None:
         if bin_path is None:
@@ -802,17 +802,17 @@ def disassemble_file(bin_data = None, dir_path=None, bin_path=None, dot_path=Non
         if disassemble_raw(raw_data=bin_data, raw_path=bin_path, dot_path=dot_path, print_listing=print_listing,
                            readable=readable, raw_64=raw_64, entrypoint=entrypoint, verbose=verbose):
             return return_path
-    elif bin_data[0:2] == "MZ":
+    elif bin_data[0:2].decode("ascii") == "MZ":
         if disassemble_pe(pe_data=bin_data, pe_path=bin_path, dot_path=dot_path, print_listing=print_listing,
                           readable=readable, verbose=verbose):
             return return_path
-    elif bin_data[0:4] == "\x7fELF":
+    elif bin_data[0:4].decode("ascii") == "\x7fELF":
         if disassemble_elf(elf_data=bin_data, elf_path=bin_path, dot_path=dot_path, print_listing=print_listing,
                            readable=readable, verbose=verbose):
             return return_path
     else:
         if verbose:
-            print("WARNING: Test file " + bin_path + " does not seem to be a PE/ELF or dot file. Use raw option if raw file.")
+            print(("WARNING: Test file " + bin_path + " does not seem to be a PE/ELF or dot file. Use raw option if raw file."))
     return None
 
 
@@ -828,7 +828,7 @@ def timeout_worker(*arg):
         out = res.get(timeout=arg[0][-1])
         p.close()
     except multiprocessing.TimeoutError:
-        print "WARNING: Disassembly timeout for", arg[0][0]
+        print("WARNING: Disassembly timeout for", arg[0][0])
         p.terminate()
         p.close()
         out = None
@@ -893,4 +893,4 @@ if __name__ == "__main__":
         sys.setrecursionlimit(1000000)
         bin_path = sys.argv[1]
         dot_path = bin_path + ".grapcfg"
-        disassemble_file(bin_path=bin_path, dot_path=dot_path, verbose=False)
+        disassemble_file(bin_path=bin_path, dot_path=dot_path, verbose=True)

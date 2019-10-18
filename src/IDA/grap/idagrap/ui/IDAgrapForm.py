@@ -45,7 +45,7 @@ class IDAgrapForm(PluginForm):
         banner += "  \\________\\/ \\____/_/ \\__\\/\\__\\/ \\_____\\/   \\_\\/ \\_\\/ \\__\\/\\__\\/ \\_\\/   \n\n"
         banner += "{:#^72}\n".format('')
 
-        print banner
+        print(banner)
 
     def setupWidgets(self):
         """

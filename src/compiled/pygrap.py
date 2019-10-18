@@ -153,7 +153,7 @@ def match_graph(pattern_arg, test_arg):
 
     pattern_graph_list = []
     for pattern in pattern_arg_list:
-        if isinstance(pattern, basestring):
+        if isinstance(pattern, str):
             f = None
             if not os.path.isfile(pattern):
                 f=tempfile.NamedTemporaryFile() 
@@ -176,7 +176,7 @@ def match_graph(pattern_arg, test_arg):
         else:
             pattern_graph_list.append(pattern)
 
-    if isinstance(test_arg, basestring):
+    if isinstance(test_arg, str):
         test_graph = getGraphFromPath(test_arg)
     else:
         test_graph = test_arg
@@ -188,7 +188,7 @@ def match_graph(pattern_arg, test_arg):
     tree, max_site_size, n_patterns = compute_tree(pattern_graph_list)
     matches = match_tree(tree, max_site_size, test_graph)
 
-    if isinstance(test_arg, basestring):
+    if isinstance(test_arg, str):
         freeGraphList(pattern_graphs_ptr, True, True)
     elif type(pattern_arg) is list:
         pass

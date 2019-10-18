@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import pygrap
@@ -44,7 +44,7 @@ def main():
 
     if args.pattern is None or args.test is None:
         if args.verbose:
-            print "ERROR: Missing pattern or test path."
+            print("ERROR: Missing pattern or test path.")
         sys.exit(0)
 
     test_paths = []
@@ -56,7 +56,7 @@ def main():
                 test_paths += list_files_recursively(test_path)
             else:
                 if args.verbose:
-                    print "WARNING: Skipping directory", test_path
+                    print("WARNING: Skipping directory", test_path)
         else:
             test_paths.append((test_path, None))
 
@@ -110,7 +110,7 @@ def main():
 
     if len(test_paths) > 1 or args.dot is None:
         if args.dot is not None and not os.path.isdir(args.dot):
-            print "ERROR: With multiple files to analyze, DOT path (option -o or or --dot-output) must be a directory."
+            print("ERROR: With multiple files to analyze, DOT path (option -o or or --dot-output) must be a directory.")
             sys.exit(0)
 
         files_to_disassemble = sorted(list(files_to_disassemble), key=lambda tup: tup[0])
@@ -137,7 +137,7 @@ def main():
             pattern_paths += compute_pattern_paths(generated_pattern_path)
 
             if args.verbose:
-                print "Inferred pattern path written:", generated_pattern_path
+                print("Inferred pattern path written:", generated_pattern_path)
             counter += 1
 
     dot_test_files = sorted(list(dot_test_files))

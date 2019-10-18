@@ -62,11 +62,11 @@ class PatternsAnalysis:
                 for m1 in p1.get_matches():
 
                     # Get the first node_t
-                    n1 = m1.get_match().values()[0][0]
+                    n1 = list(m1.get_match().values())[0][0]
 
                     for m2 in p2.get_matches():
                         # Get the first node_t
-                        n2 = m2.get_match().values()[0][0]
+                        n2 = list(m2.get_match().values())[0][0]
 
                         # If they are in the same area (function)
                         try:
@@ -107,7 +107,7 @@ class PatternsAnalysis:
                         ok = True
 
                         # Check the Min and Max rules.
-                        for pattern_id, match_dict in links.iteritems():
+                        for pattern_id, match_dict in links.items():
                             p = patterns.get_pattern(pattern_id)
 
                             if len(match_dict) < p.get_min_pattern():
@@ -128,19 +128,19 @@ class PatternsAnalysis:
         patterns = self._patterns
         found_patterns = self._found_patterns
 
-        print "%d %s PATTERN FOUND:" % (len(found_patterns),
-                                        patterns.get_name())
+        print("%d %s PATTERN FOUND:" % (len(found_patterns),
+                                        patterns.get_name()))
 
         for index, match_dict_list in enumerate(found_patterns):
-            print "\n~~ Match %d ~~" % index
+            print("\n~~ Match %d ~~" % index)
 
-            for pattern_id, match_dicts in match_dict_list.iteritems():
+            for pattern_id, match_dicts in match_dict_list.items():
 
-                print "\nPattern : %s" % patterns.get_pattern_name(pattern_id)
+                print("\nPattern : %s" % patterns.get_pattern_name(pattern_id))
 
                 # Print Pattern matches
-                for match in match_dicts.itervalues():
-                    print "------------------------"
+                for match in match_dicts.values():
+                    print("------------------------")
                     match.print_parcours()
 
     def get_found_patterns(self):

@@ -81,7 +81,7 @@ graph_t* getGraphFromFile(const char *filename) {
 %pythoncode "../../tools/grap_disassembler/disassembler.py"
 
 %pythoncode %{
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import sys
 import os
@@ -135,7 +135,7 @@ def match_graph(pattern_arg, test_arg, print_all_matches=False):
     
     pattern_graph_list = []
     for pattern in pattern_arg_list:
-        if isinstance(pattern, basestring):
+        if isinstance(pattern, str):
             f = None
             if not os.path.isfile(pattern):
                 f=tempfile.NamedTemporaryFile(delete=False, suffix=".grapp") 
@@ -158,7 +158,7 @@ def match_graph(pattern_arg, test_arg, print_all_matches=False):
         else:
             pattern_graph_list.append(pattern)
         
-    if isinstance(test_arg, basestring):
+    if isinstance(test_arg, str):
         test_graph = getGraphFromPath(test_arg)
     else:
         test_graph = test_arg
@@ -170,7 +170,7 @@ def match_graph(pattern_arg, test_arg, print_all_matches=False):
     tree, max_site_size, n_patterns = compute_tree(pattern_graph_list)
     matches = match_tree(tree, max_site_size, test_graph, print_all_matches)
 
-    if isinstance(test_arg, basestring):
+    if isinstance(test_arg, str):
         freeGraphList(pattern_graphs_ptr, True, True)
     elif type(pattern_arg) is list:
         pass
@@ -182,7 +182,7 @@ def match_graph(pattern_arg, test_arg, print_all_matches=False):
 
 def matches_tostring(matches, getids=True):
     if matches is None:
-        print "ERROR: matches is None"
+        print("ERROR: matches is None")
         return ""
 
     s = ""

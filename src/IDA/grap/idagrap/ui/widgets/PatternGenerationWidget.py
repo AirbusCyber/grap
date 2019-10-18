@@ -337,23 +337,23 @@ class PatternGenerationWidget(QMainWindow):
             
         # UI information
         if existing:
-            print "[I] CFG updated. You can now define your pattern's root node and target nodes (right click on an instruction in IDA View)."
+            print("[I] CFG updated. You can now define your pattern's root node and target nodes (right click on an instruction in IDA View).")
         else:
-            print "[I] CFG loaded. You can now define your pattern's root node and target nodes (right click on an instruction in IDA View)."
+            print("[I] CFG loaded. You can now define your pattern's root node and target nodes (right click on an instruction in IDA View).")
 
     def _onGenerateQuickPatternButtonClicked(self):
-        print "[I] Generation of quick pattern"
+        print("[I] Generation of quick pattern")
         self.text_widget.setText(self.cc.PatternGenerator.generate_quick_pattern(self.text_qp_widget.text()))
         self.generateAction.setEnabled(True)
         self._disable_options()
         
     def _onGenerateButtonClicked(self):
-        print "[I] Generation of pattern"
+        print("[I] Generation of pattern")
         self._render()
         self._enable_options()
 
     def _onResetButtonClicked(self):
-        print "[I] Reset pattern"
+        print("[I] Reset pattern")
         self.cc.PatternGenerator.resetPattern()
         self.text_widget.clear()
         self._enable_options()
@@ -376,10 +376,10 @@ class PatternGenerationWidget(QMainWindow):
         pattern_text = self.text_widget.toPlainText()
         
         if len(pattern_text.strip()) == 0:
-            print "WARNING: Pattern is empty."
+            print("WARNING: Pattern is empty.")
             return
     
-        print "[I] Saving pattern"
+        print("[I] Saving pattern")
         options = self.cc.QFileDialog.Options()
         #options |= self.cc.QFileDialog.DontUseNativeDialog
         
@@ -393,11 +393,11 @@ class PatternGenerationWidget(QMainWindow):
         filename, _ = self.cc.QFileDialog.getSaveFileName(self, "Save pattern file (.grapp files in %APPDATA%\IDAgrap\patterns will be parsed as patterns)", default_filepath, "Grap pattern (*.grapp)", options=options)
         if filename:            
             try:
-                f = open(filename, "wb")
+                f = open(filename, "w")
                 f.write(pattern_text)
                 f.close()
             except Exception as e:
-                print "WARNING:", e
+                print("WARNING:", e)
                 
     def _disable_options(self):
         self.real_time_check.setEnabled(False)
@@ -480,9 +480,3 @@ class PatternGenerationHooks(idaapi.UI_Hooks):
             elif self.cc.PatternGenerator.rootNode is None or currentAddress != self.cc.PatternGenerator.rootNode.node_id:
                 idaapi.attach_action_to_popup(form, popup, "grap:pg:set_root", None)
                 idaapi.attach_action_to_popup(form, popup, "grap:pg:add_target", None)
-
-    def populating_tform_popup(self, form, popup):
-        self.populating_widget_popup(form, popup)
-
-    def finish_populating_tform_popup(self, form, popup):
-        self.finish_populating_widget_popup(form, popup)

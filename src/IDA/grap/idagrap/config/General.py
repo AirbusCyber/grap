@@ -28,7 +28,7 @@ try:
         if not os.path.exists(config["user_patterns_path"]):
             os.makedirs(config["user_patterns_path"])
 except Exception as e:
-    print "WARNING:", e
+    print("WARNING:", e)
 
 # Patterns Definitions
 MIN_THRESHOLD = 0.0

@@ -53,13 +53,12 @@ class Node(node_t):
             size = MakeCode(ea)
             bytes = GetManyBytes(ea, size)
 
-        (address, size, mnemonic, op_str) = cs.disasm_lite(bytes, ea, count=1).next()
-        self.info.opcode = mnemonic.encode("ascii", "ignore")
+        (address, size, mnemonic, op_str) = next(cs.disasm_lite(bytes, ea, count=1))
+        self.info.opcode = mnemonic
 
-        op_str_ascci = op_str.encode("ascii", "ignore")
-        self.info.inst_str = self.info.opcode + " " + op_str_ascci
+        self.info.inst_str = self.info.opcode + " " + op_str
 
-        splitted = op_str_ascci.split(", ")
+        splitted = op_str.split(", ")
         self.info.nargs = 0
 
         if len(splitted) >= 1:

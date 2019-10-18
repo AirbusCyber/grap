@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import sys
@@ -9,7 +9,7 @@ is_cfg_from_idagrap = False
 
 def ida_get_cfg_raw(existing_cfg=None):
     if "idaapi" not in sys.modules:
-        print "ERROR: idaapi not loaded"
+        print("ERROR: idaapi not loaded")
         return None
     
     import idaapi
@@ -42,7 +42,7 @@ def ida_get_cfg():
             cfg.extract()
         return cfg
     else:
-        print "ERROR: idaapi not loaded"
+        print("ERROR: idaapi not loaded")
         return None
 
 def ida_match(pattern_arg, getids=True, print_matches=True):
@@ -50,17 +50,17 @@ def ida_match(pattern_arg, getids=True, print_matches=True):
     if (type(pattern_arg) is list or (type(pattern_arg) is str and pattern_arg != "")) and cfg is not None:
         matches = match_graph(pattern_arg, cfg.graph)
         if print_matches:
-            print matches_tostring(matches, getids)
+            print(matches_tostring(matches, getids))
         return matches
     else:
-        print "ERROR: pattern_arg is empty string or not a list, or cfg is None"
+        print("ERROR: pattern_arg is empty string or not a list, or cfg is None")
         return None
 
 
 def ida_quick_match(str_in, pattern_name="quick_pattern", getids=True, print_pattern=False, print_matches=True):
     pattern_str = quick_pattern(str_in, pattern_name)
     if print_pattern:
-        print "Generated the following pattern:"
-        print pattern_str
+        print("Generated the following pattern:")
+        print(pattern_str)
     return ida_match(pattern_str, getids, print_matches)
 

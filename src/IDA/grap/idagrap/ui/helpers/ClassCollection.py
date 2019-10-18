@@ -28,7 +28,7 @@
 
 
 # helpers
-import QtShim as QtShim
+import idagrap.ui.helpers.QtShim as QtShim
 from idagrap.core.CryptoIdentifier import CryptoColor, CryptoIdentifier
 from idagrap.core.PatternGenerator import PatternGenerator
 from idagrap.graph.Graph import CFG

@@ -14,4 +14,4 @@ else()
   target_link_libraries(tests seccomp common GTSI graph nodeinfo)
 endif()  
 
-add_custom_target(test COMMAND python2 ${CMAKE_BINARY_DIR}/test_all.py WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_custom_target(test COMMAND python3 ${CMAKE_BINARY_DIR}/test_all.py WORKING_DIRECTORY ${CMAKE_BINARY_DIR})

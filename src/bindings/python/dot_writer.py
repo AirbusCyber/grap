@@ -1,10 +1,10 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import sys
 import re
 import tempfile
-import StringIO
+from io import StringIO 
 
 class Node:
     math_operators = ["==", "!=", ">=", "<=", "<", ">"]
@@ -43,7 +43,7 @@ class Node:
     def update_cond(self, cond_str):
         if cond_str is not None:
             if self.cond is not None:
-                print "ERROR: redefining existing condition on node with id:", self.id
+                print("ERROR: redefining existing condition on node with id:", self.id)
             else:
                 self.cond = self.parse_cond(cond_str)
 
@@ -151,4 +151,4 @@ def main():
         return get_dot_path_from_string(str_in)
 
 if __name__ == "__main__":
-    print main()
+    print(main())

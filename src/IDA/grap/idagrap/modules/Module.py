@@ -112,7 +112,7 @@ class Module:
             The return value is the string representation of the
             `_group` attribute.
         """
-        for key, value in module_groups.iteritems():
+        for key, value in module_groups.items():
             if self._group == value:
                 return key
 
@@ -162,7 +162,7 @@ class ModuleCrypto(Module):
             The return value is the string representation of the
             `_type` attribute.
         """
-        for key, value in crypto_types.iteritems():
+        for key, value in crypto_types.items():
             if self._type == value:
                 return key
 
@@ -292,7 +292,7 @@ class ModuleTest(Module):
             The return value is the string representation of the
             `_type` attribute.
         """
-        for key, value in crypto_types.iteritems():
+        for key, value in crypto_types.items():
             if self._type == value:
                 return key
 

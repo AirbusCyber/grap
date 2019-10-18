@@ -2,7 +2,7 @@
 
 import colorsys
 import random
-from ColorCore import ColorCore
+from .ColorCore import ColorCore
 
 from idagrap.analysis.Analysis import PatternsAnalysis
 from idagrap.graph.Graph import CFG
@@ -51,7 +51,7 @@ class CryptoIdentifier:
         #
         
         if not cfg.graph:
-            print "[I] Creation of the Control Flow Graph (can take few seconds)"
+            print("[I] Creation of the Control Flow Graph (can take few seconds)")
             
             # Get the CFG of the binary
             cfg.extract()
@@ -59,17 +59,17 @@ class CryptoIdentifier:
         #
         # Pattern searching
         #
-        print "[I] Searching for patterns."
+        print("[I] Searching for patterns.")
         
         # Update "Test" patterns
         MODULES["Test"]["Misc"] = get_test_misc()
         
         # Group
-        for grp_name, grp in MODULES.iteritems():
+        for grp_name, grp in MODULES.items():
             #print "Group: " + grp_name
 
             # Group->Type
-            for tp_name, tp in grp.iteritems():
+            for tp_name, tp in grp.items():
                 #print "\tType: " + tp_name
 
                 if grp_name == "Test" and tp_name == "Misc":
@@ -78,15 +78,12 @@ class CryptoIdentifier:
                         for patterns in algo.get_patterns():                            
                             for pattern in patterns.get_patterns():
                                 path = pattern.get_file()
-                                #print "\t\tAdded patterns from " + path
-                                print "Added patterns from " + path
+                                print("Added patterns from " + path)
                                 patterns_path_list.append(path)
                             
-                    #print "\t\tMatching patterns against binary... this may take a few seconds"
-                    print "Matching patterns against binary... this may take a few seconds"
+                    print("Matching patterns against binary... this may take a few seconds")
                     matches = match_graph(patterns_path_list, cfg.graph, print_all_matches=True)
-                    #print "\t\t", len(matches), "patterns found."
-                    print len(matches), "patterns found."
+                    print(len(matches), "patterns matched.")
                     for pattern_name in matches:
                         pattern = Pattern(name=pattern_name)
                         patterns_t = Patterns(patterns=[pattern], name=pattern_name, perform_analysis=False, matches=matches[pattern_name])
@@ -101,31 +98,31 @@ class CryptoIdentifier:
                     for algo in tp:
 
                         # print algo
-                        print "\t\tAlgorithm: %s" % algo.get_name()
+                        print("\t\tAlgorithm: %s" % algo.get_name())
 
                         # List of Patterns
                         for patterns in algo.get_patterns():
 
-                            print "\t\t\tFunction: %s" % patterns.get_name()
+                            print("\t\t\tFunction: %s" % patterns.get_name())
 
                             # List of Pattern
                             for pattern in patterns.get_patterns():
-                                print "\t\t\t\t[I] Searching for " + pattern.get_name()
+                                print("\t\t\t\t[I] Searching for " + pattern.get_name())
 
                                 pattern.parcourir(cfg.graph)
-                                print "\t\t\t\t[I] %d %s pattern found" % (
+                                print("\t\t\t\t[I] %d %s pattern matched" % (
                                     len(pattern.get_matches()),
                                     pattern.get_name()
-                                )
+                                ))
 
                             #
                             # Analyzing
                             #
                             if patterns._perform_analysis:
-                                print "\t\t\t\t[I] Linking the patterns matches which are in the same area"
+                                print("\t\t\t\t[I] Linking the patterns matches which are in the same area")
                             ana = PatternsAnalysis(patterns, algo)
 
-                            print "\t\t\t\t[I] Filtering those patterns"
+                            print("\t\t\t\t[I] Filtering those patterns")
                             ana.filter_patterns()
 
                             # Add the analyzed patterns to the list
@@ -194,7 +191,7 @@ class CryptoColor:
         pattern_id = match.get_pattern_id()
         insts = match.get_match()
 
-        for getid, node_list in insts.iteritems():
+        for getid, node_list in insts.items():
             if not node_list.empty():
 
                 # Add all match instructions.
@@ -214,8 +211,8 @@ class CryptoColor:
 
     def xchg_colors(self):
         """Exchange old and new color for each instruction."""
-        for insts in self._matches_colors.itervalues():
-            for color in insts.itervalues():
+        for insts in self._matches_colors.values():
+            for color in insts.values():
 
                 tmp = color['old']
                 color['old'] = color['new']
@@ -269,8 +266,8 @@ class CryptoColor:
     def highlight_matches(self):
         """Highlight all the matches."""
         
-        for insts in self._matches_colors.itervalues():
-            for ea, color in insts.iteritems():
+        for insts in self._matches_colors.values():
+            for ea, color in insts.items():
                 try:
                     set_color(ea, CIC_ITEM, ColorCore.rgb_to_bgr(color['new']))
                 except:

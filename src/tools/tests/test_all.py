@@ -14,7 +14,7 @@ log_path = None
 def print_and_log(s):
     global log_path
 
-    print s
+    print(s)
     if log_path is not None:
         with open(log_path, "a") as f:
             f.write(s+"\n")
@@ -156,7 +156,7 @@ def test_grap_match_binary(verbose, option_nt, interpreter, program, n_tests, ex
 
         multiple_patterns_in_dot = False
         if len(pattern_paths[i]) == 1:
-            lines = open(pattern_paths[i][0], "rb").read().split("\n")
+            lines = open(pattern_paths[i][0], "r").read().split("\n")
 
             found_beginning = False
             for l in lines:
@@ -320,7 +320,7 @@ def run_and_parse_command(verbose, i, command, expected_traversals, algo):
         print_and_log(out)
         return 1
 
-    lines = out.split("\n")
+    lines = out.decode().split("\n")
     found_traversals = None
     for l in lines:
         splitted = l.replace('\r', '').split(" ")
@@ -367,7 +367,7 @@ def parse_tests(test_dir):
 
             expected_list = []
             if os.path.isfile(expected_path):
-                data = open(expected_path, "rb").read()
+                data = open(expected_path, "r").read()
                 splitted = data.split("\n")
 
                 if len(splitted) < 2:

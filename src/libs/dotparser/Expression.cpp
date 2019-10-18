@@ -190,7 +190,8 @@ node_t *createNode(char *value) {
   vsize_t id = hash_func(value);
 
   node_t *node = (node_t *) calloc_or_quit(1, sizeof(node_t));
-  node->str_id = std::string(value);
+  std::string value_str( value );
+  node->str_id = value_str;
   node->has_child1 = false;
   node->has_child2 = false;
   node->fathers = NULL;

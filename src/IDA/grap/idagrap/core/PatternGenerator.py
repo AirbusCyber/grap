@@ -3,7 +3,7 @@
 import colorsys
 import random
 from collections import deque, OrderedDict
-from ColorCore import ColorCore
+from .ColorCore import ColorCore
 
 from idagrap.analysis.Analysis import PatternsAnalysis
 from idagrap.graph.Graph import CFG
@@ -16,7 +16,7 @@ except:
 from pygrap import (NodeInfo, node_t, node_list_find)
 from idagrap.patterns.test.misc.ModulesTestMisc import get_test_misc
 import pygrap
-import StringIO
+import io
 
 class PatternGenerator:
     """PatternGenerator
@@ -119,23 +119,23 @@ class PatternGenerator:
         self.rootNode = rootNode
         self.resetColored()
 
-        print "Set root node to {}".format(hex(rootNode.node_id))
+        print("Set root node to {}".format(hex(rootNode.node_id)))
 
     def addTargetNode(self, targetNodeAddress):
         targetNode = node_list_find(self.graph.graph.nodes, targetNodeAddress)
         if not targetNode:
-            print "WARNING: Node not found in CFG (is it reachable from a function or from the entrypoint ?)"
+            print("WARNING: Node not found in CFG (is it reachable from a function or from the entrypoint ?)")
             return
 
         if targetNode in self.targetNodes:
-            print "WARNING: Target node already in use"
+            print("WARNING: Target node already in use")
             return
 
         self.targetNodes.append(targetNode)
         self.coloredNodes.add(targetNodeAddress)
         self.colorNode(targetNodeAddress, self.targetColor)
 
-        print "Added target node {}".format(hex(targetNode.node_id))
+        print("Added target node {}".format(hex(targetNode.node_id)))
 
     def setMatchType(self, targetNodeAddress, match_type):
         self.targetNodeType[targetNodeAddress] = match_type
@@ -161,13 +161,13 @@ class PatternGenerator:
                         self.cc.PatternGenerator.wantedName = str(s[1])
     
     def generate_quick_pattern(self, qp_str):
-        sio = StringIO.StringIO()
+        sio = io.StringIO()
         pygrap.convert_export_str_to_dot(qp_str, sio, "quick_pattern")
         return sio.getvalue()
         
     def generate(self, auto=False):
         if self.rootNode is None:
-            print "WARNING: Missing the root node. Make sure to first \"Load the CFG\", then define the root node and target nodes (right click in IDA View) before you \"Generate a pattern\"."
+            print("WARNING: Missing the root node. Make sure to first \"Load the CFG\", then define the root node and target nodes (right click in IDA View) before you \"Generate a pattern\".")
             return
 
         queue = deque()
@@ -192,7 +192,7 @@ class PatternGenerator:
                     previous[child.node_id] = node.node_id
 
         if len(foundNodes) != len(targetNodes):
-            print "WARNING: Can not reach all target nodes from the root."
+            print("WARNING: Can not reach all target nodes from the root.")
 
         # Generate the nodes and edges of the pattern
         patternNodes = OrderedDict()
@@ -236,7 +236,7 @@ class PatternGenerator:
                 patternNodes[patternEdge[0]].child2 = patternEdge[1]
 
         # Transformations
-        for patternNodeId, patternNode in patternNodes.items():
+        for patternNodeId, patternNode in list(patternNodes.items()):
             if self.typeIsDefault(patternNodeId):
                 if self.generic_arguments_option:
                     patternNode.arg1 = None
@@ -262,7 +262,7 @@ class PatternGenerator:
                     patternNode.opcode = None
 
         if self.factorize_option:
-            for patternNodeId, patternNode in reversed(patternNodes.items()):
+            for patternNodeId, patternNode in reversed(list(patternNodes.items())):
                 if patternNodeId not in patternNodes:
                     continue
 
@@ -297,7 +297,7 @@ class PatternGenerator:
             patternStr += "]\n"
         
         first_child = True
-        for patternNodeId, patternNode in reversed(patternNodes.items()):
+        for patternNodeId, patternNode in reversed(list(patternNodes.items())):
             if patternNode.child1 is not None:
                 if first_child:
                     patternStr += "\n"

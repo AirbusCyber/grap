@@ -85,21 +85,21 @@ class Match:
 
     def print_parcours(self):
         """Print the "parcours"."""
-        for getid, node_list in self._match.iteritems():
+        for getid, node_list in self._match.items():
             if not node_list.empty():
                 for n_index, node in enumerate(node_list):
 
-                    print "%s" % getid,
+                    print("%s" % getid, end=' ')
 
                     if node_list.size() > 1:
-                        print "%d" % n_index,
+                        print("%d" % n_index, end=' ')
 
-                    print ": ",
+                    print(": ", end=' ')
 
                     if node.info.has_address:
-                        print "0x%X, " % node.info.address,
+                        print("0x%X, " % node.info.address, end=' ')
 
-                    print "%s" % node.info.inst_str
+                    print("%s" % node.info.inst_str)
 
     def get_start_address(self):
         """Get the start address of this Match.
@@ -107,8 +107,8 @@ class Match:
         Returns:
             (ea_t): The return value is the start address of this Match.
         """
-        if self._match.values() is not None and len(self._match.values()) >= 1 and len(self._match.values()[0]) >= 1:
-            node = self._match.values()[0][0]
+        if list(self._match.values()) is not None and len(list(self._match.values())) >= 1 and len(list(self._match.values())[0]) >= 1:
+            node = list(self._match.values())[0][0]
         else:
             return None
 
@@ -121,7 +121,7 @@ class Match:
             (int): The return value is the number of instructions in the Match.
         """
         size = 0
-        for node_list in self._match.values():
+        for node_list in list(self._match.values()):
             size += len(node_list)
 
         return size

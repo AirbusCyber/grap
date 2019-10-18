@@ -51,7 +51,7 @@ class  AboutWidget(QMainWindow):
         self.text_widget.setFontFamily("Monospace")
         
         
-        html_text = open(config['about_path'], "rb").read()
+        html_text = open(config['about_path'], "r").read()
         if html_text is not None:
             self.text_widget.setHtml(html_text.replace("TODO_GRAPVERSION", config["version"]))
         else:
