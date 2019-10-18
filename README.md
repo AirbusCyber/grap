@@ -49,7 +49,6 @@ sudo apt-get install build-essential cmake bison flex libboost-regex-dev libboos
 ```
 
 Please note that those were tested for the latest Ubuntu LTS (18.04.3).
-
 Packages may differ depending on your distribution.
 
 ## Build and install
@@ -59,7 +58,7 @@ The following commands will build and install the project:
 - `cmake ../src/; make` will build with cmake and make
 - `sudo make install` will install grap into /usr/local/bin/
 
-SWIG might fail to find python3 if your default is python2, this can be overcome by switch to python3 as default.
+SWIG might fail to find python3 if your default version is python2, this can be overcome by switching to python3 as default.
 For instance on Ubuntu:
 ```
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
