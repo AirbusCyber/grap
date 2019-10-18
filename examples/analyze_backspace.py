@@ -7,9 +7,9 @@ import pygrap
 import pefile
 
 def print_usage():
-    print "You need at least one argument: the (backspace) binary to analyze"
-    print "-v will output the generated graph patterns"
-    print "-h will print this message"
+    print("You need at least one argument: the (backspace) binary to analyze")
+    print("-v will output the generated graph patterns")
+    print("-h will print this message")
 
 def main():
     if len(sys.argv) <= 1:
@@ -29,7 +29,7 @@ def main():
         sys.exit(1)
 
     if bin_path[-8:] == ".grapcfg":
-        print "The argument should be a binary and not a .grapcfg file"
+        print("The argument should be a binary and not a .grapcfg file")
         sys.exit(1)
 
     # use_existing specifies wether an existing dot file should be used unchanged or overwritten
@@ -38,22 +38,22 @@ def main():
     test_graph = pygrap.getGraphFromPath(dot_path)
     
     if verbose:
-       print "Analyzing", bin_path
+       print("Analyzing", bin_path)
 
     if not os.path.isfile(bin_path) or not os.path.isfile(dot_path):
-        print "Error: binary or dot file doesn't exist, exiting."
+        print("Error: binary or dot file doesn't exist, exiting.")
         sys.exit(1)
 
     pattern_decrypt = "backspace_decrypt_algos.grapp"
     matches_decrypt = pygrap.match_graph(pattern_decrypt, test_graph)
 
     if len(matches_decrypt) >= 2:
-        print "Error: two or more decryption algorithms matched, exiting."
+        print("Error: two or more decryption algorithms matched, exiting.")
         sys.exit(1)
 
     for algorithm_name in matches_decrypt:
         if verbose:
-            print "Matched algorithm:", algorithm_name
+            print("Matched algorithm:", algorithm_name)
 
         first_match = matches_decrypt[algorithm_name][0]
         first_group = first_match["A"]
@@ -62,7 +62,7 @@ def main():
         address = first_instruction.info.address
 
         if verbose:
-            print "Found decryption pattern at address", hex(int(address))
+            print("Found decryption pattern at address", hex(int(address)))
 
         # Find the beginning of the function:
         # It is a node with at least 5 fathers which address a fulfills: address - 30 <= a <= address
@@ -74,18 +74,18 @@ def main():
         """.replace("FILL_ADDR_COND", address_cond)
 
         if verbose:
-            print "Looking for entrypoint with pattern:"
-            print entrypoint_pattern
+            print("Looking for entrypoint with pattern:")
+            print(entrypoint_pattern)
         matches_entrypoint = pygrap.match_graph(entrypoint_pattern, test_graph)
 
         if len(matches_entrypoint) != 1 or len(matches_entrypoint["decrypt_fun_begin"]) != 1:
-            print "Error: Entrypoint not found, exiting"
+            print("Error: Entrypoint not found, exiting")
             sys.exit(1)
 
         entrypoint = hex(int(matches_entrypoint["decrypt_fun_begin"][0]["ep"][0].info.address))
         
         if verbose:
-            print "Found decryption function at", entrypoint
+            print("Found decryption function at", entrypoint)
 
         push_call_pattern = """
         digraph push_call_decrypt{
@@ -99,16 +99,16 @@ def main():
         """.replace("FILL_ADDR", entrypoint)
 
         if verbose:
-            print "Looking for calls to decrypt function with pattern:"
-            print push_call_pattern
+            print("Looking for calls to decrypt function with pattern:")
+            print(push_call_pattern)
         matches_calls = pygrap.match_graph(push_call_pattern, test_graph)
 
         if len(matches_calls) == 0:
-            print "error: No call found, exiting"
+            print("error: No call found, exiting")
             sys.exit(1)
 
         if verbose:
-            print len(matches_calls["push_call_decrypt"]), "calls to decrypt function found."
+            print(len(matches_calls["push_call_decrypt"]), "calls to decrypt function found.")
 
         str_tuple = []
         for m in matches_calls["push_call_decrypt"]:
@@ -125,18 +125,17 @@ def main():
 
         decrypted_strings = decrypt_strings(algorithm_name, str_tuple, bin_path)
 
-        print "Decrypted strings in", bin_path + ":"
+        print("Decrypted strings in", bin_path + ":")
         for d in decrypted_strings:
-            print d
-        print ""
+            print(d)
+        print("")
 
     pygrap.graph_free(test_graph, True)
 
 
 def decrypt_xor_sub(s):
     out = ""
-    for c in s:
-        o = ord(c)
+    for o in s:
         o = o ^ 0x11
         o = o - 0x25
         out += chr(o % 0x100)
@@ -146,8 +145,7 @@ def decrypt_xor_sub(s):
 def decrypt_sub_xor_sub(s):
     out = ""
     cl = 0
-    for c in s:
-        o = ord(c)
+    for o in s:
         o -= cl
         o = o ^ 0x0b
         o = o - 0x12
@@ -159,8 +157,7 @@ def decrypt_sub_xor_sub(s):
 def decrypt_sub_add(s):
     out = ""
     cl = 0
-    for c in s:
-        o = ord(c)
+    for o in s:
         dl = 0xff
         dl -= cl
         o += dl
@@ -172,8 +169,7 @@ def decrypt_sub_add(s):
 def decrypt_xor_sub_sub(s):
     out = ""
     i = 0
-    for c in s:
-        o = ord(c)
+    for o in s:
         o = o ^ 0x17
         o = o - i
         o = o - 0x0b
@@ -185,8 +181,7 @@ def decrypt_xor_sub_sub(s):
 def decrypt_sub_xor_add(s):
     out = ""
     i = 0
-    for c in s:
-        o = ord(c)
+    for o in s:
         o = o - i
         o = o ^ 0x19
         o = o + 0x13
@@ -209,7 +204,7 @@ def decrypt_str(d, algo):
     elif algo == "decrypt_sub_xor_add":
         return decrypt_sub_xor_add(d)
     else:
-        print "warning: unknown algo", algo
+        print("warning: unknown algo", algo)
         return None
 
 
@@ -219,7 +214,7 @@ def decrypt_strings(algo, str_tuple, bin_path):
         pe = pefile.PE(data=data)
         base_addr = pe.OPTIONAL_HEADER.ImageBase
     except:
-        print "error: pefile"
+        print("error: pefile")
         sys.exit(1)
 
     decrypted = []

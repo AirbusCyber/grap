@@ -138,7 +138,7 @@ def match_graph(pattern_arg, test_arg, print_all_matches=False):
         if isinstance(pattern, str):
             f = None
             if not os.path.isfile(pattern):
-                f=tempfile.NamedTemporaryFile(delete=False, suffix=".grapp") 
+                f=tempfile.NamedTemporaryFile(delete=False, mode="w", suffix=".grapp") 
                 f.write(pattern)
                 f.flush()
                 pattern_path = f.name
