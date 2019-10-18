@@ -48,7 +48,8 @@ Thus on Ubuntu / Debian, this should work :
 sudo apt-get install build-essential cmake bison flex libboost-regex-dev libboost-system-dev libboost-filesystem-dev libseccomp-dev python3-dev python3-pefile python3-pyelftools python3-capstone swig
 ```
 
-Please note that those were tested for the latest Ubuntu LTS (18.04.3) and the latest debian stable (9.6.0 - Strech).
+Please note that those were tested for the latest Ubuntu LTS (18.04.3).
+
 Packages may differ depending on your distribution.
 
 ## Build and install
