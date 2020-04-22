@@ -279,8 +279,9 @@ class PatternGenerationWidget(QMainWindow):
     
     def setMatchType(self, type):
         try:
-            selection, begin, end = idaapi.read_selection()
-            if selection:
+            selection, begin, end = None, None, None
+            err = idaapi.read_selection(selection, begin, end)
+            if err and selection:
                 for ea in range(begin, end+1):
                     self.cc.PatternGenerator.setMatchType(ea, type)
             else:
