@@ -137,7 +137,7 @@ def quick_pattern(str_in, pattern_name="quick_pattern"):
     return sio.getvalue()
 
 def get_dot_path_from_string(str_in, pattern_name="tmp"):
-    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".grapp")
+    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".grapp", mode="w")
     convert_export_str_to_dot(str_in, tmp_file, pattern_name)
     tmp_file.flush()
     tmp_file.close()
