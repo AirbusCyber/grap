@@ -306,8 +306,8 @@ class CryptoIdentificationWidget(QMainWindow):
                                         ))
 
                                 # Add the start address of the match
-                                match_info.setData(0, 0, hex(match.get_start_address()))
                                 match_info.setData(1, 0, True)
+                                match_info.setData(2, 0, hex(match.get_start_address()))
                                 self.signature_tree.expandItem(match_info)
                             else:
                                 match_info = self.cc.QTreeWidgetItem(patterns_info)
@@ -336,6 +336,6 @@ class CryptoIdentificationWidget(QMainWindow):
         # Jump to the match address
 
         if item.data(1, 0):
-            addr = int(item.data(0, 0), 16)
+            addr = int(item.data(2, 0), 16)
             idc.jumpto(addr)
 
