@@ -120,7 +120,7 @@ class GenericDisassembler:
             print("WARNING:", repr(e))
         return insts
 
-    def _dis(self, data, offset, insts, bin_instance, iat_api=dict(), verbose=False, ifrom=None, from_pred=True):
+    def _dis(self, data, offset, insts, bin_instance, iat_api=dict(), verbose=False, ifrom=None, from_pred=True, is_rva=False):
         '''
             <insts> is a dict like {'offset': <Instruction>}
         '''
@@ -161,7 +161,6 @@ class GenericDisassembler:
                         cache_only=False,
                     )
                     insts[inst.offset] = inst
-
                 except Exception as e:
                     if verbose:
                         print("WARNING:", repr(e))
@@ -410,9 +409,13 @@ class PEDisassembler(GenericDisassembler):
         if export_table is not None:
             for exp in export_table:
                 inst = insts.get(exp, None)
+                offset = bin_instance.get_offset_from_rva(exp.address)
+                if verbose:
+                    va = self.get_va_from_offset(bin_instance, offset)
+                    print("Export:", hex(exp.address), hex(va), exp.name.decode("utf-8"), exp.ordinal)
                 if inst is None or inst.cache_only:
                     insts = self._dis(data=data,
-                                 offset=exp.address,
+                                 offset=offset,
                                  iat_api=iat_api,
                                  bin_instance=bin_instance,
                                  insts=insts,
@@ -670,7 +673,7 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
     iat_dict = dict()
 
     try:
-        import_table = pe.DIRECTORY_ENTRY_IMPORT.symbols
+        import_table = pe.DIRECTORY_ENTRY_IMPORT
     except Exception as e:
         if verbose:
             print("WARNING:", repr(e))
@@ -689,7 +692,11 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
                 else:
                     imp_str = imp.name
 
-                iat_dict[imp.address] = entry_str + "." + imp_str
+                iat_dict[imp.address] = entry_str + ".".encode("utf-8") + imp_str
+ 
+    if verbose:
+        for k in iat_dict:
+            print("Import:", hex(k), iat_dict[k].decode("utf-8"))
 
     disass = PEDisassembler(arch=arch, mode=mode)
     insts = disass.dis(data=pe_data, offset=oep_offset, iat_api=iat_dict, bin_instance=pe, verbose=verbose)
