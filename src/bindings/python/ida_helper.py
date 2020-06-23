@@ -13,7 +13,7 @@ def ida_get_cfg_raw(existing_cfg=None):
         return None
     
     import idaapi
-    tw = idaapi.find_tform("IDAgrap")
+    tw = idaapi.find_widget("IDAgrap")
     if tw is not None:
         import idagrap
         # Get CFG from existing loaded IDAgrap

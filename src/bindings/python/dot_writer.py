@@ -4,7 +4,7 @@
 import sys
 import re
 import tempfile
-from io import StringIO 
+import io
 
 class Node:
     math_operators = ["==", "!=", ">=", "<=", "<", ">"]
@@ -132,7 +132,7 @@ def convert_export_str_to_dot(str_in, dot_file, pattern_name):
 
 
 def quick_pattern(str_in, pattern_name="quick_pattern"):
-    sio = StringIO.StringIO()
+    sio = io.StringIO()
     convert_export_str_to_dot(str_in, sio, pattern_name)
     return sio.getvalue()
 
