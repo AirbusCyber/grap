@@ -14,7 +14,7 @@ config = {
     "about_path": ROOT + os.path.sep + ".." + os.path.sep + "ui" + os.path.sep + "widgets" + os.path.sep + "about.html",
     "pygmentize_css_path": ROOT + os.path.sep + ".." + os.path.sep + "ui" + os.path.sep + "widgets" + os.path.sep + "pygmentize.css",
     "scripting_path": ROOT + os.path.sep + ".." + os.path.sep + "ui" + os.path.sep + "widgets" + os.path.sep + "scripting.html",
-    "version": "1.2.1",
+    "version": "1.3.0",
     "name": "IDAgrap"
 }
 

@@ -7,7 +7,7 @@ import os
 import sys
 import argparse
 
-GRAP_VERSION="1.2.1"
+GRAP_VERSION="1.3.0"
 
 def main():
     sys.setrecursionlimit(1000000)
