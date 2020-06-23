@@ -1,0 +1,8 @@
+Modifications:
+- Migrated from python2 to python3 (CLI and IDA plugin)
+- Various bug fixes
+
+New features for the IDA plugin:
+- Generate pattern for whole function
+- Embedded pattern editor (new text editor widget)
+
