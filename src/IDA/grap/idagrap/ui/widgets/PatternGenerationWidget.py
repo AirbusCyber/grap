@@ -89,6 +89,9 @@ class PatternGenerationWidget(QMainWindow):
         self._createGenerateAction()
         self.toolbar.addAction(self.generateAction)
 
+        self._createFuncAction()
+        self.toolbar.addAction(self.funcAction)
+        
         self._createResetAction()
         self.toolbar.addAction(self.resetAction)
         
@@ -190,6 +193,16 @@ class PatternGenerationWidget(QMainWindow):
         )
 
         self.generateQuickPatternAction.triggered.connect(self._onGenerateQuickPatternButtonClicked)
+
+    def _createFuncAction(self):
+        # Action
+        self.funcAction = self.cc.QAction(
+            self.cc.QIcon(config['icons_path'] + "icons8-function-mac-32.png"),
+            "Target whole current function",
+            self
+        )
+
+        self.funcAction.triggered.connect(self._onFuncButtonClicked)
 
     def _createResetAction(self):
         # Action
@@ -352,6 +365,27 @@ class PatternGenerationWidget(QMainWindow):
         print("[I] Generation of pattern")
         self._render()
         self._enable_options()
+
+    def _onFuncButtonClicked(self):
+        if not self.cc.PatternGenerator.graph.graph:
+            print("WARNING: Unloaded CFG. Make sure to first \"Load the CFG\"")
+            return
+
+        ea = idaapi.get_screen_ea()
+        if ea:
+            func = idaapi.ida_funcs.get_func(ea)
+            if func:
+                if self.cc.PatternGenerator.rootNode is None:
+                    print("[I] Adding root node as function entrypoint: %x", func.start_ea)
+                    self.cc.PatternGenerator.setRootNode(func.start_ea)
+
+                print("[I] Adding nodes to cover whole function")
+                flowchart = idaapi.FlowChart(func)
+                for bb in flowchart:
+                    last_inst_addr = idc.prev_head(bb.end_ea)
+                    self.cc.PatternGenerator.addTargetNode(last_inst_addr)
+
+                self._render_if_real_time() 
 
     def _onResetButtonClicked(self):
         print("[I] Reset pattern")
