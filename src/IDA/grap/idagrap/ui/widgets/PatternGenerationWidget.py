@@ -9,6 +9,7 @@ import idc
 import idaapi
 from idagrap.config.General import config
 from idagrap.patterns.Modules import MODULES
+from idagrap.ui.widgets.EditorWidget import EditorWidget
 import idagrap.ui.helpers.QtGrapSyntax as syntax
 import os
 
@@ -97,6 +98,9 @@ class PatternGenerationWidget(QMainWindow):
         
         self._createSaveAction()
         self.toolbar.addAction(self.saveAction)
+
+        self._createOpenAction()
+        self.toolbar.addAction(self.openAction)
         
     def _createQuickPatternTextWidget(self):
         self.text_qp_widget = self.cc.QLineEdit()
@@ -137,6 +141,27 @@ class PatternGenerationWidget(QMainWindow):
         self.factorize_check.stateChanged.connect(self._factorize_check_option_trigger)
         self.options_widgets.append(self.factorize_check)
 
+    def _createOpenAction(self):
+        """
+        Create an action for the open button of the toolbar and connect it.
+        """
+        # Action
+        self.openAction = self.cc.QAction(
+            self.cc.QIcon(config['icons_path'] + "icons8-edit-property-52.png"),
+            "Open pattern file for editing",
+            self
+        )
+
+        self.openAction.triggered.connect(self._onOpenClicked)
+
+    def _onOpenClicked(self):
+        options = self.cc.QFileDialog.Options()
+        filename, _ = self.cc.QFileDialog.getOpenFileName(self, "Save pattern file (.grapp files in %APPDATA%\IDAgrap\patterns will be parsed as patterns)", self.default_filepath(), "Grap pattern (*.grapp)", options=options)
+        if filename:            
+            editorWidget = EditorWidget(self.parent, filename)
+            basename=os.path.basename(filename)
+            self.parent.tabs.addTab(editorWidget, editorWidget.icon, basename)
+ 
     def _generic_arguments_option_trigger(self, state):
         self.cc.PatternGenerator.generic_arguments_option = (state == 2)
         self._render()
@@ -406,6 +431,15 @@ class PatternGenerationWidget(QMainWindow):
                     if len(fn) >= 1:
                         self.cc.PatternGenerator.wantedName = str(s[1])
         
+
+    def default_filepath(self):
+        if "user_patterns_path" in config:
+            default_path = config["user_patterns_path"]
+        else:
+            default_path = config["patterns_path"] + os.path.sep + "test"+ os.path.sep + "misc" + os.path.sep + "files"
+        default_filepath = default_path + os.path.sep + self.cc.PatternGenerator.wantedName + ".grapp"
+        return default_filepath
+ 
     def _onSaveButtonClicked(self):
         self.updateWantedName()
         pattern_text = self.text_widget.toPlainText()
@@ -414,18 +448,11 @@ class PatternGenerationWidget(QMainWindow):
             print("WARNING: Pattern is empty.")
             return
     
-        print("[I] Saving pattern")
+        #print("[I] Saving pattern")
         options = self.cc.QFileDialog.Options()
         #options |= self.cc.QFileDialog.DontUseNativeDialog
-        
-        if "user_patterns_path" in config:
-            default_path = config["user_patterns_path"]
-        else:
-            default_path = config["patterns_path"] + os.path.sep + "test"+ os.path.sep + "misc" + os.path.sep + "files"
-        
-        default_filepath = default_path + os.path.sep + self.cc.PatternGenerator.wantedName + ".grapp"
-            
-        filename, _ = self.cc.QFileDialog.getSaveFileName(self, "Save pattern file (.grapp files in %APPDATA%\IDAgrap\patterns will be parsed as patterns)", default_filepath, "Grap pattern (*.grapp)", options=options)
+           
+        filename, _ = self.cc.QFileDialog.getSaveFileName(self, "Save pattern file (.grapp files in %APPDATA%\IDAgrap\patterns will be parsed as patterns)", self.default_filepath(), "Grap pattern (*.grapp)", options=options)
         if filename:            
             try:
                 f = open(filename, "w")

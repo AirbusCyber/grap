@@ -12,7 +12,7 @@ try:
     from idc import CIC_ITEM, get_color, set_color
 except:
     from idc import CIC_ITEM, GetColor, SetColor
-from pygrap import graph_save_to_path, match_graph
+from pygrap import graph_save_to_path, match_graph, getGraphListFromPath, MakeGraphList
 from idagrap.patterns.test.misc.ModulesTestMisc import get_test_misc
 
 
@@ -30,6 +30,7 @@ class CryptoIdentifier:
 
         self.graph = graph
         self._analyzed_patterns = []
+        self.pattern_to_path = dict()
 
     def analyzing(self):
         """Analyze the graph.
@@ -82,7 +83,21 @@ class CryptoIdentifier:
                                 patterns_path_list.append(path)
                             
                     print("Matching patterns against binary... this may take a few seconds")
-                    matches = match_graph(patterns_path_list, cfg.graph, print_all_matches=True)
+                    patterns_graph_list = []
+                    for pattern_path in patterns_path_list:
+                        pattern_graphs_ptr = getGraphListFromPath(pattern_path)
+                        pattern_graphs = MakeGraphList(pattern_graphs_ptr)
+
+                        for pattern in pattern_graphs:
+                            if pattern.name not in self.pattern_to_path:
+                                self.pattern_to_path[pattern.name] = pattern_path
+                
+                        if pattern_graphs is None or len(pattern_graphs) == 0:
+                            print("Pattern graph could not be opened or is empty:", pattern_path)
+                        else:
+                            patterns_graph_list += pattern_graphs
+
+                    matches = match_graph(patterns_graph_list, cfg.graph, print_all_matches=True)
                     print(len(matches), "patterns matched.")
                     for pattern_name in matches:
                         pattern = Pattern(name=pattern_name)

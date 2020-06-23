@@ -5,8 +5,11 @@ from pygrap import graph_free
 
 import idagrap.ui.helpers.QtShim as QtShim
 import idc
+import os
 from idagrap.config.General import config
 from idagrap.patterns.Modules import MODULES
+from idagrap.ui.widgets.EditorWidget import EditorWidget
+from PyQt5.QtWidgets import QMenu
 
 QMainWindow = QtShim.get_QMainWindow()
 
@@ -46,6 +49,7 @@ class CryptoIdentificationWidget(QMainWindow):
         self.name = "Pattern Search"
         self.icon = self.cc.QIcon(config['icons_path'] + "icons8-search.png")
         self.color = False
+        self.show_all = False
 
         # This widget relies on the crypto identifier
         self.central_widget = self.cc.QWidget()
@@ -78,6 +82,7 @@ class CryptoIdentificationWidget(QMainWindow):
         """
         self._createScanGraphAction()
         self._createMatchGraphAction()
+        self._createShowAllAction()
         self._createColoringAction()
 
         self.toolbar = self.addToolBar('Crypto Identification Toolbar')
@@ -85,6 +90,7 @@ class CryptoIdentificationWidget(QMainWindow):
 
         self.toolbar.addAction(self.scanGraphAction)
         self.toolbar.addAction(self.matchGraphAction)
+        self.toolbar.addAction(self.showAllAction)
         self.toolbar.addAction(self.coloringAction)
 
     def _createScanGraphAction(self):
@@ -112,6 +118,33 @@ class CryptoIdentificationWidget(QMainWindow):
         )
 
         self.matchGraphAction.triggered.connect(self._onMatchGraphBouttonClickedThread)
+
+    def _createShowAllAction(self):
+        """
+        Create an action for the coloring button of the toolbar and connect it.
+        """
+        # Action
+        self.showAllAction = self.cc.QAction(
+            self.cc.QIcon(config['icons_path'] + "icons8-eye-50.png"),
+            "Show also unmached patterns",
+            self
+        )
+    
+        self.showAllAction.setCheckable(True)
+        self.showAllAction.toggled.connect(self._showAllBouttonToggled)
+
+    def _showAllBouttonToggled(self, boolean):
+        """Handle the different states of the show all button.
+
+        Arguments:
+            boolean (bool): State of the button.
+        """
+        if boolean:
+            self.show_all = True
+        else:
+            self.show_all = False
+
+        self.populateSignatureTree()
 
     def _createColoringAction(self):
         """
@@ -229,8 +262,37 @@ class CryptoIdentificationWidget(QMainWindow):
         # Action
         self.signature_tree.itemDoubleClicked.connect(self._onSignatureTreeItemDoubleClicked)
 
+        # Context Menu
+        self.signature_tree.setContextMenuPolicy(self.cc.QtCore.Qt.CustomContextMenu)
+        self.signature_tree.customContextMenuRequested.connect(self._onSignatureTreeRightClicked)
+
         signature_layout.addWidget(self.signature_tree)
         self.signature_widget.setLayout(signature_layout)
+
+    def _onSignatureTreeRightClicked(self, position):
+        indexes = self.signature_tree.selectedIndexes()
+        if len(indexes) > 0:
+            level = 0
+            index = indexes[0]
+            while index.parent().isValid():
+                index = index.parent()
+                level += 1
+
+        editAction = self.cc.QAction("Edit pattern", self)
+        editAction.triggered.connect(self._onSignatureTreeEditPattern)
+        self.addAction(editAction)
+        
+        printAction = self.cc.QAction("Print pattern path", self)
+        printAction.triggered.connect(self._onSignatureTreePrintPatternPath)
+        self.addAction(printAction)
+
+        menu = QMenu()
+
+        if level == 0:
+            menu.addAction(editAction)
+            menu.addAction(printAction)
+
+        menu.exec_(self.signature_tree.viewport().mapToGlobal(position))
 
     def populateSignatureTree(self):
         """
@@ -240,8 +302,8 @@ class CryptoIdentificationWidget(QMainWindow):
         self.signature_tree.clear()
         self.signature_tree.setSortingEnabled(True)
         self.qtreewidgetitems_to_addresses = dict()
-      
 
+        shown_patterns = set()
         # For each analyzed patterns
         for ana in self.cc.CryptoIdentifier.get_analyzed_patterns():
             tree_matches = ana._patterns._matches
@@ -252,15 +314,16 @@ class CryptoIdentificationWidget(QMainWindow):
 
             # If there is 1 or more matches
             if len(found_patterns) > 0:
-
                 if patterns._perform_analysis:
                     algo_info = self.cc.QTreeWidgetItem(self.signature_tree)
                     algo_info.setText(0, algo.get_name())
                     patterns_info = self.cc.QTreeWidgetItem(algo_info)
                 else:
                     patterns_info = self.cc.QTreeWidgetItem(self.signature_tree)
-                txt = "%s (%d matches)" % (patterns.get_name(), len(found_patterns))
+                pattern_name = patterns.get_name()
+                txt = "%s (%d matches)" % (pattern_name, len(found_patterns))
                 patterns_info.setText(0, txt)
+                shown_patterns.add(pattern_name)
 
                 for match_dict_list in found_patterns:
                     if patterns._perform_analysis:
@@ -325,7 +388,15 @@ class CryptoIdentificationWidget(QMainWindow):
         
         # Sort by first column, by ascending (usual) order
         self.signature_tree.sortByColumn(0, 0)
-        
+
+        # Adding unmatched patterns
+        if self.show_all:
+            for pattern_name in self.cc.CryptoIdentifier.pattern_to_path:
+                if pattern_name not in shown_patterns:
+                    patterns_info = self.cc.QTreeWidgetItem(self.signature_tree)
+                    txt = "%s (unmatched)" % (pattern_name)
+                    patterns_info.setText(0, txt)
+
     def _onSignatureTreeItemDoubleClicked(self, item, column):
         """Action for the double clicked.
 
@@ -339,3 +410,22 @@ class CryptoIdentificationWidget(QMainWindow):
             addr = int(item.data(2, 0), 16)
             idc.jumpto(addr)
 
+
+    def _onSignatureTreePrintPatternPath(self, event) :
+        getSelected = self.signature_tree.selectedItems()
+        pattern_name = getSelected[0].text(0).split(" ")[0]
+        if pattern_name in self.cc.CryptoIdentifier.pattern_to_path:
+            print("%s: %s" % (pattern_name, self.cc.CryptoIdentifier.pattern_to_path[pattern_name]))
+        else:
+            print("%s: Could not find where pattern is defined" % pattern_name)
+
+    def _onSignatureTreeEditPattern(self, event) :
+        getSelected = self.signature_tree.selectedItems()
+        pattern_name = getSelected[0].text(0).split(" ")[0]
+        if pattern_name in self.cc.CryptoIdentifier.pattern_to_path:
+            path = self.cc.CryptoIdentifier.pattern_to_path[pattern_name]
+            editorWidget = EditorWidget(self.parent, path)
+            basename=os.path.basename(path)
+            self.parent.tabs.addTab(editorWidget, editorWidget.icon, basename)
+        else:
+            print("%s: Could not find where pattern is defined" % pattern_name)

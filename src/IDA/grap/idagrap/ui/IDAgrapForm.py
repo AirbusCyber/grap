@@ -70,6 +70,7 @@ class IDAgrapForm(PluginForm):
         """
         self.tabs = self.cc.QTabWidget()
         self.tabs.setTabsClosable(False)
+        self.tabs.setMovable(True)
 
         # Add all the widgets
         for widget in self.idagrap_widgets:
