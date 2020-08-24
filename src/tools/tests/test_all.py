@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
 import os
 import subprocess
@@ -83,7 +83,7 @@ def main():
     if verbose:
         print_and_log("")
         print_and_log(Blue + "Testing " + grap_match_py_path + Color_Off)
-    error_gmpy = test_grap_match_binary(verbose, False, "python", grap_match_py_path, n_tests, expected, pattern_paths, test_paths, wildcards)
+    error_gmpy = test_grap_match_binary(verbose, False, "python3", grap_match_py_path, n_tests, expected, pattern_paths, test_paths, wildcards)
     print_error_msg(error_gmpy, grap_match_py_path + ": " + str(error_gmpy) + " error(s) found.")
 
     if verbose:
@@ -242,7 +242,7 @@ def run_bindings_test(verbose, grap_path, pattern_path, test_path, bin_path, exp
         command = []
         if len(grap_path) >= 3:
             if grap_path[-3:] == ".py":
-                command.append("python")
+                command.append("python3")
         command.append(grap_path)
         command.append("-od")
         command.append("-o")
