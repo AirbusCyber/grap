@@ -483,7 +483,7 @@ class ELFDisassembler(GenericDisassembler):
     def get_image_base_rva(self, elf):
         return self.image_base_rva
 
-    def get_section_offset_last(self, pe, offset):
+    def get_section_offset_last(self, elf, offset):
         for s in range(self.n_segments):
             segment_begin = self.seg_offset_low[s]
             segment_last = self.seg_offset_high[s] - 1
