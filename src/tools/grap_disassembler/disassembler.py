@@ -95,6 +95,7 @@ class GenericDisassembler:
         self.max_instruction_size = 16
 
     def linear_sweep_cache(self, data, offset, insts, bin_instance, verbose=False):
+        section_offset_last = self.get_section_offset_last(bin_instance, offset)
         curr_offset = offset
         try:
             inst_va = self.get_va_from_offset(bin_instance, curr_offset)
@@ -116,6 +117,10 @@ class GenericDisassembler:
                 insts[curr_offset] = inst
                 curr_offset += size
                 inst_va += size
+
+                if section_offset_last is not None and curr_offset > section_offset_last:
+                    break
+
         except Exception as e:
             print("WARNING:", repr(e))
         return insts
@@ -389,6 +394,15 @@ class PEDisassembler(GenericDisassembler):
     def get_image_base_rva(self, pe):
         return pe.OPTIONAL_HEADER.ImageBase
 
+    def get_section_offset_last(self, pe, offset):
+        for section in pe.sections:
+            section_begin = section.PointerToRawData
+            section_last = section.PointerToRawData + section.SizeOfRawData - 1
+            if section_begin <= offset <= section_last:
+                return section_last
+        print("WARNING: Cound not determine current section boundaries.")
+        return None
+
     def _dis_exported_funcs(self, bin_instance, insts, data, verbose, iat_api=dict()):
         """
         Disassemble all the exported functions.
@@ -468,6 +482,15 @@ class ELFDisassembler(GenericDisassembler):
 
     def get_image_base_rva(self, elf):
         return self.image_base_rva
+
+    def get_section_offset_last(self, pe, offset):
+        for s in range(self.n_segments):
+            segment_begin = self.seg_offset_low[s]
+            segment_last = self.seg_offset_high[s] - 1
+            if segment_begin <= offset <= segment_last:
+                return segment_last
+        print("WARNING: Cound not determine current segment boundaries.")
+        return None
 
     def _dis_exported_funcs(self, data, bin_instance, insts, verbose):
         """
