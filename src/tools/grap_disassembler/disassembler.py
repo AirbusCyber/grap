@@ -683,12 +683,12 @@ def disassemble_pe(pe_data = None, pe_path = None, dot_path = None, print_listin
         for entry in import_table:
             for imp in entry.imports:
                 if entry.dll is None:
-                    entry_str = ""
+                    entry_str = "".encode("utf-8")
                 else:
                     entry_str = entry.dll
 
                 if imp.name is None:
-                    imp_str = ""
+                    imp_str = "".encode("utf-8")
                 else:
                     imp_str = imp.name
 
