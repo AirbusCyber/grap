@@ -64,10 +64,11 @@ def main():
     for test_path, dir_arg_path in test_paths:
         try:
             f = open(test_path, "rb")
-            data = f.read(7).decode("utf-8")
+            data = f.read(7)
+            first_7_str = data.decode("utf-8")
             f.close()
         except UnicodeDecodeError:
-            data = None
+            first_7_str = ""
         except IOError:
             if os.path.isdir(test_path):
                 if args.verbose:
@@ -82,7 +83,7 @@ def main():
                 print("WARNING: Test file could not be opened or is empty: " + test_path)
             continue
         else:
-            if data[0:7].lower() == "digraph":
+            if first_7_str.lower() == "digraph":
                 if dir_arg_path is None:
                     dot_test_files.add(test_path)
             else:
