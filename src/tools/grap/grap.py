@@ -64,8 +64,10 @@ def main():
     for test_path, dir_arg_path in test_paths:
         try:
             f = open(test_path, "rb")
-            data = f.read(7)
+            data = f.read(7).decode("utf-8")
             f.close()
+        except UnicodeDecodeError:
+            data = None
         except IOError:
             if os.path.isdir(test_path):
                 if args.verbose:
