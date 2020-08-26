@@ -134,7 +134,7 @@ You will find more documentation in the [doc/](doc/) folder:
 - [doc/TESTS.md](doc/TESTS.md)
 - [doc/syntax_highlighting.md](doc/syntax_highlighting.md)
 
-The syntax of pattern and test graphs is detailed in the file [grap\_graphs.pdf](https://github.com/QuoSecGmbH/grap/releases/download/v1.2.1/grap_graphs.pdf) within the release section.
+The syntax of pattern and test graphs is detailed in the file [grap\_graphs.pdf](https://github.com/QuoSecGmbH/grap/releases/download/v1.1.0/grap_graphs.pdf) within the release section.
 
 # License
 grap is licensed under the MIT license. The full license text can be found in [LICENSE](LICENSE).
