@@ -257,6 +257,19 @@ def parse_int_hex(s):
     return None
 
 
+def parse_first_address(s):
+    split = s.split("0x")
+    if len(split) >= 2:
+        rest = split[1]
+        s = "0x"
+        for c in rest:
+            if c in "0123456789abcdef":
+                s += c
+        if len(s) >=3:
+            n = int(s, 16)
+            return n
+
+
 def parse_first_indirect(s):
     if "+" in s or "-" in s or "[" not in s:
         return None
