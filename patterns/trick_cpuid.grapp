@@ -1,0 +1,3 @@
+digraph trick_cpuid {
+    cpuid [cond="opcode is 'cpuid'"]
+}
