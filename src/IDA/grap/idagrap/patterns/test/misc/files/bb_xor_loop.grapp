@@ -1,4 +1,4 @@
-digraph xor_bb_loop{
+digraph bb_xor_loop{
 A [label="A: (^xor)*", shape="box", cond=true, repeat="*", lazyrepeat=true, maxchildren=1, getid="A"]
 B [label="B: (xor)+", shape="box", cond="opcode is xor", repeat="+",maxchildren=1, getid="B"]
 C [label="C: (*)*", shape="box", cond="true", repeat="*", getid="C"]
