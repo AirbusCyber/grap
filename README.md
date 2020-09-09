@@ -6,6 +6,10 @@ Patterns are user-defined graphs with instruction conditions ("opcode is xor and
 
 grap is available as a standalone tool with a disassembler and python bindings, and as an IDA plugin which takes advantage of the disassembly done by IDA and the reverser.
 
+Support:
+* Files: disassembly of PE, ELF and raw binary, further files should work within IDA
+* Architecture: x86 and x86_64
+
 ### Match quick pattern:
 ![Match quick pattern](https://github.com/yaps8/yaps8.github.io/raw/master/grap/figures/backspace_quick_pattern.png)
 
@@ -17,7 +21,6 @@ grap is available as a standalone tool with a disassembler and python bindings, 
 
 ### Create patterns interactively from IDA:
 ![Create and match patterns directly from IDA](https://github.com/yaps8/yaps8.github.io/raw/master/grap/figures/ida_create_pattern_v1_2_1.png)
-
 
 # Installation
 This document describes how to build and install grap on a Linux distribution.
