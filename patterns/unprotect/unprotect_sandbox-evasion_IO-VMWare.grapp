@@ -1,0 +1,25 @@
+// https://search.unprotect.it/map/sandbox-evasion/input-output-communication-port/
+
+digraph "unprotect.sandbox-evasion.IO-VMWare.cmp" {
+    0x403e82 [cond="opcode is 'cmp' and arg2 is '0x564d5868'"]
+}
+
+digraph ""unprotect.sandbox-evasion.IO-VMWare.v1" {
+    0x406d7f [cond="opcode is 'mov' and arg1 is 'eax' and arg2 is '0x564d5868'"]
+    0x406d84 [cond="opcode is 'mov' and arg1 is 'ecx' and arg2 is '0xa'"]
+    0x406d89 [cond="opcode is 'mov' and arg1 is 'dx' and arg2 is '0x5658'"]
+    0x406d8d [cond="opcode is 'in'"]
+
+    0x406d7f -> 0x406d84 [childnumber=1]
+    0x406d84 -> 0x406d89 [childnumber=1]
+    0x406d89 -> 0x406d8d [childnumber=1]
+}
+
+digraph "unprotect.sandbox-evasion.IO-VMWare.magic" {
+    1_magic [cond="inst regex '.*0x564d5868.*'"]
+    2_other [cond="true", minrepeat=0, maxrepeat=5, lazyrepeat=true]
+    3_in [cond="opcode is 'in'"]
+
+    1_magic -> 2_other [childnumber=1]
+    2_other -> 3_in [childnumber=1]
+}
