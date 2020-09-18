@@ -129,7 +129,7 @@ graph_t *addEdgesToGraph(char* name, CoupleList * cl, graph_t * g) {
   node_t *c;
   
   if (name != NULL){
-    g->name = std::string(name);
+    g->name = std::string(removeQuotes(name));
   }
   free(name);
 
