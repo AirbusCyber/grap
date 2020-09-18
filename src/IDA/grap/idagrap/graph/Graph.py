@@ -14,6 +14,7 @@ from idagrap.config.Instruction import *
 from idagrap.error.Exceptions import CodeException
 from idagrap.graph.Node import *
 from idautils import DecodeInstruction, Functions
+from idc import generate_disasm_line
 import capstone
 
 class CFG:
@@ -120,13 +121,27 @@ class CFG:
         while args_queue != []:
             ea, is_child1, ifrom = args_queue.pop(0)
             
+            # Get the instruction from IDA
             try:
-                n = Node(ea, self.info, self.capstone)
+                inst = DecodeInstruction(ea)
+            except Exception as e:
+                print("WARNING:", e)
+                continue
+
+            # Get the instruction from Capstone
+            try:
+                n = Node(ea, self.capstone, None, None, None)
             except CodeException as e:
                 continue
-            #except Exception as e:
-            #    print("WARNING:", e)
-            #    continue
+            except StopIteration as e:
+                inst_string = generate_disasm_line(ea, 0)
+                print("WARNING: Capstone raised StopIteration, probably because it does not support the following instruction:", inst_string)
+                inst_size = inst.size
+                # In this case we parse the instruction from IDA disassembly
+                n = Node(ea, None, inst, inst_size, inst_string)
+            except Exception as e:
+                print("WARNING:", e)
+                continue
 
             # If the node exists
             if node_list_find(node_list, n.getid()):
@@ -135,13 +150,6 @@ class CFG:
                     node_link(node_list_find(node_list, ifrom.getid()),
                               node_list_find(node_list, n.getid()), False,
                               is_child1)
-                continue
-
-            # Get the instruction
-            try:
-                inst = DecodeInstruction(ea)
-            except Exception as e:
-                print("WARNING:", e)
                 continue
 
             if not inst:

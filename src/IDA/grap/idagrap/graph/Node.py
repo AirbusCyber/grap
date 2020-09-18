@@ -24,9 +24,8 @@ class Node(node_t):
     Raises:
         CodeException: If the ``ea`` is not a code instruction.
     """
-
-    def __init__(self, ea, info, cs):
-        """Initialization function."""
+    def __init__(self, ea, cs, IDA_inst, IDA_inst_size, IDA_inst_string):
+        """Initialization function, to disassemble with Capstone"""
         # Init the node structure
         node_t.__init__(self)
 
@@ -46,16 +45,24 @@ class Node(node_t):
         self.info = NodeInfo()
         inst_elements = []
 
-        try:
-            size = create_insn(ea)
-            bytes = get_bytes(ea, size)
-        except:
-            size = MakeCode(ea)
-            bytes = GetManyBytes(ea, size)
+        if cs is not None:
+            try:
+                size = create_insn(ea)
+                bytes = get_bytes(ea, size)
+            except:
+                size = MakeCode(ea)
+                bytes = GetManyBytes(ea, size)
 
-        (address, size, mnemonic, op_str) = next(cs.disasm_lite(bytes, ea, count=1))
+            (address, size, mnemonic, op_str) = next(cs.disasm_lite(bytes, ea, count=1))
+        else:
+            address = ea
+            size = IDA_inst_size
+            splitted = IDA_inst_string.split(" ")
+            mnemonic = splitted[0]
+            op_str = " ".join(splitted[1:])
+
+
         self.info.opcode = mnemonic
-
         self.info.inst_str = self.info.opcode + " " + op_str
 
         splitted = op_str.split(", ")
