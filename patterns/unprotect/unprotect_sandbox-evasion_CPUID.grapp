@@ -1,0 +1,5 @@
+// https://search.unprotect.it/map/sandbox-evasion/cpuid/
+
+digraph "unprotect.sandbox-evasion.CPUID" {
+    CPUID [cond="opcode is 'cpuid'"]
+}
