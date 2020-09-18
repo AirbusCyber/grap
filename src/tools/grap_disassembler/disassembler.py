@@ -185,7 +185,7 @@ class GenericDisassembler:
                     iat_va = int(inst.op_str.split('[')[1].split(']')[0], 16)
 
                     if iat_va in iat_api:
-                        inst.op_str = iat_api[iat_va]
+                        inst.op_str = iat_api[iat_va].decode("utf-8")
                 else:
                     try:
                         remote_offset = self.get_offset_from_va(bin_instance, int(inst.op_str, 16))
@@ -208,7 +208,7 @@ class GenericDisassembler:
                     iat_va = int(inst.op_str.split('[')[1].split(']')[0], 16)
 
                     if iat_va in iat_api:
-                        inst.op_str = iat_api[iat_va]
+                        inst.op_str = iat_api[iat_va].decode("utf-8")
                 elif inst.op_str in ['eax', 'ebx', 'ecx', 'edx', 'esi', 'edi', 'esp', 'ebp']:
                     pass
                 else:
@@ -235,7 +235,7 @@ class GenericDisassembler:
                     iat_va = int(inst.op_str.split('[')[1].split(']')[0], 16)
 
                     if iat_va in iat_api:
-                        inst.op_str = iat_api[iat_va]
+                        inst.op_str = iat_api[iat_va].decode("utf-8")
                 elif inst.op_str in self.x86_32_registers:
                     pass
                 else:
