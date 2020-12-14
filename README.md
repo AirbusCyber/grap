@@ -123,8 +123,13 @@ You may find additional pattern examples in two directories:
 - [patterns/](patterns/) contains a few patterns that can be useful on any binary such as a pattern to detect short loops or to detect a loop on basic blocks,
 - [examples/](examples/) contains patterns used against the Backspace malware (see [examples/backspace_samples.md](examples/backspace_samples.md) to obtain the binary samples).
 
-# Python binding examples
-Examples of python bindings usage:
+# Tutorials & further examples
+On malware samples:
+
+- Navigating malware samples with grap (CLI, IDA): https://blog.quosec.net/posts/grap_qakbot_navigation/
+- Automating function parsing and decryption (python bindings): https://blog.quosec.net/posts/grap_qakbot_strings/
+
+Python bindings usage:
 
 - Python file demonstrating how to use bindings to analyze Backspace samples: [examples/analyze_backspace.py](examples/analyze_backspace.py)
 - Examples of IDApython scripting are integrated within the IDA plugin, you can see them here: [https://yaps8.github.io/grap/html/scripting_css.html](https://yaps8.github.io/grap/html/scripting_css.html)
