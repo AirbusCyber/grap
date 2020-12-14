@@ -1,3 +1,5 @@
+// https://search.unprotect.it/map/sandbox-evasion/cpuid/
+
 digraph trick_cpuid {
     cpuid [cond="opcode is 'cpuid'"]
 }
