@@ -1,5 +1,5 @@
 # grap: define and match graph patterns within binaries
-### [https://github.com/QuoSecGmbH/grap](https://github.com/quoscient/grap)
+### [https://github.com/QuoSecGmbH/grap](https://github.com/QuoSecGmbH/grap)
 grap takes patterns and binary files, uses a Casptone-based disassembler to obtain the control flow graphs from the binaries, then matches the patterns against them.
 
 Patterns are user-defined graphs with instruction conditions ("opcode is xor and arg1 is eax") and repetition conditions (3 identical instructions, basic blocks...).
